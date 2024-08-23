@@ -436,6 +436,23 @@
                   "enableSshAgentDesc" | i18n
                 }}</small>
               </div>
+              <div class="form-group" *ngIf="!isLinux">
+                <div class="checkbox">
+                  <label for="enableScreenshotProtection">
+                    <input
+                      id="enableScreenshotProtection"
+                      type="checkbox"
+                      aria-describedby="enableScreenshotProtectionHelp"
+                      formControlName="enableScreenshotProtection"
+                      (change)="saveEnableScreenshotProtection()"
+                    />
+                    {{ "enableScreenshotProtection" | i18n }}
+                  </label>
+                </div>
+                <small id="enableScreenshotProtectionHelp" class="help-block">{{
+                  "enableScreenshotProtectionDesc" | i18n
+                }}</small>
+              </div>
               <div class="form-group" *ngIf="showDuckDuckGoIntegrationOption">
                 <div class="checkbox">
                   <label for="enableDuckDuckGoBrowserIntegration">

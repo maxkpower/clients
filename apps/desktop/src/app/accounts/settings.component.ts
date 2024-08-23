@@ -113,6 +113,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     }),
     enableHardwareAcceleration: true,
     enableSshAgent: false,
+    enableScreenshotProtection: true,
     enableDuckDuckGoBrowserIntegration: false,
     theme: [null as ThemeType | null],
     locale: [null as string | null],
@@ -282,6 +283,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.desktopSettingsService.hardwareAcceleration$,
       ),
       enableSshAgent: await firstValueFrom(this.desktopSettingsService.sshAgentEnabled$),
+      enableScreenshotProtection: await firstValueFrom(
+        this.desktopSettingsService.screenshotProtection$,
+      ),
       theme: await firstValueFrom(this.themeStateService.selectedTheme$),
       locale: await firstValueFrom(this.i18nService.userSetLocale$),
     };
@@ -744,6 +748,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
   async saveSshAgent() {
     this.logService.debug("Saving Ssh Agent settings", this.form.value.enableSshAgent);
     await this.desktopSettingsService.setSshAgentEnabled(this.form.value.enableSshAgent);
+  }
+
+  async saveEnableScreenshotProtection() {
+    await this.desktopSettingsService.setScreenshotProtection(
+      this.form.value.enableScreenshotProtection,
+    );
   }
 
   private async generateVaultTimeoutOptions(): Promise<VaultTimeoutOption[]> {
