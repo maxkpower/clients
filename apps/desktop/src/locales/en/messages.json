@@ -3431,10 +3431,10 @@
   "changeAcctEmail": {
     "message": "Change account email"
   },
-  "enableScreenshotProtection": {
-    "message": "Prevent screenshots of Bitwarden Desktop"
+  "allowScreenshots": {
+    "message": "Allow screen capture"
   },
-  "enableScreenshotProtectionDesc": {
-    "message": "Prevent other apps from taking screenshots of your vault contents"
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   }
 }
