@@ -1796,6 +1796,15 @@
   "noPasswordsInList": {
     "message": "Neboli nájdené žiadne heslá."
   },
+  "clearHistory": {
+    "message": "Vymazať históriu"
+  },
+  "noPasswordsToShow": {
+    "message": "Žiadne heslá na zobrazenie"
+  },
+  "noRecentlyGeneratedPassword": {
+    "message": "V poslednej dobe ste negenerovali žiadne heslá"
+  },
   "remove": {
     "message": "Odstrániť"
   },
@@ -4300,8 +4309,14 @@
   "enterprisePolicyRequirementsApplied": {
     "message": "Na toto nastavenie boli uplatnené požiadavky pravidiel spoločnosti"
   },
-  "additionalContentAvailable": {
-    "message": "K dispozícii je ďalší obsah"
+  "fileSavedToDevice": {
+    "message": "Súbor sa uložil do zariadenia. Spravujte stiahnuté súbory zo zariadenia."
+  },
+  "showCharacterCount": {
+    "message": "Zobraziť počítadlo znakov"
+  },
+  "hideCharacterCount": {
+    "message": "Skryť počítadlo znakov"
   },
   "itemsInTrash": {
     "message": "Položky v koši"

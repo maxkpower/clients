@@ -1796,6 +1796,15 @@
   "noPasswordsInList": {
     "message": "Non ci sono password da mostrare."
   },
+  "clearHistory": {
+    "message": "Cancella cronologia"
+  },
+  "noPasswordsToShow": {
+    "message": "Nessuna password da mostrare"
+  },
+  "noRecentlyGeneratedPassword": {
+    "message": "Non hai generato una password di recente"
+  },
   "remove": {
     "message": "Rimuovi"
   },
@@ -4300,8 +4309,14 @@
   "enterprisePolicyRequirementsApplied": {
     "message": "I requisiti della policy aziendale sono stati applicati a questa impostazione"
   },
-  "additionalContentAvailable": {
-    "message": "Sono disponibili ulteriori contenuti"
+  "fileSavedToDevice": {
+    "message": "File salvato sul dispositivo. Gestisci dai download del dispositivo."
+  },
+  "showCharacterCount": {
+    "message": "Show character count"
+  },
+  "hideCharacterCount": {
+    "message": "Hide character count"
   },
   "itemsInTrash": {
     "message": "Elementi nel cestino"

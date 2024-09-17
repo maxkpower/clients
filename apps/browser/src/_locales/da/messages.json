@@ -1796,6 +1796,15 @@
   "noPasswordsInList": {
     "message": "Der er ingen kodeord at vise."
   },
+  "clearHistory": {
+    "message": "Ryd historik"
+  },
+  "noPasswordsToShow": {
+    "message": "Ingen adgangskoder at vise"
+  },
+  "noRecentlyGeneratedPassword": {
+    "message": "Der er ikke genereret nogen adgangskode for nylig"
+  },
   "remove": {
     "message": "Fjern"
   },
@@ -4300,8 +4309,14 @@
   "enterprisePolicyRequirementsApplied": {
     "message": "Virksomhedspolitikkrav er anvendt på denne indstilling"
   },
-  "additionalContentAvailable": {
-    "message": "Yderligere indhold er tilgængeligt"
+  "fileSavedToDevice": {
+    "message": "Fil gemt på enheden. Håndtér fra enhedens downloads."
+  },
+  "showCharacterCount": {
+    "message": "Vis tegnantal"
+  },
+  "hideCharacterCount": {
+    "message": "Skjul tegnantal"
   },
   "itemsInTrash": {
     "message": "Emner i papirkurv"

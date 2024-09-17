@@ -1796,6 +1796,15 @@
   "noPasswordsInList": {
     "message": "Não existem palavras-passe para listar."
   },
+  "clearHistory": {
+    "message": "Limpar histórico"
+  },
+  "noPasswordsToShow": {
+    "message": "Não há palavras-passe para mostrar"
+  },
+  "noRecentlyGeneratedPassword": {
+    "message": "Não gerou nenhuma palavra-passe recentemente"
+  },
   "remove": {
     "message": "Remover"
   },
@@ -4300,8 +4309,14 @@
   "enterprisePolicyRequirementsApplied": {
     "message": "Os requisitos da política empresarial foram aplicados a esta definição"
   },
-  "additionalContentAvailable": {
-    "message": "Estão disponíveis conteúdos adicionais"
+  "fileSavedToDevice": {
+    "message": "Ficheiro guardado no dispositivo. Gira-o a partir das transferências do seu dispositivo."
+  },
+  "showCharacterCount": {
+    "message": "Mostrar contagem de caracteres"
+  },
+  "hideCharacterCount": {
+    "message": "Ocultar contagem de caracteres"
   },
   "itemsInTrash": {
     "message": "Itens no lixo"

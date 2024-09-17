@@ -285,7 +285,13 @@ export class ServiceContainer {
     this.secureStorageService = new NodeEnvSecureStorageService(
       this.storageService,
       this.logService,
-      this.encryptService,
+      // MAC failures for secure storage are being logged for customers today and
+      // they occur when users unlock / login and refresh a session key but don't
+      // export it into their environment (e.g. BW_SESSION_KEY). This leaves a stale
+      // BW_SESSION key in the env which is attempted to be used to decrypt the auto
+      // unlock user key which obviously fails. So, to resolve this, we will not log
+      // MAC failures for secure storage.
+      new EncryptServiceImplementation(this.cryptoFunctionService, this.logService, false),
     );
 
     this.memoryStorageService = new MemoryStorageService();
@@ -803,6 +809,10 @@ export class ServiceContainer {
     await this.i18nService.init();
     this.twoFactorService.init();
 
+    // If a user has a BW_SESSION key stored in their env (not process.env.BW_SESSION),
+    // this should set the user key to unlock the vault on init.
+    // TODO: ideally, we wouldn't want to do this here but instead only for commands that require the vault to be unlocked
+    // as this runs on every command and could be a performance hit
     const activeAccount = await firstValueFrom(this.accountService.activeAccount$);
     if (activeAccount?.id) {
       await this.userAutoUnlockKeyService.setUserKeyInMemoryIfAutoUserKeySet(activeAccount.id);
