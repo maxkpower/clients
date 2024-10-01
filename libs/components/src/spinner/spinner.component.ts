@@ -1,6 +1,5 @@
-import { coerceBooleanProperty } from "@angular/cdk/coercion";
 import { CommonModule } from "@angular/common";
-import { Component, HostBinding, Input } from "@angular/core";
+import { Component, HostBinding, Input, booleanAttribute } from "@angular/core";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
@@ -16,39 +15,25 @@ export class SpinnerComponent {
    */
   @Input() size: "fill" | "small" | "large" = "large";
 
-  private _noColor = false;
   /**
    * Disable the default color of the spinner, inherits the text color.
    */
-  @Input()
-  get noColor(): boolean {
-    return this._noColor;
-  }
-  set noColor(value: boolean | "") {
-    this._noColor = coerceBooleanProperty(value);
-  }
+  @Input({ transform: booleanAttribute }) noColor = false;
 
   /**
    * Accessibility title. Defaults to `Loading`.
    */
   @Input() title = this.i18nService.t("loading");
 
-  private _sr = true;
   /**
    * Display text for screen readers.
    */
-  @Input()
-  get sr(): boolean {
-    return this._sr;
-  }
-  set sr(value: boolean | "") {
-    this._sr = coerceBooleanProperty(value);
-  }
+  @Input({ transform: booleanAttribute }) sr = false;
 
   @HostBinding("class") get classList() {
     return ["tw-inline-block", "tw-overflow-hidden"]
       .concat(this.sizeClass)
-      .concat([this._noColor ? null : "tw-text-primary-600"]);
+      .concat([this.noColor ? null : "tw-text-primary-600"]);
   }
 
   constructor(private i18nService: I18nService) {}
