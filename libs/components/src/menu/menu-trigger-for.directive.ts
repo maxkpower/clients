@@ -9,7 +9,7 @@ import {
   OnDestroy,
   ViewContainerRef,
 } from "@angular/core";
-import { fromEvent, merge, Subscription } from "rxjs";
+import { merge, Subscription } from "rxjs";
 import { filter, takeUntil } from "rxjs/operators";
 
 import { MenuComponent } from "./menu.component";
@@ -32,8 +32,7 @@ export class MenuTriggerForDirective implements OnDestroy {
   private overlayRef: OverlayRef;
   private defaultMenuConfig: OverlayConfig = {
     panelClass: "bit-menu-panel",
-    hasBackdrop: true,
-    backdropClass: "cdk-overlay-transparent-backdrop",
+    hasBackdrop: false,
     scrollStrategy: this.overlay.scrollStrategies.reposition(),
     positionStrategy: this.overlay
       .position()
@@ -76,6 +75,7 @@ export class MenuTriggerForDirective implements OnDestroy {
    * @param event The MouseEvent from the right-click interaction
    */
   toggleMenuOnRightClick(event: MouseEvent) {
+    event.preventDefault(); // Prevent default context menu
     this.isOpen ? this.updateMenuPosition(event) : this.openMenu(event);
   }
 
@@ -174,21 +174,11 @@ export class MenuTriggerForDirective implements OnDestroy {
   }
 
   private setupGlobalListeners() {
-    this.globalListenersSub = fromEvent<MouseEvent>(document, "contextmenu")
-      .pipe(
-        filter((event) => {
-          const clickTarget = event.target as HTMLElement;
-          return (
-            this.isOpen &&
-            clickTarget !== this.elementRef.nativeElement &&
-            !this.overlayRef.overlayElement.contains(clickTarget)
-          );
-        }),
-        takeUntil(this.overlayRef.detachments()),
-      )
+    this.overlayRef
+      .outsidePointerEvents()
+      .pipe(takeUntil(this.overlayRef.detachments()))
       .subscribe((event) => {
-        event.preventDefault(); // Prevent default context menu
-        this.updateMenuPosition(event);
+        this.destroyMenu();
       });
   }
 
