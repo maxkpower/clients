@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Evitare de caractere ambigue"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Căutare în colecție"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Setări"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Indiciu parolă"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Seiful dvs. este blocat. Verificați-vă identitatea pentru a continua."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Deblocare"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Timp de expirare seif"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Alegeți când seiful dvs. va efectua acțiunea de expirare a seifului."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Recommended for security."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Blocare cu parola principală la repornire"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Ștergere cont"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Blocare",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Coș de reciclare",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Permiteți integrarea în browser"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Folosit pentru biometrie în browser."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Permiteți integrarea de browser DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minute"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Politicile organizației afectează timpul de expirare a seifului. Timpul maxim de expirare a seifului este de $HOURS$ oră(e) și $MINUTES$ minut(e)",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Blocat"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Deblocat"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Important:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

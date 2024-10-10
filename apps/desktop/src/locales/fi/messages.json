@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Vältä epäselviä merkkejä"
   },
+  "generatorPolicyInEffect": {
+    "message": "Yrityskäytännön säännöt vaikuttavat generaattoriasetuksiisi.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Etsi kokoelmasta"
   },
@@ -515,7 +519,7 @@
     "message": "Pääsalasana"
   },
   "masterPassDesc": {
-    "message": "Pääsalasanalla pääset käsiksi holviisi. On erittäin tärkeää, että muistat pääsalasanasi, koska sen palautus ei ole mahdollista, jos unohdat sen."
+    "message": "Pääsalasanalla pääset käsiksi holviisi. On erittäin tärkeää, että muistat pääsalasanasi, koska sitä ei ole mahdollista palauttaa, jos unohdat sen."
   },
   "masterPassHintDesc": {
     "message": "Pääsalasanan vihje voi auttaa sinua muistamaan unohtamasi salasanan."
@@ -543,7 +547,7 @@
     "message": "Pääsalasana"
   },
   "masterPassImportant": {
-    "message": "Pääsalasanasi palauttaminen ei ole mahdollista, jos unohdat sen!"
+    "message": "Pääsalasanaasi ei ole mahdollista palauttaa, jos unohdat sen!"
   },
   "confirmMasterPassword": {
     "message": "Vahvista pääsalasana"
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Asetukset"
+  },
+  "accountEmail": {
+    "message": "Tilin sähköpostiosoite"
+  },
+  "requestHint": {
+    "message": "Pyydä vihje"
+  },
+  "requestPasswordHint": {
+    "message": "Pyydä pääsalasanan vihje"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Syötä tilisi sähköpostiosoite, niin salasanavihjeesi lähetetään sinulle sähköpostitse"
   },
   "passwordHint": {
     "message": "Salasanavihje"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Holvisi on lukittu. Jatka vahvistamalla henkilöllisyytesi."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Avaa"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Holvin aikakatkaisu"
+  },
+  "vaultTimeout1": {
+    "message": "Aikakatkaisu"
   },
   "vaultTimeoutDesc": {
     "message": "Määritä milloin holvin aikakatkaisutoiminto suoritetaan."
@@ -1286,7 +1317,7 @@
     }
   },
   "copySuccessful": {
-    "message": "Copy Successful"
+    "message": "Kopiointi onnistui"
   },
   "errorRefreshingAccessToken": {
     "message": "Käyttötunnisteen päivitysvirhe"
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "Suositeltavaa parempaa suojausta varten."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Lukitse pääsalasanalla uudelleenkäynnistyksen yhteydessä"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Lukitse",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Roskakori",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Salli selainintegraatio"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Käytetään verkkoselainten biometriatukeen."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Käytetään biometrisen avauksen sallimiseen muissa selaimissa kuin Safarissa."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Salli integraatio DuckDuckGo-selaimeen"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minuuttia"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Organisaatiokäytännöt ovat määrittäneet holvisi aikakatkaisun enimmäisajaksi $HOURS$ tunti(a) $MINUTES$ minuutti(a).",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "Enintään $HOURS$ tuntia $MINUTES$ minuuttia.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2101,7 +2132,7 @@
     }
   },
   "vaultTimeoutPolicyWithActionInEffect": {
-    "message": "Organisaatiokäytännöt vaikuttavat holvisi aikakatkaisuun. Suurin sallittu aika on $HOURS$ tunti(a) $MINUTES$ minuutti(a). Holvillesi määritetty aikakatkaisutoiminto on $ACTION$.",
+    "message": "Organisaatiokäytännöt vaikuttavat holvisi aikakatkaisuun. Suurin sallittu aika on $HOURS$ tuntia $MINUTES$ minuuttia. Holvillesi määritetty aikakatkaisutoiminto on $ACTION$.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Lukittu"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Avattu"
@@ -2589,6 +2623,9 @@
   "important": {
     "message": "Tärkeää:"
   },
+  "accessing": {
+    "message": "Accessing"
+  },
   "accessTokenUnableToBeDecrypted": {
     "message": "Sinut on kirjattu ulos, koska käyttötunnisteesi salausta ei voitu purkaa. Ratkaise ongelma kirjautumalla sisään uudelleen."
   },
@@ -2596,7 +2633,7 @@
     "message": "Sinut on kirjattu ulos, koska päivitystunnistettasi ei voitu noutaa. Ratkaise ongelma kirjautumalla sisään uudelleen."
   },
   "masterPasswordHint": {
-    "message": "Pääsalasanasi palauttaminen ei ole mahdollista, jos unohdat sen!"
+    "message": "Pääsalasanaasi ei ole mahdollista palauttaa, jos unohdat sen!"
   },
   "characterMinimum": {
     "message": "Vähintään $LENGTH$ merkkiä",
@@ -2857,7 +2894,7 @@
     "message": "Tiedoston salasana on virheellinen. Käytä vientitiedoston luonnin yhteydessä syötettyä salasanaa."
   },
   "destination": {
-    "message": "Määränpää"
+    "message": "Kohde"
   },
   "learnAboutImportOptions": {
     "message": "Lue lisää tuontivaihtoehdoista"
@@ -3062,10 +3099,16 @@
   "textSends": {
     "message": "Teksti-Sendit"
   },
+  "allowScreenshots": {
+    "message": "Salli kuvankaappaus"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Salli kuvankaappaus Bitwardenin työpöytäsovelluksesta."
+  },
   "ssoError": {
     "message": "Kertakirjautumiselle ei löytynyt vapaita portteja."
   },
   "fileSavedToDevice": {
-    "message": "File saved to device. Manage from your device downloads."
+    "message": "Tiedosto tallennettiin laitteelle. Hallitse sitä laitteesi latauksista."
   }
 }

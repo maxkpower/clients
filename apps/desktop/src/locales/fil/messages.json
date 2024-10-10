@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Iwasan ang mga hindi malinaw na character"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Maghanap ng koleksyon"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Mga Preperensya"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Mungkahi sa Password"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Naka-lock ang iyong vault. Patunayan ang iyong pagkakakilanlan upang magpatuloy."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Buksan"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Vault timeout"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Piliin kung kailan gagawin ng iyong vault ang vault timeout action."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Recommended for security."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "I-lock gamit ang master password sa restart"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Tanggalin ang account"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "I-lock",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Basurahan",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Payagan ang pagsasama ng browser"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Ginagamit para sa biometrics sa browser."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Payagan ang pagsasama ng browser ng DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Mga Minuto"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Ang iyong mga patakaran sa organisasyon ay nakakaapekto sa iyong vault timeout. Ang maximum na pinapayagang timeout ng vault ay $HOURS$ oras (mga) oras at $MINUTES$ (mga) minuto",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Naka-lock"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Hindi naka-lock"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Mahalaga:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

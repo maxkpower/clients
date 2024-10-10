@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Éviter les caractères ambigus"
   },
+  "generatorPolicyInEffect": {
+    "message": "Les exigences de la politique d'entreprise ont été appliquées à vos options de générateur.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Rechercher dans la collection"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Paramètres"
+  },
+  "accountEmail": {
+    "message": "Courriel du compte"
+  },
+  "requestHint": {
+    "message": "Demander l'indice"
+  },
+  "requestPasswordHint": {
+    "message": "Obtenir l'indice du mot de passe"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Saisissez l'adresse courriel de votre compte et votre indice de mot de passe vous sera envoyé"
   },
   "passwordHint": {
     "message": "Indice pour le mot de passe"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Votre coffre est verrouillé. Vérifiez votre identité pour continuer."
   },
+  "yourAccountIsLocked": {
+    "message": "Votre compte est verrouillé"
+  },
+  "or": {
+    "message": "ou"
+  },
+  "unlockWithBiometrics": {
+    "message": "Déverrouiller par biométrie"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Déverrouiller avec le mot de passe principal"
+  },
   "unlock": {
     "message": "Déverrouiller"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Délai d'expiration du coffre"
+  },
+  "vaultTimeout1": {
+    "message": "Délai dépassé"
   },
   "vaultTimeoutDesc": {
     "message": "Choisissez quand votre coffre réalisera l'action d'expiration."
@@ -1181,7 +1212,7 @@
     "message": "Vous pouvez acheter une adhésion Premium sur le coffre web de bitwarden.com. Voulez-vous visiter le site web maintenant ?"
   },
   "premiumPurchaseAlertV2": {
-    "message": "You can purchase Premium from your account settings on the Bitwarden web app."
+    "message": "Vous pouvez faire des achats Prenium à partir des paramètres de votre compte sur l'application web Bitwarden."
   },
   "premiumCurrentMember": {
     "message": "Vous êtes un membre Premium !"
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "Recommandé pour la sécurité."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Verrouiller avec le mot de passe principal au redémarrage"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Verrouiller",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Corbeille",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Activer l'intégration avec le navigateur"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "L'intégration avec le navigateur est utilisée pour le déverrouillage biométrique dans le navigateur."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Utilisé pour permettre le déverrouillage biométrique dans les navigateurs autres que Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Autoriser l'intégration DuckDuckGo au navigateur"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minutes"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Les politiques de sécurité de votre organisation ont défini le délai d'expiration de votre coffre à $HOURS$ heure(s) et $MINUTES$ minute(s) maximum.",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ heure(s) et $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Verrouillé"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Votre coffre est verrouillé"
   },
   "unlocked": {
     "message": "Déverrouillé"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Important :"
+  },
+  "accessing": {
+    "message": "Accès en cours"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "Vous avez été déconnecté car votre jeton d'accès n'a pas pu être déchiffré.  Veuillez vous reconnecter pour résoudre ce problème."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Autoriser les captures d'écran"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Autoriser la capture d'écran de l'application de bureau Bitwarden."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Пазбягаць неадназначных сімвалаў"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Пошук у калекцыі"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Налады"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Падказка да пароля"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Ваша сховішча заблакіравана. Каб працягнуць, пацвердзіце сваю асобу."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Разблакіраваць"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Час чакання сховішча"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Выберыце тайм-аўт для сховішча і дзеянне, якое неабходна зрабіць."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Рэкамендуецца ў мэтах бяспекі."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Блакіраваць асноўным паролем пры перазапуску"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Выдаліць уліковы запіс"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Заблакіраваць",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Сметніца",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Дазволіць інтэграцыю з браўзерам"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Выкарыстоўваецца для біяметрыі ў браўзеры."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Дазволіць інтэграцыю браўзера з DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Хвіліны"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Палітыка вашай арганізацыі ўплывае на час чакання сховішча. Максімальны дазволены час чакання сховішча складае $HOURS$ гадз. і $MINUTES$ хв.",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Заблакіравана"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Разблакіравана"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Важна:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Eviteu caràcters ambigus"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Cerca en la col·lecció"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Configuració"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Pista per a la contrasenya"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "La caixa forta està bloquejada. Comproveu la contrasenya mestra per continuar."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Desbloqueja"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Temps d'espera de la caixa forta"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Trieu quan es tancarà la vostra caixa forta i feu l'acció seleccionada."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Recomanat per seguretat."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Bloqueja amb la contrasenya mestra en reiniciar"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Suprimeix el compte"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Bloqueja",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Paperera",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Habilita la integració amb el navegador"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "S'utilitza per a la biometria al navegador."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Permet la integració del navegador DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minuts"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Les polítiques de l'organització afecten el temps d'espera de la caixa forta. El temps d'espera màxim permès d'aquesta és de $HOURS$ hores i $MINUTES$ minuts",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Bloquejat"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Desbloquejat"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Important:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

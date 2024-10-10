@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Evitar Caracteres Ambíguos"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Pesquisar coleção"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Configurações"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Dica da Senha"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Seu cofre está trancado. Verifique sua identidade para continuar."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Desbloquear"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Tempo Limite do Cofre"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Escolha quando o tempo limite do seu cofre irá se esgotar e execute a ação selecionada."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Recomendado para segurança."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Bloquear com senha mestra ao reiniciar"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Excluir conta"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Bloquear",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Lixeira",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Ativar integração com o navegador"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "A integração do navegador é usada para biometria no navegador."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Permitir integração ao navegador DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minutos"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "As políticas da sua organização definiram o tempo limite máximo permitido do cofre para $HOURS$ hora(s) e $MINUTES$ minuto(s).",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Bloqueado"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Desbloqueado"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Importante:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "Você foi desconectado porque seu token de acesso não pôde ser descriptografado. Por favor, faça o login novamente para resolver esse problema."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Texto enviado"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "Nenhuma porta livre foi encontrada para o cliente final."

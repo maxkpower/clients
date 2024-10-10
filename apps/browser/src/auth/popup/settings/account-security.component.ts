@@ -33,8 +33,6 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { BiometricStateService } from "@bitwarden/common/platform/biometrics/biometric-state.service";
-import { BiometricsService } from "@bitwarden/common/platform/biometrics/biometric.service";
 import {
   VaultTimeout,
   VaultTimeoutOption,
@@ -54,6 +52,7 @@ import {
   TypographyModule,
   ToastService,
 } from "@bitwarden/components";
+import { BiometricsService, BiometricStateService } from "@bitwarden/key-management";
 
 import { BiometricErrors, BiometricErrorTypes } from "../../../models/biometricErrors";
 import { BrowserApi } from "../../../platform/browser/browser-api";
@@ -560,9 +559,11 @@ export class AccountSecurityComponent implements OnInit, OnDestroy {
   }
 
   async fingerprint() {
-    const fingerprint = await this.cryptoService.getFingerprint(
-      await this.stateService.getUserId(),
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
     );
+    const publicKey = await firstValueFrom(this.cryptoService.userPublicKey$(activeUserId));
+    const fingerprint = await this.cryptoService.getFingerprint(activeUserId, publicKey);
 
     const dialogRef = FingerprintDialogComponent.open(this.dialogService, {
       fingerprint,

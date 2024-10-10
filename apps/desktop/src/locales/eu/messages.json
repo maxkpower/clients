@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Saihestu karaktere anbiguoak"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Bilatu bilduma"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Ezarpenak"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Pasahitza gogoratzeko pista"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Zure kutxa gotorra blokeatuta dago. Egiaztatu zure identitatea jarraitzeko."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Desblokeatu"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Kutxa gotorraren itxaronaldia"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Aukeratu kutxa gotorraren itxaronaldia eta egingo den ekintza."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Recommended for security."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Berrabiaraztean pasahitz nagusiarekin blokeatu"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Ezabatu kontua"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Blokeatu",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Zakarrontzia",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Baimendu nabigatzailearekin integratzea"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Nabigatzailean biometria erabiltzen da."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Baimendu DuckDuckGo nabigatzailearekin integratzea"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minutu"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Zure erakundearen politikek zure itxaronaldiari eragiten diote. Itxaronaldiak gehienez ere $HOURS$ ordu eta $MINUTES$ minutu izango ditu",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Blokeatuta"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Desblokeatuta"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Important:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

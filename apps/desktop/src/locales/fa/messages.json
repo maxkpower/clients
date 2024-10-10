@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "از کاراکترهای مبهم اجتناب کن"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "جستجوی مجموعه"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "تنظیمات"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "یادآور کلمه عبور"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "گاوصندوق شما قفل شده است. برای ادامه هویت خود را تأیید کنید."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "باز کردن قفل"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "متوقف شدن گاو‌صندوق"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "انتخاب کنید که گاو‌صندوق شما چه زمانی عمل توقف زمانی گاوصندوق را انجام دهد."
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "برای امنیت توصیه می‌شود."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "در زمان شروع مجدد، با کلمه عبور اصلی قفل کن"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "حذف حساب"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "قفل",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "زباله‌ها",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "فعال کردن ادغام مرورگر"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "یکپارچه سازی مرورگر برای بیومتریک در مرورگر استفاده می‌شود."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "اجازه ادغام مرورگر DuckDuckGo را بدهید"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "دقیقه"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "سیاست‌های سازمانتان بر مهلت زمانی گاوصندوق شما تأثیر می‌گذارد. حداکثر زمان مجاز گاوصندوق $HOURS$ ساعت و $MINUTES$ دقیقه است",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "قفل شده"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "باز شده"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "مهم:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

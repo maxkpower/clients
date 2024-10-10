@@ -144,7 +144,7 @@
     "message": "Codice di sicurezza (CVV)"
   },
   "securityCodeSlashCVV": {
-    "message": "Security code / CVV"
+    "message": "Codice di sicurezza (CVV)"
   },
   "identityName": {
     "message": "Nome identità"
@@ -269,9 +269,18 @@
   "cfTypeBoolean": {
     "message": "Booleano"
   },
+  "cfTypeCheckbox": {
+    "message": "Checkbox"
+  },
   "cfTypeLinked": {
     "message": "Collegato",
     "description": "This describes a field that is 'linked' (related) to another field."
+  },
+  "fieldType": {
+    "message": "Field type"
+  },
+  "fieldLabel": {
+    "message": "Field label"
   },
   "remove": {
     "message": "Rimuovi"
@@ -511,6 +520,24 @@
   "viewItem": {
     "message": "Visualizza elemento"
   },
+  "newItemHeader": {
+    "message": "New $TYPE$",
+    "placeholders": {
+      "type": {
+        "content": "$1",
+        "example": "login"
+      }
+    }
+  },
+  "editItemHeader": {
+    "message": "Edit $TYPE$",
+    "placeholders": {
+      "type": {
+        "content": "$1",
+        "example": "login"
+      }
+    }
+  },
   "viewItemType": {
     "message": "Visualizza $ITEMTYPE$",
     "placeholders": {
@@ -591,6 +618,45 @@
   "copyUri": {
     "message": "Copia URI",
     "description": "Copy URI to clipboard"
+  },
+  "copyCustomField": {
+    "message": "Copy $FIELD$",
+    "placeholders": {
+      "field": {
+        "content": "$1",
+        "example": "Custom field label"
+      }
+    }
+  },
+  "copyWebsite": {
+    "message": "Copy website"
+  },
+  "copyNotes": {
+    "message": "Copy notes"
+  },
+  "copyAddress": {
+    "message": "Copy address"
+  },
+  "copyPhone": {
+    "message": "Copy phone"
+  },
+  "copyEmail": {
+    "message": "Copy email"
+  },
+  "copyCompany": {
+    "message": "Copy company"
+  },
+  "copySSN": {
+    "message": "Copy Social Security number"
+  },
+  "copyPassportNumber": {
+    "message": "Copy passport number"
+  },
+  "copyLicenseNumber": {
+    "message": "Copy license number"
+  },
+  "copyName": {
+    "message": "Copy name"
   },
   "me": {
     "message": "Io"
@@ -960,6 +1026,18 @@
   "settings": {
     "message": "Impostazioni"
   },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
+  },
   "passwordHint": {
     "message": "Suggerimento per la password"
   },
@@ -1020,6 +1098,9 @@
   },
   "yourVaultIsLockedV2": {
     "message": "La cassaforte è bloccata"
+  },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
   },
   "uuid": {
     "message": "UUID"
@@ -1396,6 +1477,10 @@
   },
   "includeNumber": {
     "message": "Includi numero"
+  },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
   },
   "passwordHistory": {
     "message": "Cronologia delle password"
@@ -2117,6 +2202,9 @@
   "checkExposedPasswords": {
     "message": "Controlla password esposte"
   },
+  "timesExposed": {
+    "message": "Times exposed"
+  },
   "exposedXTimes": {
     "message": "Esposta $COUNT$ volte",
     "placeholders": {
@@ -2151,6 +2239,9 @@
   "noWeakPasswords": {
     "message": "Nessun elemento nella tua cassaforte ha password deboli."
   },
+  "weakness": {
+    "message": "Weakness"
+  },
   "reusedPasswordsReport": {
     "message": "Password riutilizzate"
   },
@@ -2175,6 +2266,9 @@
   },
   "noReusedPasswords": {
     "message": "Nessun login nella tua cassaforte ha password riutilizzate."
+  },
+  "timesReused": {
+    "message": "Times reused"
   },
   "reusedXTimes": {
     "message": "Riutilizzata $COUNT$ volte",
@@ -2472,6 +2566,9 @@
   },
   "downloadLicense": {
     "message": "Scarica licenza"
+  },
+  "viewBillingToken": {
+    "message": "View Billing Token"
   },
   "updateLicense": {
     "message": "Aggiorna licenza"
@@ -3077,6 +3174,10 @@
   },
   "incorrectPin": {
     "message": "PIN errato"
+  },
+  "pin": {
+    "message": "PIN",
+    "description": "PIN code. Ex. The short code (often numeric) that you use to unlock a device."
   },
   "exportedVault": {
     "message": "Cassaforte esportata"
@@ -3901,10 +4002,10 @@
     }
   },
   "encryptionKeyUpdateCannotProceed": {
-    "message": "Encryption key update cannot proceed"
+    "message": "Non è possibile procedere con l'aggiornamento della chiave di cifratura"
   },
   "keyUpdateFoldersFailed": {
-    "message": "When updating your encryption key, your folders could not be decrypted. To continue with the update, your folders must be deleted. No vault items will be deleted if you proceed."
+    "message": "Quando si aggiorna la chiave di cifratura, le cartelle non possono essere decifrate. Per continuare con l'aggiornamento, le cartelle devono essere eliminate. Nessun elemento della cassaforte verrà eliminato se si procede."
   },
   "keyUpdated": {
     "message": "Chiave aggiornata"
@@ -3980,6 +4081,9 @@
   },
   "vaultTimeout": {
     "message": "Timeout cassaforte"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Scegli quando la tua cassaforte eseguirà l'azione di timeout."
@@ -4249,7 +4353,7 @@
   },
   "lock": {
     "message": "Blocca",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Cestino",
@@ -4845,12 +4949,6 @@
   },
   "deleteAnyCollection": {
     "message": "Elimina tutte le raccolte"
-  },
-  "editAssignedCollections": {
-    "message": "Modifica le raccolte assegnate"
-  },
-  "deleteAssignedCollections": {
-    "message": "Elimina raccolte assegnate"
   },
   "manageGroups": {
     "message": "Gestisci i gruppi"
@@ -5459,6 +5557,19 @@
       }
     }
   },
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
+    "placeholders": {
+      "hours": {
+        "content": "$1",
+        "example": "5"
+      },
+      "minutes": {
+        "content": "$2",
+        "example": "5"
+      }
+    }
+  },
   "vaultTimeoutPolicyWithActionInEffect": {
     "message": "Le politiche della tua organizzazione stanno influenzando il timeout della tua cassaforte. Il tempo massimo consentito è di $HOURS$ ore e $MINUTES$ minuti. La tua azione di timeout della cassaforte è impostata su $ACTION$.",
     "placeholders": {
@@ -5484,9 +5595,6 @@
         "example": "Lock"
       }
     }
-  },
-  "customVaultTimeout": {
-    "message": "Timeout della cassaforte personalizzato"
   },
   "vaultTimeoutToLarge": {
     "message": "Il timeout della tua cassaforte supera le restrizioni impostate dalla tua organizzazione."
@@ -5896,8 +6004,8 @@
   "viewBillingSyncToken": {
     "message": "Visualizza token di sincronizzazione della fatturazione"
   },
-  "generateBillingSyncToken": {
-    "message": "Genera token di sincronizzazione della fatturazione"
+  "generateBillingToken": {
+    "message": "Generate billing token"
   },
   "copyPasteBillingSync": {
     "message": "Copia e incolla questo token nelle impostazioni di sincronizzazione della fatturazione della tua organizzazione self-hosted."
@@ -5905,8 +6013,8 @@
   "billingSyncCanAccess": {
     "message": "Il token di sincronizzazione della fatturazione può accedere e modificare le impostazioni di abbonamento di questa organizzazione."
   },
-  "manageBillingSync": {
-    "message": "Gestisci sincronizzazione della fatturazione"
+  "manageBillingTokenSync": {
+    "message": "Manage Billing Token"
   },
   "setUpBillingSync": {
     "message": "Configura sincronizzazione della fatturazione"
@@ -5965,14 +6073,14 @@
   "billingSyncApiKeyRotated": {
     "message": "Token ruotato"
   },
-  "billingSyncDesc": {
-    "message": "La sincronizzazione della fatturazione sblocca le sponsorizzazioni Families e la sincronizzazione automatica delle licenze sul tuo server. Dopo aver aggiornato il server cloud di Bitwarden, seleziona Sincronizza Licenza per applicare le modifiche."
-  },
   "billingSyncKeyDesc": {
     "message": "Per completare questo modulo è necessario un token di sincronizzazione della fatturazione dalle impostazioni di abbonamento della tua organizzazione cloud."
   },
   "billingSyncKey": {
     "message": "Token di sincronizzazione della fatturazione"
+  },
+  "automaticBillingSyncDesc": {
+    "message": "Automatic sync unlocks Families sponsorships and allows you to sync your license without uploading a file. After making updates in the Bitwarden cloud server, select Sync License to apply changes."
   },
   "active": {
     "message": "Attivo"
@@ -6210,7 +6318,7 @@
   },
   "lastSync": {
     "message": "Ultima sincronizzazione",
-    "description": "Used as a prefix to indicate the last time a sync occured. Example \"Last sync 1968-11-16 00:00:00\""
+    "description": "Used as a prefix to indicate the last time a sync occurred. Example \"Last sync 1968-11-16 00:00:00\""
   },
   "sponsorshipsSynced": {
     "message": "Sponsorizzazione self-hosted sincronizzata."
@@ -6369,57 +6477,57 @@
   },
   "scim": {
     "message": "Approvvigionamento SCIM",
-    "description": "The text, 'SCIM', is an acronymn and should not be translated."
+    "description": "The text, 'SCIM', is an acronym and should not be translated."
   },
   "scimDescription": {
     "message": "Approvvigiona utenti e gruppi automaticamente con il tuo fornitore di identità preferito tramite l'approvvigionamento SCIM",
-    "description": "the text, 'SCIM', is an acronymn and should not be translated."
+    "description": "the text, 'SCIM', is an acronym and should not be translated."
   },
   "scimEnabledCheckboxDesc": {
     "message": "Abilita SCIM",
-    "description": "the text, 'SCIM', is an acronymn and should not be translated."
+    "description": "the text, 'SCIM', is an acronym and should not be translated."
   },
   "scimEnabledCheckboxDescHelpText": {
     "message": "Imposta il tuo fornitore di identità preferito configurando l'URL e la chiave API SCIM",
-    "description": "the text, 'SCIM', is an acronymn and should not be translated."
+    "description": "the text, 'SCIM', is an acronym and should not be translated."
   },
   "scimApiKeyHelperText": {
     "message": "Questa chiave API ha accesso alla gestione gli utenti all'interno della tua organizzazione. Deve essere tenuta segreta."
   },
   "copyScimKey": {
     "message": "Copia la chiave API SCIM negli appunti",
-    "description": "the text, 'SCIM' and 'API', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'API', are acronyms and should not be translated."
   },
   "rotateScimKey": {
     "message": "Ruota la chiave API SCIM",
-    "description": "the text, 'SCIM' and 'API', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'API', are acronyms and should not be translated."
   },
   "rotateScimKeyWarning": {
     "message": "Sei sicuro di voler ruotare la chiave API SCIM? La chiave corrente non funzionerà più per nessuna integrazione esistente.",
-    "description": "the text, 'SCIM' and 'API', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'API', are acronyms and should not be translated."
   },
   "rotateKey": {
     "message": "Ruota chiave"
   },
   "scimApiKey": {
     "message": "Chiave API SCIM",
-    "description": "the text, 'SCIM' and 'API', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'API', are acronyms and should not be translated."
   },
   "copyScimUrl": {
     "message": "Copia l'URL dell'endpoint SCIM negli appunti",
-    "description": "the text, 'SCIM' and 'URL', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'URL', are acronyms and should not be translated."
   },
   "scimUrl": {
     "message": "URL SCIM",
-    "description": "the text, 'SCIM' and 'URL', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'URL', are acronyms and should not be translated."
   },
   "scimApiKeyRotated": {
     "message": "Chiave API SCIM ruotata",
-    "description": "the text, 'SCIM' and 'API', are acronymns and should not be translated."
+    "description": "the text, 'SCIM' and 'API', are acronyms and should not be translated."
   },
   "scimSettingsSaved": {
     "message": "Impostazioni di SCIM salvate",
-    "description": "the text, 'SCIM', is an acronymn and should not be translated."
+    "description": "the text, 'SCIM', is an acronym and should not be translated."
   },
   "inputRequired": {
     "message": "Input obbligatorio."
@@ -6490,6 +6598,18 @@
       "count": {
         "content": "$1",
         "example": "4"
+      }
+    }
+  },
+  "singleFieldNeedsAttention": {
+    "message": "1 field needs your attention."
+  },
+  "multipleFieldsNeedAttention": {
+    "message": "$COUNT$ fields need your attention.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
       }
     }
   },
@@ -7341,6 +7461,9 @@
   "fileUpload": {
     "message": "Carica file"
   },
+  "upload": {
+    "message": "Upload"
+  },
   "acceptedFormats": {
     "message": "Formati accettati:"
   },
@@ -7349,6 +7472,15 @@
   },
   "or": {
     "message": "o"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithPin": {
+    "message": "Unlock with PIN"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
   },
   "licenseAndBillingManagement": {
     "message": "Licenza e gestione della fatturazione"
@@ -7359,8 +7491,8 @@
   "manualUpload": {
     "message": "Caricamento manuale"
   },
-  "manualUploadDesc": {
-    "message": "Se non vuoi sincronizzare la fattura, carica la licenza manualmente."
+  "manualBillingTokenUploadDesc": {
+    "message": "If you do not want to opt into billing sync, manually upload your license here. This will not automatically unlock Families sponsorships."
   },
   "syncLicense": {
     "message": "Sincronizza licenza"
@@ -8202,6 +8334,9 @@
   "addField": {
     "message": "Aggiungi campo"
   },
+  "editField": {
+    "message": "Edit field"
+  },
   "items": {
     "message": "Elementi"
   },
@@ -8592,41 +8727,14 @@
   "manageBillingFromProviderPortalMessage": {
     "message": "Gestisci la fatturazione dal Portale del Fornitore"
   },
-  "startYour7DayFreeTrialOfBitwarden": {
-    "message": "Inizia la tua prova gratuita di 7 giorni di Bitwarden"
+  "continueSettingUpFreeTrial": {
+    "message": "Continue setting up your free trial of Bitwarden"
   },
-  "startYour7DayFreeTrialOfBitwardenForTeams": {
-    "message": "Inizia la tua prova gratuita di 7 giorni di Bitwarden for Teams"
+  "continueSettingUpFreeTrialPasswordManager": {
+    "message": "Continue setting up your free trial of Bitwarden Password Manager"
   },
-  "startYour7DayFreeTrialOfBitwardenForFamilies": {
-    "message": "Inizia la tua prova gratuita di 7 giorni di Bitwarden for Families"
-  },
-  "startYour7DayFreeTrialOfBitwardenForEnterprise": {
-    "message": "Inizia la tua prova gratuita di 7 giorni di Bitwarden for Enterprise"
-  },
-  "startYour7DayFreeTrialOfBitwardenSecretsManager": {
-    "message": "Inizia la tua prova gratis di 7 giorni del Secrets Manager di Bitwarden Secrets Manager"
-  },
-  "startYour7DayFreeTrialOfBitwardenSecretsManagerForTeams": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Secrets Manager for Teams"
-  },
-  "startYour7DayFreeTrialOfBitwardenSecretsManagerForFamilies": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Secrets Manager for Families"
-  },
-  "startYour7DayFreeTrialOfBitwardenSecretsManagerForEnterprise": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Secrets Manager for Enterprise"
-  },
-  "startYour7DayFreeTrialOfBitwardenPasswordManager": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Password Manager"
-  },
-  "startYour7DayFreeTrialOfBitwardenPasswordManagerForTeams": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Password Manager for Teams"
-  },
-  "startYour7DayFreeTrialOfBitwardenPasswordManagerForFamilies": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Password Manager for Families"
-  },
-  "startYour7DayFreeTrialOfBitwardenPasswordManagerForEnterprise": {
-    "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden Password Manager for Enterprise"
+  "continueSettingUpFreeTrialSecretsManager": {
+    "message": "Continue setting up your free trial of Bitwarden Secrets Manager"
   },
   "enterTeamsOrgInfo": {
     "message": "Inserisci le informazioni dell'organizzazione del tuo team"
@@ -8938,6 +9046,66 @@
   "purchasedSeatsRemoved": {
     "message": "slot acquistati rimossi"
   },
+  "environmentVariables": {
+    "message": "Environment variables"
+  },
+  "organizationId": {
+    "message": "Organization ID"
+  },
+  "projectIds": {
+    "message": "Project IDs"
+  },
+  "projectId": {
+    "message": "Project ID"
+  },
+  "projectsAccessedByMachineAccount": {
+    "message": "The following projects can be accessed by this machine account."
+  },
+  "config": {
+    "message": "Config"
+  },
+  "learnMoreAboutEmergencyAccess": {
+    "message": "Learn more about emergency access"
+  },
+  "learnMoreAboutMatchDetection": {
+    "message": "Learn more about match detection"
+  },
+  "learnMoreAboutMasterPasswordReprompt": {
+    "message": "Learn more about master password re-prompt"
+  },
+  "learnMoreAboutSearchingYourVault": {
+    "message": "Learn more about searching your vault"
+  },
+  "learnMoreAboutYourAccountFingerprintPhrase": {
+    "message": "Learn about your account fingerprint phrase"
+  },
+  "impactOfRotatingYourEncryptionKey": {
+    "message": "Impact of rotating your encryption key"
+  },
+  "learnMoreAboutEncryptionAlgorithms": {
+    "message": "Learn more about encryption algorithms"
+  },
+  "learnMoreAboutKDFIterations": {
+    "message": "Learn more about KDF iterations"
+  },
+  "learnMoreAboutLocalization": {
+    "message": "Learn more about localization"
+  },
+  "learnMoreAboutWebsiteIcons": {
+    "message": "Learn more about using website icons"
+  },
+  "learnMoreAboutUserAccess": {
+    "message": "Learn more about user access"
+  },
+  "learnMoreAboutMemberRoles": {
+    "message": "Learn more about member roles and permissions"
+  },
+  "whatIsACvvNumber": {
+    "message": "What is a CVV number?"
+  },
+  "learnMoreAboutApi": {
+    "message": "Learn more about Bitwarden's API"
+  },
   "fileSends": {
     "message": "Send File"
   },
@@ -9073,21 +9241,21 @@
   "current": {
     "message": "Attuale"
   },
-  "secretsManagerSubInfo": {
-    "message": "Il tuo abbonamento a Secrets Manager si aggiornerà a seconda del piano selezionato"
+  "secretsManagerSubscriptionInfo": {
+    "message": "Your Secrets Manager subscription will upgrade based on the plan selected"
   },
   "bitwardenPasswordManager": {
     "message": "Bitwarden Password Manager"
   },
   "secretsManagerComplimentaryPasswordManager": {
-    "message": "Your complimentary one year Password Manager subscription will upgrade to the selected plan. You will not be charged until the complimentary period is over."
+    "message": "Il tuo abbonamento complementare a Password Manager di un anno verrà aggiornato al piano selezionato. Non ti verrà addebitato nessun costo fino a quando il periodo gratuito non sarà terminato."
   },
   "fileSavedToDevice": {
     "message": "File salvato sul dispositivo. Gestisci dai download del dispositivo."
   },
   "publicApi": {
     "message": "API pubblica",
-    "description": "The text, 'API', is an acronymn and should not be translated."
+    "description": "The text, 'API', is an acronym and should not be translated."
   },
   "showCharacterCount": {
     "message": "Show character count"
@@ -9097,5 +9265,14 @@
   },
   "editAccess": {
     "message": "Modifica accesso"
+  },
+  "addAttachment": {
+    "message": "Add attachment"
+  },
+  "maxFileSizeSansPunctuation": {
+    "message": "Maximum file size is 500 MB"
+  },
+  "permanentlyDeleteAttachmentConfirmation": {
+    "message": "Are you sure you want to permanently delete this attachment?"
   }
 }

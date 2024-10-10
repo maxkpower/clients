@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Без нееднозначни знаци"
   },
+  "generatorPolicyInEffect": {
+    "message": "Изискванията на политиката за големи компании бяха приложени към настройките на генератора.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Търсене в колекцията"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Настройки"
+  },
+  "accountEmail": {
+    "message": "Е-поща на регистрацията"
+  },
+  "requestHint": {
+    "message": "Заявка за подсказка"
+  },
+  "requestPasswordHint": {
+    "message": "Заявка за подсказка за паролата"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Въведете е-пощата на регистрацията си и подсказката за паролата ще Ви бъде изпратена"
   },
   "passwordHint": {
     "message": "Подсказка за паролата"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Трезорът е заключен — въведете главната си парола, за да продължите."
   },
+  "yourAccountIsLocked": {
+    "message": "Регистрацията Ви е заключена"
+  },
+  "or": {
+    "message": "или"
+  },
+  "unlockWithBiometrics": {
+    "message": "Отключване с биометрични данни"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Отключване с главната парола"
+  },
   "unlock": {
     "message": "Отключване"
   },
@@ -928,6 +956,9 @@
     "message": "Двустепенно удостоверяване"
   },
   "vaultTimeout": {
+    "message": "Време за достъп"
+  },
+  "vaultTimeout1": {
     "message": "Време за достъп"
   },
   "vaultTimeoutDesc": {
@@ -1286,7 +1317,7 @@
     }
   },
   "copySuccessful": {
-    "message": "Copy Successful"
+    "message": "Копирането е успешно"
   },
   "errorRefreshingAccessToken": {
     "message": "Грешка при опресняването на идентификатора за достъп"
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "Препоръчително от гледна точка на сигурността."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Заключване с главната парола при повторно пускане"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Заключване",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Кошче",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Включване на интеграцията с браузър"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "За потвърждаване с биометрични данни е необходима интеграция с браузъра."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Използва се за разрешаване на отключването чрез биометрични данни в браузъри различни от Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Разрешаване на интеграцията на DuckDuckGo в браузъра"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Минути"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Настройките на организацията Ви влияят върху времето за достъп до трезора Ви. Максималното разрешено време за достъп е $HOURS$ час(а) и $MINUTES$ минути",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "Максимум $HOURS$ час(а) и $MINUTES$ минута/и.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Заключено"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Трезорът Ви е заключен"
   },
   "unlocked": {
     "message": "Отключено"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Важно:"
+  },
+  "accessing": {
+    "message": "Използване на"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "Бяхте отписан(а), тъй като идентификаторът Ви за достъп не може да бъде дешифриран. Впишете се отново, за да отстраните проблема."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Текстови изпращания"
+  },
+  "allowScreenshots": {
+    "message": "Позволяване на заснемането на екрана"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Позволяване на заснемането на екрана когато работи настолното приложение на Битуорден."
   },
   "ssoError": {
     "message": "Не могат да бъдат открити свободни портове за еднократната идентификация."

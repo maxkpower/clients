@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Evitar caracteres ambíguos"
   },
+  "generatorPolicyInEffect": {
+    "message": "Os requisitos da política empresarial foram aplicados às suas opções de gerador.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Procurar na coleção"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Definições"
+  },
+  "accountEmail": {
+    "message": "E-mail da conta"
+  },
+  "requestHint": {
+    "message": "Pedir dica"
+  },
+  "requestPasswordHint": {
+    "message": "Pedir dica da palavra-passe"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Introduza o endereço de e-mail da sua conta e ser-lhe-á enviada a sua dica da palavra-passe"
   },
   "passwordHint": {
     "message": "Dica da palavra-passe"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "O seu cofre está bloqueado. Verifique a sua identidade para continuar."
   },
+  "yourAccountIsLocked": {
+    "message": "A sua conta está bloqueada"
+  },
+  "or": {
+    "message": "ou"
+  },
+  "unlockWithBiometrics": {
+    "message": "Desbloquear com biometria"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Desbloquear com a palavra-passe mestra"
+  },
   "unlock": {
     "message": "Desbloquear"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Tempo limite do cofre"
+  },
+  "vaultTimeout1": {
+    "message": "Tempo limite"
   },
   "vaultTimeoutDesc": {
     "message": "Escolha quando é que o seu cofre executará a ação de tempo limite do cofre."
@@ -1286,7 +1317,7 @@
     }
   },
   "copySuccessful": {
-    "message": "Copy Successful"
+    "message": "Cópia bem-sucedida"
   },
   "errorRefreshingAccessToken": {
     "message": "Erro no acesso ao token de atualização"
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "Recomendado por segurança."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Bloquear com a palavra-passe mestra ao reiniciar"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Bloquear",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Lixo",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Permitir a integração do navegador"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Utilizado para a biometria no navegador."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Utilizado para permitir o desbloqueio biométrico em navegadores que não sejam o Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Permitir a integração do navegador DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minutos"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "As políticas da sua organização definiram o tempo limite máximo permitido do cofre de $HOURS$ hora(s) e $MINUTES$ minuto(s).",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hora(s) e $MINUTES$ minuto(s) no máximo.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Bloqueado"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "O seu cofre está bloqueado"
   },
   "unlocked": {
     "message": "Desbloqueado"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Importante:"
+  },
+  "accessing": {
+    "message": "A aceder"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "A sua sessão foi encerrada porque o seu token de acesso não pôde ser desencriptado. Por favor, inicie sessão novamente para resolver este problema."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Sends de texto"
+  },
+  "allowScreenshots": {
+    "message": "Permitir a captura de ecrã"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Permitir a captura de ecrã da aplicação para computador do Bitwarden."
   },
   "ssoError": {
     "message": "Não foi possível encontrar portas livres para o início de sessão sso."

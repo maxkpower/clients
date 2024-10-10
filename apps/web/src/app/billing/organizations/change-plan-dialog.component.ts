@@ -32,6 +32,7 @@ import { PaymentRequest } from "@bitwarden/common/billing/models/request/payment
 import { UpdatePaymentMethodRequest } from "@bitwarden/common/billing/models/request/update-payment-method.request";
 import { BillingResponse } from "@bitwarden/common/billing/models/response/billing.response";
 import { OrganizationSubscriptionResponse } from "@bitwarden/common/billing/models/response/organization-subscription.response";
+import { PaymentSourceResponse } from "@bitwarden/common/billing/models/response/payment-source.response";
 import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.response";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
@@ -163,6 +164,8 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   currentFocusIndex = 0;
   isCardStateDisabled = false;
   focusedIndex: number | null = null;
+  accountCredit: number;
+  paymentSource?: PaymentSourceResponse;
 
   deprecateStripeSourcesAPI: boolean;
 
@@ -200,7 +203,14 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
       this.currentPlan = this.sub?.plan;
       this.selectedPlan = this.sub?.plan;
       this.organization = await this.organizationService.get(this.organizationId);
-      this.billing = await this.organizationApiService.getBilling(this.organizationId);
+      if (this.deprecateStripeSourcesAPI) {
+        const { accountCredit, paymentSource } =
+          await this.billingApiService.getOrganizationPaymentMethod(this.organizationId);
+        this.accountCredit = accountCredit;
+        this.paymentSource = paymentSource;
+      } else {
+        this.billing = await this.organizationApiService.getBilling(this.organizationId);
+      }
     }
 
     if (!this.selfHosted) {
@@ -393,11 +403,13 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   get upgradeRequiresPaymentMethod() {
-    return (
-      this.organization?.productTierType === ProductTierType.Free &&
-      !this.showFree &&
-      !this.billing?.paymentSource
-    );
+    const isFreeTier = this.organization?.productTierType === ProductTierType.Free;
+    const shouldHideFree = !this.showFree;
+    const hasNoPaymentSource = this.deprecateStripeSourcesAPI
+      ? !this.paymentSource
+      : !this.billing?.paymentSource;
+
+    return isFreeTier && shouldHideFree && hasNoPaymentSource;
   }
 
   get selectedSecretsManagerPlan() {
@@ -485,7 +497,7 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
       return 0;
     }
 
-    const result = plan.PasswordManager.seatPrice * Math.abs(this.organization.seats || 0);
+    const result = plan.PasswordManager.seatPrice * Math.abs(this.sub?.seats || 0);
     return result;
   }
 
@@ -509,10 +521,7 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   additionalStoragePriceMonthly(selectedPlan: PlanResponse) {
-    if (!selectedPlan.isAnnual) {
-      return selectedPlan.PasswordManager.additionalStoragePricePerGb;
-    }
-    return selectedPlan.PasswordManager.additionalStoragePricePerGb / 12;
+    return selectedPlan.PasswordManager.additionalStoragePricePerGb;
   }
 
   additionalServiceAccountTotal(plan: PlanResponse): number {
@@ -672,7 +681,7 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
       if (!this.acceptingSponsorship && !this.isInTrialFlow) {
         // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.router.navigate(["/organizations/" + orgId + "/members"]);
+        this.router.navigate(["/organizations/" + orgId + "/billing/subscription"]);
       }
 
       if (this.isInTrialFlow) {
@@ -834,30 +843,43 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   calculateTotalAppliedDiscount(total: number) {
-    const discountPercent =
-      this.selectedInterval == PlanInterval.Annually
-        ? this.discountPercentage + this.discountPercentageFromSub
-        : this.discountPercentageFromSub;
-
-    const discountedTotal = total / (1 - discountPercent / 100);
+    const discountedTotal = total * (this.discountPercentageFromSub / 100);
     return discountedTotal;
   }
 
   get paymentSourceClasses() {
-    if (this.billing.paymentSource == null) {
-      return [];
-    }
-    switch (this.billing.paymentSource.type) {
-      case PaymentMethodType.Card:
-        return ["bwi-credit-card"];
-      case PaymentMethodType.BankAccount:
-        return ["bwi-bank"];
-      case PaymentMethodType.Check:
-        return ["bwi-money"];
-      case PaymentMethodType.PayPal:
-        return ["bwi-paypal text-primary"];
-      default:
+    if (this.deprecateStripeSourcesAPI) {
+      if (this.paymentSource == null) {
         return [];
+      }
+      switch (this.paymentSource.type) {
+        case PaymentMethodType.Card:
+          return ["bwi-credit-card"];
+        case PaymentMethodType.BankAccount:
+          return ["bwi-bank"];
+        case PaymentMethodType.Check:
+          return ["bwi-money"];
+        case PaymentMethodType.PayPal:
+          return ["bwi-paypal text-primary"];
+        default:
+          return [];
+      }
+    } else {
+      if (this.billing.paymentSource == null) {
+        return [];
+      }
+      switch (this.billing.paymentSource.type) {
+        case PaymentMethodType.Card:
+          return ["bwi-credit-card"];
+        case PaymentMethodType.BankAccount:
+          return ["bwi-bank"];
+        case PaymentMethodType.Check:
+          return ["bwi-money"];
+        case PaymentMethodType.PayPal:
+          return ["bwi-paypal text-primary"];
+        default:
+          return [];
+      }
     }
   }
 
@@ -871,6 +893,8 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
         return this.i18nService.t("planNameFamilies");
       case ProductTierType.Teams:
         return this.i18nService.t("planNameTeams");
+      case ProductTierType.TeamsStarter:
+        return this.i18nService.t("planNameTeamsStarter");
     }
   }
 

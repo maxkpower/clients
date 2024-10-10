@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Vermijd dubbelzinnige tekens"
   },
+  "generatorPolicyInEffect": {
+    "message": "Bedrijfsbeleidseisen zijn toegepast op je generator-instellingen.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Doorzoek collectie"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Instellingen"
+  },
+  "accountEmail": {
+    "message": "E-mailadres van account"
+  },
+  "requestHint": {
+    "message": "Hint vragen"
+  },
+  "requestPasswordHint": {
+    "message": "Hoofdwachtwoordhint vragen"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Als je het e-mailadres van je account invult, versturen we je je wachtwoordhint"
   },
   "passwordHint": {
     "message": "Wachtwoordhint"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Je kluis is vergrendeld. Voer je hoofdwachtwoord in om door te gaan."
   },
+  "yourAccountIsLocked": {
+    "message": "Je account is vergrendeld"
+  },
+  "or": {
+    "message": "of"
+  },
+  "unlockWithBiometrics": {
+    "message": "Biometrisch ontgrendelen"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Ontgrendelen met hoofdwachtwoord"
+  },
   "unlock": {
     "message": "Ontgrendelen"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Time-out van de kluis"
+  },
+  "vaultTimeout1": {
+    "message": "Time-out"
   },
   "vaultTimeoutDesc": {
     "message": "Stel de time-out van de kluis en de bijbehorende actie in."
@@ -1286,7 +1317,7 @@
     }
   },
   "copySuccessful": {
-    "message": "Copy Successful"
+    "message": "Kopiëren gelukt"
   },
   "errorRefreshingAccessToken": {
     "message": "Fout bij vernieuwen toegangstoken"
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "Aanbevolen voor veiligheid."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Bij herstart vergrendelen met hoofdwachtwoord"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Vergrendelen",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Prullenbak",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Browserintegratie inschakelen"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Browserintegratie wordt gebruikt voor biometrie in de browser."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Wordt gebruikt voor het toestaan van biometrische ontgrendelen in andere browsers dan Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "DuckDuckGo browserintegratie toestaan"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minuten"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Het beleid van je organisatie heeft invloed op de time-out van je kluis. De maximaal toegestane Kluis Time-out is $HOURS$ uur en $MINUTES$ minuten",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ uren en $MINUTES$ minu(u)t(en) maximaal.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Vergrendeld"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Je kluis is vergrendeld"
   },
   "unlocked": {
     "message": "Ontgrendeld"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Belangrijk:"
+  },
+  "accessing": {
+    "message": "Toegang verkrijgen"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "U bent uitgelogd omdat uw toegangstoken niet kon worden gedecodeerd. Log opnieuw in om dit probleem op te lossen."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Tekst-Sends"
+  },
+  "allowScreenshots": {
+    "message": "Schermopname toestaan"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Schermopnames van de Bitwarden-desktopapplicatie toestaan."
   },
   "ssoError": {
     "message": "Er zijn geen vrije poorten gevonden voor de sso-login."

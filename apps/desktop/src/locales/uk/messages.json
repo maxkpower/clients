@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Уникати неоднозначних символів"
   },
+  "generatorPolicyInEffect": {
+    "message": "До налаштувань генератора застосовано вимоги політики компанії.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Шукати в збірці"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Налаштування"
+  },
+  "accountEmail": {
+    "message": "Е-пошта облікового запису"
+  },
+  "requestHint": {
+    "message": "Підказка для запиту"
+  },
+  "requestPasswordHint": {
+    "message": "Підказка для запиту пароля"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Введіть адресу е-пошти свого облікового запису і вам буде надіслано підказку для пароля"
   },
   "passwordHint": {
     "message": "Підказка для пароля"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Сховище заблоковано. Пройдіть ідентифікацію для продовження."
   },
+  "yourAccountIsLocked": {
+    "message": "Ваш обліковий запис заблоковано"
+  },
+  "or": {
+    "message": "або"
+  },
+  "unlockWithBiometrics": {
+    "message": "Розблокувати з біометрією"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Розблокувати з головним паролем"
+  },
   "unlock": {
     "message": "Розблокувати"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Час очікування сховища"
+  },
+  "vaultTimeout1": {
+    "message": "Час очікування"
   },
   "vaultTimeoutDesc": {
     "message": "Оберіть дію, яка виконається після завершення часу очікування сховища."
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "Рекомендовано для безпеки."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Блокувати головним паролем при перезапуску"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Блокувати",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Смітник",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Дозволити інтеграцію з браузером"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Використовується для біометрії в браузері."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Використовується для біометричного розблокування у браузерах, крім Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Дозволити інтеграцію з браузером DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Хвилин"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Політикою вашої організації встановлено максимальний дозволений час очікування сховища $HOURS$ годин, $MINUTES$ хвилин.",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ год і $MINUTES$ хв максимум.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Заблоковано"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Ваше сховище заблоковано"
   },
   "unlocked": {
     "message": "Розблоковано"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Важливо:"
+  },
+  "accessing": {
+    "message": "Доступ"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "Ви вийшли з системи, оскільки неможливо розшифрувати ваш токен доступу. Увійдіть знову, щоб виправити цю проблему."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Відправлення тексту"
+  },
+  "allowScreenshots": {
+    "message": "Дозволити захоплення екрана"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Дозволити захоплення екрана для комп'ютерної програми Bitwarden."
   },
   "ssoError": {
     "message": "Не знайдено вільних портів для цього входу SSO."

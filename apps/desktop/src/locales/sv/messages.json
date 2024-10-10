@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Undvik tvetydiga tecken"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Sök i samling"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Inställningar"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Begär ledtråd"
+  },
+  "requestPasswordHint": {
+    "message": "Begär lösenordsledtråd"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Lösenordsledtråd"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "Ditt valv är låst. Bekräfta din identitet för att fortsätta."
   },
+  "yourAccountIsLocked": {
+    "message": "Ditt konto är låst"
+  },
+  "or": {
+    "message": "eller"
+  },
+  "unlockWithBiometrics": {
+    "message": "Lås upp med biometri"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Lås upp med huvudlösenord"
+  },
   "unlock": {
     "message": "Lås upp"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Valvets tidsgräns"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Välj när valvets tidsgräns överskrids och den valda åtgärden utförs."
@@ -1409,7 +1440,7 @@
     "message": "Set a file password to encrypt the export and import it to any Bitwarden account using the password for decryption."
   },
   "exportTypeHeading": {
-    "message": "Export type"
+    "message": "Exporttyp"
   },
   "accountRestricted": {
     "message": "Account restricted"
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Rekommenderas för säkerhet."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Lås med huvudlösenordet vid omstart"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Radera konto"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Lås",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Papperskorgen",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Tillåt webbläsarintegration"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Webbläsarintegration används för biometri i webbläsaren."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Tillåt integration av webbläsaren DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minuter"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Dina organisationsprinciper påverkar ditt valvs tid för timeout. Maximal tillåten tid innan timeout är $HOURS$ timme(ar) och $MINUTES$ minut(er)",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Låst"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Ditt valv är låst"
   },
   "unlocked": {
     "message": "Upplåst"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Viktigt:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Text Sends"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "No free ports could be found for the sso login."

@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "あいまいな文字を省く"
   },
+  "generatorPolicyInEffect": {
+    "message": "生成オプションにエンタープライズポリシー要件を適用しました",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "コレクションの検索"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "設定"
+  },
+  "accountEmail": {
+    "message": "アカウントのメールアドレス"
+  },
+  "requestHint": {
+    "message": "ヒントを要求"
+  },
+  "requestPasswordHint": {
+    "message": "パスワードのヒントを要求する"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "アカウントのメールアドレスを入力すると、パスワードのヒントが送信されます"
   },
   "passwordHint": {
     "message": "パスワードのヒント"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "保管庫がロックされています。開くにはマスターパスワードを入力してください。"
   },
+  "yourAccountIsLocked": {
+    "message": "アカウントがロックされています"
+  },
+  "or": {
+    "message": "または"
+  },
+  "unlockWithBiometrics": {
+    "message": "生体認証でロック解除"
+  },
+  "unlockWithMasterPassword": {
+    "message": "マスターパスワードでロック解除"
+  },
   "unlock": {
     "message": "ロック解除"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "保管庫のタイムアウト"
+  },
+  "vaultTimeout1": {
+    "message": "タイムアウト"
   },
   "vaultTimeoutDesc": {
     "message": "保管庫がタイムアウトし、選択したアクションを実行するタイミングを選択します。"
@@ -1555,7 +1586,7 @@
   "recommendedForSecurity": {
     "message": "セキュリティ向上のためおすすめします。"
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "再起動時にマスターパスワードでロック"
   },
   "deleteAccount": {
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "ロック",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "ごみ箱",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "ブラウザ統合を有効にする"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "ブラウザでの生体認証のためにブラウザ統合を使用します。"
+  "enableBrowserIntegrationDesc1": {
+    "message": "Safari 以外のブラウザで生体認証によるロック解除を許可するために使用されます。"
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "DuckDuckGo ブラウザの統合を許可する"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "分"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "あなたの組織ポリシーは保管庫のタイムアウトに影響を与えています。最大保管庫のタイムアウト時間は $HOURS$ 時間 $MINUTES$ 分です。",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ 時間と $MINUTES$ 分が最大です。",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "ロック中"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "保管庫がロックされています"
   },
   "unlocked": {
     "message": "ロック解除済み"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "重要"
+  },
+  "accessing": {
+    "message": "アクセス中"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "アクセストークンを復号できなかったためログアウトしました。この問題を解決するためには再度ログインしてください。"
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "テキスト Send"
+  },
+  "allowScreenshots": {
+    "message": "スクリーンショットを許可"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Bitwarden デスクトップアプリのスクリーンショットを許可します。"
   },
   "ssoError": {
     "message": "SSO ログインのための空きポートが見つかりませんでした。"

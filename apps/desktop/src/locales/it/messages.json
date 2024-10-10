@@ -444,6 +444,10 @@
   "ambiguous": {
     "message": "Evita caratteri ambigui"
   },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
+  },
   "searchCollection": {
     "message": "Cerca nella raccolta"
   },
@@ -559,6 +563,18 @@
   },
   "settings": {
     "message": "Impostazioni"
+  },
+  "accountEmail": {
+    "message": "E-mail dell’account"
+  },
+  "requestHint": {
+    "message": "Richiedi una dritta"
+  },
+  "requestPasswordHint": {
+    "message": "Richiedi una dritta per la password"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Inserisci l'indirizzo e-mail dell'account e la dritta per la password ti sarà inviata"
   },
   "passwordHint": {
     "message": "Suggerimento per la password"
@@ -902,6 +918,18 @@
   "yourVaultIsLocked": {
     "message": "La tua cassaforte è bloccata. Verifica la tua identità per continuare."
   },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
+  },
   "unlock": {
     "message": "Sblocca"
   },
@@ -929,6 +957,9 @@
   },
   "vaultTimeout": {
     "message": "Timeout cassaforte"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Scegli quando la tua cassaforte eseguirà l'azione di timeout."
@@ -1286,7 +1317,7 @@
     }
   },
   "copySuccessful": {
-    "message": "Copy Successful"
+    "message": "Copia riuscita"
   },
   "errorRefreshingAccessToken": {
     "message": "Errore di aggiornamento del token di accesso"
@@ -1555,8 +1586,8 @@
   "recommendedForSecurity": {
     "message": "Consigliato per la sicurezza."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "Blocca con password principale al riavvio"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "Elimina account"
@@ -1633,7 +1664,7 @@
   },
   "lock": {
     "message": "Blocca",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Cestino",
@@ -1756,8 +1787,8 @@
   "enableBrowserIntegration": {
     "message": "Consenti l'integrazione del browser"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Usata per i dati biometrici nel browser."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Consenti l'integrazione del browser DuckDuckGo"
@@ -2087,8 +2118,8 @@
   "minutes": {
     "message": "Minuti"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Le politiche della tua organizzazione hanno impostato il timeout massimo consentito della tua cassaforte su $HOURS$ ore e $MINUTES$ minuti.",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2236,6 +2267,9 @@
   },
   "locked": {
     "message": "Bloccato"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Sbloccato"
@@ -2588,6 +2622,9 @@
   },
   "important": {
     "message": "Importante:"
+  },
+  "accessing": {
+    "message": "Accessing"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "Sei stato fatto uscire perché non è stato possibile decrittografare il tuo token di accesso. Entra di nuovo per risolvere il problema."
@@ -3061,6 +3098,12 @@
   },
   "textSends": {
     "message": "Send Testo"
+  },
+  "allowScreenshots": {
+    "message": "Allow screen capture"
+  },
+  "allowScreenshotsDesc": {
+    "message": "Allow screen capture of the Bitwarden desktop application."
   },
   "ssoError": {
     "message": "Non è stato possibile trovare nessuna porta libera per il login Sso."

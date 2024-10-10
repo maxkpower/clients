@@ -17,6 +17,10 @@ import {
   OrganizationUserApiService,
   OrganizationUserConfirmRequest,
   OrganizationUserUserDetailsResponse,
+  CollectionService,
+  CollectionData,
+  Collection,
+  CollectionDetailsResponse,
 } from "@bitwarden/admin-console/common";
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
@@ -39,14 +43,11 @@ import { isNotSelfUpgradable, ProductTierType } from "@bitwarden/common/billing/
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
-import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
-import { CollectionData } from "@bitwarden/common/vault/models/data/collection.data";
-import { Collection } from "@bitwarden/common/vault/models/domain/collection";
-import { CollectionDetailsResponse } from "@bitwarden/common/vault/models/response/collection.response";
 import { DialogService, SimpleDialogOptions, ToastService } from "@bitwarden/components";
 
 import {
@@ -107,6 +108,7 @@ export class MembersComponent extends BaseMembersComponent<OrganizationUserView>
     i18nService: I18nService,
     organizationManagementPreferencesService: OrganizationManagementPreferencesService,
     cryptoService: CryptoService,
+    private encryptService: EncryptService,
     validationService: ValidationService,
     logService: LogService,
     userNamePipe: UserNamePipe,
@@ -289,7 +291,7 @@ export class MembersComponent extends BaseMembersComponent<OrganizationUserView>
 
   async confirmUser(user: OrganizationUserView, publicKey: Uint8Array): Promise<void> {
     const orgKey = await this.cryptoService.getOrgKey(this.organization.id);
-    const key = await this.cryptoService.rsaEncrypt(orgKey.key, publicKey);
+    const key = await this.encryptService.rsaEncrypt(orgKey.key, publicKey);
     const request = new OrganizationUserConfirmRequest();
     request.key = key.encryptedString;
     await this.organizationUserApiService.postOrganizationUserConfirm(
