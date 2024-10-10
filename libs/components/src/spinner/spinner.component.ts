@@ -28,7 +28,7 @@ export class SpinnerComponent {
   /**
    * Display text for screen readers.
    */
-  @Input({ transform: booleanAttribute }) sr = false;
+  @Input({ transform: booleanAttribute }) sr = true;
 
   @HostBinding("class") get classList() {
     return ["tw-inline-block", "tw-overflow-hidden"]
