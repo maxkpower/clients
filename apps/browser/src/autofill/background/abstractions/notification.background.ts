@@ -116,6 +116,8 @@ type NotificationBackgroundExtensionMessageHandlers = {
   bgGetExcludedDomains: () => Promise<NeverDomains>;
   bgGetActiveUserServerConfig: () => Promise<ServerConfig>;
   getWebVaultUrlForNotification: () => Promise<string>;
+  bgNotificationAdd: ({ message }: BackgroundOnMessageHandlerParams) => Promise<void>;
+  bgNotificationChange: ({ message }: BackgroundOnMessageHandlerParams) => Promise<void>;
 };
 
 export {

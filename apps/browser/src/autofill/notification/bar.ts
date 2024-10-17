@@ -146,6 +146,7 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
 }
 
 function handleTypeAdd() {
+  sendAddNotificationMessage({});
   setContent(document.getElementById("template-add") as HTMLTemplateElement);
 
   const addButton = document.getElementById("add-save");
@@ -180,6 +181,7 @@ function handleTypeAdd() {
 }
 
 function handleTypeChange() {
+  sendChangeNotificationMessage({});
   setContent(document.getElementById("template-change") as HTMLTemplateElement);
   const changeButton = document.getElementById("change-save");
   changeButton.addEventListener("click", (e) => {
@@ -201,6 +203,20 @@ function sendSaveCipherMessage(edit: boolean, folder?: string) {
     command: "bgSaveCipher",
     folder,
     edit,
+  });
+}
+
+function sendAddNotificationMessage(updateData: unknown) {
+  sendPlatformMessage({
+    command: "bgNotificationAdd",
+    updateData,
+  });
+}
+
+function sendChangeNotificationMessage(updateData: unknown) {
+  sendPlatformMessage({
+    command: "bgNotificationChange",
+    updateData,
   });
 }
 

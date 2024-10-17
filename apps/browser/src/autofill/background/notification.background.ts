@@ -79,6 +79,8 @@ export default class NotificationBackground {
     bgGetExcludedDomains: () => this.getExcludedDomains(),
     bgGetActiveUserServerConfig: () => this.getActiveUserServerConfig(),
     getWebVaultUrlForNotification: () => this.getWebVaultUrl(),
+    bgNotificationAdd: ({ message }) => this.handleNotificationAdd(message),
+    bgNotificationChange: ({ message }) => this.handleNotificationAdd(message),
   };
 
   constructor(
@@ -516,6 +518,57 @@ export default class NotificationBackground {
     }
 
     await this.saveOrUpdateCredentials(sender.tab, message.edit, message.folder);
+  }
+
+  private async handleNotificationAdd(message: NotificationBackgroundExtensionMessage) {
+    let notification: string;
+    await chrome.notifications.create(
+      "",
+      {
+        type: "basic",
+        title: "Bitwarden: Cipher Added",
+        message: "A cipher was detected\nwould you like to save it?",
+        iconUrl: "images/icon128.png",
+        buttons: [
+          {
+            title: "Save",
+          },
+          {
+            title: "Close",
+          },
+        ],
+      },
+      (id) => (notification = id),
+    );
+
+    const buttonListener = async (notificationId: string, buttonIndex: number) => {
+      if (notificationId === notification) {
+        if (buttonIndex === 0) {
+          this.logService.info("clicked save");
+          // await this.addLogin(message, { tab: null });
+        } else {
+          this.logService.info("clicked close");
+        }
+        await chrome.notifications.clear(notification);
+      }
+      this.logService.info("received button click for", notificationId, buttonIndex);
+    };
+    const clickListener = async (notificationId: string) => {
+      this.logService.info("notification clicked", notificationId);
+    };
+    chrome.notifications.onButtonClicked.addListener(buttonListener);
+    chrome.notifications.onClicked.addListener(clickListener);
+
+    chrome.notifications.onClosed.addListener(async (notificationId) => {
+      this.logService.info("notification closed", notificationId);
+      if (notificationId === notification) {
+        chrome.notifications.onButtonClicked.removeListener(buttonListener);
+        chrome.notifications.onClicked.removeListener(clickListener);
+        await chrome.notifications.clear(notification);
+      }
+    });
+
+    setTimeout(() => chrome.notifications.clear(notification), 10000);
   }
 
   /**
