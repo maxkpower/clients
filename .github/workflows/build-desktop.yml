@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Verify
         run: |
@@ -67,7 +67,7 @@ jobs:
         working-directory: apps/desktop
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Get Package Version
         id: retrieve-version
@@ -140,10 +140,10 @@ jobs:
         working-directory: apps/desktop
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -174,20 +174,21 @@ jobs:
         with:
           path: |
             apps/desktop/desktop_native/napi/*.node
+            apps/desktop/desktop_native/dist/*
             ${{ env.RUNNER_TEMP }}/.cargo/registry
             ${{ env.RUNNER_TEMP }}/.cargo/git
           key: rust-${{ runner.os }}-${{ hashFiles('apps/desktop/desktop_native/**/*') }}
 
       - name: Build Native Module
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: apps/desktop/desktop_native/napi
+        working-directory: apps/desktop/desktop_native
         env:
           PKG_CONFIG_ALLOW_CROSS: true
           PKG_CONFIG_ALL_STATIC: true
           TARGET: musl
         run: |
           rustup target add x86_64-unknown-linux-musl
-          npm run build:cross-platform
+          node build.js cross-platform
 
       - name: Build application
         run: npm run dist:lin
@@ -249,10 +250,10 @@ jobs:
       NODE_OPTIONS: --max_old_space_size=4096
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -301,13 +302,15 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         id: cache
         with:
-          path: apps/desktop/desktop_native/napi/*.node
+          path: |
+            apps/desktop/desktop_native/napi/*.node
+            apps/desktop/desktop_native/dist/*
           key: rust-${{ runner.os }}-${{ hashFiles('apps/desktop/desktop_native/**/*') }}
 
       - name: Build Native Module
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: apps/desktop/desktop_native/napi
-        run: npm run build:cross-platform
+        working-directory: apps/desktop/desktop_native
+        run: node build.js cross-platform
 
       - name: Build & Sign (dev)
         env:
@@ -455,10 +458,10 @@ jobs:
         working-directory: apps/desktop
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -584,13 +587,15 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         id: cache
         with:
-          path: apps/desktop/desktop_native/napi/*.node
+          path: |
+            apps/desktop/desktop_native/napi/*.node
+            apps/desktop/desktop_native/dist/*
           key: rust-${{ runner.os }}-${{ hashFiles('apps/desktop/desktop_native/**/*') }}
 
       - name: Build Native Module
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: apps/desktop/desktop_native/napi
-        run: npm run build:cross-platform
+        working-directory: apps/desktop/desktop_native
+        run: node build.js cross-platform
 
       - name: Build application (dev)
         run: npm run build
@@ -619,10 +624,10 @@ jobs:
         working-directory: apps/desktop
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -738,7 +743,7 @@ jobs:
           $package = Get-Content -Raw -Path electron-builder.json | ConvertFrom-Json
           $package | Add-Member -MemberType NoteProperty -Name buildVersion -Value "$env:BUILD_NUMBER"
           $package | ConvertTo-Json -Depth 32 | Set-Content -Path electron-builder.json
-          "### MacOS GitHub build number: $env:BUILD_NUMBER" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          Write-Output "### MacOS GitHub build number: $env:BUILD_NUMBER"
 
       - name: Install Node dependencies
         run: npm ci
@@ -748,13 +753,15 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         id: cache
         with:
-          path: apps/desktop/desktop_native/napi/*.node
+          path: |
+            apps/desktop/desktop_native/napi/*.node
+            apps/desktop/desktop_native/dist/*
           key: rust-${{ runner.os }}-${{ hashFiles('apps/desktop/desktop_native/**/*') }}
 
       - name: Build Native Module
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: apps/desktop/desktop_native/napi
-        run: npm run build:cross-platform
+        working-directory: apps/desktop/desktop_native
+        run: node build.js cross-platform
 
       - name: Build
         if: steps.build-cache.outputs.cache-hit != 'true'
@@ -836,10 +843,10 @@ jobs:
         working-directory: apps/desktop
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -878,6 +885,13 @@ jobs:
         uses: Azure/login@e15b166166a8746d1a47596803bd8c1b595455cf # v1.6.0
         with:
           creds: ${{ secrets.AZURE_KV_CI_SERVICE_PRINCIPAL }}
+
+      - name: Retrieve Slack secret
+        id: retrieve-slack-secret
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
+        with:
+          keyvault: bitwarden-ci
+          secrets: "slack-bot-token"
 
       - name: Download Provisioning Profiles secrets
         env:
@@ -955,7 +969,7 @@ jobs:
           $package = Get-Content -Raw -Path electron-builder.json | ConvertFrom-Json
           $package | Add-Member -MemberType NoteProperty -Name buildVersion -Value "$env:BUILD_NUMBER"
           $package | ConvertTo-Json -Depth 32 | Set-Content -Path electron-builder.json
-          "### MacOS App Store build number: $env:BUILD_NUMBER" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          Write-Output "### MacOS App Store build number: $env:BUILD_NUMBER"
 
       - name: Install Node dependencies
         run: npm ci
@@ -965,13 +979,15 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         id: cache
         with:
-          path: apps/desktop/desktop_native/napi/*.node
+          path: |
+            apps/desktop/desktop_native/napi/*.node
+            apps/desktop/desktop_native/dist/*
           key: rust-${{ runner.os }}-${{ hashFiles('apps/desktop/desktop_native/**/*') }}
 
       - name: Build Native Module
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: apps/desktop/desktop_native/napi
-        run: npm run build:cross-platform
+        working-directory: apps/desktop/desktop_native
+        run: node build.js cross-platform
 
       - name: Build
         if: steps.build-cache.outputs.cache-hit != 'true'
@@ -1016,16 +1032,46 @@ jobs:
           if-no-files-found: error
 
       - name: Deploy to TestFlight
+        id: testflight-deploy
         if: |
             (github.ref == 'refs/heads/main'
-              && needs.setup.outputs.rc_branch_exists == 0
-              && needs.setup.outputs.hotfix_branch_exists == 0)
-            || (github.ref == 'refs/heads/rc' && needs.setup.outputs.hotfix_branch_exists == 0)
-            || github.ref == 'refs/heads/hotfix-rc-desktop'
+            || github.ref == 'refs/heads/rc'
+            || github.ref == 'refs/heads/hotfix-rc-desktop')
         env:
           APP_STORE_CONNECT_TEAM_ISSUER: ${{ secrets.APP_STORE_CONNECT_TEAM_ISSUER }}
           APP_STORE_CONNECT_AUTH_KEY: 6TV9MKN3GP
-        run: npm run upload:mas
+        run: |
+          xcrun altool \
+            --upload-app \
+            --type macos \
+            --file "$(find ./dist/mas-universal/Bitwarden*.pkg)" \
+            --apiKey $APP_STORE_CONNECT_AUTH_KEY \
+            --apiIssuer $APP_STORE_CONNECT_TEAM_ISSUER
+
+      - name: Post message to a Slack channel
+        id: slack-message
+        if: |
+            (github.ref == 'refs/heads/main'
+            || github.ref == 'refs/heads/rc'
+            || github.ref == 'refs/heads/hotfix-rc-desktop')
+        uses: slackapi/slack-github-action@37ebaef184d7626c5f204ab8d3baff4262dd30f0 # v1.27.0
+        with:
+          channel-id: C074F5UESQ0
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Desktop client v${{ env._PACKAGE_VERSION }} <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|build ${{ env.BUILD_NUMBER }}> success on *${{ github.ref_name }}*"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ steps.retrieve-slack-secret.outputs.slack-bot-token }}
+          BUILD_NUMBER: ${{ needs.setup.outputs.build_number }}
 
 
   macos-package-dev:
@@ -1044,10 +1090,10 @@ jobs:
         working-directory: apps/desktop
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -1158,7 +1204,7 @@ jobs:
           $package = Get-Content -Raw -Path electron-builder.json | ConvertFrom-Json
           $package | Add-Member -MemberType NoteProperty -Name buildVersion -Value "$env:BUILD_NUMBER"
           $package | ConvertTo-Json -Depth 32 | Set-Content -Path electron-builder.json
-          "### MacOS Dev build number: $env:BUILD_NUMBER" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          Write-Output "### MacOS Dev build number: $env:BUILD_NUMBER"
 
       - name: Install Node dependencies
         run: npm ci
@@ -1168,13 +1214,15 @@ jobs:
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         id: cache
         with:
-          path: apps/desktop/desktop_native/napi/*.node
+          path: |
+            apps/desktop/desktop_native/napi/*.node
+            apps/desktop/desktop_native/dist/*
           key: rust-${{ runner.os }}-${{ hashFiles('apps/desktop/desktop_native/**/*') }}
 
       - name: Build Native Module
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: apps/desktop/desktop_native/napi
-        run: npm run build:cross-platform
+        working-directory: apps/desktop/desktop_native
+        run: node build.js cross-platform
 
       - name: Build
         if: steps.build-cache.outputs.cache-hit != 'true'
@@ -1233,7 +1281,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Login to Azure
         uses: Azure/login@e15b166166a8746d1a47596803bd8c1b595455cf # v1.6.0
