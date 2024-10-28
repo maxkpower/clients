@@ -1,11 +1,12 @@
 import { DialogConfig, DialogRef, DIALOG_DATA } from "@angular/cdk/dialog";
 import { Component, Inject, OnDestroy, OnInit } from "@angular/core";
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -52,6 +53,7 @@ export class BulkShareDialogComponent implements OnInit, OnDestroy {
   shareableCiphers: CipherView[] = [];
 
   private writeableCollections: CollectionView[] = [];
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
 
   constructor(
     @Inject(DIALOG_DATA) params: BulkShareDialogParams,
@@ -73,7 +75,9 @@ export class BulkShareDialogComponent implements OnInit, OnDestroy {
       (c) => !c.hasOldAttachments && c.organizationId == null,
     );
     this.nonShareableCount = this.ciphers.length - this.shareableCiphers.length;
-    const allCollections = await this.collectionService.getAllDecrypted();
+    const allCollections = await firstValueFrom(
+      this.collectionService.decryptedCollections$(this.activeUserId$),
+    );
     this.writeableCollections = allCollections.filter((c) => !c.readOnly);
     this.organizations = await this.organizationService.getAll();
     if (this.organizationId == null && this.organizations.length > 0) {
@@ -100,14 +104,11 @@ export class BulkShareDialogComponent implements OnInit, OnDestroy {
   submit = async () => {
     const checkedCollectionIds = this.collections.filter(isChecked).map((c) => c.id);
     try {
-      const activeUserId = await firstValueFrom(
-        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-      );
       await this.cipherService.shareManyWithServer(
         this.shareableCiphers,
         this.organizationId,
         checkedCollectionIds,
-        activeUserId,
+        await firstValueFrom(this.activeUserId$),
       );
       const orgName =
         this.organizations.find((o) => o.id === this.organizationId)?.name ??

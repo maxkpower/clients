@@ -120,6 +120,7 @@ import { FolderFilter, OrganizationFilter } from "./vault-filter/shared/models/v
 import { VaultFilterModule } from "./vault-filter/vault-filter.module";
 import { VaultHeaderComponent } from "./vault-header/vault-header.component";
 import { VaultOnboardingComponent } from "./vault-onboarding/vault-onboarding.component";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 const BroadcasterSubscriptionId = "VaultComponent";
 const SearchTextDebounceInterval = 200;
@@ -178,6 +179,7 @@ export class VaultComponent implements OnInit, OnDestroy {
   private refresh$ = new BehaviorSubject<void>(null);
   private destroy$ = new Subject<void>();
   private extensionRefreshEnabled: boolean;
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
 
   private vaultItemDialogRef?: DialogRef<VaultItemDialogResult> | undefined;
 
@@ -268,7 +270,7 @@ export class VaultComponent implements OnInit, OnDestroy {
       });
 
     const filter$ = this.routedVaultFilterService.filter$;
-    const allCollections$ = this.collectionService.decryptedCollections$;
+    const allCollections$ = this.collectionService.decryptedCollections$(this.activeUserId$);
     const nestedCollections$ = allCollections$.pipe(
       map((collections) => getNestedCollectionTree(collections)),
     );
