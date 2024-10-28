@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
-import { firstValueFrom, map, Observable, Subject, takeUntil } from "rxjs";
+import { firstValueFrom, Observable, Subject, takeUntil } from "rxjs";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
@@ -9,6 +9,7 @@ import { Organization } from "@bitwarden/common/admin-console/models/domain/orga
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { isCardExpired } from "@bitwarden/common/autofill/utils";
+import { getByIds } from "@bitwarden/common/platform/misc";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
@@ -104,11 +105,7 @@ export class CipherViewComponent implements OnChanges, OnDestroy {
       this.collections = await firstValueFrom(
         this.collectionService
           .decryptedCollections$(this.activeUserId$)
-          .pipe(
-            map((allCollections) =>
-              allCollections.filter((c) => this.cipher.collectionIds.includes(c.id)),
-            ),
-          ),
+          .pipe(getByIds(this.cipher.collectionIds)),
       );
     }
 

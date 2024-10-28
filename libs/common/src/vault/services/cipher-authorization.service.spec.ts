@@ -4,8 +4,9 @@ import { firstValueFrom, of } from "rxjs";
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
-import { CollectionId } from "@bitwarden/common/types/guid";
+import { CollectionId, UserId } from "@bitwarden/common/types/guid";
 
+import { mockAccountServiceWith } from "../../../spec";
 import { CipherView } from "../models/view/cipher.view";
 
 import {
@@ -14,10 +15,13 @@ import {
 } from "./cipher-authorization.service";
 
 describe("CipherAuthorizationService", () => {
+  const userId = "UserId" as UserId;
+
   let cipherAuthorizationService: CipherAuthorizationService;
 
   const mockCollectionService = mock<CollectionService>();
   const mockOrganizationService = mock<OrganizationService>();
+  const mockAccountService = mockAccountServiceWith(userId);
 
   // Mock factories
   const createMockCipher = (
@@ -56,6 +60,7 @@ describe("CipherAuthorizationService", () => {
     cipherAuthorizationService = new DefaultCipherAuthorizationService(
       mockCollectionService,
       mockOrganizationService,
+      mockAccountService,
     );
   });
 
@@ -113,7 +118,7 @@ describe("CipherAuthorizationService", () => {
         createMockCollection("col1", true),
         createMockCollection("col2", false),
       ];
-      mockCollectionService.decryptedCollectionViews$.mockReturnValue(
+      mockCollectionService.decryptedCollections$.mockReturnValue(
         of(allCollections as CollectionView[]),
       );
 
@@ -121,10 +126,6 @@ describe("CipherAuthorizationService", () => {
         .canDeleteCipher$(cipher, [activeCollectionId])
         .subscribe((result) => {
           expect(result).toBe(true);
-          expect(mockCollectionService.decryptedCollectionViews$).toHaveBeenCalledWith([
-            "col1",
-            "col2",
-          ] as CollectionId[]);
           done();
         });
     });
@@ -139,7 +140,7 @@ describe("CipherAuthorizationService", () => {
         createMockCollection("col1", false),
         createMockCollection("col2", true),
       ];
-      mockCollectionService.decryptedCollectionViews$.mockReturnValue(
+      mockCollectionService.decryptedCollections$.mockReturnValue(
         of(allCollections as CollectionView[]),
       );
 
@@ -147,10 +148,6 @@ describe("CipherAuthorizationService", () => {
         .canDeleteCipher$(cipher, [activeCollectionId])
         .subscribe((result) => {
           expect(result).toBe(false);
-          expect(mockCollectionService.decryptedCollectionViews$).toHaveBeenCalledWith([
-            "col1",
-            "col2",
-          ] as CollectionId[]);
           done();
         });
     });
@@ -165,17 +162,12 @@ describe("CipherAuthorizationService", () => {
         createMockCollection("col2", true),
         createMockCollection("col3", false),
       ];
-      mockCollectionService.decryptedCollectionViews$.mockReturnValue(
+      mockCollectionService.decryptedCollections$.mockReturnValue(
         of(allCollections as CollectionView[]),
       );
 
       cipherAuthorizationService.canDeleteCipher$(cipher).subscribe((result) => {
         expect(result).toBe(true);
-        expect(mockCollectionService.decryptedCollectionViews$).toHaveBeenCalledWith([
-          "col1",
-          "col2",
-          "col3",
-        ] as CollectionId[]);
         done();
       });
     });
@@ -189,16 +181,12 @@ describe("CipherAuthorizationService", () => {
         createMockCollection("col1", false),
         createMockCollection("col2", false),
       ];
-      mockCollectionService.decryptedCollectionViews$.mockReturnValue(
+      mockCollectionService.decryptedCollections$.mockReturnValue(
         of(allCollections as CollectionView[]),
       );
 
       cipherAuthorizationService.canDeleteCipher$(cipher).subscribe((result) => {
         expect(result).toBe(false);
-        expect(mockCollectionService.decryptedCollectionViews$).toHaveBeenCalledWith([
-          "col1",
-          "col2",
-        ] as CollectionId[]);
         done();
       });
     });
@@ -246,7 +234,7 @@ describe("CipherAuthorizationService", () => {
           createMockCollection("col1", true),
           createMockCollection("col2", false),
         ];
-        mockCollectionService.decryptedCollectionViews$.mockReturnValue(
+        mockCollectionService.decryptedCollections$.mockReturnValue(
           of(allCollections as CollectionView[]),
         );
 
@@ -263,7 +251,7 @@ describe("CipherAuthorizationService", () => {
           createMockCollection("col1", false),
           createMockCollection("col2", false),
         ];
-        mockCollectionService.decryptedCollectionViews$.mockReturnValue(
+        mockCollectionService.decryptedCollections$.mockReturnValue(
           of(allCollections as CollectionView[]),
         );
 
