@@ -22,6 +22,8 @@ import {
 import { CollectionService } from "@bitwarden/admin-console/common";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
@@ -36,8 +38,6 @@ import { PopupCipherView } from "../views/popup-cipher.view";
 
 import { VaultPopupAutofillService } from "./vault-popup-autofill.service";
 import { MY_VAULT_ID, VaultPopupListFiltersService } from "./vault-popup-list-filters.service";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
-import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 
 /**
  * Service for managing the various item lists on the new Vault tab in the browser popup.

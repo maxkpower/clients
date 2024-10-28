@@ -8,6 +8,7 @@ import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { EventType } from "@bitwarden/common/enums";
 import { CardExport } from "@bitwarden/common/models/export/card.export";
@@ -47,7 +48,6 @@ import { CollectionResponse } from "../vault/models/collection.response";
 import { FolderResponse } from "../vault/models/folder.response";
 
 import { DownloadCommand } from "./download.command";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 export class GetCommand extends DownloadCommand {
   constructor(

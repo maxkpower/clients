@@ -1,6 +1,7 @@
 import { Location } from "@angular/common";
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 import { first } from "rxjs/operators";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
@@ -8,6 +9,8 @@ import { VaultItemsComponent as BaseVaultItemsComponent } from "@bitwarden/angul
 import { VaultFilter } from "@bitwarden/angular/vault/vault-filter/models/vault-filter.model";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -22,9 +25,6 @@ import { BrowserApi } from "../../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../../platform/popup/browser-popup-utils";
 import { VaultBrowserStateService } from "../../../services/vault-browser-state.service";
 import { VaultFilterService } from "../../../services/vault-filter.service";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
-import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { firstValueFrom } from "rxjs";
 
 const ComponentId = "VaultItemsComponent";
 

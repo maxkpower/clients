@@ -12,6 +12,7 @@ import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { CipherWithIdExport, CollectionWithIdExport } from "@bitwarden/common/models/export";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
@@ -33,7 +34,6 @@ import {
 import { BaseVaultExportService } from "./base-vault-export.service";
 import { OrganizationVaultExportServiceAbstraction } from "./org-vault-export.service.abstraction";
 import { ExportFormat } from "./vault-export.service.abstraction";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 export class OrganizationVaultExportService
   extends BaseVaultExportService

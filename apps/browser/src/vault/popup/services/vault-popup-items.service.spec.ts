@@ -6,6 +6,7 @@ import { CollectionService, CollectionView } from "@bitwarden/admin-console/comm
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { mockAccountServiceWith, ObservableTracker } from "@bitwarden/common/spec";
@@ -20,7 +21,6 @@ import { BrowserApi } from "../../../platform/browser/browser-api";
 import { VaultPopupAutofillService } from "./vault-popup-autofill.service";
 import { VaultPopupItemsService } from "./vault-popup-items.service";
 import { VaultPopupListFiltersService } from "./vault-popup-list-filters.service";
-import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 
 describe("VaultPopupItemsService", () => {
   let testBed: TestBed;

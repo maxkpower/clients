@@ -29,6 +29,7 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { ClientType } from "@bitwarden/common/enums";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -72,7 +73,6 @@ import {
   ImportSuccessDialogComponent,
 } from "./dialog";
 import { ImportLastPassComponent } from "./lastpass";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 const safeProviders: SafeProvider[] = [
   safeProvider({
