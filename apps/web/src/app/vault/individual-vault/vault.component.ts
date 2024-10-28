@@ -44,6 +44,7 @@ import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { EventType } from "@bitwarden/common/enums";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -55,7 +56,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SyncService } from "@bitwarden/common/platform/sync";
-import { CipherId, CollectionId, OrganizationId, UserId } from "@bitwarden/common/types/guid";
+import { CipherId, CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -120,7 +121,6 @@ import { FolderFilter, OrganizationFilter } from "./vault-filter/shared/models/v
 import { VaultFilterModule } from "./vault-filter/vault-filter.module";
 import { VaultHeaderComponent } from "./vault-header/vault-header.component";
 import { VaultOnboardingComponent } from "./vault-onboarding/vault-onboarding.component";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 const BroadcasterSubscriptionId = "VaultComponent";
 const SearchTextDebounceInterval = 200;
@@ -174,7 +174,6 @@ export class VaultComponent implements OnInit, OnDestroy {
   protected selectedCollection: TreeNode<CollectionView> | undefined;
   protected canCreateCollections = false;
   protected currentSearchText$: Observable<string>;
-  private activeUserId: UserId;
   private searchText$ = new Subject<string>();
   private refresh$ = new BehaviorSubject<void>(null);
   private destroy$ = new Subject<void>();
@@ -220,10 +219,6 @@ export class VaultComponent implements OnInit, OnDestroy {
       this.platformUtilsService.isSelfHost()
         ? "trashCleanupWarningSelfHosted"
         : "trashCleanupWarning",
-    );
-
-    this.activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
     );
 
     const firstSetup$ = this.route.queryParams.pipe(
@@ -825,7 +820,7 @@ export class VaultComponent implements OnInit, OnDestroy {
       if (result.collection) {
         // Update CollectionService with the new collection
         const c = new CollectionData(result.collection as CollectionDetailsResponse);
-        await this.collectionService.upsert(c);
+        await this.collectionService.upsert(c, await firstValueFrom(this.activeUserId$));
       }
       this.refresh();
     }
@@ -846,11 +841,14 @@ export class VaultComponent implements OnInit, OnDestroy {
       if (result.collection) {
         // Update CollectionService with the new collection
         const c = new CollectionData(result.collection as CollectionDetailsResponse);
-        await this.collectionService.upsert(c);
+        await this.collectionService.upsert(c, await firstValueFrom(this.activeUserId$));
       }
       this.refresh();
     } else if (result.action === CollectionDialogAction.Deleted) {
-      await this.collectionService.delete(result.collection?.id);
+      await this.collectionService.delete(
+        result.collection?.id,
+        await firstValueFrom(this.activeUserId$),
+      );
       this.refresh();
       // Navigate away if we deleted the collection we were viewing
       if (this.selectedCollection?.node.id === c?.id) {
@@ -879,7 +877,7 @@ export class VaultComponent implements OnInit, OnDestroy {
     }
     try {
       await this.apiService.deleteCollection(collection.organizationId, collection.id);
-      await this.collectionService.delete(collection.id);
+      await this.collectionService.delete(collection.id, await firstValueFrom(this.activeUserId$));
 
       this.toastService.showToast({
         variant: "success",

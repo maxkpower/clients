@@ -15,6 +15,7 @@ import {
   CollectionAccessSelectionView,
   CollectionAdminView,
 } from "../models";
+import { UserId } from "@bitwarden/common/types/guid";
 
 export class DefaultCollectionAdminService implements CollectionAdminService {
   constructor(
@@ -53,7 +54,7 @@ export class DefaultCollectionAdminService implements CollectionAdminService {
     return view;
   }
 
-  async save(collection: CollectionAdminView): Promise<CollectionDetailsResponse> {
+  async save(collection: CollectionAdminView, userId: UserId): Promise<CollectionDetailsResponse> {
     const request = await this.encrypt(collection);
 
     let response: CollectionDetailsResponse;
@@ -69,9 +70,9 @@ export class DefaultCollectionAdminService implements CollectionAdminService {
     }
 
     if (response.assigned) {
-      await this.collectionService.upsert(new CollectionData(response));
+      await this.collectionService.upsert(new CollectionData(response), userId);
     } else {
-      await this.collectionService.delete(collection.id);
+      await this.collectionService.delete(collection.id, userId);
     }
 
     return response;

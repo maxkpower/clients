@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from "@angula
 import { AbstractControl, FormBuilder, Validators } from "@angular/forms";
 import {
   combineLatest,
+  firstValueFrom,
   map,
   Observable,
   of,
@@ -24,6 +25,8 @@ import {
 } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -96,6 +99,8 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
   protected showDeleteButton = false;
   protected showAddAccessWarning = false;
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     @Inject(DIALOG_DATA) private params: CollectionDialogParams,
     private formBuilder: FormBuilder,
@@ -108,6 +113,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     private organizationUserApiService: OrganizationUserApiService,
     private dialogService: DialogService,
     private changeDetectorRef: ChangeDetectorRef,
+    private accountService: AccountService,
   ) {
     this.tabIndex = params.initialTab ?? CollectionDialogTabType.Info;
   }
@@ -305,7 +311,10 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       collectionView.name = this.formGroup.controls.name.value;
     }
 
-    const savedCollection = await this.collectionAdminService.save(collectionView);
+    const savedCollection = await this.collectionAdminService.save(
+      collectionView,
+      await firstValueFrom(this.activeUserId$),
+    );
 
     this.platformUtilsService.showToast(
       "success",
