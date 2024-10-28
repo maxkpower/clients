@@ -1275,6 +1275,7 @@ export default class MainBackground {
     this.cipherAuthorizationService = new DefaultCipherAuthorizationService(
       this.collectionService,
       this.organizationService,
+      this.accountService,
     );
   }
 

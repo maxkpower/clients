@@ -22,7 +22,7 @@ describe("custom rxjs operators", () => {
 
       const output = await firstValueFrom(getById(2)(of(input)));
 
-      expect(output).toEqual([{ id: 1, data: "one" }]);
+      expect(output).toEqual({ id: 2, data: "two" });
     });
   });
 

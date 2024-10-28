@@ -815,6 +815,7 @@ export class ServiceContainer {
     this.cipherAuthorizationService = new DefaultCipherAuthorizationService(
       this.collectionService,
       this.organizationService,
+      this.accountService,
     );
   }
 
