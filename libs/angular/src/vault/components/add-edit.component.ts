@@ -39,6 +39,7 @@ import { SecureNoteView } from "@bitwarden/common/vault/models/view/secure-note.
 import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService } from "@bitwarden/components";
 import { PasswordRepromptService } from "@bitwarden/vault";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 @Directive()
 export class AddEditComponent implements OnInit, OnDestroy {
@@ -97,6 +98,8 @@ export class AddEditComponent implements OnInit, OnDestroy {
   protected writeableCollections: CollectionView[];
   private personalOwnershipPolicyAppliesToActiveUser: boolean;
   private previousCipherId: string;
+
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
 
   get fido2CredentialCreationDateValue(): string {
     const dateCreated = this.i18nService.t("dateCreated");
@@ -253,9 +256,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     if (this.cipher == null) {
       if (this.editMode) {
         const cipher = await this.loadCipher();
-        const activeUserId = await firstValueFrom(
-          this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-        );
+        const activeUserId = await firstValueFrom(this.activeUserId$);
         this.cipher = await cipher.decrypt(
           await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
         );
@@ -391,9 +392,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       this.cipher.id = null;
     }
 
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(this.activeUserId$);
     const cipher = await this.encryptCipher(activeUserId);
     try {
       this.formPromise = this.saveCipher(cipher);
@@ -672,7 +671,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
   }
 
   protected async loadCollections() {
-    const allCollections = await this.collectionService.getAllDecrypted();
+    const allCollections = await firstValueFrom(
+      this.collectionService.decryptedCollections$(this.activeUserId$),
+    );
     return allCollections.filter((c) => !c.readOnly);
   }
 

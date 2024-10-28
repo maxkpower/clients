@@ -22,6 +22,9 @@ import { BrowserApi } from "../../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../../platform/popup/browser-popup-utils";
 import { VaultBrowserStateService } from "../../../services/vault-browser-state.service";
 import { VaultFilterService } from "../../../services/vault-filter.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { firstValueFrom } from "rxjs";
 
 const ComponentId = "VaultItemsComponent";
 
@@ -49,6 +52,8 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
   private applySavedState = true;
   private scrollingContainer = "cdk-virtual-scroll-viewport";
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     searchService: SearchService,
     private organizationService: OrganizationService,
@@ -64,6 +69,7 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
     private platformUtilsService: PlatformUtilsService,
     cipherService: CipherService,
     private vaultFilterService: VaultFilterService,
+    private accountService: AccountService,
   ) {
     super(searchService, cipherService);
     this.applySavedState =
@@ -133,7 +139,10 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
         this.showVaultFilter = false;
         this.collectionId = params.collectionId;
         this.searchPlaceholder = this.i18nService.t("searchCollection");
-        const collectionNode = await this.collectionService.getNested(this.collectionId);
+        const allCollections = await firstValueFrom(
+          this.collectionService.decryptedCollections$(this.activeUserId$),
+        );
+        const collectionNode = this.collectionService.getNested(allCollections, this.collectionId);
         if (collectionNode != null && collectionNode.node != null) {
           this.groupingTitle = collectionNode.node.name;
           this.nestedCollections =

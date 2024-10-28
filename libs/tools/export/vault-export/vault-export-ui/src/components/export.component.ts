@@ -21,6 +21,8 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { EventType } from "@bitwarden/common/enums";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -150,6 +152,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     { name: ".json (Encrypted)", value: "encrypted_json" },
   ];
 
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   private destroy$ = new Subject<void>();
   private onlyManagedCollections = true;
 
@@ -167,6 +171,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     protected dialogService: DialogService,
     protected organizationService: OrganizationService,
     private collectionService: CollectionService,
+    protected accountService: AccountService,
   ) {}
 
   async ngOnInit() {
@@ -204,7 +209,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.organizations$ = combineLatest({
-      collections: this.collectionService.decryptedCollections$,
+      collections: this.collectionService.decryptedCollections$(this.activeUserId$),
       memberOrganizations: this.organizationService.memberOrganizations$,
     }).pipe(
       map(({ collections, memberOrganizations }) => {

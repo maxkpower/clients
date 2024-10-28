@@ -6,6 +6,7 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { OrganizationUserStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -26,6 +27,7 @@ export class ShareComponent implements OnInit, OnDestroy {
   organizations$: Observable<Organization[]>;
 
   protected writeableCollections: Checkable<CollectionView>[] = [];
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
 
   private _destroy = new Subject<void>();
 
@@ -49,7 +51,9 @@ export class ShareComponent implements OnInit, OnDestroy {
   }
 
   async load() {
-    const allCollections = await this.collectionService.getAllDecrypted();
+    const allCollections = await firstValueFrom(
+      this.collectionService.decryptedCollections$(this.activeUserId$),
+    );
     this.writeableCollections = allCollections.map((c) => c).filter((c) => !c.readOnly);
 
     this.organizations$ = this.organizationService.memberOrganizations$.pipe(

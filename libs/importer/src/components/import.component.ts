@@ -72,6 +72,7 @@ import {
   ImportSuccessDialogComponent,
 } from "./dialog";
 import { ImportLastPassComponent } from "./lastpass";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 const safeProviders: SafeProvider[] = [
   safeProvider({
@@ -128,6 +129,8 @@ export class ImportComponent implements OnInit, OnDestroy, AfterViewInit {
   folders$: Observable<FolderView[]>;
   collections$: Observable<CollectionView[]>;
   organizations$: Observable<Organization[]>;
+
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
 
   private _organizationId: string;
 
@@ -205,6 +208,7 @@ export class ImportComponent implements OnInit, OnDestroy, AfterViewInit {
     @Optional()
     protected importCollectionService: ImportCollectionServiceAbstraction,
     protected toastService: ToastService,
+    protected accountService: AccountService,
   ) {}
 
   protected get importBlockedByPolicy(): boolean {
@@ -272,15 +276,15 @@ export class ImportComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         if (value) {
-          this.collections$ = Utils.asyncToObservable(() =>
-            this.collectionService
-              .getAllDecrypted()
-              .then((decryptedCollections) =>
+          this.collections$ = this.collectionService
+            .decryptedCollections$(this.activeUserId$)
+            .pipe(
+              map((decryptedCollections) =>
                 decryptedCollections
                   .filter((c2) => c2.organizationId === value && c2.manage)
                   .sort(Utils.getSortFunction(this.i18nService, "name")),
               ),
-          );
+            );
         }
       });
     this.formGroup.controls.vaultSelector.setValue("myVault");

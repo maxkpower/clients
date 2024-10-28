@@ -134,8 +134,12 @@ export class VaultTimeoutService implements VaultTimeoutServiceAbstraction {
     if (userId == null || userId === currentUserId) {
       await this.searchService.clearIndex();
       await this.folderService.clearCache();
-      await this.collectionService.clearActiveUserCache();
     }
+
+    // TODO: is the userId ever null here? Surely a null userId cannot be authenticated?
+    // Also MasterPasswordService throws an exception if the userId is null and hasn't caused any issues
+    // TODO: why do these other services clear lockingUserId and not userId?
+    await this.collectionService.clearDecryptedState(userId);
 
     await this.masterPasswordService.clearMasterKey(lockingUserId);
 

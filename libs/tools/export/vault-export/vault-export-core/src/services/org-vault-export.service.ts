@@ -33,11 +33,14 @@ import {
 import { BaseVaultExportService } from "./base-vault-export.service";
 import { OrganizationVaultExportServiceAbstraction } from "./org-vault-export.service.abstraction";
 import { ExportFormat } from "./vault-export.service.abstraction";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 
 export class OrganizationVaultExportService
   extends BaseVaultExportService
   implements OrganizationVaultExportServiceAbstraction
 {
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     private cipherService: CipherService,
     private apiService: ApiService,
@@ -185,9 +188,13 @@ export class OrganizationVaultExportService
     const promises = [];
 
     promises.push(
-      this.collectionService.getAllDecrypted().then(async (collections) => {
-        decCollections = collections.filter((c) => c.organizationId == organizationId && c.manage);
-      }),
+      firstValueFrom(this.collectionService.decryptedCollections$(this.activeUserId$)).then(
+        (collections) => {
+          decCollections = collections.filter(
+            (c) => c.organizationId == organizationId && c.manage,
+          );
+        },
+      ),
     );
 
     promises.push(
@@ -217,9 +224,13 @@ export class OrganizationVaultExportService
     const promises = [];
 
     promises.push(
-      this.collectionService.getAll().then((collections) => {
-        encCollections = collections.filter((c) => c.organizationId == organizationId && c.manage);
-      }),
+      firstValueFrom(this.collectionService.encryptedCollections$(this.activeUserId$)).then(
+        (collections) => {
+          encCollections = collections.filter(
+            (c) => c.organizationId == organizationId && c.manage,
+          );
+        },
+      ),
     );
 
     promises.push(
