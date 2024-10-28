@@ -22,6 +22,7 @@ import { LoginExport } from "@bitwarden/common/models/export/login.export";
 import { SecureNoteExport } from "@bitwarden/common/models/export/secure-note.export";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
+import { getById } from "@bitwarden/common/platform/misc/rxjs-operators";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SendType } from "@bitwarden/common/tools/send/enums/send-type";
@@ -410,9 +411,9 @@ export class GetCommand extends DownloadCommand {
 
     let decCollection: CollectionView = null;
     if (Utils.isGuid(id)) {
-      const collection = (
-        await firstValueFrom(this.collectionService.encryptedCollections$(activeUserId$))
-      ).find((c) => c.id === id);
+      const collection = await firstValueFrom(
+        this.collectionService.encryptedCollections$(activeUserId$).pipe(getById(id as string)),
+      );
       if (collection != null) {
         const orgKeys = await firstValueFrom(this.keyService.activeUserOrgKeys$);
         decCollection = await collection.decrypt(
