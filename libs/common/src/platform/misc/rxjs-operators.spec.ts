@@ -5,7 +5,7 @@ import { getById, getByIds } from "./rxjs-operators";
 describe("custom rxjs operators", () => {
   describe("getById", () => {
     it("returns an object with a matching id", async () => {
-      const input = [
+      const obs = of([
         {
           id: 1,
           data: "one",
@@ -18,17 +18,17 @@ describe("custom rxjs operators", () => {
           id: 3,
           data: "three",
         },
-      ];
+      ]).pipe(getById(2));
 
-      const output = await firstValueFrom(getById(2)(of(input)));
+      const result = await firstValueFrom(obs);
 
-      expect(output).toEqual({ id: 2, data: "two" });
+      expect(result).toEqual({ id: 2, data: "two" });
     });
   });
 
   describe("getByIds", () => {
     it("returns an array of objects with matching ids", async () => {
-      const input = [
+      const obs = of([
         {
           id: 1,
           data: "one",
@@ -45,11 +45,11 @@ describe("custom rxjs operators", () => {
           id: 4,
           data: "four",
         },
-      ];
+      ]).pipe(getByIds([2, 3]));
 
-      const output = await firstValueFrom(getByIds([2, 3])(of(input)));
+      const result = await firstValueFrom(obs);
 
-      expect(output).toEqual([
+      expect(result).toEqual([
         { id: 2, data: "two" },
         { id: 3, data: "three" },
       ]);
