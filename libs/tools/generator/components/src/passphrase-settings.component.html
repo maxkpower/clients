@@ -1,4 +1,4 @@
-<bit-section>
+<bit-section [disableMargin]="disableMargin">
   <bit-section-header *ngIf="showHeader">
     <h6 bitTypography="h6">{{ "options" | i18n }}</h6>
   </bit-section-header>
@@ -7,14 +7,8 @@
       <bit-card>
         <bit-form-field disableMargin>
           <bit-label>{{ "numWords" | i18n }}</bit-label>
-          <input
-            bitInput
-            formControlName="numWords"
-            id="num-words"
-            type="number"
-            [min]="minNumWords"
-            [max]="maxNumWords"
-          />
+          <input bitInput formControlName="numWords" id="num-words" type="number" />
+          <bit-hint>{{ numWordsBoundariesHint$ | async }}</bit-hint>
         </bit-form-field>
       </bit-card>
     </div>

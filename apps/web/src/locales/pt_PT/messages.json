@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Acesso à informação"
   },
+  "passwordRisk": {
+    "message": "Risco da palavra-passe"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Descubra as palavras-passe em risco e notifique os utilizadores para alterarem essas palavras-passe."
+  },
+  "dataLastUpdated": {
+    "message": "Última atualização dos dados: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Membros notificados"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "Não marcou nenhuma aplicação como prioritária"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Selecione as suas aplicações mais críticas para descobrir palavras-passe em risco e notifique os utilizadores para alterarem essas palavras-passe."
+  },
+  "markPriorityApps": {
+    "message": "Marcar aplicações prioritárias"
+  },
+  "markAppAsCritical": {
+    "message": "Marcar a aplicação como crítica"
   },
   "application": {
     "message": "Aplicação"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Gerar palavra-passe"
   },
+  "generatePassphrase": {
+    "message": "Gerar frase de acesso"
+  },
   "checkPassword": {
     "message": "Verificar se a palavra-passe foi exposta."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Copiar palavra-passe",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Copiar frase de acesso",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Palavra-passe copiada"
   },
   "copyUsername": {
     "message": "Copiar nome de utilizador",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Utilizar um método de início de sessão diferente"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Iniciar sessão com a chave de acesso"
+  },
+  "useSingleSignOn": {
+    "message": "Utilizar início de sessão único"
+  },
+  "welcomeBack": {
+    "message": "Bem-vindo de volta"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Chave de acesso inválida. Por favor, tente novamente."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Criar conta"
   },
+  "newToBitwarden": {
+    "message": "Novo no Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Defina uma palavra-passe forte"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Iniciar sessão"
+  },
+  "logInToBitwarden": {
+    "message": "Iniciar sessão no Bitwarden"
   },
   "verifyIdentity": {
     "message": "Verifique a sua identidade"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Não tem permissão para ver todos os itens desta coleção."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Não tem permissões para esta coleção"
   },
   "noCollectionsInList": {
     "message": "Não existem coleções para listar."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Aderir à organização"
   },
+  "joinOrganizationName": {
+    "message": "Aderir a $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Foi convidado a juntar-se à organização listada acima. Para aceitar o convite, é necessário iniciar sessão ou criar uma nova conta Bitwarden."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Gerar nome de utilizador"
   },
+  "generateEmail": {
+    "message": "Gerar e-mail"
+  },
   "usernameType": {
     "message": "Tipo de nome de utilizador"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Gerar um alias de e-mail com um serviço de reencaminhamento externo."
+  },
+  "forwarderDomainName": {
+    "message": "Domínio de e-mail",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Escolha um domínio que seja suportado pelo serviço selecionado",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Erro no $SERVICENAME$: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "A sua organização exige a definição de uma palavra-passe mestra.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "de $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ não encontrado(a)",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Limitar a criação e eliminação de coleções aos proprietários e administradores"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Limitar a criação de coleções aos proprietários e administradores"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Limitar a eliminação de coleções aos proprietários e administradores"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Os proprietários e administradores podem gerir todas as coleções e itens"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "URL do servidor"
+  },
+  "selfHostBaseUrl": {
+    "message": "URL do servidor auto-hospedado",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Alias de domínio"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Editar acesso"
   },
+  "textHelpText": {
+    "message": "Utilize campos de texto para dados como perguntas de segurança"
+  },
+  "hiddenHelpText": {
+    "message": "Utilize campos ocultos para dados sensíveis como uma palavra-passe"
+  },
+  "checkBoxHelpText": {
+    "message": "Utilize caixas de verificação se pretender preencher automaticamente uma caixa de verificação de um formulário, como um e-mail de memorização"
+  },
+  "linkedHelpText": {
+    "message": "Utilize um campo ligado quando tiver problemas de preenchimento automático para um site específico."
+  },
+  "linkedLabelHelpText": {
+    "message": "Introduza o ID do HTML, o nome, a aria-label ou o placeholder do campo."
+  },
   "addAttachment": {
     "message": "Adicionar anexo"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Tem a certeza de que pretende eliminar permanentemente este anexo?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Gerir a subscrição a partir do",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Para hospedar o Bitwarden no seu próprio servidor, precisará de carregar o seu ficheiro de licença. Para suportar planos Familiar gratuitos e recursos avançados de faturamento para a sua organização auto-hospedada, precisará de configurar a sincronização automática na sua organização auto-hospedada."
+  },
+  "selfHostingTitleProper": {
+    "message": "Auto-hospedagem"
   }
 }

@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Přístup k inteligenci"
   },
+  "passwordRisk": {
+    "message": "Rizikové heslo"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Objevte riziková hesla a upozorněte uživatele na změnu těchto hesel."
+  },
+  "dataLastUpdated": {
+    "message": "Data naposledy aktualizována: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Obeznámení členové"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "Neoznačili jste žádné aplikace jako prioritu"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Vyberte své nejkritičtější aplikace, abyste objevili riziková hesla a upozorněte uživatele na změnu těchto hesel."
+  },
+  "markPriorityApps": {
+    "message": "Označit prioritní aplikace"
+  },
+  "markAppAsCritical": {
+    "message": "Označit aplikaci jako kritickou"
   },
   "application": {
     "message": "Aplikace"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Vygenerovat heslo"
   },
+  "generatePassphrase": {
+    "message": "Vygenerovat heslovou frázi"
+  },
   "checkPassword": {
     "message": "Zkontrolujte, zda nedošlo k úniku hesla."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Kopírovat heslo",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Kopírovat heslovou frázi",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Heslo bylo zkopírováno"
   },
   "copyUsername": {
     "message": "Kopírovat uživatelské jméno",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Použít jinou metodu přihlášení"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Přihlásit se pomocí přístupového klíče"
+  },
+  "useSingleSignOn": {
+    "message": "Použít jednotné přihlášení"
+  },
+  "welcomeBack": {
+    "message": "Vítejte zpět"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Neplatný přístupový klíč. Zkuste to znovu."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Vytvořit účet"
   },
+  "newToBitwarden": {
+    "message": "Jste noví na Bitwardenu?"
+  },
   "setAStrongPassword": {
     "message": "Nastavit hlavní heslo"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Přihlásit se"
+  },
+  "logInToBitwarden": {
+    "message": "Přihlásit se do Bitwardenu"
   },
   "verifyIdentity": {
     "message": "Ověřte svou totožnost"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Nemáte oprávnění k zobrazení všech položek v této kolekci."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Nemáte oprávnění k této kolekci"
   },
   "noCollectionsInList": {
     "message": "Žádné kolekce k zobrazení."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Přidat se k organizaci"
   },
+  "joinOrganizationName": {
+    "message": "Připojit se k $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Byli jste pozváni do výše uvedené organizace. Chcete-li přijmout pozvánku, musíte se přihlásit nebo vytvořit nový účet na Bitwardenu."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Vygenerovat uživatelské jméno"
   },
+  "generateEmail": {
+    "message": "Vygenerovat e-mail"
+  },
   "usernameType": {
     "message": "Typ uživatelského jména"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Vygeneruje alias e-mailu pomocí externí přeposílací služby."
+  },
+  "forwarderDomainName": {
+    "message": "E-mailová doména",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Vyberte doménu, která je podporována vybranou službou",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Chyba $SERVICENAME$: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Vaše organizace vyžaduje nastavení hlavního hesla.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "z $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ nebyl nalezen",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Omezí vytváření a mazání kolekce na vlastníky a správce"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Omezí vytváření kolekce na vlastníky a správce"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Omezí mazání kolekce na vlastníky a správce"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Vlastníci a správci mohou spravovat všechny kolekce a předměty"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "URL serveru"
+  },
+  "selfHostBaseUrl": {
+    "message": "Adresa URL serveru vlastního hostování",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Doména aliasu"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Upravit přístup"
   },
+  "textHelpText": {
+    "message": "Použijte textová pole pro data jako např. bezpečnostní otázky"
+  },
+  "hiddenHelpText": {
+    "message": "Použijte skrytá pole pro citlivá data, jako je heslo"
+  },
+  "checkBoxHelpText": {
+    "message": "Použijte zaškrtávací políčka, pokud chcete automaticky vyplnit zaškrtávací políčko formuláře (např. pro zapamatování e-mailu)"
+  },
+  "linkedHelpText": {
+    "message": "Použijte propojené pole, pokud máte problémy s automatickým vyplňováním na konkrétní webové stránce."
+  },
+  "linkedLabelHelpText": {
+    "message": "Zadejte ID pole z HTML, název, popisek nebo zástupný znak pole."
+  },
   "addAttachment": {
     "message": "Přidat přílohu"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Opravdu chcete tuto přílohu navždy smazat?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Spravovat předplatné z",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Chcete-li hostovat Bitwarden na vlastním serveru, musíte nahrát licenční soubor. Chcete-li podporovat plány Free Families a pokročilé možnosti účtování pro Vaši vlastní hostovanou organizaci, budete muset nastavit automatickou synchronizaci ve Vaší vlastní hostované organizaci."
+  },
+  "selfHostingTitleProper": {
+    "message": "Vlastní hosting"
   }
 }

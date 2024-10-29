@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Access Intelligence"
   },
+  "passwordRisk": {
+    "message": "Рискова парола"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Откриване на пароли в риск и известяване на потребителите да ги сменят."
+  },
+  "dataLastUpdated": {
+    "message": "Последно обновяване на данните: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Известени членове"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "Не сте отбелязали нито едно приложение като приоритетно"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Изберете най-важните си приложения, за да откриете паролите, които може да са в риск, и да известите потребителите да ги сменят."
+  },
+  "markPriorityApps": {
+    "message": "Отбелязване на приоритетни приложения"
+  },
+  "markAppAsCritical": {
+    "message": "Отбелязване на приложението като важно"
   },
   "application": {
     "message": "Приложение"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Нова парола"
   },
+  "generatePassphrase": {
+    "message": "Генериране на парола-фраза"
+  },
   "checkPassword": {
     "message": "Проверка дали паролата е разкрита."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Копиране на паролата",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Копиране на паролата-фраза",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Паролата е копирана"
   },
   "copyUsername": {
     "message": "Копиране на потребителското име",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Използване на друг метод на вписване"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Вписване със секретен ключ"
+  },
+  "useSingleSignOn": {
+    "message": "Използване на еднократна идентификация"
+  },
+  "welcomeBack": {
+    "message": "Добре дошли отново"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Грешен секретен ключ. Опитайте отново."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Създаване на абонамент"
   },
+  "newToBitwarden": {
+    "message": "За пръв път ли ползвате Битуорден?"
+  },
   "setAStrongPassword": {
     "message": "Използвайте сложна парола"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Вписване"
+  },
+  "logInToBitwarden": {
+    "message": "Впишете се в Битуорден"
   },
   "verifyIdentity": {
     "message": "Потвърдете самоличността си"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Нямате права да преглеждате всички елементи в тази колекция."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Нямате права за тази колекция"
   },
   "noCollectionsInList": {
     "message": "Няма колекции за показване."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Присъединяване към организация"
   },
+  "joinOrganizationName": {
+    "message": "Присъединяване към $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Поканени сте да се присъедините към посочената по-горе организация. За да приемете, ще трябва да се впишете в абонамента си към Битуорден. Ако нямате такъв, ще трябва да създадете безплатен абонамент и след това да се впишете в него."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Генериране на потр. име"
   },
+  "generateEmail": {
+    "message": "Генериране на електронна поща"
+  },
   "usernameType": {
     "message": "Тип потребителско име"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Generate an email alias with an external forwarding service."
+  },
+  "forwarderDomainName": {
+    "message": "Домейн на електронната поща",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Изберете домейн, който се поддържа от избраната услуга",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Грешка от $SERVICENAME$: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Организацията Ви изисква да зададете главна парола.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "от $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "Няма намерен $RESOURCE$",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Ограничаване на създаването и изтриването на колекции, така че да може да се извършва само от собствениците и администраторите"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Ограничаване на създаването на колекции, така че да може да се извършва само от собствениците и администраторите"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Ограничаване на изтриването на колекции, така че да може да се извършва само от собствениците и администраторите"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Собствениците и администраторите могат да управляват всички колекции и елементи"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Адрес на сървъра"
+  },
+  "selfHostBaseUrl": {
+    "message": "Адрес на собствения сървър",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Псевдонимен домейн"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Редактиране на достъпа"
   },
+  "textHelpText": {
+    "message": "Използвайте текстови полета за обикновени данни, например въпроси за сигурност"
+  },
+  "hiddenHelpText": {
+    "message": "Използвайте скрити полета за чувствителни данни, например пароли"
+  },
+  "checkBoxHelpText": {
+    "message": "Използвайте полета за отметки, ако искате да попълвате автоматично такива полета във формуляри, например такова за запомняне на е-пощата"
+  },
+  "linkedHelpText": {
+    "message": "Използвайте свързано поле, когато имате проблеми с автоматичното попълване на конкретен уеб сайт."
+  },
+  "linkedLabelHelpText": {
+    "message": "Enter the the field's html id, name, aria-label, or placeholder."
+  },
   "addAttachment": {
     "message": "Добавяне на прикачен файл"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Наистина ли искате да изтриете завинаги този прикачен файл?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Управлявайте абонамента от тук:",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "За да използвате Битуорден на собствен сървър, трябва да качите своя файл с лиценз. Ако искате да поддържате безплатни Семейни планове и разширени опции за таксуване в своята организация със собствен хостинг, ще трябва да настроите автоматичното синхронизиране в организацията си."
+  },
+  "selfHostingTitleProper": {
+    "message": "Собствен хостинг"
   }
 }

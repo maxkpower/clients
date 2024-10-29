@@ -1,7 +1,12 @@
 import { Injectable, NgModule } from "@angular/core";
 import { ActivatedRouteSnapshot, RouteReuseStrategy, RouterModule, Routes } from "@angular/router";
 
-import { EnvironmentSelectorComponent } from "@bitwarden/angular/auth/components/environment-selector.component";
+import {
+  EnvironmentSelectorComponent,
+  EnvironmentSelectorRouteData,
+  ExtensionDefaultOverlayPosition,
+} from "@bitwarden/angular/auth/components/environment-selector.component";
+import { unauthUiRefreshRedirect } from "@bitwarden/angular/auth/functions/unauth-ui-refresh-redirect";
 import { unauthUiRefreshSwap } from "@bitwarden/angular/auth/functions/unauth-ui-refresh-route-swap";
 import {
   authGuard,
@@ -16,6 +21,8 @@ import { extensionRefreshSwap } from "@bitwarden/angular/utils/extension-refresh
 import {
   AnonLayoutWrapperComponent,
   AnonLayoutWrapperData,
+  LoginComponent,
+  LoginSecondaryContentComponent,
   LockIcon,
   LockV2Component,
   PasswordHintComponent,
@@ -27,6 +34,7 @@ import {
   RegistrationUserAddIcon,
   SetPasswordJitComponent,
   UserLockIcon,
+  VaultIcon,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -42,8 +50,8 @@ import { HintComponent } from "../auth/popup/hint.component";
 import { HomeComponent } from "../auth/popup/home.component";
 import { LockComponent } from "../auth/popup/lock.component";
 import { LoginDecryptionOptionsComponent } from "../auth/popup/login-decryption-options/login-decryption-options.component";
+import { LoginComponentV1 } from "../auth/popup/login-v1.component";
 import { LoginViaAuthRequestComponent } from "../auth/popup/login-via-auth-request.component";
-import { LoginComponent } from "../auth/popup/login.component";
 import { RegisterComponent } from "../auth/popup/register.component";
 import { RemovePasswordComponent } from "../auth/popup/remove-password.component";
 import { SetPasswordComponent } from "../auth/popup/set-password.component";
@@ -100,6 +108,7 @@ import { ViewComponent } from "../vault/popup/components/vault/view.component";
 import { AddEditV2Component } from "../vault/popup/components/vault-v2/add-edit/add-edit-v2.component";
 import { AssignCollections } from "../vault/popup/components/vault-v2/assign-collections/assign-collections.component";
 import { AttachmentsV2Component } from "../vault/popup/components/vault-v2/attachments/attachments-v2.component";
+import { PasswordHistoryV2Component } from "../vault/popup/components/vault-v2/vault-password-history-v2/vault-password-history-v2.component";
 import { ViewV2Component } from "../vault/popup/components/vault-v2/view-v2/view-v2.component";
 import { AppearanceV2Component } from "../vault/popup/settings/appearance-v2.component";
 import { AppearanceComponent } from "../vault/popup/settings/appearance.component";
@@ -154,7 +163,7 @@ const routes: Routes = [
   {
     path: "home",
     component: HomeComponent,
-    canActivate: [unauthGuardFn(unauthRouteOverrides)],
+    canActivate: [unauthGuardFn(unauthRouteOverrides), unauthUiRefreshRedirect("/login")],
     data: { state: "home" } satisfies RouteDataProperties,
   },
   ...extensionRefreshSwap(Fido2V1Component, Fido2Component, {
@@ -162,12 +171,6 @@ const routes: Routes = [
     canActivate: [fido2AuthGuard],
     data: { state: "fido2" } satisfies RouteDataProperties,
   }),
-  {
-    path: "login",
-    component: LoginComponent,
-    canActivate: [unauthGuardFn(unauthRouteOverrides)],
-    data: { state: "login" } satisfies RouteDataProperties,
-  },
   {
     path: "login-with-device",
     component: LoginViaAuthRequestComponent,
@@ -259,12 +262,11 @@ const routes: Routes = [
     canActivate: [authGuard],
     data: { state: "view-cipher" } satisfies RouteDataProperties,
   }),
-  {
+  ...extensionRefreshSwap(PasswordHistoryComponent, PasswordHistoryV2Component, {
     path: "cipher-password-history",
-    component: PasswordHistoryComponent,
     canActivate: [authGuard],
     data: { state: "cipher-password-history" } satisfies RouteDataProperties,
-  },
+  }),
   ...extensionRefreshSwap(AddEditComponent, AddEditV2Component, {
     path: "add-cipher",
     canActivate: [authGuard, debounceNavigationGuard()],
@@ -440,6 +442,47 @@ const routes: Routes = [
               path: "",
               component: EnvironmentSelectorComponent,
               outlet: "environment-selector",
+              data: {
+                overlayPosition: ExtensionDefaultOverlayPosition,
+              } satisfies EnvironmentSelectorRouteData,
+            },
+          ],
+        },
+      ],
+    },
+  ),
+  ...unauthUiRefreshSwap(
+    LoginComponentV1,
+    ExtensionAnonLayoutWrapperComponent,
+    {
+      path: "login",
+      canActivate: [unauthGuardFn(unauthRouteOverrides)],
+      data: { state: "login" },
+    },
+    {
+      path: "",
+      children: [
+        {
+          path: "login",
+          canActivate: [unauthGuardFn(unauthRouteOverrides)],
+          data: {
+            pageIcon: VaultIcon,
+            pageTitle: {
+              key: "logInToBitwarden",
+            },
+            state: "login",
+            showAcctSwitcher: true,
+          } satisfies RouteDataProperties & ExtensionAnonLayoutWrapperData,
+          children: [
+            { path: "", component: LoginComponent },
+            { path: "", component: LoginSecondaryContentComponent, outlet: "secondary" },
+            {
+              path: "",
+              component: EnvironmentSelectorComponent,
+              outlet: "environment-selector",
+              data: {
+                overlayPosition: ExtensionDefaultOverlayPosition,
+              } satisfies EnvironmentSelectorRouteData,
             },
           ],
         },

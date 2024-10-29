@@ -69,7 +69,11 @@
   ></app-collection-badge>
 </td>
 <td bitCell [ngClass]="RowHeightClass" *ngIf="showGroups"></td>
-<td bitCell [ngClass]="RowHeightClass" *ngIf="viewingOrgVault"></td>
+<td bitCell [ngClass]="RowHeightClass" *ngIf="viewingOrgVault">
+  <p class="tw-mb-0 tw-text-muted">
+    {{ permissionText }}
+  </p>
+</td>
 <td bitCell [ngClass]="RowHeightClass" class="tw-text-right">
   <button
     [disabled]="disabled || disableMenu"
@@ -132,7 +136,7 @@
       <i class="bwi bwi-fw bwi-undo" aria-hidden="true"></i>
       {{ "restore" | i18n }}
     </button>
-    <button bitMenuItem *ngIf="canEditCipher" (click)="deleteCipher()" type="button">
+    <button bitMenuItem *ngIf="canManageCollection" (click)="deleteCipher()" type="button">
       <span class="tw-text-danger">
         <i class="bwi bwi-fw bwi-trash" aria-hidden="true"></i>
         {{ (cipher.isDeleted ? "permanentlyDelete" : "delete") | i18n }}

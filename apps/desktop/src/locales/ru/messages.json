@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "С возвращением"
+  },
   "moveToOrgDesc": {
     "message": "Выберите организацию, в которую вы хотите переместить этот элемент. При перемещении в организацию право собственности на элемент переходит к этой организации. Вы больше не будете прямым владельцем этого элемента после его перемещения."
   },
@@ -259,6 +262,9 @@
   "generatePassword": {
     "message": "Сгенерировать пароль"
   },
+  "generatePassphrase": {
+    "message": "Создать парольную фразу"
+  },
   "type": {
     "message": "Тип"
   },
@@ -393,6 +399,10 @@
   },
   "copyPassword": {
     "message": "Скопировать пароль"
+  },
+  "copyPassphrase": {
+    "message": "Скопировать парольную фразу",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
     "message": "Скопировать URI"
@@ -547,6 +557,9 @@
   "createAccount": {
     "message": "Создать аккаунт"
   },
+  "newToBitwarden": {
+    "message": "Впервые на Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Задайте надежный пароль"
   },
@@ -555,6 +568,18 @@
   },
   "logIn": {
     "message": "Войти"
+  },
+  "logInToBitwarden": {
+    "message": "Войти в Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "Войти с passkey"
+  },
+  "loginWithDevice": {
+    "message": "Войти с помощью устройства"
+  },
+  "useSingleSignOn": {
+    "message": "Использовать единый вход"
   },
   "submit": {
     "message": "Отправить"
@@ -601,6 +626,15 @@
   },
   "joinOrganization": {
     "message": "Присоединиться к организации"
+  },
+  "joinOrganizationName": {
+    "message": "Присоединиться к $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
     "message": "Завершите присоединение к этой организации, установив мастер-пароль."
@@ -818,6 +852,10 @@
   },
   "baseUrl": {
     "message": "URL сервера"
+  },
+  "selfHostBaseUrl": {
+    "message": "URL собственного сервера",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "URL API сервера"
@@ -1208,6 +1246,9 @@
   "copyNumber": {
     "message": "Скопировать номер",
     "description": "Copy credit card number"
+  },
+  "copyEmail": {
+    "message": "Скопировать email"
   },
   "copySecurityCode": {
     "message": "Скопировать код безопасности",
@@ -1642,6 +1683,12 @@
   "deleteAccountWarning": {
     "message": "Удаление вашей учетной записи необратимо. Его нельзя отменить."
   },
+  "cannotDeleteAccount": {
+    "message": "Невозможно удалить аккаунт"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "Это действие не может быть выполнено, поскольку ваша учетная запись принадлежит организации. Обратитесь к администратору организации за дополнительными сведениями."
+  },
   "accountDeleted": {
     "message": "Аккаунт удален"
   },
@@ -1751,6 +1798,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "Необходимо установить мастер-пароль для организации.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "из $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "verificationRequired": {
     "message": "Требуется верификация",
@@ -2334,6 +2390,9 @@
   "generateUsername": {
     "message": "Создать имя пользователя"
   },
+  "generateEmail": {
+    "message": "Сгенерировать email"
+  },
   "usernameType": {
     "message": "Тип имени пользователя"
   },
@@ -2376,6 +2435,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Создать псевдоним электронной почты для внешней службы пересылки."
+  },
+  "forwarderDomainName": {
+    "message": "Домен электронной почты",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Выберите домен, который поддерживается выбранным сервисом",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Ошибка $SERVICENAME$: $ERRORMESSAGE$",
@@ -3143,12 +3210,6 @@
   },
   "textSends": {
     "message": "Текстовая Send"
-  },
-  "allowScreenshots": {
-    "message": "Разрешить скриншоты"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Разрешить скриншоты в Bitwarden для компьютера."
   },
   "ssoError": {
     "message": "Не удалось найти свободные порты для авторизации SSO."

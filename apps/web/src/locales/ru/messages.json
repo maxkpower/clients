@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Access Intelligence"
   },
+  "passwordRisk": {
+    "message": "Риск пароля"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Обнаружение паролей, подверженных риску, и уведомление пользователей о необходимости сменить эти пароли."
+  },
+  "dataLastUpdated": {
+    "message": "Последнее обновление: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Уведомленные участники"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "Вы не отметили ни одного приложения в качестве приоритетного"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Выберите наиболее важные приложения, чтобы обнаружить пароли, подверженные риску, и уведомить пользователей о необходимости сменить эти пароли."
+  },
+  "markPriorityApps": {
+    "message": "Отметьте приоритетные приложения"
+  },
+  "markAppAsCritical": {
+    "message": "Пометить приложение как критическое"
   },
   "application": {
     "message": "Приложение"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Сгенерировать пароль"
   },
+  "generatePassphrase": {
+    "message": "Создать парольную фразу"
+  },
   "checkPassword": {
     "message": "Проверьте, не скомпрометирован ли пароль."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Скопировать пароль",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Скопировать парольную фразу",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Пароль скопирован"
   },
   "copyUsername": {
     "message": "Скопировать имя пользователя",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Использовать другой способ авторизации"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Войти с passkey"
+  },
+  "useSingleSignOn": {
+    "message": "Использовать единый вход"
+  },
+  "welcomeBack": {
+    "message": "С возвращением"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Неверный passkey. Попробуйте снова."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Создать аккаунт"
   },
+  "newToBitwarden": {
+    "message": "Впервые на Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Задайте надежный пароль"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Войти"
+  },
+  "logInToBitwarden": {
+    "message": "Войти в Bitwarden"
   },
   "verifyIdentity": {
     "message": "Подтвердите вашу личность"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "У вас нет разрешения на просмотр всех элементов этой коллекции."
+  },
+  "youDoNotHavePermissions": {
+    "message": "У вас нет прав на эту коллекцию"
   },
   "noCollectionsInList": {
     "message": "Нет коллекций для отображения."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Присоединиться к организации"
   },
+  "joinOrganizationName": {
+    "message": "Присоединиться к $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Вас пригласили присоединиться к организации, указанной выше. Чтобы принять приглашение, вам необходимо войти или создать новую учетную запись Bitwarden."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Создать имя пользователя"
   },
+  "generateEmail": {
+    "message": "Сгенерировать email"
+  },
   "usernameType": {
     "message": "Тип имени пользователя"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Создать псевдоним электронной почты для внешней службы пересылки."
+  },
+  "forwarderDomainName": {
+    "message": "Домен электронной почты",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Выберите домен, который поддерживается выбранным сервисом",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Ошибка $SERVICENAME$: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Необходимо установить мастер-пароль для организации.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "из $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ не найден",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Ограничить создание и удаление коллекций владельцам и администраторам"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Ограничить создание коллекций владельцам и администраторам"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Ограничить удаление коллекций владельцам и администраторам"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Владельцы и администраторы могут управлять всеми коллекциями и элементами"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "URL сервера"
+  },
+  "selfHostBaseUrl": {
+    "message": "URL собственного сервера",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Псевдоним домена"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Изменить доступ"
   },
+  "textHelpText": {
+    "message": "Используйте текстовые поля для простых данных, таких как контрольные вопросы"
+  },
+  "hiddenHelpText": {
+    "message": "Используйте скрытые поля для конфиденциальных данных, таких как пароли"
+  },
+  "checkBoxHelpText": {
+    "message": "Используйте флажки, если вы хотите автоматически заполнить поле формы, например, email"
+  },
+  "linkedHelpText": {
+    "message": "Используйте связанное поле, если у вас возникли проблемы с автозаполнением для конкретного сайта."
+  },
+  "linkedLabelHelpText": {
+    "message": "Введите HTML-идентификатор поля, имя, aria-label, или плейсхолдер."
+  },
   "addAttachment": {
     "message": "Добавить вложение"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Вы уверены, что хотите навсегда удалить это вложение?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Управление подпиской с",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Чтобы разместить Bitwarden на собственном сервере, вам нужно загрузить файл лицензии. Для поддержки тарифных планов Free Families и расширенных возможностей выставления счетов для вашей организации, размещенной на собственном сервере вам необходимо настроить автоматическую синхронизацию в вашей организации."
+  },
+  "selfHostingTitleProper": {
+    "message": "Собственное размещение"
   }
 }

@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Willkommen zurück"
+  },
   "moveToOrgDesc": {
     "message": "Wähle eine Organisation aus, in die du diesen Eintrag verschieben möchtest. Das Verschieben in eine Organisation überträgt das Eigentum an diese Organisation. Du bist nicht mehr der direkte Eigentümer dieses Eintrags, sobald er verschoben wurde."
   },
@@ -259,6 +262,9 @@
   "generatePassword": {
     "message": "Passwort generieren"
   },
+  "generatePassphrase": {
+    "message": "Passphrase generieren"
+  },
   "type": {
     "message": "Typ"
   },
@@ -393,6 +399,10 @@
   },
   "copyPassword": {
     "message": "Passwort kopieren"
+  },
+  "copyPassphrase": {
+    "message": "Passphrase kopieren",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
     "message": "URI kopieren"
@@ -547,6 +557,9 @@
   "createAccount": {
     "message": "Konto erstellen"
   },
+  "newToBitwarden": {
+    "message": "Neu bei Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Lege ein starkes Passwort fest"
   },
@@ -555,6 +568,18 @@
   },
   "logIn": {
     "message": "Anmelden"
+  },
+  "logInToBitwarden": {
+    "message": "Bei Bitwarden anmelden"
+  },
+  "logInWithPasskey": {
+    "message": "Mit Passkey anmelden"
+  },
+  "loginWithDevice": {
+    "message": "Mit Gerät anmelden"
+  },
+  "useSingleSignOn": {
+    "message": "Single Sign-on verwenden"
   },
   "submit": {
     "message": "Absenden"
@@ -601,6 +626,15 @@
   },
   "joinOrganization": {
     "message": "Organisation beitreten"
+  },
+  "joinOrganizationName": {
+    "message": "$ORGANIZATIONNAME$ beitreten",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
     "message": "Schließe den Beitritt zu dieser Organisation ab, indem du ein Master-Passwort festlegst."
@@ -818,6 +852,10 @@
   },
   "baseUrl": {
     "message": "Server-URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "Selbst gehostete Server-URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "API Server-URL"
@@ -1208,6 +1246,9 @@
   "copyNumber": {
     "message": "Nummer kopieren",
     "description": "Copy credit card number"
+  },
+  "copyEmail": {
+    "message": "E-Mail-Adresse kopieren"
   },
   "copySecurityCode": {
     "message": "Sicherheitscode kopieren",
@@ -1642,6 +1683,12 @@
   "deleteAccountWarning": {
     "message": "Die Kontolöschung ist dauerhaft. Sie kann nicht rückgängig gemacht werden."
   },
+  "cannotDeleteAccount": {
+    "message": "Cannot delete account"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "This action cannot be completed because your account is owned by an organization. Contact your organization administrator for additional details."
+  },
   "accountDeleted": {
     "message": "Konto gelöscht"
   },
@@ -1751,6 +1798,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "Deine Organisation verlangt, dass du ein Master-Passwort festlegen musst.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "von $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "verificationRequired": {
     "message": "Verifizierung erforderlich",
@@ -2334,6 +2390,9 @@
   "generateUsername": {
     "message": "Benutzername generieren"
   },
+  "generateEmail": {
+    "message": "E-Mail generieren"
+  },
   "usernameType": {
     "message": "Benutzernamentyp"
   },
@@ -2376,6 +2435,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Erzeuge ein E-Mail-Alias mit einem externen Weiterleitungsdienst."
+  },
+  "forwarderDomainName": {
+    "message": "E-Mail-Domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Wähle eine Domain aus, die vom ausgewählten Dienst unterstützt wird",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ Fehler: $ERRORMESSAGE$",
@@ -3143,12 +3210,6 @@
   },
   "textSends": {
     "message": "Text-Sends"
-  },
-  "allowScreenshots": {
-    "message": "Bildschirmaufnahme erlauben"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Bildschirmaufnahme der Bitwarden Desktop-Anwendung erlauben."
   },
   "ssoError": {
     "message": "Es konnten keine freien Ports für die SSO-Anmeldung gefunden werden."

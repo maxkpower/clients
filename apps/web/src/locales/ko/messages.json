@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Access Intelligence"
   },
+  "passwordRisk": {
+    "message": "Password Risk"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Discover at-risk passwords and notify users to change those passwords."
+  },
+  "dataLastUpdated": {
+    "message": "Data last updated: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Notified members"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "You haven’t marked any applications as a priority"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Select your most critical applications to discover at-risk passwords, and notify users to change those passwords."
+  },
+  "markPriorityApps": {
+    "message": "Mark priority apps"
+  },
+  "markAppAsCritical": {
+    "message": "Mark app as critical"
   },
   "application": {
     "message": "Application"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "비밀번호 생성"
   },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
+  },
   "checkPassword": {
     "message": "비밀번호가 노출되었는지 확인합니다."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "비밀번호 복사",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Password copied"
   },
   "copyUsername": {
     "message": "사용자 이름 복사",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Use a different log in method"
   },
-  "loginWithPasskey": {
-    "message": "패스키로 로그인"
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
+  },
+  "welcomeBack": {
+    "message": "Welcome back"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Invalid Passkey. Please try again."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "계정 만들기"
   },
+  "newToBitwarden": {
+    "message": "New to Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Set a strong password"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "로그인"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
   },
   "verifyIdentity": {
     "message": "Verify your Identity"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "이 컬렉션의 모든 항목을 볼 권한이 없습니다."
+  },
+  "youDoNotHavePermissions": {
+    "message": "You do not have permissions to this collection"
   },
   "noCollectionsInList": {
     "message": "콜렉션이 없습니다."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "조직 참가"
   },
+  "joinOrganizationName": {
+    "message": "Join $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "이 조직에서 귀하에게 가입 초대를 보냈습니다. 초대를 수락하려면 로그인하거나 Bitwarden 계정을 생성해야 합니다."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Generate username"
   },
+  "generateEmail": {
+    "message": "Generate email"
+  },
   "usernameType": {
     "message": "Username type"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Generate an email alias with an external forwarding service."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ error: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Your organization requires you to set a master password.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "out of $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ not found",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Limit collection creation and deletion to owners and admins"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Limit collection creation to owners and admins"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Limit collection deletion to owners and admins"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Owners and admins can manage all collections and items"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Server URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Alias domain"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Edit access"
   },
+  "textHelpText": {
+    "message": "Use text fields for data like security questions"
+  },
+  "hiddenHelpText": {
+    "message": "Use hidden fields for sensitive data like a password"
+  },
+  "checkBoxHelpText": {
+    "message": "Use checkboxes if you'd like to autofill a form's checkbox, like a remember email"
+  },
+  "linkedHelpText": {
+    "message": "Use a linked field when you are experiencing autofill issues for a specific website."
+  },
+  "linkedLabelHelpText": {
+    "message": "Enter the the field's html id, name, aria-label, or placeholder."
+  },
   "addAttachment": {
     "message": "Add attachment"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Are you sure you want to permanently delete this attachment?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Manage subscription from the",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "To host Bitwarden on your own server, you will need to upload your license file. To support Free Families plans and advanced billing capabilities for your self-hosted organization, you will need to set up automatic sync in your self-hosted organization."
+  },
+  "selfHostingTitleProper": {
+    "message": "Self-Hosting"
   }
 }

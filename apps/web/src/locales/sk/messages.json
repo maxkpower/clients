@@ -1,18 +1,33 @@
 {
   "allApplications": {
-    "message": "All applications"
+    "message": "Všetky aplikácie"
   },
   "priorityApplications": {
-    "message": "Priority applications"
+    "message": "Prioritné aplikácie"
   },
   "accessIntelligence": {
     "message": "Access Intelligence"
+  },
+  "passwordRisk": {
+    "message": "Ohrozenie hesla"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Odhaľte ohrozené hesla a upozornite používateľov, aby si ich zmenili."
+  },
+  "dataLastUpdated": {
+    "message": "Posledná aktualizácia dát: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
   },
   "notifiedMembers": {
     "message": "Notified members"
   },
   "allApplicationsWithCount": {
-    "message": "All applications ($COUNT$)",
+    "message": "Všetky aplikácie ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -21,7 +36,7 @@
     }
   },
   "priorityApplicationsWithCount": {
-    "message": "Priority applications ($COUNT$)",
+    "message": "Prioritné aplikácie ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -38,26 +53,38 @@
       }
     }
   },
+  "noPriorityApplicationsTitle": {
+    "message": "Neoznačili ste žiadne aplikácie ako prioritné"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Pre odhalenie ohrozených hesiel a upozornenie používateľov aby si ich zmenili vyberte vaše najkritickejšie aplikácie."
+  },
+  "markPriorityApps": {
+    "message": "Označiť prioritné aplikácie"
+  },
+  "markAppAsCritical": {
+    "message": "Označiť aplikáciu ako kritickú"
+  },
   "application": {
-    "message": "Application"
+    "message": "Aplikácia"
   },
   "atRiskPasswords": {
-    "message": "At-risk passwords"
+    "message": "Ohrozených hesiel"
   },
   "totalPasswords": {
-    "message": "Total passwords"
+    "message": "Celkom hesiel"
   },
   "atRiskMembers": {
-    "message": "At-risk members"
+    "message": "Ohrozených členov"
   },
   "totalMembers": {
-    "message": "Total members"
+    "message": "Celkový počet členov"
   },
   "atRiskApplications": {
-    "message": "At-risk applications"
+    "message": "Ohrozených aplikácii"
   },
   "totalApplications": {
-    "message": "Total applications"
+    "message": "Všetkých aplikácii"
   },
   "whatTypeOfItem": {
     "message": "Aký typ položky to je?"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Generovať heslo"
   },
+  "generatePassphrase": {
+    "message": "Generovať prístupovú frázu"
+  },
   "checkPassword": {
     "message": "Overiť či došlo k úniku hesla."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Kopírovať heslo",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Kopírovať prístupovú frázu",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Heslo skopírované"
   },
   "copyUsername": {
     "message": "Kopírovať používateľské meno",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Použiť iný spôsob prihlásenia"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Prihlásiť sa s prístupovým kľúčom"
+  },
+  "useSingleSignOn": {
+    "message": "Použiť jednotné prihlásenie"
+  },
+  "welcomeBack": {
+    "message": "Vitajte späť"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Nesprávne Passkey heslo. Prosím skúste to znovu."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Vytvoriť účet"
   },
+  "newToBitwarden": {
+    "message": "Ste noví na Bitwardene?"
+  },
   "setAStrongPassword": {
     "message": "Nastavte silné heslo"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Prihlásiť sa"
+  },
+  "logInToBitwarden": {
+    "message": "Prihlásenie do Bitwardenu"
   },
   "verifyIdentity": {
     "message": "Overte svoju totožnosť"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Nemáte povolenie pre zobrazenie všetkých položiek v tejto zbierke."
+  },
+  "youDoNotHavePermissions": {
+    "message": "K tejto zbierke nemáte oprávnenia"
   },
   "noCollectionsInList": {
     "message": "Neexistujú žiadne zbierky na zobrazenie."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Pripojte sa k organizácii"
   },
+  "joinOrganizationName": {
+    "message": "Pripojiť sa k $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Obdržali ste pozvánku do vyššie menovanej Organizácie. Ak chcete pozvánku prijať, musíte sa prihlásiť alebo si vytvoriť nový Bitwarden účet."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Vygenerovať používateľské meno"
   },
+  "generateEmail": {
+    "message": "Generovať e-mail"
+  },
   "usernameType": {
     "message": "Typ používateľského mena"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Vytvoriť e-mailový alias pomocou externej služby preposielania."
+  },
+  "forwarderDomainName": {
+    "message": "E-mailová doména",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Vyberte doménu, ktorá je podporovaná vybranou službou",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ error: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Vaša organizácia vyžaduje, aby ste nastavili hlavné heslo.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "z $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ nenájdené",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Obmedziť vytváranie a vymazávanie zbierky len pre vlastníkov a administrátorov"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Obmedziť vytváranie zbierky len pre vlastníkov a administrátorov"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Obmedziť vymazávanie zbierky len pre vlastníkov a administrátorov"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Vlastníci a správcovia môžu spravovať všetky zbierky a položky"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "URL servera"
+  },
+  "selfHostBaseUrl": {
+    "message": "Adresa URL vlastného hostingu",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Alias doména"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Upraviť prístup"
   },
+  "textHelpText": {
+    "message": "Textové polia používajte pre také údaje, ako sú bezpečnostné otázky"
+  },
+  "hiddenHelpText": {
+    "message": "Skryté polia požívajte pre citlivé údaje ako je heslo"
+  },
+  "checkBoxHelpText": {
+    "message": "Ak chcete automaticky vyplniť začiarkávacie políčko formulára, napríklad zapamätať e-mail, použite začiarkávacie políčka"
+  },
+  "linkedHelpText": {
+    "message": "Ak máte problémy s automatickým vypĺňaním pre konkrétnu webovú stránku, použite prepojené pole."
+  },
+  "linkedLabelHelpText": {
+    "message": "Zadajte html atribút poľa id, name, aria-label, alebo placeholder."
+  },
   "addAttachment": {
     "message": "Priložiť prílohu"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Naozaj chcete natrvalo odstrániť túto prílohu?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Spravovať predplatné z",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Ak chcete prevádzkovať Bitwarden na vlastnom serveri, musíte nahrať licenčný súbor. Pre podporu Free Families plánu a pokročilé možnosti fakturácie pre vašu organizáciu s vlastným hostingom, budete musieť nastaviť automatickú synchronizáciu v organizácii vo vlastnom hostingu."
+  },
+  "selfHostingTitleProper": {
+    "message": "Vlastný hosting"
   }
 }

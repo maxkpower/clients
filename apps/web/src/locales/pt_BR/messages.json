@@ -1,18 +1,33 @@
 {
   "allApplications": {
-    "message": "All applications"
+    "message": "Todos os aplicativos"
   },
   "priorityApplications": {
-    "message": "Priority applications"
+    "message": "Aplicações prioritárias"
   },
   "accessIntelligence": {
-    "message": "Access Intelligence"
+    "message": "Acessar a Inteligência"
+  },
+  "passwordRisk": {
+    "message": "Password Risk"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Discover at-risk passwords and notify users to change those passwords."
+  },
+  "dataLastUpdated": {
+    "message": "Data last updated: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
   },
   "notifiedMembers": {
-    "message": "Notified members"
+    "message": "Membros notificados"
   },
   "allApplicationsWithCount": {
-    "message": "All applications ($COUNT$)",
+    "message": "Todas as aplicações ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -21,7 +36,7 @@
     }
   },
   "priorityApplicationsWithCount": {
-    "message": "Priority applications ($COUNT$)",
+    "message": "Aplicações prioritárias ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -30,7 +45,7 @@
     }
   },
   "notifiedMembersWithCount": {
-    "message": "Notified members ($COUNT$)",
+    "message": "Membros notificados ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -38,26 +53,38 @@
       }
     }
   },
+  "noPriorityApplicationsTitle": {
+    "message": "You haven’t marked any applications as a priority"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Select your most critical applications to discover at-risk passwords, and notify users to change those passwords."
+  },
+  "markPriorityApps": {
+    "message": "Mark priority apps"
+  },
+  "markAppAsCritical": {
+    "message": "Mark app as critical"
+  },
   "application": {
-    "message": "Application"
+    "message": "Aplicativo"
   },
   "atRiskPasswords": {
-    "message": "At-risk passwords"
+    "message": "Senhas de risco"
   },
   "totalPasswords": {
-    "message": "Total passwords"
+    "message": "Total de senhas"
   },
   "atRiskMembers": {
-    "message": "At-risk members"
+    "message": "Membros de risco"
   },
   "totalMembers": {
-    "message": "Total members"
+    "message": "Total de membros"
   },
   "atRiskApplications": {
-    "message": "At-risk applications"
+    "message": "Aplicações de risco"
   },
   "totalApplications": {
-    "message": "Total applications"
+    "message": "Todos os aplicativos"
   },
   "whatTypeOfItem": {
     "message": "Que tipo de item é este?"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Gerar Senha"
   },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
+  },
   "checkPassword": {
     "message": "Verifique se a senha foi exposta."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Copiar Senha",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Senha copiada"
   },
   "copyUsername": {
     "message": "Copiar Nome de Usuário",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Use um método de login diferente"
   },
-  "loginWithPasskey": {
-    "message": "Iniciar sessão com a chave de acesso"
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
+  },
+  "welcomeBack": {
+    "message": "Welcome back"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Senha inválida. Por favor, tente novamente."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Criar conta"
   },
+  "newToBitwarden": {
+    "message": "New to Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Defina uma senha forte"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Iniciar sessão"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
   },
   "verifyIdentity": {
     "message": "Verifique sua identidade"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Você não tem permissão para visualizar todos os itens desta coleção."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Você não tem permissões para essa coleção"
   },
   "noCollectionsInList": {
     "message": "Não há coleções para listar."
@@ -1504,7 +1556,7 @@
     "description": "deprecated. Use avoidAmbiguous instead."
   },
   "avoidAmbiguous": {
-    "message": "Avoid ambiguous characters",
+    "message": "Evitar caracteres ambíguos",
     "description": "Label for the avoid ambiguous characters checkbox."
   },
   "regeneratePassword": {
@@ -1532,7 +1584,7 @@
     "message": "Caracteres Especiais (!@#$%^&*)"
   },
   "uppercaseDescription": {
-    "message": "Include uppercase characters",
+    "message": "Incluir caracteres maiúsculos",
     "description": "Tooltip for the password generator uppercase character checkbox"
   },
   "uppercaseLabel": {
@@ -1540,7 +1592,7 @@
     "description": "Label for the password generator uppercase character checkbox"
   },
   "lowercaseDescription": {
-    "message": "Include lowercase characters",
+    "message": "Incluir caracteres minúsculos",
     "description": "Full description for the password generator lowercase character checkbox"
   },
   "lowercaseLabel": {
@@ -1548,15 +1600,15 @@
     "description": "Label for the password generator lowercase character checkbox"
   },
   "numbersDescription": {
-    "message": "Include numbers",
+    "message": "Incluir números",
     "description": "Full description for the password generator numbers checkbox"
   },
   "numbersLabel": {
-    "message": "0-9",
+    "message": "0 – 9",
     "description": "Label for the password generator numbers checkbox"
   },
   "specialCharactersDescription": {
-    "message": "Include special characters",
+    "message": "Incluir caracteres especiais",
     "description": "Full description for the password generator special characters checkbox"
   },
   "specialCharactersLabel": {
@@ -2715,10 +2767,10 @@
     "message": "Faturas"
   },
   "noUnpaidInvoices": {
-    "message": "No unpaid invoices."
+    "message": "Sem faturas não pagas."
   },
   "noPaidInvoices": {
-    "message": "No paid invoices."
+    "message": "Sem faturas pagas."
   },
   "paid": {
     "message": "Pago",
@@ -3780,6 +3832,15 @@
   },
   "joinOrganization": {
     "message": "Junte-se a Organização"
+  },
+  "joinOrganizationName": {
+    "message": "Entrar em $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "joinOrganizationDesc": {
     "message": "Você foi convidado para participar da organização listada acima. Para aceitar o convite, você precisa iniciar sessão ou criar uma nova conta no Bitwarden."
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Gerar Usuário"
   },
+  "generateEmail": {
+    "message": "Generate email"
+  },
   "usernameType": {
     "message": "Tipo de Usuário"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Gere um alias de e-mail com um serviço externo de encaminhamento."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Erro $SERVICENAME$ : $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Sua organização requer que você defina uma senha mestra.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "fora do $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ não encontrado",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Limitar criação de coleção e exclusão a proprietários e administradores"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Limitar criação de coleção e exclusão a proprietários e administradores"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Limit collection deletion to owners and admins"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Proprietários e administradores podem gerenciar todas as coleções e itens"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "URL do Servidor"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Alias do domínio"
@@ -9368,13 +9459,38 @@
   "editAccess": {
     "message": "Edit access"
   },
+  "textHelpText": {
+    "message": "Utilize campos de texto para dados como perguntas de segurança"
+  },
+  "hiddenHelpText": {
+    "message": "Use campos ocultos para dados confidenciais como uma senha"
+  },
+  "checkBoxHelpText": {
+    "message": "Use caixas de seleção se gostaria de preencher automaticamente a caixa de seleção de um formulário, como um e-mail de lembrança"
+  },
+  "linkedHelpText": {
+    "message": "Use um campo vinculado quando estiver enfrentando problemas com o auto-preenchimento para um site específico."
+  },
+  "linkedLabelHelpText": {
+    "message": "Digite o Id html do campo, nome, nome aria-label, ou marcador de posição"
+  },
   "addAttachment": {
-    "message": "Add attachment"
+    "message": "Adicionar anexo"
   },
   "maxFileSizeSansPunctuation": {
-    "message": "Maximum file size is 500 MB"
+    "message": "O tamanho máximo do arquivo é 500 MB"
   },
   "permanentlyDeleteAttachmentConfirmation": {
-    "message": "Are you sure you want to permanently delete this attachment?"
+    "message": "Tem certeza de que deseja excluir permanentemente esse anexo?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Manage subscription from the",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "To host Bitwarden on your own server, you will need to upload your license file. To support Free Families plans and advanced billing capabilities for your self-hosted organization, you will need to set up automatic sync in your self-hosted organization."
+  },
+  "selfHostingTitleProper": {
+    "message": "Self-Hosting"
   }
 }

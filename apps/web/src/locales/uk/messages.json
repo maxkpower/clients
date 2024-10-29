@@ -1,18 +1,33 @@
 {
   "allApplications": {
-    "message": "All applications"
+    "message": "Всі програми"
   },
   "priorityApplications": {
-    "message": "Priority applications"
+    "message": "Пріоритетні програми"
   },
   "accessIntelligence": {
-    "message": "Access Intelligence"
+    "message": "Керування доступом"
+  },
+  "passwordRisk": {
+    "message": "Ризиковані паролі"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Дізнавайтеся про ризиковані паролі та сповіщайте користувачів про необхідність їх заміни."
+  },
+  "dataLastUpdated": {
+    "message": "Дані востаннє оновлено: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
   },
   "notifiedMembers": {
-    "message": "Notified members"
+    "message": "Сповіщення учасників"
   },
   "allApplicationsWithCount": {
-    "message": "All applications ($COUNT$)",
+    "message": "Всі програми ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -21,7 +36,7 @@
     }
   },
   "priorityApplicationsWithCount": {
-    "message": "Priority applications ($COUNT$)",
+    "message": "Пріоритетні програми ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -30,7 +45,7 @@
     }
   },
   "notifiedMembersWithCount": {
-    "message": "Notified members ($COUNT$)",
+    "message": "Сповіщення учасників ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -38,26 +53,38 @@
       }
     }
   },
+  "noPriorityApplicationsTitle": {
+    "message": "Ви не позначили жодної пріоритетної програми"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Виберіть найбільш критичні програми, для яких виявлятимуться ризиковані паролі, та сповіщайте користувачів про необхідність їх заміни."
+  },
+  "markPriorityApps": {
+    "message": "Позначити пріоритетні програми"
+  },
+  "markAppAsCritical": {
+    "message": "Позначити програму критичною"
+  },
   "application": {
-    "message": "Application"
+    "message": "Програма"
   },
   "atRiskPasswords": {
-    "message": "At-risk passwords"
+    "message": "Ризиковані паролі"
   },
   "totalPasswords": {
-    "message": "Total passwords"
+    "message": "Всього паролів"
   },
   "atRiskMembers": {
-    "message": "At-risk members"
+    "message": "Ризиковані учасники"
   },
   "totalMembers": {
-    "message": "Total members"
+    "message": "Всього учасників"
   },
   "atRiskApplications": {
-    "message": "At-risk applications"
+    "message": "Ризиковані програми"
   },
   "totalApplications": {
-    "message": "Total applications"
+    "message": "Всього програм"
   },
   "whatTypeOfItem": {
     "message": "Який це тип запису?"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Генерувати пароль"
   },
+  "generatePassphrase": {
+    "message": "Генерувати парольну фразу"
+  },
   "checkPassword": {
     "message": "Перевірити чи пароль було викрито."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Копіювати пароль",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Копіювати парольну фразу",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Пароль скопійовано"
   },
   "copyUsername": {
     "message": "Копіювати ім'я користувача",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Використати інший спосіб входу"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Увійти з ключем доступу"
+  },
+  "useSingleSignOn": {
+    "message": "Використовувати єдиний вхід"
+  },
+  "welcomeBack": {
+    "message": "З поверненням"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Недійсний ключ доступу. Повторіть спробу."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Створити обліковий запис"
   },
+  "newToBitwarden": {
+    "message": "Вперше у Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Встановіть надійний пароль"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Увійти"
+  },
+  "logInToBitwarden": {
+    "message": "Увійти в Bitwarden"
   },
   "verifyIdentity": {
     "message": "Підтвердьте свою особу"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "У вас немає повноважень на перегляд усіх записів у цій збірці."
+  },
+  "youDoNotHavePermissions": {
+    "message": "У вас немає дозволів для цієї збірки"
   },
   "noCollectionsInList": {
     "message": "Немає збірок."
@@ -2715,10 +2767,10 @@
     "message": "Рахунки"
   },
   "noUnpaidInvoices": {
-    "message": "No unpaid invoices."
+    "message": "Немає несплачених рахунків."
   },
   "noPaidInvoices": {
-    "message": "No paid invoices."
+    "message": "Немає сплачених рахунків."
   },
   "paid": {
     "message": "Сплачено",
@@ -3780,6 +3832,15 @@
   },
   "joinOrganization": {
     "message": "Приєднатися до організації"
+  },
+  "joinOrganizationName": {
+    "message": "Приєднатися до $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "joinOrganizationDesc": {
     "message": "Вас було запрошено приєднатися до зазначеної вгорі організації. Щоб підтвердити запрошення, вам необхідно увійти в обліковий запис Bitwarden, або створити його."
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Генерувати ім'я користувача"
   },
+  "generateEmail": {
+    "message": "Генерувати е-пошту"
+  },
   "usernameType": {
     "message": "Тип імені користувача"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Згенеруйте псевдонім е-пошти зі стороннім сервісом пересилання."
+  },
+  "forwarderDomainName": {
+    "message": "Домен електронної пошти",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Виберіть домен, який підтримується вибраною службою",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Помилка $SERVICENAME$: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Ваша організація вимагає, щоб ви встановили головний пароль.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "з $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ не знайдено",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Дозволити створення та видалення збірок лише власникам та адміністраторам"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Дозволити створення збірок лише власникам та адміністраторам"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Дозволити видалення збірок лише власникам та адміністраторам"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Власники та адміністратори можуть керувати всіма збірками та записами"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "URL-адреса сервера"
+  },
+  "selfHostBaseUrl": {
+    "message": "URL-адреса власного сервера",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Псевдонім домену"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Редагувати доступ"
   },
+  "textHelpText": {
+    "message": "Використовуйте текстові поля для даних, як-от секретні запитання"
+  },
+  "hiddenHelpText": {
+    "message": "Використовуйте приховані поля для конфіденційних даних, як-от пароль"
+  },
+  "checkBoxHelpText": {
+    "message": "Використовуйте прапорці, якщо хочете автоматично заповнювати поля, як-от адресу е-пошти"
+  },
+  "linkedHelpText": {
+    "message": "Використовуйте пов'язане поле у разі виникнення проблем з автозаповненням для певного вебсайту."
+  },
+  "linkedLabelHelpText": {
+    "message": "Введіть html-ідентифікатор поля, назву, мітку або заповнювач."
+  },
   "addAttachment": {
     "message": "Додати вкладення"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Ви дійсно хочете остаточно видалити це вкладення?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Керуйте передплатою на",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Щоб розмістити Bitwarden на власному сервері, вам необхідно вивантажити файл ліцензії. Для підтримки безплатних сімейних тарифних планів та розширених можливостей виставлення рахунків для організації на власному хостингу, вам необхідно буде налаштувати автоматичну синхронізацію для своєї організації на власному хостингу."
+  },
+  "selfHostingTitleProper": {
+    "message": "Власне розміщення"
   }
 }

@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Access Intelligence"
   },
+  "passwordRisk": {
+    "message": "Password Risk"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Discover at-risk passwords and notify users to change those passwords."
+  },
+  "dataLastUpdated": {
+    "message": "Data last updated: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Benachrichtigte Mitglieder"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "You haven’t marked any applications as a priority"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Select your most critical applications to discover at-risk passwords, and notify users to change those passwords."
+  },
+  "markPriorityApps": {
+    "message": "Mark priority apps"
+  },
+  "markAppAsCritical": {
+    "message": "Mark app as critical"
   },
   "application": {
     "message": "Anwendung"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Passwort generieren"
   },
+  "generatePassphrase": {
+    "message": "Passphrase generieren"
+  },
   "checkPassword": {
     "message": "Überprüfen ob ihr Kennwort kompromittiert ist."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Passwort kopieren",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Passphrase kopieren",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Passwort kopiert"
   },
   "copyUsername": {
     "message": "Benutzername kopieren",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Eine andere Anmeldemethode verwenden"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Mit Passkey anmelden"
+  },
+  "useSingleSignOn": {
+    "message": "Single Sign-on verwenden"
+  },
+  "welcomeBack": {
+    "message": "Willkommen zurück"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Ungültiger Passkey. Bitte versuche es erneut."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Konto erstellen"
   },
+  "newToBitwarden": {
+    "message": "Neu bei Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Lege ein starkes Passwort fest"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Anmelden"
+  },
+  "logInToBitwarden": {
+    "message": "Bei Bitwarden anmelden"
   },
   "verifyIdentity": {
     "message": "Verifiziere deine Identität"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Du hast nicht die Berechtigung, alle Einträge in dieser Sammlung anzuzeigen."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Du hast keine Berechtigung für diese Sammlung"
   },
   "noCollectionsInList": {
     "message": "Keine Sammlungen vorhanden."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Organisation beitreten"
   },
+  "joinOrganizationName": {
+    "message": "$ORGANIZATIONNAME$ beitreten",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Du wurdest eingeladen, dem oben genannten Organisation beizutreten. Um die Einladung anzunehmen, musst du ein Bitwarden-Konto erstellen oder dich mit deinem bestehenden Bitwarden-Konto anmelden."
   },
@@ -5197,13 +5258,13 @@
     "message": "Die Mitglieder anzeigen und auswählen, denen du Zugriff auf den Secrets Manager gewähren möchtest."
   },
   "openYourOrganizations": {
-    "message": "Open your organization's"
+    "message": "Öffne deine Organisations-"
   },
   "usingTheMenuSelect": {
     "message": "Using the menu, select"
   },
   "toGrantAccessToSelectedMembers": {
-    "message": "to grant access to selected members."
+    "message": "um Zugriff auf ausgewählte Mitglieder zu gewähren."
   },
   "sendVaultCardTryItNow": {
     "message": "probiere es jetzt aus",
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Benutzername generieren"
   },
+  "generateEmail": {
+    "message": "E-Mail generieren"
+  },
   "usernameType": {
     "message": "Benutzernamenstyp"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Generiere ein E-Mail-Alias mit einem externen Weiterleitungsdienst."
+  },
+  "forwarderDomainName": {
+    "message": "E-Mail-Domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Wähle eine Domain aus, die vom ausgewählten Dienst unterstützt wird",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ Fehler: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Deine Organisation verlangt, dass du ein Master-Passwort festlegen musst.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "von $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ nicht gefunden",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Sammlungserstellung und -löschung auf Eigentümer und Administratoren beschränken"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Das Erstellen von Sammlungen auf Eigentümer und Administratoren beschränken"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Das Löschen von Sammlungen auf Eigentümer und Administratoren beschränken"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Besitzer und Administratoren können alle Sammlungen und Einträge verwalten"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Server-URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "Selbst gehostete Server-URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Alias-Domain"
@@ -8800,7 +8891,7 @@
     "message": "35% Rabatt"
   },
   "monthPerMember": {
-    "message": "month per member"
+    "message": "Monat pro Mitglied"
   },
   "seats": {
     "message": "Benutzerplätze"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Zugriff bearbeiten"
   },
+  "textHelpText": {
+    "message": "Verwende Textfelder für Daten wie Sicherheitsfragen"
+  },
+  "hiddenHelpText": {
+    "message": "Verwende versteckte Felder für vertrauliche Daten wie ein Passwort"
+  },
+  "checkBoxHelpText": {
+    "message": "Verwende Kontrollkästchen, wenn du das Kontrollkästchen eines Formulars automatisch ausfüllen möchtest, wie eine Erinnerungs-E-Mail"
+  },
+  "linkedHelpText": {
+    "message": "Verwende ein verknüpftes Feld, wenn du Probleme mit dem automatischen Ausfüllen einer bestimmten Website hast."
+  },
+  "linkedLabelHelpText": {
+    "message": "Gib die HTML-ID des Felds, Name, Aria-Label oder einen Platzhalter ein."
+  },
   "addAttachment": {
     "message": "Anhang hinzufügen"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Bist du sicher, dass du diesen Anhang dauerhaft löschen möchtest?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Manage subscription from the",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Um Bitwarden auf deinem eigenen Server zu hosten, must du deine Lizenzdatei hochladen. Um Free Families-Tarife und erweiterte Abrechnungsmöglichkeiten für deine selbst gehostete Organisation anzubieten, musst du die automatische Synchronisierung für deine selbst gehostete Organisation einrichten."
+  },
+  "selfHostingTitleProper": {
+    "message": "Selbst gehostet"
   }
 }

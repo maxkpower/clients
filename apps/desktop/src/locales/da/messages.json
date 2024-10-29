@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Velkommen tilbage"
+  },
   "moveToOrgDesc": {
     "message": "Vælg en organisation, hvortil dette emne skal flyttes. Flytning overfører ejerskab af emnet til organisationen, og efter flytningen vil man ikke længere være den direkte ejer af emnet."
   },
@@ -259,6 +262,9 @@
   "generatePassword": {
     "message": "Generér adgangskode"
   },
+  "generatePassphrase": {
+    "message": "Generér adgangssætning"
+  },
   "type": {
     "message": "Type"
   },
@@ -393,6 +399,10 @@
   },
   "copyPassword": {
     "message": "Kopiér adgangskode"
+  },
+  "copyPassphrase": {
+    "message": "Kopiér adgangssætning",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
     "message": "Kopiér URI"
@@ -547,6 +557,9 @@
   "createAccount": {
     "message": "Opret konto"
   },
+  "newToBitwarden": {
+    "message": "Ny på Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Indstil en stærk adgangskode"
   },
@@ -555,6 +568,18 @@
   },
   "logIn": {
     "message": "Log ind"
+  },
+  "logInToBitwarden": {
+    "message": "Log ind på Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "Log ind med adgangsnøgle"
+  },
+  "loginWithDevice": {
+    "message": "Log ind med enhed"
+  },
+  "useSingleSignOn": {
+    "message": "Brug Single Sign-On"
   },
   "submit": {
     "message": "Indsend"
@@ -601,6 +626,15 @@
   },
   "joinOrganization": {
     "message": "Bliv medlem af organisation"
+  },
+  "joinOrganizationName": {
+    "message": "Bliv nedlem af $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
     "message": "Færdiggør tilmeldingen til denne organisation ved at opsætte en hovedadgangskode."
@@ -818,6 +852,10 @@
   },
   "baseUrl": {
     "message": "Server-URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "URL til selv-hostet server",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "API-server URL"
@@ -1208,6 +1246,9 @@
   "copyNumber": {
     "message": "Kopiér nummer",
     "description": "Copy credit card number"
+  },
+  "copyEmail": {
+    "message": "Kopiér e-mail"
   },
   "copySecurityCode": {
     "message": "Kopiér bekræftelseskode",
@@ -1642,6 +1683,12 @@
   "deleteAccountWarning": {
     "message": "Sletning af din konto er permanent og irreversibel."
   },
+  "cannotDeleteAccount": {
+    "message": "Kan ikke slette konto"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "Denne handling kan ikke fuldføres, da kontoen ejes af en organisation. Kontakt organisationsadministratoren for yderligere detaljer."
+  },
   "accountDeleted": {
     "message": "Konto slettet"
   },
@@ -1751,6 +1798,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "Organisationen kræver, at der oprettes en hovedadgangskode.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "ud af $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "verificationRequired": {
     "message": "Bekræftelse kræves",
@@ -2334,6 +2390,9 @@
   "generateUsername": {
     "message": "Generér brugernavn"
   },
+  "generateEmail": {
+    "message": "Generér e-mail"
+  },
   "usernameType": {
     "message": "Brugernavnstype"
   },
@@ -2376,6 +2435,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Generér et e-mail alias med en ekstern viderestillingstjeneste."
+  },
+  "forwarderDomainName": {
+    "message": "E-maildomæne",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Vælg et domæne understøttet af den valgte tjeneste",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$-fejl: $ERRORMESSAGE$",
@@ -3143,12 +3210,6 @@
   },
   "textSends": {
     "message": "Tekst-Sends"
-  },
-  "allowScreenshots": {
-    "message": "Tillad skærmoptagelse"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Tillad skærmoptagelse af Bitwarden-computerprogrammet."
   },
   "ssoError": {
     "message": "Ingen ledige porte fundet til SSO-login."

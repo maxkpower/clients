@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Vítejte zpět"
+  },
   "moveToOrgDesc": {
     "message": "Vyberte organizaci, do které chcete tuto položku přesunout. Přesun do organizace převede vlastnictví položky této organizaci. Po přesunutí této položky již nebudete přímým vlastníkem této položky."
   },
@@ -259,6 +262,9 @@
   "generatePassword": {
     "message": "Vygenerovat heslo"
   },
+  "generatePassphrase": {
+    "message": "Vygenerovat heslovou frázi"
+  },
   "type": {
     "message": "Typ"
   },
@@ -393,6 +399,10 @@
   },
   "copyPassword": {
     "message": "Kopírovat heslo"
+  },
+  "copyPassphrase": {
+    "message": "Kopírovat heslovou frázi",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
     "message": "Kopírovat URI"
@@ -547,6 +557,9 @@
   "createAccount": {
     "message": "Vytvořit účet"
   },
+  "newToBitwarden": {
+    "message": "Jste noví na Bitwardenu?"
+  },
   "setAStrongPassword": {
     "message": "Nastavit hlavní heslo"
   },
@@ -555,6 +568,18 @@
   },
   "logIn": {
     "message": "Přihlásit se"
+  },
+  "logInToBitwarden": {
+    "message": "Přihlásit se do Bitwardenu"
+  },
+  "logInWithPasskey": {
+    "message": "Přihlásit se pomocí přístupového klíče"
+  },
+  "loginWithDevice": {
+    "message": "Přihlásit se zařízením"
+  },
+  "useSingleSignOn": {
+    "message": "Použít jednotné přihlášení"
   },
   "submit": {
     "message": "Odeslat"
@@ -601,6 +626,15 @@
   },
   "joinOrganization": {
     "message": "Přidat se k organizaci"
+  },
+  "joinOrganizationName": {
+    "message": "Připojit se k $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
     "message": "Dokončete připojení k této organizaci nastavením hlavního hesla."
@@ -818,6 +852,10 @@
   },
   "baseUrl": {
     "message": "URL serveru"
+  },
+  "selfHostBaseUrl": {
+    "message": "Adresa URL serveru vlastního hostování",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "URL serveru API"
@@ -1208,6 +1246,9 @@
   "copyNumber": {
     "message": "Kopírovat číslo",
     "description": "Copy credit card number"
+  },
+  "copyEmail": {
+    "message": "Kopírovat e-mail"
   },
   "copySecurityCode": {
     "message": "Kopírovat bezpečnostní kód",
@@ -1642,6 +1683,12 @@
   "deleteAccountWarning": {
     "message": "Smazání účtu je trvalé. Tuto akci nelze vrátit zpět."
   },
+  "cannotDeleteAccount": {
+    "message": "Nelze smazat účet"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "Tuto akci nelze dokončit, protože Váš účet vlastní organizace. Další informace získáte od správce organizace."
+  },
   "accountDeleted": {
     "message": "Účet byl smazán"
   },
@@ -1751,6 +1798,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "Vaše organizace vyžaduje nastavení hlavního hesla.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "z $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "verificationRequired": {
     "message": "Je vyžadováno ověření",
@@ -2334,6 +2390,9 @@
   "generateUsername": {
     "message": "Vygenerovat uživatelské jméno"
   },
+  "generateEmail": {
+    "message": "Vygenerovat e-mail"
+  },
   "usernameType": {
     "message": "Typ uživatelského jména"
   },
@@ -2376,6 +2435,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Vygeneruje alias e-mailu pomocí externí přeposílací služby."
+  },
+  "forwarderDomainName": {
+    "message": "E-mailová doména",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Vyberte doménu, která je podporována vybranou službou",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Chyba $SERVICENAME$: $ERRORMESSAGE$",
@@ -3143,12 +3210,6 @@
   },
   "textSends": {
     "message": "Sends s texty"
-  },
-  "allowScreenshots": {
-    "message": "Povolit záznam obrazovky"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Povolí zachycování obrazovky desktopové aplikace Bitwarden."
   },
   "ssoError": {
     "message": "Pro přihlášení SSO nebyly nalezeny žádné volné porty."

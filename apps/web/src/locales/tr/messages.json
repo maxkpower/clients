@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Access Intelligence"
   },
+  "passwordRisk": {
+    "message": "Parola Riski"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Riskli parolaları tespit edip kullanıcıları bu parolaları değiştirmeleri konusunda bilgilendirin."
+  },
+  "dataLastUpdated": {
+    "message": "Son veri güncellemesi: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Notified members"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "Hiçbir uygulamayı öncelikli olarak işaretlemediniz"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Select your most critical applications to discover at-risk passwords, and notify users to change those passwords."
+  },
+  "markPriorityApps": {
+    "message": "Mark priority apps"
+  },
+  "markAppAsCritical": {
+    "message": "Mark app as critical"
   },
   "application": {
     "message": "Uygulama"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Parola oluştur"
   },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
+  },
   "checkPassword": {
     "message": "Parolanız ele geçirilip geçirilmediğini kontrol edin."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Parolayı kopyala",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Parola kopyalandı"
   },
   "copyUsername": {
     "message": "Kullanıcı adını kopyala",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Başka bir giriş yöntemi kullan"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Geçiş anahtarıyla giriş yap"
+  },
+  "useSingleSignOn": {
+    "message": "Çoklu oturum açma kullan"
+  },
+  "welcomeBack": {
+    "message": "Tekrar hoş geldiniz"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Geçersiz geçiş anahtarı. Lütfen tekrar deneyin."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Hesap aç"
   },
+  "newToBitwarden": {
+    "message": "Bitwarden'da yeni misiniz?"
+  },
   "setAStrongPassword": {
     "message": "Güçlü bir parola belirleyin"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Giriş yap"
+  },
+  "logInToBitwarden": {
+    "message": "Bitwarden'a giriş yapın"
   },
   "verifyIdentity": {
     "message": "Kimliğinizi doğrulayın"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Bu koleksiyondaki tüm kayıtları görmek için izniniz yok."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Bu koleksiyona erişme izniniz yok"
   },
   "noCollectionsInList": {
     "message": "Listelenecek koleksiyon yok."
@@ -3067,7 +3119,7 @@
     "message": "İlkeler"
   },
   "singleSignOn": {
-    "message": "Tek oturum açma"
+    "message": "Çoklu oturum açma"
   },
   "editPolicy": {
     "message": "İlkeyi düzenle"
@@ -3780,6 +3832,15 @@
   },
   "joinOrganization": {
     "message": "Kuruluşa katıl"
+  },
+  "joinOrganizationName": {
+    "message": "$ORGANIZATIONNAME$ kuruluşuna katıl",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "joinOrganizationDesc": {
     "message": "Yukarıdaki kuruluşa katılmaya davet edildiniz. Daveti kabul etmek için giriş yapmanız veya yeni bir Bitwarden hesabı açmanız gerekiyor."
@@ -4551,10 +4612,10 @@
     "message": "Kuruluş tanımlayıcı"
   },
   "ssoLogInWithOrgIdentifier": {
-    "message": "Kuruluşunuzun tek oturum açma portalını kullanarak giriş yapabilirsiniz. Başlamak için lütfen kuruluşunuzun SSO tanımlayıcısını girin."
+    "message": "Kuruluşunuzun çoklu oturum açma portalını kullanarak giriş yapabilirsiniz. Başlamak için lütfen kuruluşunuzun SSO tanımlayıcısını girin."
   },
   "enterpriseSingleSignOn": {
-    "message": "Kurumsal tek oturum açma"
+    "message": "Kurumsal çoklu oturum açma"
   },
   "ssoHandOff": {
     "message": "Şimdi bu sekmeyi kapatıp uzantı üzerinden devam edebilirsiniz."
@@ -4627,16 +4688,16 @@
     "message": "Sahip veya yönetici olmayan ve zaten başka bir kuruluşun üyesi olan kuruluş üyeleri kuruluşunuzdan kaldırılır."
   },
   "requireSso": {
-    "message": "Tek oturum açma kimlik doğrulamasını zorunlu tut"
+    "message": "Çoklu oturum açma kimlik doğrulamasını zorunlu tut"
   },
   "requireSsoPolicyDesc": {
-    "message": "Üyelerin kurumsal tek oturum açma (SSO) yöntemiyle oturum açmasını zorunlu kılın."
+    "message": "Üyelerin kurumsal çoklu oturum açma (SSO) yöntemiyle oturum açmasını zorunlu kıl."
   },
   "prerequisite": {
     "message": "Önkoşul"
   },
   "requireSsoPolicyReq": {
-    "message": "Bu ilkeyi etkinleştirmeden önce tek kuruluş kurumsal ilkesi etkinleştirilmelidir."
+    "message": "Bu ilkeyi etkinleştirmeden önce çoklu kuruluş kurumsal ilkesi etkinleştirilmelidir."
   },
   "requireSsoPolicyReqError": {
     "message": "Tek kuruluş ilkesi ayarlanmamış."
@@ -5827,7 +5888,7 @@
     "message": "Bağlama türü"
   },
   "idpSingleSignOnServiceUrl": {
-    "message": "Tek oturum açma (SSO) servis URL'si"
+    "message": "Çoklu oturum açma (SSO) servis URL'si"
   },
   "idpSingleLogoutServiceUrl": {
     "message": "Tek çıkış (SLO) servis URL'si"
@@ -5848,7 +5909,7 @@
     "message": "Kimlik doğrulama isteklerini imzala"
   },
   "ssoSettingsSaved": {
-    "message": "Tek oturum açma yapılandırması kaydedildi"
+    "message": "Çoklu oturum açma yapılandırması kaydedildi"
   },
   "sponsoredFamilies": {
     "message": "Ücretsiz Bitwarden Aile"
@@ -6023,7 +6084,7 @@
     "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Use the require single-sign-on authentication policy to require all members to log in with SSO.'"
   },
   "ssoPolicyHelpAnchor": {
-    "message": "require single sign-on authentication policy",
+    "message": "çoklu oturum açma kimlik doğrulama ilkesini zorunlu tut",
     "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Use the require single-sign-on authentication policy to require all members to log in with SSO.'"
   },
   "ssoPolicyHelpEnd": {
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Kullanıcı adı oluştur"
   },
+  "generateEmail": {
+    "message": "E-posta oluştur"
+  },
   "usernameType": {
     "message": "Kullanıcı adı türü"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Harici bir yönlendirme servisiyle e-posta maskesi oluştur."
+  },
+  "forwarderDomainName": {
+    "message": "E-posta alan adı",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Seçtiğiniz servisin desteklediği bir alan adı seçin",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ hatası: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Kuruluşunuz bir ana parola belirlemenizi gerektiriyor.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "/ $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ bulunamadı",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Koleksiyon oluşturma ve silme işlemlerini sahipler ve yöneticilerle sınırlandırın"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Koleksiyon oluşturmayı sahipler ve yöneticilerle sınırlandırın"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Koleksiyon silmeyi sahipler ve yöneticilerle sınırlandırın"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Sahipler ve yöneticiler tüm koleksiyonları ve öğeleri yönetebilir"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Sunucu URL'si"
+  },
+  "selfHostBaseUrl": {
+    "message": "Kendi kendine barındırılan sunucu URL'si",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Alias alan adı"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Edit access"
   },
+  "textHelpText": {
+    "message": "Güvenlik sorusu gibi veriler için metin alanlarını kullanın"
+  },
+  "hiddenHelpText": {
+    "message": "Parola gibi hassas verileri için gizli alanları kullanın"
+  },
+  "checkBoxHelpText": {
+    "message": "Formlardaki onay kutularını (örn. \"e-posta adresimi hatırla\") otomatik doldurmak isterseniz onay kutularını kullanın"
+  },
+  "linkedHelpText": {
+    "message": "Use a linked field when you are experiencing autofill issues for a specific website."
+  },
+  "linkedLabelHelpText": {
+    "message": "Enter the the field's html id, name, aria-label, or placeholder."
+  },
   "addAttachment": {
     "message": "Dosya ekle"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Bu dosyayı kalıcı olarak silmek istediğinizden emin misiniz?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Aboneliğinizi yönetin:",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "To host Bitwarden on your own server, you will need to upload your license file. To support Free Families plans and advanced billing capabilities for your self-hosted organization, you will need to set up automatic sync in your self-hosted organization."
+  },
+  "selfHostingTitleProper": {
+    "message": "Kendi Kendinize Barındırma"
   }
 }

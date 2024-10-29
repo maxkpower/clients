@@ -12,8 +12,7 @@
       >
     </bit-form-field>
     <bit-form-field>
-      <bit-label *ngIf="!shouldShowNewPassword">{{ "password" | i18n }}</bit-label>
-      <bit-label *ngIf="shouldShowNewPassword">{{ "newPassword" | i18n }}</bit-label>
+      <bit-label>{{ (passwordRemoved ? "newPassword" : "password") | i18n }}</bit-label>
       <input bitInput type="password" formControlName="password" />
       <button
         data-testid="toggle-visibility-for-password"
@@ -21,6 +20,7 @@
         bitIconButton
         bitSuffix
         bitPasswordInputToggle
+        *ngIf="!hasPassword"
       ></button>
       <button
         type="button"
@@ -30,6 +30,7 @@
         [disabled]="!config.areSendsAllowed"
         (click)="generatePassword()"
         data-testid="generate-password"
+        *ngIf="!hasPassword"
       ></button>
       <button
         type="button"
@@ -40,8 +41,20 @@
         [valueLabel]="'password' | i18n"
         [appCopyClick]="sendOptionsForm.get('password').value"
         showToast
+        *ngIf="!hasPassword"
       ></button>
-      <bit-hint>{{ "sendPasswordDescV2" | i18n }}</bit-hint>
+      <button
+        *ngIf="hasPassword"
+        class="tw-border-l-0 last:tw-rounded-r focus-visible:tw-border-l focus-visible:tw-ml-[-1px]"
+        bitSuffix
+        type="button"
+        buttonType="danger"
+        bitIconButton="bwi-minus-circle"
+        [appA11yTitle]="'removePassword' | i18n"
+        [bitAction]="removePassword"
+        showToast
+      ></button>
+      <bit-hint>{{ "sendPasswordDescV3" | i18n }}</bit-hint>
     </bit-form-field>
     <bit-form-control *ngIf="!disableHideEmail || originalSendView?.hideEmail">
       <input

@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Access Intelligence"
   },
+  "passwordRisk": {
+    "message": "Password Risk"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Discover at-risk passwords and notify users to change those passwords."
+  },
+  "dataLastUpdated": {
+    "message": "Data last updated: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Notified members"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "You haven’t marked any applications as a priority"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Select your most critical applications to discover at-risk passwords, and notify users to change those passwords."
+  },
+  "markPriorityApps": {
+    "message": "Mark priority apps"
+  },
+  "markAppAsCritical": {
+    "message": "Markera app som kritisk"
   },
   "application": {
     "message": "Application"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Generera lösenord"
   },
+  "generatePassphrase": {
+    "message": "Generera lösenfras"
+  },
   "checkPassword": {
     "message": "Kontrollera om lösenordet har avslöjats."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Kopiera lösenord",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Kopiera lösenfras",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Lösenord kopierades"
   },
   "copyUsername": {
     "message": "Kopiera användarnamn",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Använd en annan inloggningsmetod"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Logga in med nyckel"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
+  },
+  "welcomeBack": {
+    "message": "Välkommen tillbaka"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Ogiltig nyckel. Försök igen."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Skapa konto"
   },
+  "newToBitwarden": {
+    "message": "Ny på Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Ställ in ett starkt lösenord"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Logga in"
+  },
+  "logInToBitwarden": {
+    "message": "Logga in på Bitwarden"
   },
   "verifyIdentity": {
     "message": "Verify your Identity"
@@ -1196,6 +1245,9 @@
   "noPermissionToViewAllCollectionItems": {
     "message": "Du har inte behörighet att se alla objekt i denna samling."
   },
+  "youDoNotHavePermissions": {
+    "message": "You do not have permissions to this collection"
+  },
   "noCollectionsInList": {
     "message": "Det finns inga samlingar att visa."
   },
@@ -1323,7 +1375,7 @@
     "message": "E-post"
   },
   "emailDescV2": {
-    "message": "Enter a code sent to your email."
+    "message": "Ange en kod som skickas per e-post."
   },
   "continue": {
     "message": "Fortsätt"
@@ -2040,7 +2092,7 @@
     "message": "Bitwarden Authenticator allows you to store authenticator keys and generate TOTP codes for 2-step verification flows. Learn more on the bitwarden.com website."
   },
   "twoStepAuthenticatorScanCodeV2": {
-    "message": "Scan the QR code below with your authenticator app or enter the key."
+    "message": "Skanna QR-koden nedan med din autentiseringsapp eller ange nyckeln."
   },
   "twoStepAuthenticatorQRCanvasError": {
     "message": "Could not load QR code. Try again or use the key below."
@@ -3780,6 +3832,15 @@
   },
   "joinOrganization": {
     "message": "Gå med i organisation"
+  },
+  "joinOrganizationName": {
+    "message": "Join $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "joinOrganizationDesc": {
     "message": "Du har bjudits in att gå med i organisationen ovan. För att acceptera inbjudan måste du logga in eller skapa ett nytt Bitwarden-konto."
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Generera användarnamn"
   },
+  "generateEmail": {
+    "message": "Generate email"
+  },
   "usernameType": {
     "message": "Användarnamnstyp"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Generera ett e-postalias med en extern vidarebefordranstjänst."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$-fel: $ERRORMESSAGE$",
@@ -7814,7 +7886,7 @@
     "message": "Weak password identified and found in a data breach. Use a strong and unique password to protect your account. Are you sure you want to use this password?"
   },
   "characterMinimum": {
-    "message": "$LENGTH$ character minimum",
+    "message": "Minst $LENGTH$ tecken",
     "placeholders": {
       "length": {
         "content": "$1",
@@ -7921,6 +7993,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "Your organization requires you to set a master password.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "av $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "notFound": {
     "message": "$RESOURCE$ not found",
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Limit collection creation and deletion to owners and admins"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Limit collection creation to owners and admins"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Limit collection deletion to owners and admins"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Ägare och administratörer kan hantera alla samlingar och objekt"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Server-URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Aliasdomän"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Redigera åtkomst"
   },
+  "textHelpText": {
+    "message": "Use text fields for data like security questions"
+  },
+  "hiddenHelpText": {
+    "message": "Use hidden fields for sensitive data like a password"
+  },
+  "checkBoxHelpText": {
+    "message": "Use checkboxes if you'd like to autofill a form's checkbox, like a remember email"
+  },
+  "linkedHelpText": {
+    "message": "Use a linked field when you are experiencing autofill issues for a specific website."
+  },
+  "linkedLabelHelpText": {
+    "message": "Enter the the field's html id, name, aria-label, or placeholder."
+  },
   "addAttachment": {
     "message": "Lägg till bilaga"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Are you sure you want to permanently delete this attachment?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Manage subscription from the",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "To host Bitwarden on your own server, you will need to upload your license file. To support Free Families plans and advanced billing capabilities for your self-hosted organization, you will need to set up automatic sync in your self-hosted organization."
+  },
+  "selfHostingTitleProper": {
+    "message": "Self-Hosting"
   }
 }

@@ -1,18 +1,33 @@
 {
   "allApplications": {
-    "message": "All applications"
+    "message": "Kaikki sovellukset"
   },
   "priorityApplications": {
-    "message": "Priority applications"
+    "message": "Ensisijaiset sovellukset"
   },
   "accessIntelligence": {
     "message": "Access Intelligence"
+  },
+  "passwordRisk": {
+    "message": "Password Risk"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Discover at-risk passwords and notify users to change those passwords."
+  },
+  "dataLastUpdated": {
+    "message": "Data last updated: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
   },
   "notifiedMembers": {
     "message": "Notified members"
   },
   "allApplicationsWithCount": {
-    "message": "All applications ($COUNT$)",
+    "message": "Kaikki sovellukset ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -21,7 +36,7 @@
     }
   },
   "priorityApplicationsWithCount": {
-    "message": "Priority applications ($COUNT$)",
+    "message": "Ensisijaiset sovellukset ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -38,26 +53,38 @@
       }
     }
   },
+  "noPriorityApplicationsTitle": {
+    "message": "You haven’t marked any applications as a priority"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Select your most critical applications to discover at-risk passwords, and notify users to change those passwords."
+  },
+  "markPriorityApps": {
+    "message": "Mark priority apps"
+  },
+  "markAppAsCritical": {
+    "message": "Mark app as critical"
+  },
   "application": {
-    "message": "Application"
+    "message": "Sovellus"
   },
   "atRiskPasswords": {
-    "message": "At-risk passwords"
+    "message": "Riskialttiit salasanat"
   },
   "totalPasswords": {
-    "message": "Total passwords"
+    "message": "Salasanoja yhteensä"
   },
   "atRiskMembers": {
-    "message": "At-risk members"
+    "message": "Riskialttiit jäsenet"
   },
   "totalMembers": {
-    "message": "Total members"
+    "message": "Jäseniä yhteensä"
   },
   "atRiskApplications": {
-    "message": "At-risk applications"
+    "message": "Riskialttiit sovellukset"
   },
   "totalApplications": {
-    "message": "Total applications"
+    "message": "Sovelluksia yhteensä"
   },
   "whatTypeOfItem": {
     "message": "Minkä tyyppinen kohde tämä on?"
@@ -198,7 +225,7 @@
     "message": "Merkki"
   },
   "expiration": {
-    "message": "Erääntymisaika"
+    "message": "Voimassaolo päättyy"
   },
   "securityCode": {
     "message": "Turvakoodi (CVC/CVV)"
@@ -404,6 +431,9 @@
   },
   "generatePassword": {
     "message": "Luo salasana"
+  },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
   },
   "checkPassword": {
     "message": "Tarkasta, onko salasana paljastunut."
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Kopioi salasana",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Salasana kopioitu"
   },
   "copyUsername": {
     "message": "Kopioi käyttäjätunnus",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Käytä vaihtoehtoista kirjautumistapaa"
   },
-  "loginWithPasskey": {
-    "message": "Kirjaudu pääsyavaimella"
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
+  },
+  "welcomeBack": {
+    "message": "Welcome back"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Pääsyavain ei kelpaa. Yritä uudelleen."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Luo uusi tili"
   },
+  "newToBitwarden": {
+    "message": "New to Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Aseta vahva salasana"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Kirjaudu sisään"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
   },
   "verifyIdentity": {
     "message": "Vahvista henkilöllisyytesi"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Sinulla ei ole kokoelman kaikkien kohteiden tarkastelun sallivia käyttöoikeuksia."
+  },
+  "youDoNotHavePermissions": {
+    "message": "You do not have permissions to this collection"
   },
   "noCollectionsInList": {
     "message": "Näytettäviä kokoelmia ei ole."
@@ -2715,10 +2767,10 @@
     "message": "Laskut"
   },
   "noUnpaidInvoices": {
-    "message": "No unpaid invoices."
+    "message": "Ei maksamattomia laskuja."
   },
   "noPaidInvoices": {
-    "message": "No paid invoices."
+    "message": "Ei maksettuja laskuja."
   },
   "paid": {
     "message": "Maksettu",
@@ -3780,6 +3832,15 @@
   },
   "joinOrganization": {
     "message": "Liity organisaatioon"
+  },
+  "joinOrganizationName": {
+    "message": "Join $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "joinOrganizationDesc": {
     "message": "Sinut on kutsuttu liittymään yllä mainittuun organisaatioon. Hyväksyäksesi kutsun, sinun tulee kirjautua tilillesi tai luoda uusi Bitwarden-tili."
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Luo käyttäjätunnus"
   },
+  "generateEmail": {
+    "message": "Generate email"
+  },
   "usernameType": {
     "message": "Käyttäjätunnuksen tyyppi"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Luo sähköpostialias ulkoisella ohjauspalvelulla."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ -virhe: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Organisaatiosi edellyttää, että asetat pääsalasanan.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "out of $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "Resurssia $RESOURCE$ ei löytynyt",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Rajoita kokoelmien luonti ja poisto omistajille ja ylläpitäjille"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Limit collection creation to owners and admins"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Limit collection deletion to owners and admins"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Omistajat ja ylläpitäjät voivat hallita kaikkia kokoelmia ja kohteita"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Palvelimen URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Aliaksen verkkotunnus"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Muokkaa käyttöoikeuksia"
   },
+  "textHelpText": {
+    "message": "Use text fields for data like security questions"
+  },
+  "hiddenHelpText": {
+    "message": "Use hidden fields for sensitive data like a password"
+  },
+  "checkBoxHelpText": {
+    "message": "Use checkboxes if you'd like to autofill a form's checkbox, like a remember email"
+  },
+  "linkedHelpText": {
+    "message": "Use a linked field when you are experiencing autofill issues for a specific website."
+  },
+  "linkedLabelHelpText": {
+    "message": "Enter the the field's html id, name, aria-label, or placeholder."
+  },
   "addAttachment": {
     "message": "Lisää liite"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Haluatko varmasti poistaa liitteen pysyvästi?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Manage subscription from the",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "To host Bitwarden on your own server, you will need to upload your license file. To support Free Families plans and advanced billing capabilities for your self-hosted organization, you will need to set up automatic sync in your self-hosted organization."
+  },
+  "selfHostingTitleProper": {
+    "message": "Self-Hosting"
   }
 }

@@ -45,6 +45,7 @@ export class VaultItemsComponent {
   @Input() viewingOrgVault: boolean;
   @Input() addAccessStatus: number;
   @Input() addAccessToggle: boolean;
+  @Input() activeCollection: CollectionView | undefined;
 
   private _ciphers?: CipherView[] = [];
   @Input() get ciphers(): CipherView[] {
@@ -90,11 +91,39 @@ export class VaultItemsComponent {
     );
   }
 
+  get showDelete(): boolean {
+    if (this.selection.selected.length === 0) {
+      return true;
+    }
+
+    const hasPersonalItems = this.hasPersonalItems();
+    const uniqueCipherOrgIds = this.getUniqueOrganizationIds();
+
+    const canManageCollectionCiphers = this.selection.selected
+      .filter((item) => item.cipher)
+      .every(({ cipher }) => this.canManageCollection(cipher));
+
+    const canDeleteCollections = this.selection.selected
+      .filter((item) => item.collection)
+      .every((item) => item.collection && this.canDeleteCollection(item.collection));
+
+    const userCanDeleteAccess = canManageCollectionCiphers && canDeleteCollections;
+
+    if (
+      userCanDeleteAccess ||
+      (hasPersonalItems && (!uniqueCipherOrgIds.size || userCanDeleteAccess))
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   get disableMenu() {
     return (
       !this.bulkMoveAllowed &&
       !this.showAssignToCollections() &&
-      !this.showDelete() &&
+      !this.showDelete &&
       !this.showBulkEditCollectionAccess
     );
   }
@@ -165,6 +194,7 @@ export class VaultItemsComponent {
     });
   }
 
+  // TODO: PM-13944 Refactor to use cipherAuthorizationService.canClone$ instead
   protected canClone(vaultItem: VaultItem) {
     if (vaultItem.cipher.organizationId == null) {
       return true;
@@ -196,6 +226,37 @@ export class VaultItemsComponent {
 
     const organization = this.allOrganizations.find((o) => o.id === cipher.organizationId);
     return (organization.canEditAllCiphers && this.viewingOrgVault) || cipher.edit;
+  }
+
+  protected canManageCollection(cipher: CipherView) {
+    // If the cipher is not part of an organization (personal item), user can manage it
+    if (cipher.organizationId == null) {
+      return true;
+    }
+
+    // Check for admin access in AC vault
+    if (this.showAdminActions) {
+      const organization = this.allOrganizations.find((o) => o.id === cipher.organizationId);
+      // If the user is an admin, they can delete an unassigned cipher
+      if (cipher.collectionIds.length === 0) {
+        return organization?.canEditUnmanagedCollections === true;
+      }
+
+      if (
+        organization?.permissions.editAnyCollection ||
+        (organization?.allowAdminAccessToAllCollectionItems && organization.isAdmin)
+      ) {
+        return true;
+      }
+    }
+
+    if (this.activeCollection) {
+      return this.activeCollection.manage === true;
+    }
+
+    return this.allCollections
+      .filter((c) => cipher.collectionIds.includes(c.id))
+      .some((collection) => collection.manage);
   }
 
   private refreshItems() {
@@ -239,6 +300,11 @@ export class VaultItemsComponent {
       return false;
     }
 
+    // When the user doesn't belong to an organization, hide assign to collections
+    if (this.allOrganizations.length === 0) {
+      return false;
+    }
+
     if (this.selection.selected.length === 0) {
       return true;
     }
@@ -265,37 +331,6 @@ export class VaultItemsComponent {
       this.selection.selected.filter((item) => item.collection).length === 0;
 
     return (canEditOrManageAllCiphers || this.allCiphersHaveEditAccess()) && collectionNotSelected;
-  }
-
-  protected showDelete(): boolean {
-    if (this.selection.selected.length === 0) {
-      return true;
-    }
-
-    const hasPersonalItems = this.hasPersonalItems();
-    const uniqueCipherOrgIds = this.getUniqueOrganizationIds();
-    const organizations = Array.from(uniqueCipherOrgIds, (orgId) =>
-      this.allOrganizations.find((o) => o.id === orgId),
-    );
-
-    const canEditOrManageAllCiphers =
-      organizations.length > 0 && organizations.every((org) => org?.canEditAllCiphers);
-
-    const canDeleteCollections = this.selection.selected
-      .filter((item) => item.collection)
-      .every((item) => item.collection && this.canDeleteCollection(item.collection));
-
-    const userCanDeleteAccess =
-      (canEditOrManageAllCiphers || this.allCiphersHaveEditAccess()) && canDeleteCollections;
-
-    if (
-      userCanDeleteAccess ||
-      (hasPersonalItems && (!uniqueCipherOrgIds.size || userCanDeleteAccess))
-    ) {
-      return true;
-    }
-
-    return false;
   }
 
   private hasPersonalItems(): boolean {

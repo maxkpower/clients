@@ -8,6 +8,21 @@
   "accessIntelligence": {
     "message": "Toegangsintelligentie"
   },
+  "passwordRisk": {
+    "message": "Wachtwoordrisico"
+  },
+  "discoverAtRiskPasswords": {
+    "message": "Ontdek risicovolle wachtwoorden en attendeer gebruikers deze wachtwoorden te wijzigen."
+  },
+  "dataLastUpdated": {
+    "message": "Datum laatste wijziging: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
+  },
   "notifiedMembers": {
     "message": "Geînformeerde leden"
   },
@@ -37,6 +52,18 @@
         "example": "3"
       }
     }
+  },
+  "noPriorityApplicationsTitle": {
+    "message": "Je hebt nog geen applicaties als belangrijk aangewezen"
+  },
+  "noPriorityApplicationsDescription": {
+    "message": "Wijs je meest kritische applicaties aan om risicovolle wachtwoorden te ontdekken en gebruikers te attenderen deze te wijzigen."
+  },
+  "markPriorityApps": {
+    "message": "Belangrijke apps aanwijzen"
+  },
+  "markAppAsCritical": {
+    "message": "App aanwijzen als belangrijk"
   },
   "application": {
     "message": "Applicatie"
@@ -405,6 +432,9 @@
   "generatePassword": {
     "message": "Wachtwoord genereren"
   },
+  "generatePassphrase": {
+    "message": "Wachtwoordzin genereren"
+  },
   "checkPassword": {
     "message": "Controleer of wachtwoord is gelekt."
   },
@@ -662,6 +692,13 @@
   "copyPassword": {
     "message": "Wachtwoord kopiëren",
     "description": "Copy password to clipboard"
+  },
+  "copyPassphrase": {
+    "message": "Wachtwoordzin kopiëren",
+    "description": "Copy passphrase to clipboard"
+  },
+  "passwordCopied": {
+    "message": "Wachtwoord gekopieerd"
   },
   "copyUsername": {
     "message": "Gebruikersnaam kopiëren",
@@ -929,8 +966,14 @@
   "useADifferentLogInMethod": {
     "message": "Gebruik een andere loginmethode"
   },
-  "loginWithPasskey": {
+  "logInWithPasskey": {
     "message": "Inloggen met passkey"
+  },
+  "useSingleSignOn": {
+    "message": "Single sign-on gebruiken"
+  },
+  "welcomeBack": {
+    "message": "Welkom terug"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "Ongeldige passkey. Probeer het opnieuw."
@@ -1013,6 +1056,9 @@
   "createAccount": {
     "message": "Account aanmaken"
   },
+  "newToBitwarden": {
+    "message": "Nieuw bij Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Sterk wachtwoord instellen"
   },
@@ -1027,6 +1073,9 @@
   },
   "logIn": {
     "message": "Inloggen"
+  },
+  "logInToBitwarden": {
+    "message": "Inloggen op Bitwarden"
   },
   "verifyIdentity": {
     "message": "Verify your Identity"
@@ -1195,6 +1244,9 @@
   },
   "noPermissionToViewAllCollectionItems": {
     "message": "Je hebt geen rechten om alle items in deze collectie te zien."
+  },
+  "youDoNotHavePermissions": {
+    "message": "Je hebt geen rechten op deze collectie"
   },
   "noCollectionsInList": {
     "message": "Er zijn geen verzamelingen om weer te geven."
@@ -3781,6 +3833,15 @@
   "joinOrganization": {
     "message": "Lid worden van organisatie"
   },
+  "joinOrganizationName": {
+    "message": "Aansluiten bij $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
   "joinOrganizationDesc": {
     "message": "Je bent uitgenodigd om lid te worden van bovenstaande organisatie. Om de uitnodiging te accepteren, moet je inloggen of een nieuw Bitwarden-account aanmaken."
   },
@@ -6339,6 +6400,9 @@
   "generateUsername": {
     "message": "Gebruikersnaam genereren"
   },
+  "generateEmail": {
+    "message": "E-mailadres genereren"
+  },
   "usernameType": {
     "message": "Type gebruikersnaam"
   },
@@ -6443,6 +6507,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Genereer een e-mailalias met een externe doorschakelservice."
+  },
+  "forwarderDomainName": {
+    "message": "E-maildomein",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Kies een domein dat wordt ondersteund door de geselecteerde dienst",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ error: $ERRORMESSAGE$",
@@ -7922,6 +7994,15 @@
     "message": "Je organisatie vereist dat je een hoofdwachtwoord instelt.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "van $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "notFound": {
     "message": "$RESOURCE$ niet gevonden",
     "placeholders": {
@@ -8183,6 +8264,12 @@
   "limitCollectionCreationDeletionDesc": {
     "message": "Aanmaken en verwijderen van collecties tot eigenaren en managers beperken"
   },
+  "limitCollectionCreationDesc": {
+    "message": "Aanmaken van collecties beperken tot eigenaren en managers"
+  },
+  "limitCollectionDeletionDesc": {
+    "message": "Verwijderen van collecties beperken tot eigenaren en managers"
+  },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "Eigenaren en beheerders kunnen alle collecties en items beheren"
   },
@@ -8227,6 +8314,10 @@
   },
   "baseUrl": {
     "message": "Server-URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "URL zelfgehoste server",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "Aliasdomein"
@@ -9368,6 +9459,21 @@
   "editAccess": {
     "message": "Toegang bewerken"
   },
+  "textHelpText": {
+    "message": "Gebruik tekstvelden voor data zoals beveiligingsvragen"
+  },
+  "hiddenHelpText": {
+    "message": "Gebruik verborgen velden voor gevoelige gegevens zoals een wachtwoord"
+  },
+  "checkBoxHelpText": {
+    "message": "Gebruik aanvinkvakjes als je een formulier automatisch wilt invullen, zoals e-mailadres herinneren"
+  },
+  "linkedHelpText": {
+    "message": "Gebruik een gekoppeld veld als je problemen ervaart met het automatisch invullen voor een specifieke website."
+  },
+  "linkedLabelHelpText": {
+    "message": "Html-id, naam, aria-label of placeholder van het veld invullen."
+  },
   "addAttachment": {
     "message": "Bijlage toevoegen"
   },
@@ -9376,5 +9482,15 @@
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Weet je zeker dat je deze bijlage definitief wilt verwijderen?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Abonnement beheren vanuit het",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "Om Bitwarden op je eigen server te hosten, moet je je licentiebestand uploaden. Om gratis familie-abonnementen en geavanceerde factureringsmogelijkheden voor je zelfgehoste organisatie te ondersteunen, moet je automatische synchronisatie instellen in je zelfgehoste organisatie."
+  },
+  "selfHostingTitleProper": {
+    "message": "Zelf hosten"
   }
 }
