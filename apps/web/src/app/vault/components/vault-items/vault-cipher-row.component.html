@@ -71,12 +71,12 @@
 <td bitCell [ngClass]="RowHeightClass" *ngIf="viewingOrgVault"></td>
 <td bitCell [ngClass]="RowHeightClass" class="tw-text-right">
   <button
-    [disabled]="disabled || disableMenu"
+    [disabled]="disabled"
     [bitMenuTriggerFor]="cipherOptions"
     size="small"
     bitIconButton="bwi-ellipsis-v"
     type="button"
-    appA11yTitle="{{ (disableMenu ? 'missingPermissions' : 'options') | i18n }}"
+    appA11yTitle="{{ 'options' | i18n }}"
     appStopProp
   ></button>
   <bit-menu #cipherOptions>
@@ -149,7 +149,7 @@
       </button>
     </ng-container>
 
-    <bit-menu-divider></bit-menu-divider>
+    <bit-menu-divider *ngIf="showMenuDivider"></bit-menu-divider>
 
     <button bitMenuItem type="button" (click)="toggleFavorite()">
       <i

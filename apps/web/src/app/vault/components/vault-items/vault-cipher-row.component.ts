@@ -97,36 +97,35 @@ export class VaultCipherRowComponent implements OnInit {
     return this.cipher.type === this.CipherType.Login && !this.cipher.isDeleted;
   }
 
-  protected get showCopyPassword(): boolean {
-    return this.isLoginCipher && this.cipher.viewPassword;
-  }
-
-  protected get showCopyTotp(): boolean {
-    return this.isLoginCipher && this.showTotpCopyButton;
-  }
-
-  protected get showLaunchUri(): boolean {
-    return this.isLoginCipher && this.cipher.login.canLaunch;
+  protected get hasVisibleLoginOptions() {
+    return (
+      this.isLoginCipher &&
+      (!!this.cipher.login?.username ||
+        (this.cipher.viewPassword && !!this.cipher.login?.password) ||
+        this.showTotpCopyButton ||
+        this.cipher.login.canLaunch)
+    );
   }
 
   protected get isCardCipher(): boolean {
     return this.cipher.type === this.CipherType.Card && !this.cipher.isDeleted;
   }
 
-  protected get hasCardValues(): boolean {
-    return !!this.cipher.card.number || !!this.cipher.card.code;
+  protected get hasVisibleCardOptions(): boolean {
+    return this.isCardCipher && (!!this.cipher.card.number || !!this.cipher.card.code);
   }
 
   protected get isIdentityCipher() {
     return this.cipher.type === this.CipherType.Identity && !this.cipher.isDeleted;
   }
 
-  protected get hasIdentityValues(): boolean {
+  protected get hasVisibleIdentityOptions(): boolean {
     return (
-      !!this.cipher.identity.fullAddressForCopy ||
-      !!this.cipher.identity.email ||
-      !!this.cipher.identity.username ||
-      !!this.cipher.identity.phone
+      this.isIdentityCipher &&
+      (!!this.cipher.identity.fullAddressForCopy ||
+        !!this.cipher.identity.email ||
+        !!this.cipher.identity.username ||
+        !!this.cipher.identity.phone)
     );
   }
 
@@ -134,25 +133,17 @@ export class VaultCipherRowComponent implements OnInit {
     return this.cipher.type === this.CipherType.SecureNote && !this.cipher.isDeleted;
   }
 
-  protected get hasSecureNoteValue(): boolean {
-    return !!this.cipher.notes;
+  protected get hasVisibleSecureNoteOptions(): boolean {
+    return this.isIdentityCipher && !!this.cipher.notes;
   }
 
-  protected get disableMenu() {
-    return !(
-      this.isLoginCipher ||
-      this.showCopyPassword ||
-      this.showCopyTotp ||
-      this.showLaunchUri ||
-      this.showAttachments ||
-      this.showClone ||
-      this.canEditCipher ||
-      this.cipher.isDeleted
+  protected get showMenuDivider() {
+    return (
+      this.hasVisibleLoginOptions ||
+      this.hasVisibleCardOptions ||
+      this.hasVisibleIdentityOptions ||
+      this.hasVisibleSecureNoteOptions
     );
-  }
-
-  protected copy(field: "username" | "password" | "totp") {
-    this.onEvent.emit({ type: "copyField", item: this.cipher, field });
   }
 
   protected clone() {
@@ -193,7 +184,7 @@ export class VaultCipherRowComponent implements OnInit {
 
   @HostListener("contextmenu", ["$event"])
   protected onRightClick(event: MouseEvent) {
-    if (!this.disabled || !this.disableMenu) {
+    if (!this.disabled) {
       this.menuTrigger.toggleMenuOnRightClick(event);
     }
   }
