@@ -10,7 +10,7 @@ import {
   ViewContainerRef,
 } from "@angular/core";
 import { merge, Subscription } from "rxjs";
-import { filter, takeUntil } from "rxjs/operators";
+import { filter, skip, takeUntil } from "rxjs/operators";
 
 import { MenuComponent } from "./menu.component";
 
@@ -57,7 +57,6 @@ export class MenuTriggerForDirective implements OnDestroy {
   };
   private closedEventsSub: Subscription;
   private keyDownEventsSub: Subscription;
-  private globalListenersSub: Subscription;
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
@@ -112,7 +111,7 @@ export class MenuTriggerForDirective implements OnDestroy {
     this.overlayRef.attach(templatePortal);
 
     this.setupClosingActions();
-    this.setupGlobalListeners();
+    this.setupMenuCloseListener();
 
     if (this.menu.keyManager) {
       this.menu.keyManager.setFirstItemActive();
@@ -173,10 +172,15 @@ export class MenuTriggerForDirective implements OnDestroy {
       });
   }
 
-  private setupGlobalListeners() {
+  /**
+   * Sets up a listener for clicks outside the menu overlay.
+   * We skip(1) because the initial right-click event that opens the menu is also
+   * considered an outside click event, which would immediately close the menu
+   */
+  private setupMenuCloseListener() {
     this.overlayRef
       .outsidePointerEvents()
-      .pipe(takeUntil(this.overlayRef.detachments()))
+      .pipe(skip(1), takeUntil(this.overlayRef.detachments()))
       .subscribe((event) => {
         this.destroyMenu();
       });
@@ -186,6 +190,5 @@ export class MenuTriggerForDirective implements OnDestroy {
     this.closedEventsSub?.unsubscribe();
     this.overlayRef?.dispose();
     this.keyDownEventsSub?.unsubscribe();
-    this.globalListenersSub?.unsubscribe();
   }
 }
