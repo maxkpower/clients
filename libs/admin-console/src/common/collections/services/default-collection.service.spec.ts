@@ -103,6 +103,38 @@ describe("DefaultCollectionService", () => {
       const encryptedCollections = await firstValueFrom(collectionService.encryptedCollections$);
       expect(encryptedCollections.length).toBe(0);
     });
+
+    it("handles undefined org keys", async () => {
+      // Arrange test collections
+      const org1 = Utils.newGuid() as OrganizationId;
+      const org2 = Utils.newGuid() as OrganizationId;
+
+      const collection1 = collectionDataFactory(org1);
+      const collection2 = collectionDataFactory(org2);
+
+      // Arrange state provider
+      const fakeStateProvider = mockStateProvider();
+      await fakeStateProvider.setUserState(ENCRYPTED_COLLECTION_DATA_KEY, {
+        [collection1.id]: collection1,
+        [collection2.id]: collection2,
+      });
+
+      // Arrange cryptoService - orgKeys and mock decryption
+      // Crypto/KeyService emits null on lock
+      const cryptoService = mockCryptoService();
+      cryptoService.orgKeys$.mockReturnValue(of(undefined));
+      cryptoService.activeUserOrgKeys$ = of(undefined);
+
+      const collectionService = new DefaultCollectionService(
+        cryptoService,
+        mock<EncryptService>(),
+        mockI18nService(),
+        fakeStateProvider,
+      );
+
+      await firstValueFrom(collectionService.decryptedCollections$);
+      // TODO: define expected behaviour
+    });
   });
 });
 

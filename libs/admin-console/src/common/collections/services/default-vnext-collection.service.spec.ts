@@ -126,6 +126,23 @@ describe("DefaultvNextCollectionService", () => {
 
       expect(encryptedCollections.length).toBe(0);
     });
+
+    it("handles undefined orgKeys", async () => {
+      // Arrange test data
+      const org1 = Utils.newGuid() as OrganizationId;
+      const collection1 = collectionDataFactory(org1);
+
+      const org2 = Utils.newGuid() as OrganizationId;
+      const collection2 = collectionDataFactory(org2);
+
+      // Arrange dependencies
+      await setEncryptedState([collection1, collection2]);
+      // KeyService emits undefined when the vault is locked
+      cryptoKeys.next(undefined);
+      keyService.activeUserOrgKeys$ = of(undefined);
+
+      await firstValueFrom(collectionService.decryptedCollections$(of(userId)));
+    });
   });
 
   describe("encryptedCollections$", () => {
