@@ -1,4 +1,5 @@
 import { Directive, EventEmitter, Output } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import {
   EnvironmentService,
@@ -6,6 +7,7 @@ import {
 } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { ToastService } from "@bitwarden/components";
 
 import { ModalService } from "../../services/modal.service";
 
@@ -26,22 +28,31 @@ export class EnvironmentComponent {
     protected environmentService: EnvironmentService,
     protected i18nService: I18nService,
     private modalService: ModalService,
+    private toastService: ToastService,
   ) {
-    const urls = this.environmentService.getUrls();
-    if (this.environmentService.selectedRegion != Region.SelfHosted) {
-      return;
-    }
+    this.environmentService.environment$.pipe(takeUntilDestroyed()).subscribe((env) => {
+      if (env.getRegion() !== Region.SelfHosted) {
+        this.baseUrl = "";
+        this.webVaultUrl = "";
+        this.apiUrl = "";
+        this.identityUrl = "";
+        this.iconsUrl = "";
+        this.notificationsUrl = "";
+        return;
+      }
 
-    this.baseUrl = urls.base || "";
-    this.webVaultUrl = urls.webVault || "";
-    this.apiUrl = urls.api || "";
-    this.identityUrl = urls.identity || "";
-    this.iconsUrl = urls.icons || "";
-    this.notificationsUrl = urls.notifications || "";
+      const urls = env.getUrls();
+      this.baseUrl = urls.base || "";
+      this.webVaultUrl = urls.webVault || "";
+      this.apiUrl = urls.api || "";
+      this.identityUrl = urls.identity || "";
+      this.iconsUrl = urls.icons || "";
+      this.notificationsUrl = urls.notifications || "";
+    });
   }
 
   async submit() {
-    const resUrls = await this.environmentService.setUrls({
+    await this.environmentService.setEnvironment(Region.SelfHosted, {
       base: this.baseUrl,
       api: this.apiUrl,
       identity: this.identityUrl,
@@ -50,15 +61,11 @@ export class EnvironmentComponent {
       notifications: this.notificationsUrl,
     });
 
-    // re-set urls since service can change them, ex: prefixing https://
-    this.baseUrl = resUrls.base;
-    this.apiUrl = resUrls.api;
-    this.identityUrl = resUrls.identity;
-    this.webVaultUrl = resUrls.webVault;
-    this.iconsUrl = resUrls.icons;
-    this.notificationsUrl = resUrls.notifications;
-
-    this.platformUtilsService.showToast("success", null, this.i18nService.t("environmentSaved"));
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("environmentSaved"),
+    });
     this.saved();
   }
 

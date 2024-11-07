@@ -1,19 +1,12 @@
-import { View } from "@bitwarden/common/src/models/view/view";
+import { CollectionAccessSelectionView } from "@bitwarden/admin-console/common";
+import { View } from "@bitwarden/common/models/view/view";
 
 import { GroupDetailsResponse, GroupResponse } from "../services/group/responses/group.response";
-
-import { CollectionAccessSelectionView } from "./collection-access-selection.view";
 
 export class GroupView implements View {
   id: string;
   organizationId: string;
   name: string;
-  /**
-   * @deprecated
-   * To be removed alongside `FeatureFlag.FlexibleCollections`.
-   * This will always return `false` if Flexible Collections is enabled.
-   **/
-  accessAll: boolean;
   externalId: string;
   collections: CollectionAccessSelectionView[] = [];
   members: string[] = [];

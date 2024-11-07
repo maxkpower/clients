@@ -1,7 +1,7 @@
-import { Jsonify } from "type-fest";
-
+import { UriMatchStrategySetting } from "../../../models/domain/domain-service";
 import { Utils } from "../../../platform/misc/utils";
-import { LoginLinkedId as LinkedId, UriMatchType } from "../../enums";
+import { DeepJsonify } from "../../../types/deep-jsonify";
+import { LoginLinkedId as LinkedId } from "../../enums";
 import { linkedFieldOption } from "../../linked-field-option.decorator";
 import { Login } from "../domain/login";
 
@@ -10,9 +10,9 @@ import { ItemView } from "./item.view";
 import { LoginUriView } from "./login-uri.view";
 
 export class LoginView extends ItemView {
-  @linkedFieldOption(LinkedId.Username)
+  @linkedFieldOption(LinkedId.Username, { sortPosition: 0 })
   username: string = null;
-  @linkedFieldOption(LinkedId.Password)
+  @linkedFieldOption(LinkedId.Password, { sortPosition: 1 })
   password: string = null;
 
   passwordRevisionDate?: Date = null;
@@ -40,6 +40,11 @@ export class LoginView extends ItemView {
   }
 
   get subTitle(): string {
+    // if there's a passkey available, use that as a fallback
+    if (Utils.isNullOrEmpty(this.username) && this.fido2Credentials?.length > 0) {
+      return this.fido2Credentials[0].userName;
+    }
+
     return this.username;
   }
 
@@ -62,7 +67,7 @@ export class LoginView extends ItemView {
   }
 
   get hasUris(): boolean {
-    return this.uris.length > 0;
+    return this.uris != null && this.uris.length > 0;
   }
 
   get hasFido2Credentials(): boolean {
@@ -72,7 +77,7 @@ export class LoginView extends ItemView {
   matchesUri(
     targetUri: string,
     equivalentDomains: Set<string>,
-    defaultUriMatch: UriMatchType = null,
+    defaultUriMatch: UriMatchStrategySetting = null,
   ): boolean {
     if (this.uris == null) {
       return false;
@@ -81,10 +86,10 @@ export class LoginView extends ItemView {
     return this.uris.some((uri) => uri.matchesUri(targetUri, equivalentDomains, defaultUriMatch));
   }
 
-  static fromJSON(obj: Partial<Jsonify<LoginView>>): LoginView {
+  static fromJSON(obj: Partial<DeepJsonify<LoginView>>): LoginView {
     const passwordRevisionDate =
       obj.passwordRevisionDate == null ? null : new Date(obj.passwordRevisionDate);
-    const uris = obj.uris.map((uri: any) => LoginUriView.fromJSON(uri));
+    const uris = obj.uris.map((uri) => LoginUriView.fromJSON(uri));
     const fido2Credentials = obj.fido2Credentials?.map((key) => Fido2CredentialView.fromJSON(key));
 
     return Object.assign(new LoginView(), obj, {

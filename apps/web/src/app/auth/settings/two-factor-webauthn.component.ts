@@ -1,4 +1,6 @@
-import { Component, NgZone } from "@angular/core";
+import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
+import { Component, Inject, NgZone } from "@angular/core";
+import { FormControl, FormGroup } from "@angular/forms";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
@@ -14,7 +16,7 @@ import { AuthResponse } from "@bitwarden/common/auth/types/auth-response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { DialogService } from "@bitwarden/components";
+import { DialogService, ToastService } from "@bitwarden/components";
 
 import { TwoFactorBaseComponent } from "./two-factor-base.component";
 
@@ -44,7 +46,13 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
 
   override componentName = "app-two-factor-webauthn";
 
+  protected formGroup = new FormGroup({
+    name: new FormControl({ value: "", disabled: !this.keyIdAvailable }),
+  });
+
   constructor(
+    @Inject(DIALOG_DATA) protected data: AuthResponse<TwoFactorWebAuthnResponse>,
+    private dialogRef: DialogRef,
     apiService: ApiService,
     i18nService: I18nService,
     platformUtilsService: PlatformUtilsService,
@@ -52,6 +60,7 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
     logService: LogService,
     userVerificationService: UserVerificationService,
     dialogService: DialogService,
+    toastService: ToastService,
   ) {
     super(
       apiService,
@@ -60,7 +69,9 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
       logService,
       userVerificationService,
       dialogService,
+      toastService,
     );
+    this.auth(data);
   }
 
   auth(authResponse: AuthResponse<TwoFactorWebAuthnResponse>) {
@@ -68,26 +79,37 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
     this.processResponse(authResponse.response);
   }
 
-  async submit() {
+  submit = async () => {
     if (this.webAuthnResponse == null || this.keyIdAvailable == null) {
       // Should never happen.
       return Promise.reject();
     }
+    return this.enable();
+  };
+
+  protected async enable() {
     const request = await this.buildRequestModel(UpdateTwoFactorWebAuthnRequest);
     request.deviceResponse = this.webAuthnResponse;
     request.id = this.keyIdAvailable;
-    request.name = this.name;
+    request.name = this.formGroup.value.name;
 
-    return super.enable(async () => {
-      this.formPromise = this.apiService.putTwoFactorWebAuthn(request);
-      const response = await this.formPromise;
-      await this.processResponse(response);
+    const response = await this.apiService.putTwoFactorWebAuthn(request);
+    this.processResponse(response);
+    this.toastService.showToast({
+      title: this.i18nService.t("success"),
+      message: this.i18nService.t("twoFactorProviderEnabled"),
+      variant: "success",
     });
+    this.onUpdated.emit(response.enabled);
   }
 
-  disable() {
-    return super.disable(this.formPromise);
-  }
+  disable = async () => {
+    await this.disableMethod();
+    if (!this.enabled) {
+      this.onUpdated.emit(this.enabled);
+      this.dialogRef.close();
+    }
+  };
 
   async remove(key: Key) {
     if (this.keysConfiguredCount <= 1 || key.removePromise != null) {
@@ -116,19 +138,15 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
     }
   }
 
-  async readKey() {
+  readKey = async () => {
     if (this.keyIdAvailable == null) {
       return;
     }
     const request = await this.buildRequestModel(SecretVerificationRequest);
-    try {
-      this.challengePromise = this.apiService.getTwoFactorWebAuthnChallenge(request);
-      const challenge = await this.challengePromise;
-      this.readDevice(challenge);
-    } catch (e) {
-      this.logService.error(e);
-    }
-  }
+    this.challengePromise = this.apiService.getTwoFactorWebAuthnChallenge(request);
+    const challenge = await this.challengePromise;
+    this.readDevice(challenge);
+  };
 
   private readDevice(webAuthnChallenge: ChallengeResponse) {
     // eslint-disable-next-line
@@ -164,7 +182,8 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
     this.resetWebAuthn();
     this.keys = [];
     this.keyIdAvailable = null;
-    this.name = null;
+    this.formGroup.get("name").enable();
+    this.formGroup.get("name").setValue(null);
     this.keysConfiguredCount = 0;
     for (let i = 1; i <= 5; i++) {
       if (response.keys != null) {
@@ -187,5 +206,13 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
       }
     }
     this.enabled = response.enabled;
+    this.onUpdated.emit(this.enabled);
+  }
+
+  static open(
+    dialogService: DialogService,
+    config: DialogConfig<AuthResponse<TwoFactorWebAuthnResponse>>,
+  ) {
+    return dialogService.open<boolean>(TwoFactorWebAuthnComponent, config);
   }
 }

@@ -1,11 +1,11 @@
 import { CommonModule, Location } from "@angular/common";
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { Router } from "@angular/router";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { AvatarModule } from "@bitwarden/components";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { AvatarModule, ItemModule } from "@bitwarden/components";
 
 import { AccountSwitcherService, AvailableAccount } from "./services/account-switcher.service";
 
@@ -13,17 +13,18 @@ import { AccountSwitcherService, AvailableAccount } from "./services/account-swi
   standalone: true,
   selector: "auth-account",
   templateUrl: "account.component.html",
-  imports: [CommonModule, JslibModule, AvatarModule],
+  imports: [CommonModule, JslibModule, AvatarModule, ItemModule],
 })
 export class AccountComponent {
   @Input() account: AvailableAccount;
+  @Input() extensionRefreshFlag: boolean = false;
   @Output() loading = new EventEmitter<boolean>();
 
   constructor(
     private accountSwitcherService: AccountSwitcherService,
-    private router: Router,
     private location: Location,
     private i18nService: I18nService,
+    private logService: LogService,
   ) {}
 
   get specialAccountAddId() {
@@ -32,17 +33,23 @@ export class AccountComponent {
 
   async selectAccount(id: string) {
     this.loading.emit(true);
-    await this.accountSwitcherService.selectAccount(id);
+    let result;
+    try {
+      result = await this.accountSwitcherService.selectAccount(id);
+    } catch (e) {
+      this.logService.error("Error selecting account", e);
+    }
 
-    if (id === this.specialAccountAddId) {
-      this.router.navigate(["home"]);
-    } else {
+    // Navigate out of account switching for unlocked accounts
+    // locked or logged out account statuses are handled by background and app.component
+    if (result?.status === AuthenticationStatus.Unlocked) {
       this.location.back();
     }
+    this.loading.emit(false);
   }
 
   get status() {
-    if (this.account.isActive && this.account.status !== AuthenticationStatus.Locked) {
+    if (this.account.isActive) {
       return { text: this.i18nService.t("active"), icon: "bwi-check-circle" };
     }
 

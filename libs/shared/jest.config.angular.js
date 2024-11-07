@@ -6,10 +6,13 @@ const { defaultTransformerOptions } = require("jest-preset-angular/presets");
 module.exports = {
   testMatch: ["**/+(*.)+(spec).+(ts)"],
 
-  // Workaround for a memory leak that crashes tests in CI:
-  // https://github.com/facebook/jest/issues/9430#issuecomment-1149882002
-  // Also anecdotally improves performance when run locally
-  maxWorkers: 3,
+  testPathIgnorePatterns: [
+    "/node_modules/", // default value
+    ".*.type.spec.ts", // ignore type tests (which are checked at compile time and not run by jest)
+  ],
+
+  // Improves on-demand performance, for watches prefer 25%, overridable by setting --maxWorkers
+  maxWorkers: "50%",
 
   transform: {
     "^.+\\.(ts|js|mjs|svg)$": [

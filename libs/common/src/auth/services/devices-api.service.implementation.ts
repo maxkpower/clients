@@ -71,13 +71,20 @@ export class DevicesApiServiceImplementation implements DevicesApiServiceAbstrac
     return new DeviceResponse(result);
   }
 
-  async updateTrust(updateDevicesTrustRequestModel: UpdateDevicesTrustRequest): Promise<void> {
+  async updateTrust(
+    updateDevicesTrustRequestModel: UpdateDevicesTrustRequest,
+    deviceIdentifier: string,
+  ): Promise<void> {
     await this.apiService.send(
       "POST",
       "/devices/update-trust",
       updateDevicesTrustRequestModel,
       true,
       false,
+      null,
+      (headers) => {
+        headers.set("Device-Identifier", deviceIdentifier);
+      },
     );
   }
 
@@ -93,5 +100,19 @@ export class DevicesApiServiceImplementation implements DevicesApiServiceAbstrac
       true,
     );
     return new ProtectedDeviceResponse(result);
+  }
+
+  async postDeviceTrustLoss(deviceIdentifier: string): Promise<void> {
+    await this.apiService.send(
+      "POST",
+      "/devices/lost-trust",
+      null,
+      true,
+      false,
+      null,
+      (headers) => {
+        headers.set("Device-Identifier", deviceIdentifier);
+      },
+    );
   }
 }

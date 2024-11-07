@@ -9,10 +9,24 @@ import { fadeIn } from "../animations";
   animations: [fadeIn],
 })
 export class DialogComponent {
+  /** Background color */
+  @Input()
+  background: "default" | "alt" = "default";
+
   /**
    * Dialog size, more complex dialogs should use large, otherwise default is fine.
    */
   @Input() dialogSize: "small" | "default" | "large" = "default";
+
+  /**
+   * Title to show in the dialog's header
+   */
+  @Input() title: string;
+
+  /**
+   * Subtitle to show in the dialog's header
+   */
+  @Input() subtitle: string;
 
   private _disablePadding = false;
   /**

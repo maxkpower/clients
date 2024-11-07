@@ -3,6 +3,33 @@ import * as path from "path";
 import { Utils } from "./utils";
 
 describe("Utils Service", () => {
+  describe("isGuid", () => {
+    it("is false when null", () => {
+      expect(Utils.isGuid(null)).toBe(false);
+    });
+
+    it("is false when undefined", () => {
+      expect(Utils.isGuid(undefined)).toBe(false);
+    });
+
+    it("is false when empty", () => {
+      expect(Utils.isGuid("")).toBe(false);
+    });
+
+    it("is false when not a string", () => {
+      expect(Utils.isGuid(123 as any)).toBe(false);
+    });
+
+    it("is false when not a guid", () => {
+      expect(Utils.isGuid("not a guid")).toBe(false);
+    });
+
+    it("is true when a guid", () => {
+      // we use a limited guid scope in which all zeroes is invalid
+      expect(Utils.isGuid("00000000-0000-1000-8000-000000000000")).toBe(true);
+    });
+  });
+
   describe("getDomain", () => {
     it("should fail for invalid urls", () => {
       expect(Utils.getDomain(null)).toBeNull();
@@ -258,6 +285,7 @@ describe("Utils Service", () => {
     });
   }
 
+  const asciiHelloWorld = "hello world";
   const asciiHelloWorldArray = [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100];
   const b64HelloWorldString = "aGVsbG8gd29ybGQ=";
 
@@ -621,6 +649,61 @@ describe("Utils Service", () => {
       expect(Utils.daysRemaining(new Date(2023, 10, 12, 10))).toBe(41);
       // leap year
       expect(Utils.daysRemaining(new Date(2024, 9, 2, 10))).toBe(366);
+    });
+  });
+
+  describe("fromBufferToUtf8(...)", () => {
+    const originalIsNode = Utils.isNode;
+
+    afterEach(() => {
+      Utils.isNode = originalIsNode;
+    });
+
+    runInBothEnvironments("should convert an ArrayBuffer to a utf8 string", () => {
+      const buffer = new Uint8Array(asciiHelloWorldArray).buffer;
+      const str = Utils.fromBufferToUtf8(buffer);
+      expect(str).toBe(asciiHelloWorld);
+    });
+
+    runInBothEnvironments("should handle an empty buffer", () => {
+      const buffer = new ArrayBuffer(0);
+      const str = Utils.fromBufferToUtf8(buffer);
+      expect(str).toBe("");
+    });
+
+    runInBothEnvironments("should convert a binary ArrayBuffer to a binary string", () => {
+      const cases = [
+        {
+          input: [
+            174, 21, 17, 79, 39, 130, 132, 173, 49, 180, 113, 118, 160, 15, 47, 99, 57, 208, 141,
+            187, 54, 194, 153, 12, 37, 130, 155, 213, 125, 196, 241, 101,
+          ],
+          output: "�O'���1�qv�/c9Ѝ�6%���}��e",
+        },
+        {
+          input: [
+            88, 17, 69, 41, 75, 69, 128, 225, 252, 219, 146, 72, 162, 14, 139, 120, 30, 239, 105,
+            229, 14, 131, 174, 119, 61, 88, 108, 135, 60, 88, 120, 145,
+          ],
+          output: "XE)KE���ےH��x�i���w=Xl�<Xx�",
+        },
+        {
+          input: [
+            121, 110, 81, 148, 48, 67, 209, 43, 3, 39, 143, 184, 237, 184, 213, 183, 84, 157, 47, 6,
+            31, 183, 99, 142, 155, 156, 192, 107, 118, 64, 176, 36,
+          ],
+          output: "ynQ�0C�+'����շT�/�c����kv@�$",
+        },
+      ];
+
+      cases.forEach((c) => {
+        const buffer = new Uint8Array(c.input).buffer;
+        const str = Utils.fromBufferToUtf8(buffer);
+        // Match the expected output
+        expect(str).toBe(c.output);
+        // Make sure it matches with the Node.js Buffer output
+        expect(str).toBe(Buffer.from(buffer).toString("utf8"));
+      });
     });
   });
 });

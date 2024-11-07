@@ -1,12 +1,21 @@
+import { firstValueFrom } from "rxjs";
+
+import {
+  CollectionRequest,
+  CollectionAccessDetailsResponse,
+  CollectionDetailsResponse,
+  CollectionResponse,
+} from "@bitwarden/admin-console/common";
+import { LogoutReason } from "@bitwarden/auth/common";
+
 import { ApiService as ApiServiceAbstraction } from "../abstractions/api.service";
+import { VaultTimeoutSettingsService } from "../abstractions/vault-timeout/vault-timeout-settings.service";
 import { OrganizationConnectionType } from "../admin-console/enums";
 import { OrganizationSponsorshipCreateRequest } from "../admin-console/models/request/organization/organization-sponsorship-create.request";
 import { OrganizationSponsorshipRedeemRequest } from "../admin-console/models/request/organization/organization-sponsorship-redeem.request";
 import { OrganizationConnectionRequest } from "../admin-console/models/request/organization-connection.request";
 import { ProviderAddOrganizationRequest } from "../admin-console/models/request/provider/provider-add-organization.request";
 import { ProviderOrganizationCreateRequest } from "../admin-console/models/request/provider/provider-organization-create.request";
-import { ProviderSetupRequest } from "../admin-console/models/request/provider/provider-setup.request";
-import { ProviderUpdateRequest } from "../admin-console/models/request/provider/provider-update.request";
 import { ProviderUserAcceptRequest } from "../admin-console/models/request/provider/provider-user-accept.request";
 import { ProviderUserBulkConfirmRequest } from "../admin-console/models/request/provider/provider-user-bulk-confirm.request";
 import { ProviderUserBulkRequest } from "../admin-console/models/request/provider/provider-user-bulk.request";
@@ -30,11 +39,11 @@ import {
   ProviderUserResponse,
   ProviderUserUserDetailsResponse,
 } from "../admin-console/models/response/provider/provider-user.response";
-import { ProviderResponse } from "../admin-console/models/response/provider/provider.response";
 import { SelectionReadOnlyResponse } from "../admin-console/models/response/selection-read-only.response";
 import { TokenService } from "../auth/abstractions/token.service";
 import { CreateAuthRequest } from "../auth/models/request/create-auth.request";
 import { DeviceVerificationRequest } from "../auth/models/request/device-verification.request";
+import { DisableTwoFactorAuthenticatorRequest } from "../auth/models/request/disable-two-factor-authenticator.request";
 import { EmailTokenRequest } from "../auth/models/request/email-token.request";
 import { EmailRequest } from "../auth/models/request/email.request";
 import { DeviceRequest } from "../auth/models/request/identity-token/device.request";
@@ -54,13 +63,14 @@ import { TwoFactorEmailRequest } from "../auth/models/request/two-factor-email.r
 import { TwoFactorProviderRequest } from "../auth/models/request/two-factor-provider.request";
 import { TwoFactorRecoveryRequest } from "../auth/models/request/two-factor-recovery.request";
 import { UpdateProfileRequest } from "../auth/models/request/update-profile.request";
+import { UpdateTdeOffboardingPasswordRequest } from "../auth/models/request/update-tde-offboarding-password.request";
 import { UpdateTempPasswordRequest } from "../auth/models/request/update-temp-password.request";
 import { UpdateTwoFactorAuthenticatorRequest } from "../auth/models/request/update-two-factor-authenticator.request";
 import { UpdateTwoFactorDuoRequest } from "../auth/models/request/update-two-factor-duo.request";
 import { UpdateTwoFactorEmailRequest } from "../auth/models/request/update-two-factor-email.request";
 import { UpdateTwoFactorWebAuthnDeleteRequest } from "../auth/models/request/update-two-factor-web-authn-delete.request";
 import { UpdateTwoFactorWebAuthnRequest } from "../auth/models/request/update-two-factor-web-authn.request";
-import { UpdateTwoFactorYubioOtpRequest } from "../auth/models/request/update-two-factor-yubio-otp.request";
+import { UpdateTwoFactorYubikeyOtpRequest } from "../auth/models/request/update-two-factor-yubikey-otp.request";
 import { ApiKeyResponse } from "../auth/models/response/api-key.response";
 import { AuthRequestResponse } from "../auth/models/response/auth-request.response";
 import { DeviceVerificationResponse } from "../auth/models/response/device-verification.response";
@@ -68,7 +78,6 @@ import { IdentityCaptchaResponse } from "../auth/models/response/identity-captch
 import { IdentityTokenResponse } from "../auth/models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "../auth/models/response/identity-two-factor.response";
 import { KeyConnectorUserKeyResponse } from "../auth/models/response/key-connector-user-key.response";
-import { MasterPasswordPolicyResponse } from "../auth/models/response/master-password-policy.response";
 import { PreloginResponse } from "../auth/models/response/prelogin.response";
 import { RegisterResponse } from "../auth/models/response/register.response";
 import { SsoPreValidateResponse } from "../auth/models/response/sso-pre-validate.response";
@@ -93,19 +102,17 @@ import { SubscriptionResponse } from "../billing/models/response/subscription.re
 import { TaxInfoResponse } from "../billing/models/response/tax-info.response";
 import { TaxRateResponse } from "../billing/models/response/tax-rate.response";
 import { DeviceType } from "../enums";
+import { VaultTimeoutAction } from "../enums/vault-timeout-action.enum";
 import { CollectionBulkDeleteRequest } from "../models/request/collection-bulk-delete.request";
 import { DeleteRecoverRequest } from "../models/request/delete-recover.request";
 import { EventRequest } from "../models/request/event.request";
-import { IapCheckRequest } from "../models/request/iap-check.request";
 import { KdfRequest } from "../models/request/kdf.request";
 import { KeysRequest } from "../models/request/keys.request";
-import { OrganizationImportRequest } from "../models/request/organization-import.request";
 import { PreloginRequest } from "../models/request/prelogin.request";
 import { RegisterRequest } from "../models/request/register.request";
 import { StorageRequest } from "../models/request/storage.request";
 import { UpdateAvatarRequest } from "../models/request/update-avatar.request";
 import { UpdateDomainsRequest } from "../models/request/update-domains.request";
-import { UpdateKeyRequest } from "../models/request/update-key.request";
 import { VerifyDeleteRecoverRequest } from "../models/request/verify-delete-recover.request";
 import { VerifyEmailRequest } from "../models/request/verify-email.request";
 import { BreachAccountResponse } from "../models/response/breach-account.response";
@@ -117,8 +124,12 @@ import { ProfileResponse } from "../models/response/profile.response";
 import { UserKeyResponse } from "../models/response/user-key.response";
 import { AppIdService } from "../platform/abstractions/app-id.service";
 import { EnvironmentService } from "../platform/abstractions/environment.service";
+import { LogService } from "../platform/abstractions/log.service";
 import { PlatformUtilsService } from "../platform/abstractions/platform-utils.service";
+import { flagEnabled } from "../platform/misc/flags";
 import { Utils } from "../platform/misc/utils";
+import { SyncResponse } from "../platform/sync";
+import { UserId } from "../types/guid";
 import { AttachmentRequest } from "../vault/models/request/attachment.request";
 import { CipherBulkDeleteRequest } from "../vault/models/request/cipher-bulk-delete.request";
 import { CipherBulkMoveRequest } from "../vault/models/request/cipher-bulk-move.request";
@@ -129,15 +140,10 @@ import { CipherCreateRequest } from "../vault/models/request/cipher-create.reque
 import { CipherPartialRequest } from "../vault/models/request/cipher-partial.request";
 import { CipherShareRequest } from "../vault/models/request/cipher-share.request";
 import { CipherRequest } from "../vault/models/request/cipher.request";
-import { CollectionRequest } from "../vault/models/request/collection.request";
 import { AttachmentUploadDataResponse } from "../vault/models/response/attachment-upload-data.response";
 import { AttachmentResponse } from "../vault/models/response/attachment.response";
 import { CipherResponse } from "../vault/models/response/cipher.response";
-import {
-  CollectionAccessDetailsResponse,
-  CollectionResponse,
-} from "../vault/models/response/collection.response";
-import { SyncResponse } from "../vault/models/response/sync.response";
+import { OptionalCipherResponse } from "../vault/models/response/optional-cipher.response";
 
 /**
  * @deprecated The `ApiService` class is deprecated and calls should be extracted into individual
@@ -155,7 +161,10 @@ export class ApiService implements ApiServiceAbstraction {
     private platformUtilsService: PlatformUtilsService,
     private environmentService: EnvironmentService,
     private appIdService: AppIdService,
-    private logoutCallback: (expired: boolean) => Promise<void>,
+    private refreshAccessTokenErrorCallback: () => void,
+    private logService: LogService,
+    private logoutCallback: (logoutReason: LogoutReason) => Promise<void>,
+    private vaultTimeoutSettingsService: VaultTimeoutSettingsService,
     private customUserAgent: string = null,
   ) {
     this.device = platformUtilsService.getDevice();
@@ -202,10 +211,12 @@ export class ApiService implements ApiServiceAbstraction {
         ? request.toIdentityToken()
         : request.toIdentityToken(this.platformUtilsService.getClientType());
 
+    const env = await firstValueFrom(this.environmentService.environment$);
+
     const response = await this.fetch(
-      new Request(this.environmentService.getIdentityUrl() + "/connect/token", {
+      new Request(env.getIdentityUrl() + "/connect/token", {
         body: this.qsStringify(identityToken),
-        credentials: this.getCredentials(),
+        credentials: await this.getCredentials(),
         cache: "no-store",
         headers: headers,
         method: "POST",
@@ -225,7 +236,6 @@ export class ApiService implements ApiServiceAbstraction {
         responseJson.TwoFactorProviders2 &&
         Object.keys(responseJson.TwoFactorProviders2).length
       ) {
-        await this.tokenService.clearTwoFactorToken();
         return new IdentityTwoFactorResponse(responseJson);
       } else if (
         response.status === 400 &&
@@ -241,9 +251,10 @@ export class ApiService implements ApiServiceAbstraction {
 
   async refreshIdentityToken(): Promise<any> {
     try {
-      await this.doAuthRefresh();
+      await this.refreshToken();
     } catch (e) {
-      return Promise.reject(null);
+      this.logService.error("Error refreshing access token: ", e);
+      throw e;
     }
   }
 
@@ -322,13 +333,14 @@ export class ApiService implements ApiServiceAbstraction {
   }
 
   async postPrelogin(request: PreloginRequest): Promise<PreloginResponse> {
+    const env = await firstValueFrom(this.environmentService.environment$);
     const r = await this.send(
       "POST",
       "/accounts/prelogin",
       request,
       false,
       true,
-      this.environmentService.getIdentityUrl(),
+      env.getIdentityUrl(),
     );
     return new PreloginResponse(r);
   }
@@ -367,13 +379,14 @@ export class ApiService implements ApiServiceAbstraction {
   }
 
   async postRegister(request: RegisterRequest): Promise<RegisterResponse> {
+    const env = await firstValueFrom(this.environmentService.environment$);
     const r = await this.send(
       "POST",
       "/accounts/register",
       request,
       false,
       true,
-      this.environmentService.getIdentityUrl(),
+      env.getIdentityUrl(),
     );
     return new RegisterResponse(r);
   }
@@ -383,16 +396,8 @@ export class ApiService implements ApiServiceAbstraction {
     return new PaymentResponse(r);
   }
 
-  async postIapCheck(request: IapCheckRequest): Promise<any> {
-    return this.send("POST", "/accounts/iap-check", request, true, false);
-  }
-
   postReinstatePremium(): Promise<any> {
     return this.send("POST", "/accounts/reinstate-premium", null, true, false);
-  }
-
-  postCancelPremium(): Promise<any> {
-    return this.send("POST", "/accounts/cancel-premium", null, true, false);
   }
 
   async postAccountStorage(request: StorageRequest): Promise<PaymentResponse> {
@@ -412,22 +417,12 @@ export class ApiService implements ApiServiceAbstraction {
     return this.send("POST", "/accounts/keys", request, true, false);
   }
 
-  postAccountKey(request: UpdateKeyRequest): Promise<any> {
-    return this.send("POST", "/accounts/key", request, true, false);
-  }
-
   postAccountVerifyEmail(): Promise<any> {
     return this.send("POST", "/accounts/verify-email", null, true, false);
   }
 
   postAccountVerifyEmailToken(request: VerifyEmailRequest): Promise<any> {
     return this.send("POST", "/accounts/verify-email-token", request, false, false);
-  }
-
-  postAccountVerifyPassword(
-    request: SecretVerificationRequest,
-  ): Promise<MasterPasswordPolicyResponse> {
-    return this.send("POST", "/accounts/verify-password", request, true, true);
   }
 
   postAccountRecoverDelete(request: DeleteRecoverRequest): Promise<any> {
@@ -465,6 +460,10 @@ export class ApiService implements ApiServiceAbstraction {
 
   putUpdateTempPassword(request: UpdateTempPasswordRequest): Promise<any> {
     return this.send("PUT", "/accounts/update-temp-password", request, true, false);
+  }
+
+  putUpdateTdeOffboardingPassword(request: UpdateTdeOffboardingPasswordRequest): Promise<void> {
+    return this.send("PUT", "/accounts/update-tde-offboarding-password", request, true, false);
   }
 
   postConvertToKeyConnector(): Promise<void> {
@@ -570,12 +569,22 @@ export class ApiService implements ApiServiceAbstraction {
     return this.send("PUT", "/ciphers/share", request, true, false);
   }
 
-  putCipherCollections(id: string, request: CipherCollectionsRequest): Promise<any> {
-    return this.send("PUT", "/ciphers/" + id + "/collections", request, true, false);
+  async putCipherCollections(
+    id: string,
+    request: CipherCollectionsRequest,
+  ): Promise<OptionalCipherResponse> {
+    const response = await this.send(
+      "PUT",
+      "/ciphers/" + id + "/collections_v2",
+      request,
+      true,
+      true,
+    );
+    return new OptionalCipherResponse(response);
   }
 
   putCipherCollectionsAdmin(id: string, request: CipherCollectionsRequest): Promise<any> {
-    return this.send("PUT", "/ciphers/" + id + "/collections-admin", request, true, false);
+    return this.send("PUT", "/ciphers/" + id + "/collections-admin", request, true, true);
   }
 
   postPurgeCiphers(
@@ -780,7 +789,7 @@ export class ApiService implements ApiServiceAbstraction {
   async postCollection(
     organizationId: string,
     request: CollectionRequest,
-  ): Promise<CollectionResponse> {
+  ): Promise<CollectionDetailsResponse> {
     const r = await this.send(
       "POST",
       "/organizations/" + organizationId + "/collections",
@@ -788,14 +797,14 @@ export class ApiService implements ApiServiceAbstraction {
       true,
       true,
     );
-    return new CollectionResponse(r);
+    return new CollectionAccessDetailsResponse(r);
   }
 
   async putCollection(
     organizationId: string,
     id: string,
     request: CollectionRequest,
-  ): Promise<CollectionResponse> {
+  ): Promise<CollectionDetailsResponse> {
     const r = await this.send(
       "PUT",
       "/organizations/" + organizationId + "/collections/" + id,
@@ -803,7 +812,7 @@ export class ApiService implements ApiServiceAbstraction {
       true,
       true,
     );
-    return new CollectionResponse(r);
+    return new CollectionAccessDetailsResponse(r);
   }
 
   async putCollectionUsers(
@@ -867,16 +876,6 @@ export class ApiService implements ApiServiceAbstraction {
     return r;
   }
 
-  async putGroupUsers(organizationId: string, id: string, request: string[]): Promise<any> {
-    await this.send(
-      "PUT",
-      "/organizations/" + organizationId + "/groups/" + id + "/users",
-      request,
-      true,
-      false,
-    );
-  }
-
   deleteGroupUser(organizationId: string, id: string, organizationUserId: string): Promise<any> {
     return this.send(
       "DELETE",
@@ -892,10 +891,6 @@ export class ApiService implements ApiServiceAbstraction {
   async getPlans(): Promise<ListResponse<PlanResponse>> {
     const r = await this.send("GET", "/plans", null, false, true);
     return new ListResponse(r, PlanResponse);
-  }
-
-  async postPublicImportDirectory(request: OrganizationImportRequest): Promise<any> {
-    return this.send("POST", "/public/organization/import", request, true, false);
   }
 
   async getTaxRates(): Promise<ListResponse<TaxRateResponse>> {
@@ -1005,6 +1000,13 @@ export class ApiService implements ApiServiceAbstraction {
     return new TwoFactorAuthenticatorResponse(r);
   }
 
+  async deleteTwoFactorAuthenticator(
+    request: DisableTwoFactorAuthenticatorRequest,
+  ): Promise<TwoFactorProviderResponse> {
+    const r = await this.send("DELETE", "/two-factor/authenticator", request, true, true);
+    return new TwoFactorProviderResponse(r);
+  }
+
   async putTwoFactorEmail(request: UpdateTwoFactorEmailRequest): Promise<TwoFactorEmailResponse> {
     const r = await this.send("PUT", "/two-factor/email", request, true, true);
     return new TwoFactorEmailResponse(r);
@@ -1030,7 +1032,7 @@ export class ApiService implements ApiServiceAbstraction {
   }
 
   async putTwoFactorYubiKey(
-    request: UpdateTwoFactorYubioOtpRequest,
+    request: UpdateTwoFactorYubikeyOtpRequest,
   ): Promise<TwoFactorYubiKeyResponse> {
     const r = await this.send("PUT", "/two-factor/yubikey", request, true, true);
     return new TwoFactorYubiKeyResponse(r);
@@ -1160,23 +1162,6 @@ export class ApiService implements ApiServiceAbstraction {
 
   async deleteOrganizationConnection(id: string): Promise<void> {
     return this.send("DELETE", "/organizations/connections/" + id, null, true, false);
-  }
-
-  // Provider APIs
-
-  async postProviderSetup(id: string, request: ProviderSetupRequest) {
-    const r = await this.send("POST", "/providers/" + id + "/setup", request, true, true);
-    return new ProviderResponse(r);
-  }
-
-  async getProvider(id: string) {
-    const r = await this.send("GET", "/providers/" + id, null, true, true);
-    return new ProviderResponse(r);
-  }
-
-  async putProvider(id: string, request: ProviderUpdateRequest) {
-    const r = await this.send("PUT", "/providers/" + id, request, true, true);
-    return new ProviderResponse(r);
   }
 
   // Provider User APIs
@@ -1454,8 +1439,8 @@ export class ApiService implements ApiServiceAbstraction {
     return new ListResponse(r, EventResponse);
   }
 
-  async postEventsCollect(request: EventRequest[]): Promise<any> {
-    const authHeader = await this.getActiveBearerToken();
+  async postEventsCollect(request: EventRequest[], userId?: UserId): Promise<any> {
+    const authHeader = await this.tokenService.getAccessToken(userId);
     const headers = new Headers({
       "Device-Type": this.deviceType,
       Authorization: "Bearer " + authHeader,
@@ -1464,10 +1449,11 @@ export class ApiService implements ApiServiceAbstraction {
     if (this.customUserAgent != null) {
       headers.set("User-Agent", this.customUserAgent);
     }
+    const env = await firstValueFrom(this.environmentService.environment$);
     const response = await this.fetch(
-      new Request(this.environmentService.getEventsUrl() + "/collect", {
+      new Request(env.getEventsUrl() + "/collect", {
         cache: "no-store",
-        credentials: this.getCredentials(),
+        credentials: await this.getCredentials(),
         method: "POST",
         body: JSON.stringify(request),
         headers: headers,
@@ -1587,10 +1573,9 @@ export class ApiService implements ApiServiceAbstraction {
   // Helpers
 
   async getActiveBearerToken(): Promise<string> {
-    let accessToken = await this.tokenService.getToken();
+    let accessToken = await this.tokenService.getAccessToken();
     if (await this.tokenService.tokenNeedsRefresh()) {
-      await this.doAuthRefresh();
-      accessToken = await this.tokenService.getToken();
+      accessToken = await this.refreshToken();
     }
     return accessToken;
   }
@@ -1624,11 +1609,12 @@ export class ApiService implements ApiServiceAbstraction {
       headers.set("User-Agent", this.customUserAgent);
     }
 
-    const path = `/account/prevalidate?domainHint=${encodeURIComponent(identifier)}`;
+    const env = await firstValueFrom(this.environmentService.environment$);
+    const path = `/sso/prevalidate?domainHint=${encodeURIComponent(identifier)}`;
     const response = await this.fetch(
-      new Request(this.environmentService.getIdentityUrl() + path, {
+      new Request(env.getIdentityUrl() + path, {
         cache: "no-store",
-        credentials: this.getCredentials(),
+        credentials: await this.getCredentials(),
         headers: headers,
         method: "GET",
       }),
@@ -1729,22 +1715,24 @@ export class ApiService implements ApiServiceAbstraction {
     );
   }
 
-  protected async doAuthRefresh(): Promise<void> {
+  protected async refreshToken(): Promise<string> {
     const refreshToken = await this.tokenService.getRefreshToken();
     if (refreshToken != null && refreshToken !== "") {
-      return this.doRefreshToken();
+      return this.refreshAccessToken();
     }
 
     const clientId = await this.tokenService.getClientId();
     const clientSecret = await this.tokenService.getClientSecret();
     if (!Utils.isNullOrWhitespace(clientId) && !Utils.isNullOrWhitespace(clientSecret)) {
-      return this.doApiTokenRefresh();
+      return this.refreshApiToken();
     }
 
-    throw new Error("Cannot refresh token, no refresh token or api keys are stored");
+    this.refreshAccessTokenErrorCallback();
+
+    throw new Error("Cannot refresh access token, no refresh token or api keys are stored.");
   }
 
-  protected async doRefreshToken(): Promise<void> {
+  protected async refreshAccessToken(): Promise<string> {
     const refreshToken = await this.tokenService.getRefreshToken();
     if (refreshToken == null || refreshToken === "") {
       throw new Error();
@@ -1758,16 +1746,17 @@ export class ApiService implements ApiServiceAbstraction {
       headers.set("User-Agent", this.customUserAgent);
     }
 
-    const decodedToken = await this.tokenService.decodeToken();
+    const env = await firstValueFrom(this.environmentService.environment$);
+    const decodedToken = await this.tokenService.decodeAccessToken();
     const response = await this.fetch(
-      new Request(this.environmentService.getIdentityUrl() + "/connect/token", {
+      new Request(env.getIdentityUrl() + "/connect/token", {
         body: this.qsStringify({
           grant_type: "refresh_token",
           client_id: decodedToken.client_id,
           refresh_token: refreshToken,
         }),
         cache: "no-store",
-        credentials: this.getCredentials(),
+        credentials: await this.getCredentials(),
         headers: headers,
         method: "POST",
       }),
@@ -1776,18 +1765,33 @@ export class ApiService implements ApiServiceAbstraction {
     if (response.status === 200) {
       const responseJson = await response.json();
       const tokenResponse = new IdentityTokenResponse(responseJson);
-      await this.tokenService.setTokens(
+
+      const newDecodedAccessToken = await this.tokenService.decodeAccessToken(
         tokenResponse.accessToken,
-        tokenResponse.refreshToken,
-        null,
       );
+      const userId = newDecodedAccessToken.sub;
+
+      const vaultTimeoutAction = await firstValueFrom(
+        this.vaultTimeoutSettingsService.getVaultTimeoutActionByUserId$(userId),
+      );
+      const vaultTimeout = await firstValueFrom(
+        this.vaultTimeoutSettingsService.getVaultTimeoutByUserId$(userId),
+      );
+
+      const refreshedTokens = await this.tokenService.setTokens(
+        tokenResponse.accessToken,
+        vaultTimeoutAction as VaultTimeoutAction,
+        vaultTimeout,
+        tokenResponse.refreshToken,
+      );
+      return refreshedTokens.accessToken;
     } else {
       const error = await this.handleError(response, true, true);
       return Promise.reject(error);
     }
   }
 
-  protected async doApiTokenRefresh(): Promise<void> {
+  protected async refreshApiToken(): Promise<string> {
     const clientId = await this.tokenService.getClientId();
     const clientSecret = await this.tokenService.getClientSecret();
 
@@ -1805,7 +1809,22 @@ export class ApiService implements ApiServiceAbstraction {
       throw new Error("Invalid response received when refreshing api token");
     }
 
-    await this.tokenService.setToken(response.accessToken);
+    const newDecodedAccessToken = await this.tokenService.decodeAccessToken(response.accessToken);
+    const userId = newDecodedAccessToken.sub;
+
+    const vaultTimeoutAction = await firstValueFrom(
+      this.vaultTimeoutSettingsService.getVaultTimeoutActionByUserId$(userId),
+    );
+    const vaultTimeout = await firstValueFrom(
+      this.vaultTimeoutSettingsService.getVaultTimeoutByUserId$(userId),
+    );
+
+    const refreshedToken = await this.tokenService.setAccessToken(
+      response.accessToken,
+      vaultTimeoutAction as VaultTimeoutAction,
+      vaultTimeout,
+    );
+    return refreshedToken;
   }
 
   async send(
@@ -1817,42 +1836,60 @@ export class ApiService implements ApiServiceAbstraction {
     apiUrl?: string,
     alterHeaders?: (headers: Headers) => void,
   ): Promise<any> {
-    apiUrl = Utils.isNullOrWhitespace(apiUrl) ? this.environmentService.getApiUrl() : apiUrl;
+    const env = await firstValueFrom(this.environmentService.environment$);
+    apiUrl = Utils.isNullOrWhitespace(apiUrl) ? env.getApiUrl() : apiUrl;
 
     // Prevent directory traversal from malicious paths
     const pathParts = path.split("?");
     const requestUrl =
       apiUrl + Utils.normalizePath(pathParts[0]) + (pathParts.length > 1 ? `?${pathParts[1]}` : "");
 
-    const headers = new Headers({
-      "Device-Type": this.deviceType,
-    });
-    if (this.customUserAgent != null) {
-      headers.set("User-Agent", this.customUserAgent);
-    }
+    const [requestHeaders, requestBody] = await this.buildHeadersAndBody(
+      authed,
+      hasResponse,
+      body,
+      alterHeaders,
+    );
 
     const requestInit: RequestInit = {
       cache: "no-store",
-      credentials: this.getCredentials(),
+      credentials: await this.getCredentials(),
       method: method,
     };
+    requestInit.headers = requestHeaders;
+    requestInit.body = requestBody;
+    const response = await this.fetch(new Request(requestUrl, requestInit));
 
-    if (authed) {
-      const authHeader = await this.getActiveBearerToken();
-      headers.set("Authorization", "Bearer " + authHeader);
+    const responseType = response.headers.get("content-type");
+    const responseIsJson = responseType != null && responseType.indexOf("application/json") !== -1;
+    const responseIsCsv = responseType != null && responseType.indexOf("text/csv") !== -1;
+    if (hasResponse && response.status === 200 && responseIsJson) {
+      const responseJson = await response.json();
+      return responseJson;
+    } else if (hasResponse && response.status === 200 && responseIsCsv) {
+      return await response.text();
+    } else if (response.status !== 200) {
+      const error = await this.handleError(response, false, authed);
+      return Promise.reject(error);
     }
-    if (body != null) {
-      if (typeof body === "string") {
-        requestInit.body = body;
-        headers.set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-      } else if (typeof body === "object") {
-        if (body instanceof FormData) {
-          requestInit.body = body;
-        } else {
-          headers.set("Content-Type", "application/json; charset=utf-8");
-          requestInit.body = JSON.stringify(body);
-        }
-      }
+  }
+
+  private async buildHeadersAndBody(
+    authed: boolean,
+    hasResponse: boolean,
+    body: any,
+    alterHeaders: (headers: Headers) => void,
+  ): Promise<[Headers, any]> {
+    let requestBody: any = null;
+    const headers = new Headers({
+      "Device-Type": this.deviceType,
+    });
+
+    if (flagEnabled("prereleaseBuild")) {
+      headers.set("Is-Prerelease", "true");
+    }
+    if (this.customUserAgent != null) {
+      headers.set("User-Agent", this.customUserAgent);
     }
     if (hasResponse) {
       headers.set("Accept", "application/json");
@@ -1860,19 +1897,26 @@ export class ApiService implements ApiServiceAbstraction {
     if (alterHeaders != null) {
       alterHeaders(headers);
     }
-
-    requestInit.headers = headers;
-    const response = await this.fetch(new Request(requestUrl, requestInit));
-
-    const responseType = response.headers.get("content-type");
-    const responseIsJson = responseType != null && responseType.indexOf("application/json") !== -1;
-    if (hasResponse && response.status === 200 && responseIsJson) {
-      const responseJson = await response.json();
-      return responseJson;
-    } else if (response.status !== 200) {
-      const error = await this.handleError(response, false, authed);
-      return Promise.reject(error);
+    if (authed) {
+      const authHeader = await this.getActiveBearerToken();
+      headers.set("Authorization", "Bearer " + authHeader);
     }
+
+    if (body != null) {
+      if (typeof body === "string") {
+        requestBody = body;
+        headers.set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+      } else if (typeof body === "object") {
+        if (body instanceof FormData) {
+          requestBody = body;
+        } else {
+          headers.set("Content-Type", "application/json; charset=utf-8");
+          requestBody = JSON.stringify(body);
+        }
+      }
+    }
+
+    return [headers, requestBody];
   }
 
   private async handleError(
@@ -1896,7 +1940,7 @@ export class ApiService implements ApiServiceAbstraction {
           responseJson != null &&
           responseJson.error === "invalid_grant")
       ) {
-        await this.logoutCallback(true);
+        await this.logoutCallback("invalidGrantError");
         return null;
       }
     }
@@ -1912,8 +1956,9 @@ export class ApiService implements ApiServiceAbstraction {
       .join("&");
   }
 
-  private getCredentials(): RequestCredentials {
-    if (!this.isWebClient || this.environmentService.hasBaseUrl()) {
+  private async getCredentials(): Promise<RequestCredentials> {
+    const env = await firstValueFrom(this.environmentService.environment$);
+    if (!this.isWebClient || env.hasBaseUrl()) {
       return "include";
     }
     return undefined;

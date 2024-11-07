@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Welcome back"
+  },
   "moveToOrgDesc": {
     "message": "سازمانی را انتخاب کنید که می‌خواهید این مورد را به آن منتقل کنید. انتقال به یک سازمان، مالکیت مورد را به آن سازمان منتقل می‌کند. پس از انتقال این مورد، دیگر مالک مستقیم آن نخواهید بود."
   },
@@ -259,6 +262,9 @@
   "generatePassword": {
     "message": "تولید کلمه عبور"
   },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
+  },
   "type": {
     "message": "نوع"
   },
@@ -394,6 +400,10 @@
   "copyPassword": {
     "message": "کپی کلمه عبور"
   },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
+  },
   "copyUri": {
     "message": "کپی نشانی اینترنتی"
   },
@@ -403,17 +413,59 @@
   "length": {
     "message": "طول"
   },
+  "passwordMinLength": {
+    "message": "حداقل طول رمز عبور"
+  },
   "uppercase": {
-    "message": "حروف بزرگ (A-Z)"
+    "message": "حروف بزرگ (A-Z)",
+    "description": "deprecated. Use uppercaseLabel instead."
   },
   "lowercase": {
-    "message": "حروف کوچک (a-z)"
+    "message": "حروف کوچک (a-z)",
+    "description": "deprecated. Use lowercaseLabel instead."
   },
   "numbers": {
-    "message": "اعداد (‪0-9‬)"
+    "message": "اعداد (‪0-9‬)",
+    "description": "deprecated. Use numbersLabel instead."
   },
   "specialCharacters": {
     "message": "نویسه‌های ویژه (!@#$%^&*)"
+  },
+  "include": {
+    "message": "Include",
+    "description": "Card header for password generator include block"
+  },
+  "uppercaseDescription": {
+    "message": "Include uppercase characters",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "Include lowercase characters",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "Include numbers",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "Include special characters",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
   },
   "numWords": {
     "message": "تعداد کلمات"
@@ -439,7 +491,16 @@
     "description": "Minimum Special Characters"
   },
   "ambiguous": {
-    "message": "از کاراکترهای مبهم اجتناب کن"
+    "message": "از کاراکترهای مبهم اجتناب کن",
+    "description": "deprecated. Use avoidAmbiguous instead."
+  },
+  "avoidAmbiguous": {
+    "message": "Avoid ambiguous characters",
+    "description": "Label for the avoid ambiguous characters checkbox."
+  },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
   },
   "searchCollection": {
     "message": "جستجوی مجموعه"
@@ -496,8 +557,29 @@
   "createAccount": {
     "message": "ایجاد حساب کاربری"
   },
+  "newToBitwarden": {
+    "message": "New to Bitwarden?"
+  },
+  "setAStrongPassword": {
+    "message": "تنظیم رمز عبور قوی"
+  },
+  "finishCreatingYourAccountBySettingAPassword": {
+    "message": "ایجاد حساب‌تان را با تنظیم کردن رمز عبور تکمیل کنید"
+  },
   "logIn": {
     "message": "ورود"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "loginWithDevice": {
+    "message": "Log in with device"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
   },
   "submit": {
     "message": "ثبت"
@@ -517,8 +599,60 @@
   "masterPassHint": {
     "message": "یادآور کلمه عبور اصلی (اختیاری)"
   },
+  "masterPassHintText": {
+    "message": "If you forget your password, the password hint can be sent to your email. $CURRENT$/$MAXIMUM$ character maximum.",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "maximum": {
+        "content": "$2",
+        "example": "50"
+      }
+    }
+  },
+  "masterPassword": {
+    "message": "Master password"
+  },
+  "masterPassImportant": {
+    "message": "Your master password cannot be recovered if you forget it!"
+  },
+  "confirmMasterPassword": {
+    "message": "Confirm master password"
+  },
+  "masterPassHintLabel": {
+    "message": "Master password hint"
+  },
+  "joinOrganization": {
+    "message": "Join organization"
+  },
+  "joinOrganizationName": {
+    "message": "Join $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
+  "finishJoiningThisOrganizationBySettingAMasterPassword": {
+    "message": "Finish joining this organization by setting a master password."
+  },
   "settings": {
     "message": "تنظیمات"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "یادآور کلمه عبور"
@@ -551,11 +685,23 @@
       }
     }
   },
+  "youSuccessfullyLoggedIn": {
+    "message": "شما با موفقیت وارد شدید"
+  },
+  "youMayCloseThisWindow": {
+    "message": "می‌توانید این پنجره را ببندید"
+  },
   "masterPassDoesntMatch": {
     "message": "کلمه عبور اصلی با تکرار آن مطابقت ندارد."
   },
   "newAccountCreated": {
     "message": "حساب کاربری جدید شما ساخته شد! حالا می‌توانید وارد شوید."
+  },
+  "newAccountCreated2": {
+    "message": "Your new account has been created!"
+  },
+  "youHaveBeenLoggedIn": {
+    "message": "You have been logged in!"
   },
   "masterPassSent": {
     "message": "ما یک ایمیل همراه با یادآور کلمه عبور اصلی برایتان ارسال کردیم."
@@ -586,6 +732,9 @@
   },
   "verificationCodeRequired": {
     "message": "کد تأیید مورد نیاز است."
+  },
+  "webauthnCancelOrTimeout": {
+    "message": "The authentication was cancelled or took too long. Please try again."
   },
   "invalidVerificationCode": {
     "message": "کد تأیید نامعتبر است"
@@ -638,18 +787,18 @@
   "authenticatorAppTitle": {
     "message": "برنامه احراز هویت"
   },
-  "authenticatorAppDesc": {
-    "message": "از یک برنامه احراز هویت (مانند Authy یا Google Authenticator) استفاده کنید تا کدهای تأیید بر پایه زمان تولید کنید.",
-    "description": "'Authy' and 'Google Authenticator' are product names and should not be translated."
+  "authenticatorAppDescV2": {
+    "message": "Enter a code generated by an authenticator app like Bitwarden Authenticator.",
+    "description": "'Bitwarden Authenticator' is a product name and should not be translated."
   },
-  "yubiKeyTitle": {
-    "message": "کلید امنیتی YubiKey OTP"
+  "yubiKeyTitleV2": {
+    "message": "Yubico OTP security key"
   },
   "yubiKeyDesc": {
     "message": "از یک YubiKey برای دسترسی به حسابتان استفاده کنید. همراه با دستگاه‌های YubiKey 4 ،4 Nano ،NEO کار می‌کند."
   },
-  "duoDesc": {
-    "message": "با Duo Security با استفاده از برنامه تلفن همراه، پیامک، تماس تلفنی، یا کلید امنیتی U2F تأیید کنید.",
+  "duoDescV2": {
+    "message": "Enter a code generated by Duo Security.",
     "description": "'Duo Security' and 'Duo Mobile' are product names and should not be translated."
   },
   "duoOrganizationDesc": {
@@ -665,8 +814,8 @@
   "emailTitle": {
     "message": "ایمیل"
   },
-  "emailDesc": {
-    "message": "کد تأیید برایتان ارسال می‌شود."
+  "emailDescV2": {
+    "message": "Enter a code sent to your email."
   },
   "loginUnavailable": {
     "message": "ورود به سیستم در دسترس نیست"
@@ -686,6 +835,15 @@
   "selfHostedEnvironmentFooter": {
     "message": "نشانی اینترنتی پایه فرضی نصب Bitwarden میزبانی شده را مشخص کنید."
   },
+  "selfHostedBaseUrlHint": {
+    "message": "Specify the base URL of your on-premises hosted Bitwarden installation. Example: https://bitwarden.company.com"
+  },
+  "selfHostedCustomEnvHeader": {
+    "message": "For advanced configuration, you can specify the base URL of each service independently."
+  },
+  "selfHostedEnvFormInvalid": {
+    "message": "You must add either the base Server URL or at least one custom environment."
+  },
   "customEnvironment": {
     "message": "محیط سفارشی"
   },
@@ -694,6 +852,10 @@
   },
   "baseUrl": {
     "message": "نشانی اینترنتی سرور"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "نشانی سرور API"
@@ -734,8 +896,23 @@
   "loggedOut": {
     "message": "خارج شد"
   },
+  "loggedOutDesc": {
+    "message": "شما از حساب خود خارج شده‌اید."
+  },
   "loginExpired": {
     "message": "نشست ورود شما منقضی شده است."
+  },
+  "restartRegistration": {
+    "message": "Restart registration"
+  },
+  "expiredLink": {
+    "message": "Expired link"
+  },
+  "pleaseRestartRegistrationOrTryLoggingIn": {
+    "message": "Please restart registration or try logging in."
+  },
+  "youMayAlreadyHaveAnAccount": {
+    "message": "You may already have an account"
   },
   "logOutConfirmation": {
     "message": "آیا مطمئنید که می‌خواهید خارج شوید؟"
@@ -791,8 +968,11 @@
   "changeMasterPass": {
     "message": "تغییر کلمه عبور اصلی"
   },
-  "changeMasterPasswordConfirmation": {
-    "message": "شما می‌توانید کلمه عبور اصلی خود را در bitwarden.com تغییر دهید. آیا می‌خواهید از سایت بازدید کنید؟"
+  "continueToWebApp": {
+    "message": "با برنامه وب ادامه می‌دهید؟"
+  },
+  "changeMasterPasswordOnWebConfirmation": {
+    "message": "می‌توانید کلمه عبور اصلی خود را در برنامه وب Bitwarden تغییر دهید."
   },
   "fingerprintPhrase": {
     "message": "عبارت اثر انگشت",
@@ -819,6 +999,18 @@
   },
   "yourVaultIsLocked": {
     "message": "گاوصندوق شما قفل شده است. برای ادامه هویت خود را تأیید کنید."
+  },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
   },
   "unlock": {
     "message": "باز کردن قفل"
@@ -847,6 +1039,9 @@
   },
   "vaultTimeout": {
     "message": "متوقف شدن گاو‌صندوق"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "انتخاب کنید که گاو‌صندوق شما چه زمانی عمل توقف زمانی گاوصندوق را انجام دهد."
@@ -1052,6 +1247,9 @@
     "message": "کپی شماره",
     "description": "Copy credit card number"
   },
+  "copyEmail": {
+    "message": "Copy email"
+  },
   "copySecurityCode": {
     "message": "کپی کد امنیتی",
     "description": "Copy credit card security code (CVV)"
@@ -1097,6 +1295,9 @@
   },
   "premiumPurchaseAlert": {
     "message": "شما می‌توانید عضویت پرمیوم را از گاوصندوق وب bitwarden.com خریداری کنید. مایلید اکنون از وب‌سایت بازید کنید؟"
+  },
+  "premiumPurchaseAlertV2": {
+    "message": "You can purchase Premium from your account settings on the Bitwarden web app."
   },
   "premiumCurrentMember": {
     "message": "شما یک عضو پرمیوم هستید!"
@@ -1200,6 +1401,15 @@
       }
     }
   },
+  "copySuccessful": {
+    "message": "Copy Successful"
+  },
+  "errorRefreshingAccessToken": {
+    "message": "Access Token Refresh Error"
+  },
+  "errorRefreshingAccessTokenDesc": {
+    "message": "No refresh token or API keys found. Please try logging out and logging back in."
+  },
   "help": {
     "message": "راهنما"
   },
@@ -1287,11 +1497,41 @@
     "message": "کلمه عبور به‌روزرسانی شد",
     "description": "ex. Date this password was updated"
   },
+  "exportFrom": {
+    "message": "صادرات از"
+  },
   "exportVault": {
     "message": "برون ریزی گاوصندوق"
   },
   "fileFormat": {
     "message": "فرمت پرونده"
+  },
+  "fileEncryptedExportWarningDesc": {
+    "message": "This file export will be password protected and require the file password to decrypt."
+  },
+  "filePassword": {
+    "message": "رمز فایل"
+  },
+  "exportPasswordDescription": {
+    "message": "This password will be used to export and import this file"
+  },
+  "accountRestrictedOptionDescription": {
+    "message": "Use your account encryption key, derived from your account's username and Master Password, to encrypt the export and restrict import to only the current Bitwarden account."
+  },
+  "passwordProtected": {
+    "message": "محافظت ‌شده با کلمه عبور"
+  },
+  "passwordProtectedOptionDescription": {
+    "message": "Set a file password to encrypt the export and import it to any Bitwarden account using the password for decryption."
+  },
+  "exportTypeHeading": {
+    "message": "نوع صادرات"
+  },
+  "accountRestricted": {
+    "message": "حساب کاربری محدود شده است"
+  },
+  "filePasswordAndConfirmFilePasswordDoNotMatch": {
+    "message": "عدم تطابق \"رمز فایل\" و \"تایید رمز فایل\" با یکدیگر."
   },
   "hCaptchaUrl": {
     "message": "نشانی اینترنتی hCaptcha",
@@ -1389,14 +1629,23 @@
   "invalidPin": {
     "message": "کد پین غیر معتبر است."
   },
+  "tooManyInvalidPinEntryAttemptsLoggingOut": {
+    "message": "Too many invalid PIN entry attempts. Logging out."
+  },
   "unlockWithWindowsHello": {
     "message": "باز کردن با Windows Hello"
   },
   "additionalWindowsHelloSettings": {
     "message": "تنظیمات اضافی Windows Hello"
   },
+  "unlockWithPolkit": {
+    "message": "Unlock with system authentication"
+  },
   "windowsHelloConsentMessage": {
     "message": "تأیید برای Bitwarden."
+  },
+  "polkitConsentMessage": {
+    "message": "Authenticate to unlock Bitwarden."
   },
   "unlockWithTouchId": {
     "message": "باز کردن با Touch ID"
@@ -1410,6 +1659,9 @@
   "autoPromptWindowsHello": {
     "message": "درخواست Windows Hello در هنگام راه اندازی"
   },
+  "autoPromptPolkit": {
+    "message": "Ask for system authentication on launch"
+  },
   "autoPromptTouchId": {
     "message": "درخواست Touch ID در هنگام راه اندازی"
   },
@@ -1419,8 +1671,8 @@
   "recommendedForSecurity": {
     "message": "برای امنیت توصیه می‌شود."
   },
-  "lockWithMasterPassOnRestart": {
-    "message": "در زمان شروع مجدد، با کلمه عبور اصلی قفل کن"
+  "lockWithMasterPassOnRestart1": {
+    "message": "Lock with master password on restart"
   },
   "deleteAccount": {
     "message": "حذف حساب"
@@ -1430,6 +1682,12 @@
   },
   "deleteAccountWarning": {
     "message": "حذف حساب شما دائمی است. نمی‌توان آن را برگرداند."
+  },
+  "cannotDeleteAccount": {
+    "message": "Cannot delete account"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "This action cannot be completed because your account is owned by an organization. Contact your organization administrator for additional details."
   },
   "accountDeleted": {
     "message": "حساب حذف شد"
@@ -1497,7 +1755,7 @@
   },
   "lock": {
     "message": "قفل",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "زباله‌ها",
@@ -1540,6 +1798,19 @@
   "orgRequiresYouToSetPassword": {
     "message": "Your organization requires you to set a master password.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "out of $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "verificationRequired": {
+    "message": "تایید مورد نیاز است",
+    "description": "Default title for the user verification dialog."
   },
   "currentMasterPass": {
     "message": "کلمه عبور اصلی فعلی"
@@ -1592,6 +1863,21 @@
   "masterPasswordPolicyRequirementsNotMet": {
     "message": "کلمه عبور اصلی جدید شما از شرایط سیاست پیروی نمی‌کند."
   },
+  "receiveMarketingEmailsV2": {
+    "message": "Get advice, announcements, and research opportunities from Bitwarden in your inbox."
+  },
+  "unsubscribe": {
+    "message": "Unsubscribe"
+  },
+  "atAnyTime": {
+    "message": "در هر زمان."
+  },
+  "byContinuingYouAgreeToThe": {
+    "message": "با ادامه دادن، شما موافقت می‌کنید که"
+  },
+  "and": {
+    "message": "و"
+  },
   "acceptPolicies": {
     "message": "با علامت زدن این کادر با موارد زیر موافقت می‌کنید:"
   },
@@ -1601,8 +1887,8 @@
   "enableBrowserIntegration": {
     "message": "فعال کردن ادغام مرورگر"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "یکپارچه سازی مرورگر برای بیومتریک در مرورگر استفاده می‌شود."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "اجازه ادغام مرورگر DuckDuckGo را بدهید"
@@ -1612,6 +1898,12 @@
   },
   "browserIntegrationUnsupportedTitle": {
     "message": "ادغام مرورگر پشتیبانی نمی‌شود"
+  },
+  "browserIntegrationErrorTitle": {
+    "message": "Error enabling browser integration"
+  },
+  "browserIntegrationErrorDesc": {
+    "message": "An error has occurred while enabling browser integration."
   },
   "browserIntegrationMasOnlyDesc": {
     "message": "متأسفانه در حال حاضر ادغام مرورگر فقط در نسخه Mac App Store پشتیبانی می‌شود."
@@ -1627,6 +1919,12 @@
   },
   "enableBrowserIntegrationFingerprintDesc": {
     "message": "هنگام ایجاد پیوند بین دسکتاپ و مرورگر خود، با تأیید اعتبار اثر انگشت، یک لایه امنیتی دیگر را فعال کنید. درصورت فعال بودن، این امر مستلزم مداخله و تأیید کاربر در هر بار برقراری ارتباط است."
+  },
+  "enableHardwareAcceleration": {
+    "message": "استفاده از شتاب سخت افزاری"
+  },
+  "enableHardwareAccelerationDesc": {
+    "message": "By default this setting is ON. Turn OFF only if you experience graphical issues. Restart is required."
   },
   "approve": {
     "message": "تأیید"
@@ -1657,6 +1955,12 @@
   },
   "biometricsNotEnabledDesc": {
     "message": "بیومتریک مرورگر ابتدا نیاز به فعالسازی بیومتریک دسکتاپ در تنظیمات دارد."
+  },
+  "biometricsManualSetupTitle": {
+    "message": "Automatic setup not available"
+  },
+  "biometricsManualSetupDesc": {
+    "message": "Due to the installation method, biometrics support could not be automatically enabled. Would you like to open the documentation on how to do this manually?"
   },
   "personalOwnershipSubmitError": {
     "message": "به دلیل سیاست پرمیوم، برای ذخیره موارد در گاوصندوق شخصی خود محدود شده اید. گزینه مالکیت را به یک سازمان تغییر دهید و مجموعه های موجود را انتخاب کنید."
@@ -1842,6 +2146,9 @@
   "emailVerificationRequired": {
     "message": "تأیید ایمیل لازم است"
   },
+  "emailVerifiedV2": {
+    "message": "Email verified"
+  },
   "emailVerificationRequiredDesc": {
     "message": "برای استفاده از این ویژگی باید ایمیل خود را تأیید کنید."
   },
@@ -1866,14 +2173,53 @@
   "updateWeakMasterPasswordWarning": {
     "message": "کلمه عبور اصلی شما با یک یا چند سیاست سازمان‌تان مطابقت ندارد. برای دسترسی به گاوصندوق، باید همین حالا کلمه عبور اصلی خود را به‌روز کنید. در صورت ادامه، شما از نشست فعلی خود خارج می‌شوید و باید دوباره وارد سیستم شوید. نشست فعال در دستگاه های دیگر ممکن است تا یک ساعت همچنان فعال باقی بمانند."
   },
+  "tdeDisabledMasterPasswordRequired": {
+    "message": "Your organization has disabled trusted device encryption. Please set a master password to access your vault."
+  },
+  "tryAgain": {
+    "message": "دوباره سعی کنید"
+  },
+  "verificationRequiredForActionSetPinToContinue": {
+    "message": "Verification required for this action. Set a PIN to continue."
+  },
+  "setPin": {
+    "message": "تنظیم PIN"
+  },
+  "verifyWithBiometrics": {
+    "message": "تایید با استفاده از بیومتریک"
+  },
+  "awaitingConfirmation": {
+    "message": "در انتظار تایید"
+  },
+  "couldNotCompleteBiometrics": {
+    "message": "تکمیل بیومتریک ممکن نشد."
+  },
+  "needADifferentMethod": {
+    "message": "نیازمند روش دیگری هستید؟"
+  },
+  "useMasterPassword": {
+    "message": "استفاده از رمز عبور اصلی"
+  },
+  "usePin": {
+    "message": "استفاده از پین"
+  },
+  "useBiometrics": {
+    "message": "استفاده از بیومتریک"
+  },
+  "enterVerificationCodeSentToEmail": {
+    "message": "کد تأییدی را که به ایمیل شما ارسال شده است وارد کنید."
+  },
+  "resendCode": {
+    "message": "ارسال دوباره کد"
+  },
   "hours": {
     "message": "ساعت"
   },
   "minutes": {
     "message": "دقیقه"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "سیاست‌های سازمانتان بر مهلت زمانی گاوصندوق شما تأثیر می‌گذارد. حداکثر زمان مجاز گاوصندوق $HOURS$ ساعت و $MINUTES$ دقیقه است",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -1913,6 +2259,9 @@
   },
   "vaultTimeoutTooLarge": {
     "message": "مهلت زمانی شما بیش از محدودیت های تعیین شده توسط سازمانتان است."
+  },
+  "inviteAccepted": {
+    "message": "Invitation accepted"
   },
   "resetPasswordPolicyAutoEnroll": {
     "message": "ثبت نام خودکار"
@@ -1983,6 +2332,9 @@
   "switchAccount": {
     "message": "تعویض حساب کاربری"
   },
+  "alreadyHaveAccount": {
+    "message": "در حال حاضر حساب کاربری دارید؟"
+  },
   "options": {
     "message": "گزینه‌ها"
   },
@@ -2001,14 +2353,30 @@
       }
     }
   },
+  "exportingOrganizationVaultTitle": {
+    "message": "Exporting organization vault"
+  },
+  "exportingOrganizationVaultDesc": {
+    "message": "Only the organization vault associated with $ORGANIZATION$ will be exported. Items in individual vaults or other organizations will not be included.",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "ACME Moving Co."
+      }
+    }
+  },
   "locked": {
     "message": "قفل شده"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "باز شده"
   },
   "generator": {
-    "message": "تولید کننده"
+    "message": "تولید کننده",
+    "description": "Short for 'credential generator'."
   },
   "whatWouldYouLikeToGenerate": {
     "message": "چه چیزی دوست دارید تولید کنید؟"
@@ -2021,6 +2389,23 @@
   },
   "generateUsername": {
     "message": "ایجاد نام کاربری"
+  },
+  "generateEmail": {
+    "message": "Generate email"
+  },
+  "generatorBoundariesHint": {
+    "message": "Value must be between $MIN$ and $MAX$",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "نوع نام کاربری"
@@ -2064,6 +2449,116 @@
   },
   "forwardedEmailDesc": {
     "message": "یک نام مستعار ایمیل با یک سرویس ارسال خارجی ایجاد کنید."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
+  },
+  "forwarderError": {
+    "message": "$SERVICENAME$ error: $ERRORMESSAGE$",
+    "description": "Reports an error returned by a forwarding service to the user.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      },
+      "errormessage": {
+        "content": "$2",
+        "example": "Invalid characters in domain name."
+      }
+    }
+  },
+  "forwarderGeneratedBy": {
+    "message": "Generated by Bitwarden.",
+    "description": "Displayed with the address on the forwarding service's configuration screen."
+  },
+  "forwarderGeneratedByWithWebsite": {
+    "message": "Website: $WEBSITE$. Generated by Bitwarden.",
+    "description": "Displayed with the address on the forwarding service's configuration screen.",
+    "placeholders": {
+      "WEBSITE": {
+        "content": "$1",
+        "example": "www.example.com"
+      }
+    }
+  },
+  "forwaderInvalidToken": {
+    "message": "Invalid $SERVICENAME$ API token",
+    "description": "Displayed when the user's API token is empty or rejected by the forwarding service.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwaderInvalidTokenWithMessage": {
+    "message": "Invalid $SERVICENAME$ API token: $ERRORMESSAGE$",
+    "description": "Displayed when the user's API token is rejected by the forwarding service with an error message.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      },
+      "errormessage": {
+        "content": "$2",
+        "example": "Please verify your email address to continue."
+      }
+    }
+  },
+  "forwarderNoAccountId": {
+    "message": "Unable to obtain $SERVICENAME$ masked email account ID.",
+    "description": "Displayed when the forwarding service fails to return an account ID.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderNoDomain": {
+    "message": "Invalid $SERVICENAME$ domain.",
+    "description": "Displayed when the domain is empty or domain authorization failed at the forwarding service.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderNoUrl": {
+    "message": "Invalid $SERVICENAME$ url.",
+    "description": "Displayed when the url of the forwarding service wasn't supplied.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderUnknownError": {
+    "message": "Unknown $SERVICENAME$ error occurred.",
+    "description": "Displayed when the forwarding service failed due to an unknown error.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderUnknownForwarder": {
+    "message": "Unknown forwarder: '$SERVICENAME$'.",
+    "description": "Displayed when the forwarding service is not supported.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "JustTrust.us"
+      }
+    }
   },
   "hostname": {
     "message": "نام میزبان",
@@ -2169,9 +2664,6 @@
   "denyLogIn": {
     "message": "رد ورود"
   },
-  "approveLoginRequests": {
-    "message": "درخواست های ورود را تأیید کنید"
-  },
   "logInConfirmedForEmailOnDevice": {
     "message": "ورود به سیستم برای $EMAIL$ در $DEVICE$ تأیید شد",
     "placeholders": {
@@ -2206,9 +2698,6 @@
   "thisRequestIsNoLongerValid": {
     "message": "این درخواست دیگر معتبر نیست."
   },
-  "approveLoginRequestDesc": {
-    "message": "از این دستگاه برای تأیید درخواست‌های ورود به سیستم از دستگاه‌های دیگر استفاده کنید."
-  },
   "confirmLoginAtemptForMail": {
     "message": "تأیید تلاش برای ورود به سیستم برای $EMAIL$",
     "placeholders": {
@@ -2220,6 +2709,27 @@
   },
   "logInRequested": {
     "message": "ورود الزامیست"
+  },
+  "creatingAccountOn": {
+    "message": "Creating account on"
+  },
+  "checkYourEmail": {
+    "message": "Check your email"
+  },
+  "followTheLinkInTheEmailSentTo": {
+    "message": "Follow the link in the email sent to"
+  },
+  "andContinueCreatingYourAccount": {
+    "message": "and continue creating your account."
+  },
+  "noEmail": {
+    "message": "No email?"
+  },
+  "goBack": {
+    "message": "Go back"
+  },
+  "toEditYourEmailAddress": {
+    "message": "to edit your email address."
   },
   "exposedMasterPassword": {
     "message": "کلمه عبور اصلی افشا شده"
@@ -2238,6 +2748,15 @@
   },
   "important": {
     "message": "مهم:"
+  },
+  "accessing": {
+    "message": "Accessing"
+  },
+  "accessTokenUnableToBeDecrypted": {
+    "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
+  },
+  "refreshTokenSecureStorageRetrievalFailure": {
+    "message": "You have been logged out because your refresh token could not be retrieved. Please log in again to resolve this issue."
   },
   "masterPasswordHint": {
     "message": "کلمه عبور اصلی شما در صورت فراموشی قابل بازیابی نیست!"
@@ -2284,15 +2803,6 @@
   "eu": {
     "message": "اروپا",
     "description": "European Union"
-  },
-  "loggingInOn": {
-    "message": "ورود با"
-  },
-  "usDomain": {
-    "message": "bitwarden.com"
-  },
-  "euDomain": {
-    "message": "bitwarden.eu"
   },
   "selfHostedServer": {
     "message": "خود میزبان"
@@ -2424,6 +2934,12 @@
   "submenu": {
     "message": "زیرمنو"
   },
+  "toggleSideNavigation": {
+    "message": "Toggle side navigation"
+  },
+  "skipToContent": {
+    "message": "پرش به محتوا"
+  },
   "typePasskey": {
     "message": "کلید عبور"
   },
@@ -2437,26 +2953,26 @@
     "message": "دامنه مستعار"
   },
   "importData": {
-    "message": "Import data",
+    "message": "وارد کردن اطلاعات",
     "description": "Used for the desktop menu item and the header of the import dialog"
   },
   "importError": {
-    "message": "Import error"
+    "message": "خطای وارد کردن"
   },
   "importErrorDesc": {
-    "message": "There was a problem with the data you tried to import. Please resolve the errors listed below in your source file and try again."
+    "message": "مشکلی با داده‌هایی که سعی کردید وارد کنید وجود داشت. لطفاً خطاهای فهرست شده در زیر را در فایل منبع خود برطرف کرده و دوباره امتحان کنید."
   },
   "resolveTheErrorsBelowAndTryAgain": {
-    "message": "Resolve the errors below and try again."
+    "message": "خطاهای زیر را برطرف کرده و دوباره امتحان کنید."
   },
   "description": {
-    "message": "Description"
+    "message": "توضیحات"
   },
   "importSuccess": {
-    "message": "Data successfully imported"
+    "message": "داده‌ها با موفقیت وارد شد"
   },
   "importSuccessNumberOfItems": {
-    "message": "A total of $AMOUNT$ items were imported.",
+    "message": "$AMOUNT$ مورد وارد شده است.",
     "placeholders": {
       "amount": {
         "content": "$1",
@@ -2465,7 +2981,7 @@
     }
   },
   "total": {
-    "message": "Total"
+    "message": "مجموع"
   },
   "importWarning": {
     "message": "You are importing data to $ORGANIZATION$. Your data may be shared with members of this organization. Do you want to proceed?",
@@ -2476,11 +2992,23 @@
       }
     }
   },
+  "duoHealthCheckResultsInNullAuthUrlError": {
+    "message": "Error connecting with the Duo service. Use a different two-step login method or contact Duo for assistance."
+  },
+  "launchDuoAndFollowStepsToFinishLoggingIn": {
+    "message": "Launch Duo and follow the steps to finish logging in."
+  },
+  "duoRequiredByOrgForAccount": {
+    "message": "Duo two-step login is required for your account."
+  },
+  "launchDuo": {
+    "message": "Launch Duo in Browser"
+  },
   "importFormatError": {
     "message": "Data is not formatted correctly. Please check your import file and try again."
   },
   "importNothingError": {
-    "message": "Nothing was imported."
+    "message": "چیزی وارد نشد."
   },
   "importEncKeyError": {
     "message": "Error decrypting the exported file. Your encryption key does not match the encryption key used export the data."
@@ -2488,17 +3016,17 @@
   "invalidFilePassword": {
     "message": "Invalid file password, please use the password you entered when you created the export file."
   },
-  "importDestination": {
-    "message": "Import destination"
+  "destination": {
+    "message": "Destination"
   },
   "learnAboutImportOptions": {
     "message": "Learn about your import options"
   },
   "selectImportFolder": {
-    "message": "Select a folder"
+    "message": "یک پوشه انتخاب کنید"
   },
   "selectImportCollection": {
-    "message": "Select a collection"
+    "message": "انتخاب یک مجموعه"
   },
   "importTargetHint": {
     "message": "Select this option if you want the imported file contents moved to a $DESTINATION$",
@@ -2511,22 +3039,22 @@
     }
   },
   "importUnassignedItemsError": {
-    "message": "File contains unassigned items."
+    "message": "فایل حاوی موارد اختصاص نیافته است."
   },
   "selectFormat": {
     "message": "Select the format of the import file"
   },
   "selectImportFile": {
-    "message": "Select the import file"
+    "message": "انتخاب فایل وارد شده"
   },
   "chooseFile": {
-    "message": "Choose File"
+    "message": "انتخاب فایل"
   },
   "noFileChosen": {
-    "message": "No file chosen"
+    "message": "هیچ فایلی انتخاب نشد"
   },
   "orCopyPasteFileContents": {
-    "message": "or copy/paste the import file contents"
+    "message": "یا محتویات فایل وارد شده را کپی/پیست کنید"
   },
   "instructionsFor": {
     "message": "$NAME$ Instructions",
@@ -2547,14 +3075,26 @@
   "confirmFilePassword": {
     "message": "Confirm file password"
   },
+  "exportSuccess": {
+    "message": "Vault data exported"
+  },
   "multifactorAuthenticationCancelled": {
-    "message": "Multifactor authentication cancelled"
+    "message": "تایید هویت چندمرحله‌ای کنسل شد"
   },
   "noLastPassDataFound": {
     "message": "No LastPass data found"
   },
   "incorrectUsernameOrPassword": {
-    "message": "Incorrect username or password"
+    "message": "نام کاربری یا گذرواژه نادرست است"
+  },
+  "incorrectPassword": {
+    "message": "Incorrect password"
+  },
+  "incorrectCode": {
+    "message": "Incorrect code"
+  },
+  "incorrectPin": {
+    "message": "Incorrect PIN"
   },
   "multifactorAuthenticationFailed": {
     "message": "Multifactor authentication failed"
@@ -2600,15 +3140,92 @@
     "message": "Import directly from LastPass"
   },
   "importFromCSV": {
-    "message": "Import from CSV"
+    "message": "وارد کردن از CSV"
   },
   "lastPassTryAgainCheckEmail": {
     "message": "Try again or look for an email from LastPass to verify it's you."
   },
   "collection": {
-    "message": "Collection"
+    "message": "مجموعه"
   },
   "lastPassYubikeyDesc": {
     "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
+  },
+  "commonImportFormats": {
+    "message": "فرمت‌های رایج",
+    "description": "Label indicating the most common import formats"
+  },
+  "success": {
+    "message": "Success"
+  },
+  "troubleshooting": {
+    "message": "Troubleshooting"
+  },
+  "disableHardwareAccelerationRestart": {
+    "message": "Disable hardware acceleration and restart"
+  },
+  "enableHardwareAccelerationRestart": {
+    "message": "Enable hardware acceleration and restart"
+  },
+  "removePasskey": {
+    "message": "Remove passkey"
+  },
+  "passkeyRemoved": {
+    "message": "Passkey removed"
+  },
+  "errorAssigningTargetCollection": {
+    "message": "Error assigning target collection."
+  },
+  "errorAssigningTargetFolder": {
+    "message": "Error assigning target folder."
+  },
+  "viewItemsIn": {
+    "message": "View items in $NAME$",
+    "description": "Button to view the contents of a folder or collection",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "backTo": {
+    "message": "Back to $NAME$",
+    "description": "Navigate back to a previous folder or collection",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "back": {
+    "message": "Back",
+    "description": "Button text to navigate back"
+  },
+  "removeItem": {
+    "message": "Remove $NAME$",
+    "description": "Remove a selected option, such as a folder or collection",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "data": {
+    "message": "Data"
+  },
+  "fileSends": {
+    "message": "File Sends"
+  },
+  "textSends": {
+    "message": "Text Sends"
+  },
+  "ssoError": {
+    "message": "No free ports could be found for the sso login."
+  },
+  "fileSavedToDevice": {
+    "message": "File saved to device. Manage from your device downloads."
   }
 }

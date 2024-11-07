@@ -3,6 +3,7 @@
 $dark-icon-themes: "theme_dark", "theme_solarizedDark", "theme_nord";
 
 $font-family-sans-serif: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-family-source-code-pro: "Source Code Pro", monospace;
 $font-size-base: 14px;
 $text-color: #212529;
 $muted-text-color: #6c747c;
@@ -10,6 +11,9 @@ $border-color: #ced4dc;
 $border-color-dark: #ddd;
 $border-radius: 3px;
 $focus-outline-color: #1252a3;
+$muted-blue: #5a6d91;
+$password-special-color: #b80017;
+$password-number-color: #1452c1;
 
 $brand-primary: #175ddc;
 
@@ -24,6 +28,12 @@ $solarizedDarkBase2: #eee8d5;
 $solarizedDarkCyan: #2aa198;
 $solarizedDarkGreen: #859900;
 
+$success-color-light: #017e45;
+$success-color-dark: #8db89b;
+
+$error-color-light: #c83522;
+$error-color-dark: #ee9792;
+
 $themes: (
   light: (
     textColor: $text-color,
@@ -37,6 +47,11 @@ $themes: (
     inputBackgroundColor: #ffffff,
     borderColor: $border-color,
     focusOutlineColor: $focus-outline-color,
+    successColor: $success-color-light,
+    errorColor: $error-color-light,
+    passkeysAuthenticating: $muted-blue,
+    passwordSpecialColor: $password-special-color,
+    passwordNumberColor: $password-number-color,
   ),
   dark: (
     textColor: #ffffff,
@@ -49,7 +64,12 @@ $themes: (
     inputBorderColor: #4c525f,
     inputBackgroundColor: #2f343d,
     borderColor: #4c525f,
-    focusOutlineColor: $focus-outline-color,
+    focusOutlineColor: lighten($focus-outline-color, 25%),
+    successColor: $success-color-dark,
+    errorColor: $error-color-dark,
+    passkeysAuthenticating: #bac0ce,
+    passwordSpecialColor: #ff8d85,
+    passwordNumberColor: #6f9df1,
   ),
   nord: (
     textColor: $nord5,
@@ -62,7 +82,11 @@ $themes: (
     inputBorderColor: $nord0,
     inputBackgroundColor: $nord2,
     borderColor: $nord0,
-    focusOutlineColor: $focus-outline-color,
+    focusOutlineColor: lighten($focus-outline-color, 25%),
+    successColor: $success-color-dark,
+    passkeysAuthenticating: $nord4,
+    passwordSpecialColor: $nord12,
+    passwordNumberColor: $nord8,
   ),
   solarizedDark: (
     textColor: $solarizedDarkBase2,
@@ -76,7 +100,11 @@ $themes: (
     inputBorderColor: rgba($solarizedDarkBase2, 0.2),
     inputBackgroundColor: $solarizedDarkBase01,
     borderColor: $solarizedDarkBase2,
-    focusOutlineColor: $focus-outline-color,
+    focusOutlineColor: lighten($focus-outline-color, 15%),
+    successColor: $success-color-dark,
+    passkeysAuthenticating: $solarizedDarkBase2,
+    passwordSpecialColor: #b58900,
+    passwordNumberColor: $solarizedDarkCyan,
   ),
 );
 

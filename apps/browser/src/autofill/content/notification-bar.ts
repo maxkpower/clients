@@ -1,10 +1,14 @@
+import { ServerConfig } from "../../../../../libs/common/src/platform/abstractions/config/server-config";
+import {
+  AddLoginMessageData,
+  ChangePasswordMessageData,
+} from "../background/abstractions/notification.background";
 import AutofillField from "../models/autofill-field";
 import { WatchedForm } from "../models/watched-form";
-import AddLoginRuntimeMessage from "../notification/models/add-login-runtime-message";
-import ChangePasswordRuntimeMessage from "../notification/models/change-password-runtime-message";
+import { NotificationBarIframeInitData } from "../notification/abstractions/notification-bar";
+import { NotificationTypeData } from "../overlay/notifications/abstractions/overlay-notifications-content.service";
 import { FormData } from "../services/abstractions/autofill.service";
-import { GlobalSettings, UserSettings } from "../types";
-import { getFromLocalStorage, setupExtensionDisconnectAction } from "../utils";
+import { sendExtensionMessage, setupExtensionDisconnectAction } from "../utils";
 
 interface HTMLElementWithFormOpId extends HTMLElement {
   formOpId: string;
@@ -28,9 +32,13 @@ interface HTMLElementWithFormOpId extends HTMLElement {
  * and async scripts to finish loading.
  * https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event
  */
+let notificationBarIframe: HTMLIFrameElement = null;
+
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", loadNotificationBar);
 } else {
+  // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   loadNotificationBar();
 }
 
@@ -79,43 +87,31 @@ async function loadNotificationBar() {
   ]);
   const changePasswordButtonContainsNames = new Set(["pass", "change", "contras", "senha"]);
 
-  // These are preferences for whether to show the notification bar based on the user's settings
-  // and they are set in the Settings > Options page in the browser extension.
-  let disabledAddLoginNotification = false;
-  let disabledChangedPasswordNotification = false;
+  const enableChangedPasswordPrompt = await sendExtensionMessage(
+    "bgGetEnableChangedPasswordPrompt",
+  );
+  const enableAddedLoginPrompt = await sendExtensionMessage("bgGetEnableAddedLoginPrompt");
+  const excludedDomains = await sendExtensionMessage("bgGetExcludedDomains");
+  const activeUserServerConfig: ServerConfig = await sendExtensionMessage(
+    "bgGetActiveUserServerConfig",
+  );
+  const activeUserVault = activeUserServerConfig?.environment?.vault;
+
   let showNotificationBar = true;
 
-  // Look up the active user id from storage
-  const activeUserIdKey = "activeUserId";
-  let activeUserId: string;
-
-  const activeUserStorageValue = await getFromLocalStorage(activeUserIdKey);
-  if (activeUserStorageValue[activeUserIdKey]) {
-    activeUserId = activeUserStorageValue[activeUserIdKey];
-  }
-
-  // Look up the user's settings from storage
-  const userSettingsStorageValue = await getFromLocalStorage(activeUserId);
-  if (userSettingsStorageValue[activeUserId]) {
-    const userSettings: UserSettings = userSettingsStorageValue[activeUserId].settings;
-    const globalSettings: GlobalSettings = await getFromLocalStorage("global");
-
+  if (activeUserVault) {
     // Do not show the notification bar on the Bitwarden vault
     // because they can add logins and change passwords there
-    if (window.location.origin === userSettings.serverConfig.environment.vault) {
+    if (window.location.origin === activeUserVault) {
       showNotificationBar = false;
     } else {
       // NeverDomains is a dictionary of domains that the user has chosen to never
       // show the notification bar on (for login detail collection or password change).
       // It is managed in the Settings > Excluded Domains page in the browser extension.
       // Example: '{"bitwarden.com":null}'
-      const excludedDomainsDict = globalSettings.neverDomains;
-      if (!excludedDomainsDict || !(window.location.hostname in excludedDomainsDict)) {
-        // Set local disabled preferences
-        disabledAddLoginNotification = globalSettings.disableAddLoginNotification;
-        disabledChangedPasswordNotification = globalSettings.disableChangedPasswordNotification;
 
-        if (!disabledAddLoginNotification || !disabledChangedPasswordNotification) {
+      if (!excludedDomains || !(window.location.hostname in excludedDomains)) {
+        if (enableAddedLoginPrompt || enableChangedPasswordPrompt) {
           // If the user has not disabled both notifications, then handle the initial page change (null -> actual page)
           handlePageChange();
         }
@@ -185,6 +181,18 @@ async function loadNotificationBar() {
       watchForms(msg.data.forms);
       sendResponse();
       return true;
+    } else if (msg.command === "saveCipherAttemptCompleted") {
+      if (!notificationBarIframe) {
+        return;
+      }
+
+      notificationBarIframe.contentWindow?.postMessage(
+        {
+          command: "saveCipherAttemptCompleted",
+          error: msg.data?.error,
+        },
+        "*",
+      );
     }
   }
   // End Message Processing
@@ -330,9 +338,7 @@ async function loadNotificationBar() {
       // to avoid missing any forms that are added after the page loads
       observeDom();
 
-      sendPlatformMessage({
-        command: "checkNotificationQueue",
-      });
+      void sendExtensionMessage("checkNotificationQueue");
     }
 
     // This is a safeguard in case the observer misses a SPA page change.
@@ -360,9 +366,9 @@ async function loadNotificationBar() {
    * `main.background.ts : collectPageDetailsForContentScript`
    *
    * (3) `main.background.ts : collectPageDetailsForContentScript`
-   * sends a message with command `collectPageDetails` to the `autofill.js` content script
+   * sends a message with command `collectPageDetails` to the `autofill-init.js` content script
    *
-   * (4) `autofill.js` content script runs a `collect(document)` method.
+   * (4) `autofill-init.js` content script runs a `collect(document)` method.
    * The result is sent via message with command `collectPageDetailsResponse` to `notification.background.ts : processMessage(...)`
    *
    * (5) `notification.background.ts : processMessage(...)` gathers forms with password fields and passes them and the page details
@@ -370,10 +376,7 @@ async function loadNotificationBar() {
    *
    * */
   function collectPageDetails() {
-    sendPlatformMessage({
-      command: "bgCollectPageDetails",
-      sender: "notificationBar",
-    });
+    void sendExtensionMessage("bgCollectPageDetails", { sender: "notificationBar" });
   }
 
   // End Page Detail Collection Methods
@@ -407,7 +410,7 @@ async function loadNotificationBar() {
       // If the form could not be retrieved by its HTML ID, retrieve it by its index pulled from the opid
       if (formEl == null) {
         // opid stands for OnePassword ID - uniquely ID's an element on a page
-        // and is generated in `autofill.js`
+        // and is generated in `autofill-init.js`
         // Each form has an opid and each element has an opid and its parent form opid
         const index = parseInt(f.form.opid.split("__")[2], null);
         formEl = document.getElementsByTagName("form")[index];
@@ -598,15 +601,14 @@ async function loadNotificationBar() {
         continue;
       }
 
-      const disabledBoth = disabledChangedPasswordNotification && disabledAddLoginNotification;
-      // if user has not disabled both notifications and we have a username and password field,
+      // if user has enabled either add login or change password notification, and we have a username and password field
       if (
-        !disabledBoth &&
+        (enableChangedPasswordPrompt || enableAddedLoginPrompt) &&
         watchedForms[i].usernameEl != null &&
         watchedForms[i].passwordEl != null
       ) {
         // Create a login object from the form data
-        const login: AddLoginRuntimeMessage = {
+        const login: AddLoginMessageData = {
           username: watchedForms[i].usernameEl.value,
           password: watchedForms[i].passwordEl.value,
           url: document.URL,
@@ -617,10 +619,7 @@ async function loadNotificationBar() {
         const passwordPopulated = login.password != null && login.password !== "";
         if (userNamePopulated && passwordPopulated) {
           processedForm(form);
-          sendPlatformMessage({
-            command: "bgAddLogin",
-            login: login,
-          });
+          void sendExtensionMessage("bgAddLogin", { login });
           break;
         } else if (
           userNamePopulated &&
@@ -637,7 +636,7 @@ async function loadNotificationBar() {
 
       // if user has not disabled the password changed notification and we have multiple password fields,
       // then check if the user has changed their password
-      if (!disabledChangedPasswordNotification && watchedForms[i].passwordEls != null) {
+      if (enableChangedPasswordPrompt && watchedForms[i].passwordEls != null) {
         // Get the values of the password fields
         const passwords: string[] = watchedForms[i].passwordEls
           .filter((el: HTMLInputElement) => el.value != null && el.value !== "")
@@ -689,15 +688,12 @@ async function loadNotificationBar() {
 
           // Send a message to the `notification.background.ts` background script to notify the user that their password has changed
           // which eventually calls the `processMessage(...)` method in this script with command `openNotificationBar`
-          const changePasswordRuntimeMessage: ChangePasswordRuntimeMessage = {
+          const data: ChangePasswordMessageData = {
             newPassword: newPass,
             currentPassword: curPass,
             url: document.URL,
           };
-          sendPlatformMessage({
-            command: "bgChangedPassword",
-            data: changePasswordRuntimeMessage,
-          });
+          void sendExtensionMessage("bgChangedPassword", { data });
           break;
         }
       }
@@ -837,39 +833,44 @@ async function loadNotificationBar() {
   // End Form Detection and Submission Handling
 
   // Notification Bar Functions (open, close, height adjustment, etc.)
-  function closeExistingAndOpenBar(type: string, typeData: any) {
-    const barQueryParams = {
+  function closeExistingAndOpenBar(type: string, typeData: NotificationTypeData) {
+    const notificationBarInitData: NotificationBarIframeInitData = {
       type,
       isVaultLocked: typeData.isVaultLocked,
       theme: typeData.theme,
       removeIndividualVault: typeData.removeIndividualVault,
-      webVaultURL: typeData.webVaultURL,
+      importType: typeData.importType,
     };
-    const barQueryString = new URLSearchParams(barQueryParams).toString();
-    const barPage = "notification/bar.html?" + barQueryString;
+    const notificationBarUrl = "notification/bar.html";
 
     const frame = document.getElementById("bit-notification-bar-iframe") as HTMLIFrameElement;
-    if (frame != null && frame.src.indexOf(barPage) >= 0) {
+    if (frame != null && frame.src.indexOf(notificationBarUrl) >= 0) {
       return;
     }
 
     closeBar(false);
-    openBar(type, barPage);
+    openBar(type, notificationBarUrl, notificationBarInitData);
   }
 
-  function openBar(type: string, barPage: string) {
+  function openBar(
+    type: string,
+    barPage: string,
+    notificationBarInitData: NotificationBarIframeInitData,
+  ) {
     barType = type;
 
     if (document.body == null) {
       return;
     }
 
-    const barPageUrl: string = chrome.extension.getURL(barPage);
+    setupInitNotificationBarMessageListener(notificationBarInitData);
+    const barPageUrl: string = chrome.runtime.getURL(barPage);
 
-    const iframe = document.createElement("iframe");
-    iframe.style.cssText = "height: 42px; width: 100%; border: 0; min-height: initial;";
-    iframe.id = "bit-notification-bar-iframe";
-    iframe.src = barPageUrl;
+    notificationBarIframe = document.createElement("iframe");
+    notificationBarIframe.style.cssText =
+      "height: 42px; width: 100%; border: 0; min-height: initial;";
+    notificationBarIframe.id = "bit-notification-bar-iframe";
+    notificationBarIframe.src = barPageUrl;
 
     const frameDiv = document.createElement("div");
     frameDiv.setAttribute("aria-live", "polite");
@@ -877,11 +878,34 @@ async function loadNotificationBar() {
     frameDiv.style.cssText =
       "height: 42px; width: 100%; top: 0; left: 0; padding: 0; position: fixed; " +
       "z-index: 2147483647; visibility: visible;";
-    frameDiv.appendChild(iframe);
+    frameDiv.appendChild(notificationBarIframe);
     document.body.appendChild(frameDiv);
 
-    (iframe.contentWindow.location as any) = barPageUrl;
+    (notificationBarIframe.contentWindow.location as any) = barPageUrl;
+  }
 
+  function setupInitNotificationBarMessageListener(initData: NotificationBarIframeInitData) {
+    const handleInitNotificationBarMessage = (event: MessageEvent) => {
+      const { source, data } = event;
+      if (
+        source !== notificationBarIframe.contentWindow ||
+        data?.command !== "initNotificationBar"
+      ) {
+        return;
+      }
+
+      notificationBarIframe.contentWindow.postMessage(
+        { command: "initNotificationBar", initData },
+        "*",
+      );
+      injectSpacer();
+      window.removeEventListener("message", handleInitNotificationBarMessage);
+    };
+
+    window.addEventListener("message", handleInitNotificationBarMessage);
+  }
+
+  function injectSpacer() {
     const spacer = document.createElement("div");
     spacer.id = "bit-notification-bar-spacer";
     spacer.style.cssText = "height: 42px;";
@@ -892,6 +916,7 @@ async function loadNotificationBar() {
     const barEl = document.getElementById("bit-notification-bar");
     if (barEl != null) {
       barEl.parentElement.removeChild(barEl);
+      notificationBarIframe = null;
     }
 
     const spacerEl = document.getElementById("bit-notification-bar-spacer");
@@ -905,14 +930,8 @@ async function loadNotificationBar() {
 
     switch (barType) {
       case "add":
-        sendPlatformMessage({
-          command: "bgAddClose",
-        });
-        break;
       case "change":
-        sendPlatformMessage({
-          command: "bgChangeClose",
-        });
+        void sendExtensionMessage("bgRemoveTabFromNotificationQueue");
         break;
       default:
         break;
@@ -937,10 +956,6 @@ async function loadNotificationBar() {
   // End Notification Bar Functions (open, close, height adjustment, etc.)
 
   // Helper Functions
-  function sendPlatformMessage(msg: any) {
-    chrome.runtime.sendMessage(msg);
-  }
-
   function isInIframe() {
     try {
       return window.self !== window.top;
@@ -968,8 +983,8 @@ async function loadNotificationBar() {
    * @param {HTMLElement} el
    * @returns {boolean} Returns `true` if the element is visible and `false` otherwise
    *
-   * Copied from autofill.js and converted to TypeScript;
-   * TODO: could be refactored to be in a shared location if autofill.js is converted to TS
+   * Copied from autofill-init.js and converted to TypeScript;
+   * TODO: could be refactored to be in a shared location if autofill-init.js is converted to TS
    */
   function isElementVisible(el: HTMLElement): boolean {
     let theEl: Node | null = el;

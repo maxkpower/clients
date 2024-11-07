@@ -6,12 +6,6 @@
   margin: 0;
 }
 
-html {
-  &.cdk-global-scrollblock {
-    position: unset;
-  }
-}
-
 html,
 body {
   font-family: $font-family-sans-serif;
@@ -23,6 +17,8 @@ body {
 body {
   width: 375px !important;
   height: 600px !important;
+  position: relative;
+  min-height: 100vh;
   overflow: hidden;
   color: $text-color;
   background-color: $background-color;
@@ -72,7 +68,7 @@ img {
   border: none;
 }
 
-a {
+a:not(popup-page a, popup-tab-navigation a) {
   text-decoration: none;
 
   @include themify($themes) {
@@ -175,7 +171,7 @@ cdk-virtual-scroll-viewport::-webkit-scrollbar-thumb,
   }
 }
 
-header:not(bit-callout header) {
+header:not(bit-callout header, bit-dialog header, popup-page header) {
   height: 44px;
   display: flex;
 
@@ -452,7 +448,7 @@ app-root {
   }
 }
 
-main {
+main:not(popup-page main) {
   position: absolute;
   top: 44px;
   bottom: 0;

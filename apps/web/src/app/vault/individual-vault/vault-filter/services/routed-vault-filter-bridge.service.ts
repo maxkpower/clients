@@ -2,15 +2,12 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { combineLatest, map, Observable } from "rxjs";
 
+import { Unassigned } from "@bitwarden/admin-console/common";
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 import { ServiceUtils } from "@bitwarden/common/vault/service-utils";
 
 import { RoutedVaultFilterBridge } from "../shared/models/routed-vault-filter-bridge.model";
-import {
-  RoutedVaultFilterModel,
-  Unassigned,
-  All,
-} from "../shared/models/routed-vault-filter.model";
+import { RoutedVaultFilterModel, All } from "../shared/models/routed-vault-filter.model";
 import { VaultFilter } from "../shared/models/vault-filter.model";
 import {
   CipherTypeFilter,
@@ -65,6 +62,8 @@ export class RoutedVaultFilterBridgeService {
 
   navigate(filter: RoutedVaultFilterModel) {
     const [commands, extras] = this.routedVaultFilterService.createRoute(filter);
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(commands, extras);
   }
 }

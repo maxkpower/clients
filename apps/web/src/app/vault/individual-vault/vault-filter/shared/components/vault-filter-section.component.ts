@@ -35,7 +35,7 @@ export class VaultFilterSectionComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.section?.data$?.pipe(takeUntil(this.destroy$)).subscribe((data) => {
       this.data = data;
     });
@@ -67,11 +67,18 @@ export class VaultFilterSectionComponent implements OnInit, OnDestroy {
   }
 
   isNodeSelected(filterNode: TreeNode<VaultFilterType>) {
+    const { organizationId, cipherTypeId, folderId, collectionId, isCollectionSelected } =
+      this.activeFilter;
+
+    const collectionStatus =
+      filterNode?.node.id === "AllCollections" &&
+      (isCollectionSelected || collectionId === "AllCollections");
+
     return (
-      this.activeFilter.organizationId === filterNode?.node.id ||
-      this.activeFilter.cipherTypeId === filterNode?.node.id ||
-      this.activeFilter.folderId === filterNode?.node.id ||
-      this.activeFilter.collectionId === filterNode?.node.id
+      organizationId === filterNode?.node.id ||
+      cipherTypeId === filterNode?.node.id ||
+      folderId === filterNode?.node.id ||
+      collectionStatus
     );
   }
 

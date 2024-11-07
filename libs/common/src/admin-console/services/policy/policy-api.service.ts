@@ -4,13 +4,13 @@ import { ApiService } from "../../../abstractions/api.service";
 import { HttpStatusCode } from "../../../enums";
 import { ErrorResponse } from "../../../models/response/error.response";
 import { ListResponse } from "../../../models/response/list.response";
-import { StateService } from "../../../platform/abstractions/state.service";
 import { Utils } from "../../../platform/misc/utils";
 import { PolicyApiServiceAbstraction } from "../../abstractions/policy/policy-api.service.abstraction";
 import { InternalPolicyService } from "../../abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "../../enums";
 import { PolicyData } from "../../models/data/policy.data";
 import { MasterPasswordPolicyOptions } from "../../models/domain/master-password-policy-options";
+import { Policy } from "../../models/domain/policy";
 import { PolicyRequest } from "../../models/request/policy.request";
 import { PolicyResponse } from "../../models/response/policy.response";
 
@@ -18,7 +18,6 @@ export class PolicyApiService implements PolicyApiServiceAbstraction {
   constructor(
     private policyService: InternalPolicyService,
     private apiService: ApiService,
-    private stateService: StateService,
   ) {}
 
   async getPolicy(organizationId: string, type: PolicyType): Promise<PolicyResponse> {
@@ -48,7 +47,7 @@ export class PolicyApiService implements PolicyApiServiceAbstraction {
     token: string,
     email: string,
     organizationUserId: string,
-  ): Promise<ListResponse<PolicyResponse>> {
+  ): Promise<Policy[] | undefined> {
     const r = await this.apiService.send(
       "GET",
       "/organizations/" +
@@ -64,7 +63,7 @@ export class PolicyApiService implements PolicyApiServiceAbstraction {
       false,
       true,
     );
-    return new ListResponse(r, PolicyResponse);
+    return Policy.fromListResponse(new ListResponse(r, PolicyResponse));
   }
 
   private async getMasterPasswordPolicyResponseForOrgUser(
@@ -88,9 +87,7 @@ export class PolicyApiService implements PolicyApiServiceAbstraction {
       const masterPasswordPolicyResponse =
         await this.getMasterPasswordPolicyResponseForOrgUser(orgId);
 
-      const masterPasswordPolicy = this.policyService.mapPolicyFromResponse(
-        masterPasswordPolicyResponse,
-      );
+      const masterPasswordPolicy = Policy.fromResponse(masterPasswordPolicyResponse);
 
       if (!masterPasswordPolicy) {
         return null;

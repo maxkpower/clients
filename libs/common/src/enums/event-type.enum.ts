@@ -11,6 +11,7 @@ export enum EventType {
   User_UpdatedTempPassword = 1008,
   User_MigratedKeyToKeyConnector = 1009,
   User_RequestedDeviceApproval = 1010,
+  User_TdeOffboardingPasswordSet = 1011,
 
   Cipher_Created = 1100,
   Cipher_Updated = 1101,
@@ -30,6 +31,7 @@ export enum EventType {
   Cipher_SoftDeleted = 1115,
   Cipher_Restored = 1116,
   Cipher_ClientToggledCardNumberVisible = 1117,
+  Cipher_ClientToggledTOTPSeedVisible = 1118,
 
   Collection_Created = 1300,
   Collection_Updated = 1301,

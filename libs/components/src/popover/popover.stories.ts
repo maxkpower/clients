@@ -78,7 +78,7 @@ export const Default: Story = {
       <div class="tw-mt-32">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
         >
@@ -119,7 +119,7 @@ export const InitiallyOpen: Story = {
       <div class="tw-mt-32">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           [popoverOpen]="true"
           #triggerRef="popoverTrigger"
@@ -130,6 +130,9 @@ export const InitiallyOpen: Story = {
       ${popoverContent}
       `,
   }),
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 };
 
 export const RightStart: Story = {
@@ -142,7 +145,7 @@ export const RightStart: Story = {
       <div class="tw-mt-32">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -165,7 +168,7 @@ export const RightCenter: Story = {
       <div class="tw-mt-32">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -188,7 +191,7 @@ export const RightEnd: Story = {
       <div class="tw-mt-32">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -211,7 +214,7 @@ export const LeftStart: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-end">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -234,7 +237,7 @@ export const LeftCenter: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-end">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -256,7 +259,7 @@ export const LeftEnd: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-end">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -279,7 +282,7 @@ export const BelowStart: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-center">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -302,7 +305,7 @@ export const BelowCenter: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-center">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -325,7 +328,7 @@ export const BelowEnd: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-center">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -348,7 +351,7 @@ export const AboveStart: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-center">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -371,7 +374,7 @@ export const AboveCenter: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-center">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"
@@ -394,7 +397,7 @@ export const AboveEnd: Story = {
       <div class="tw-mt-32 tw-flex tw-justify-center">
         <button
           type="button"
-          class="tw-border-none tw-bg-transparent tw-text-primary-500"
+          class="tw-border-none tw-bg-transparent tw-text-primary-600"
           [bitPopoverTriggerFor]="myPopover"
           #triggerRef="popoverTrigger"
           [position]="'${args.position}'"

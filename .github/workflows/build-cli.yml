@@ -1,8 +1,8 @@
----
 name: Build CLI
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize]
     branches-ignore:
       - 'l10n_master'
       - 'cf-pages'
@@ -13,6 +13,7 @@ on:
       - '!*.md'
       - '!*.txt'
       - '.github/workflows/build-cli.yml'
+      - 'bitwarden_license/bit-cli/**'
   push:
     branches:
       - 'main'
@@ -25,6 +26,7 @@ on:
       - '!*.md'
       - '!*.txt'
       - '.github/workflows/build-cli.yml'
+      - 'bitwarden_license/bit-cli/**'
   workflow_dispatch:
     inputs: {}
 
@@ -33,21 +35,9 @@ defaults:
     working-directory: apps/cli
 
 jobs:
-  cloc:
-    name: CLOC
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-
-      - name: Set up cloc
-        run: |
-          sudo apt update
-          sudo apt -y install cloc
-
-      - name: Print lines of code
-        run: cloc --include-lang TypeScript,JavaScript --vcs git
-
+  check-run:
+    name: Check PR run
+    uses: bitwarden/gh-actions/.github/workflows/check-run.yml@main
 
   setup:
     name: Setup
@@ -56,8 +46,10 @@ jobs:
       package_version: ${{ steps.retrieve-package-version.outputs.package_version }}
       node_version: ${{ steps.retrieve-node-version.outputs.node_version }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Check out repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{  github.event.pull_request.head.sha }}
 
       - name: Get Package Version
         id: retrieve-package-version
@@ -73,23 +65,33 @@ jobs:
           NODE_VERSION=${NODE_NVMRC/v/''}
           echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
-
   cli:
-    name: Build CLI ${{ matrix.os }}
+    name: "${{ matrix.os.base }} - ${{ matrix.license_type.readable }}"
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-11]
-    runs-on: ${{ matrix.os }}
+        os:
+          [
+            { base: "linux", distro: "ubuntu-22.04" },
+            { base: "mac", distro: "macos-13" }
+          ]
+        license_type:
+          [
+            { build_prefix: "oss", artifact_prefix: "-oss", readable: "open source license" },
+            { build_prefix: "bit", artifact_prefix: "", readable: "commercial license" }
+          ]
+    runs-on: ${{ matrix.os.distro }}
     needs:
       - setup
     env:
       _PACKAGE_VERSION: ${{ needs.setup.outputs.package_version }}
       _NODE_VERSION: ${{ needs.setup.outputs.node_version }}
-      _WIN_PKG_FETCH_VERSION: 18.5.0
-      _WIN_PKG_VERSION: 3.4
+      _WIN_PKG_FETCH_VERSION: 20.11.1
+      _WIN_PKG_VERSION: 3.5
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Check out repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{  github.event.pull_request.head.sha }}
 
       - name: Setup Unix Vars
         run: |
@@ -98,7 +100,7 @@ jobs:
             awk '{print tolower($0)}')" >> $GITHUB_ENV
 
       - name: Set up Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -109,16 +111,16 @@ jobs:
         working-directory: ./
 
       - name: Build & Package Unix
-        run: npm run dist:${{ env.SHORT_RUNNER_OS }} --quiet
+        run: npm run dist:${{ matrix.license_type.build_prefix }}:${{ env.SHORT_RUNNER_OS }} --quiet
 
       - name: Zip Unix
         run: |
-          cd ./dist/${{ env.LOWER_RUNNER_OS }}
-          zip ../bw-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip ./bw
+          cd ./dist/${{ matrix.license_type.build_prefix }}/${{ env.LOWER_RUNNER_OS }}
+          zip ../../bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip ./bw
 
       - name: Version Test
         run: |
-          unzip "./dist/bw-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip" -d "./test"
+          unzip "./dist/bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip" -d "./test"
           testVersion=$(./test/bw -v)
           echo "version: $_PACKAGE_VERSION"
           echo "testVersion: $testVersion"
@@ -130,36 +132,46 @@ jobs:
       - name: Create checksums Unix
         run: |
           cd ./dist
-          shasum -a 256 bw-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip \
-            | awk '{split($0, a); print a[1]}' > bw-${{ env.LOWER_RUNNER_OS }}-sha256-${{ env._PACKAGE_VERSION }}.txt
+          shasum -a 256 bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip \
+            | awk '{split($0, a); print a[1]}' > bw${{
+          matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-sha256-${{ env._PACKAGE_VERSION }}.txt
 
       - name: Upload unix zip asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: bw-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip
-          path: apps/cli/dist/bw-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip
+          name: bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip
+          path: apps/cli/dist/bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-${{ env._PACKAGE_VERSION }}.zip
           if-no-files-found: error
 
       - name: Upload unix checksum asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: bw-${{ env.LOWER_RUNNER_OS }}-sha256-${{ env._PACKAGE_VERSION }}.txt
-          path: apps/cli/dist/bw-${{ env.LOWER_RUNNER_OS }}-sha256-${{ env._PACKAGE_VERSION }}.txt
+          name: bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-sha256-${{ env._PACKAGE_VERSION }}.txt
+          path: apps/cli/dist/bw${{ matrix.license_type.artifact_prefix }}-${{ env.LOWER_RUNNER_OS }}-sha256-${{ env._PACKAGE_VERSION }}.txt
           if-no-files-found: error
 
   cli-windows:
-    name: Build CLI Windows
-    runs-on: windows-2019
+    name: "windows - ${{ matrix.license_type.readable }}"
+    strategy:
+      matrix:
+        license_type:
+          [
+            { build_prefix: "oss", artifact_prefix: "-oss", readable: "open source license" },
+            { build_prefix: "bit", artifact_prefix: "", readable: "commercial license" }
+          ]
+    runs-on: windows-2022
     needs:
       - setup
     env:
       _PACKAGE_VERSION: ${{ needs.setup.outputs.package_version }}
       _NODE_VERSION: ${{ needs.setup.outputs.node_version }}
-      _WIN_PKG_FETCH_VERSION: 18.5.0
-      _WIN_PKG_VERSION: 3.4
+      _WIN_PKG_FETCH_VERSION: 20.11.1
+      _WIN_PKG_VERSION: 3.5
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Check out repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{  github.event.pull_request.head.sha }}
 
       - name: Setup Windows builder
         run: |
@@ -168,7 +180,7 @@ jobs:
           choco install nasm --no-progress
 
       - name: Set up Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
@@ -178,7 +190,7 @@ jobs:
         shell: pwsh
         run: |
           cd $HOME
-          $fetchedUrl = "https://github.com/vercel/pkg-fetch/releases/download/v$env:_WIN_PKG_VERSION/node-v$env:_WIN_PKG_FETCH_VERSION-win-x64"
+          $fetchedUrl = "https://github.com/yao-pkg/pkg-fetch/releases/download/v$env:_WIN_PKG_VERSION/node-v$env:_WIN_PKG_FETCH_VERSION-win-x64"
           New-Item -ItemType directory -Path .\.pkg-cache
           New-Item -ItemType directory -Path .\.pkg-cache\v$env:_WIN_PKG_VERSION
           Invoke-RestMethod -Uri $fetchedUrl `
@@ -234,25 +246,26 @@ jobs:
         working-directory: ./
 
       - name: Build & Package Windows
-        run: npm run dist:win --quiet
+        run: npm run dist:${{ matrix.license_type.build_prefix }}:win --quiet
 
       - name: Package Chocolatey
         shell: pwsh
+        if: ${{ matrix.license_type.build_prefix == 'bit' }}
         run: |
           Copy-Item -Path stores/chocolatey -Destination dist/chocolatey -Recurse
-          Copy-Item dist/windows/bw.exe -Destination dist/chocolatey/tools
+          Copy-Item dist/${{ matrix.license_type.build_prefix }}/windows/bw.exe -Destination dist/chocolatey/tools
           Copy-Item ${{ github.workspace }}/LICENSE.txt -Destination dist/chocolatey/tools
           choco pack dist/chocolatey/bitwarden-cli.nuspec --version ${{ env._PACKAGE_VERSION }} --out dist/chocolatey
 
       - name: Zip Windows
         shell: cmd
-        run: 7z a ./dist/bw-windows-%_PACKAGE_VERSION%.zip ./dist/windows/bw.exe
+        run: 7z a ./dist/bw${{ matrix.license_type.artifact_prefix}}-windows-%_PACKAGE_VERSION%.zip ./dist/${{ matrix.license_type.build_prefix }}/windows/bw.exe
 
       - name: Version Test
         run: |
           dir ./dist/
-          Expand-Archive -Path "./dist/bw-windows-${env:_PACKAGE_VERSION}.zip" -DestinationPath "./test/windows"
-          $testVersion = Invoke-Expression '& ./test/windows/bw.exe -v'
+          Expand-Archive -Path "./dist/bw${{ matrix.license_type.artifact_prefix }}-windows-${env:_PACKAGE_VERSION}.zip" -DestinationPath "./test/${{ matrix.license_type.build_prefix }}/windows"
+          $testVersion = Invoke-Expression '& ./test/${{ matrix.license_type.build_prefix }}/windows/bw.exe -v'
           echo "version: $env:_PACKAGE_VERSION"
           echo "testVersion: $testVersion"
           if($testVersion -ne $env:_PACKAGE_VERSION) {
@@ -261,46 +274,56 @@ jobs:
 
       - name: Create checksums Windows
         run: |
-          checksum -f="./dist/bw-windows-${env:_PACKAGE_VERSION}.zip" `
-            -t sha256 | Out-File -Encoding ASCII ./dist/bw-windows-sha256-${env:_PACKAGE_VERSION}.txt
+          checksum -f="./dist/bw${{ matrix.license_type.artifact_prefix }}-windows-${env:_PACKAGE_VERSION}.zip" `
+            -t sha256 | Out-File -Encoding ASCII ./dist/bw${{ matrix.license_type.artifact_prefix }}-windows-sha256-${env:_PACKAGE_VERSION}.txt
 
       - name: Upload windows zip asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: bw-windows-${{ env._PACKAGE_VERSION }}.zip
-          path: apps/cli/dist/bw-windows-${{ env._PACKAGE_VERSION }}.zip
+          name: bw${{ matrix.license_type.artifact_prefix }}-windows-${{ env._PACKAGE_VERSION }}.zip
+          path: apps/cli/dist/bw${{ matrix.license_type.artifact_prefix }}-windows-${{ env._PACKAGE_VERSION }}.zip
           if-no-files-found: error
 
       - name: Upload windows checksum asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: bw-windows-sha256-${{ env._PACKAGE_VERSION }}.txt
-          path: apps/cli/dist/bw-windows-sha256-${{ env._PACKAGE_VERSION }}.txt
+          name: bw${{ matrix.license_type.artifact_prefix }}-windows-sha256-${{ env._PACKAGE_VERSION }}.txt
+          path: apps/cli/dist/bw${{ matrix.license_type.artifact_prefix }}-windows-sha256-${{ env._PACKAGE_VERSION }}.txt
           if-no-files-found: error
 
       - name: Upload Chocolatey asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        if: matrix.license_type.build_prefix == 'bit'
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: bitwarden-cli.${{ env._PACKAGE_VERSION }}.nupkg
           path: apps/cli/dist/chocolatey/bitwarden-cli.${{ env._PACKAGE_VERSION }}.nupkg
           if-no-files-found: error
 
+      - name: Zip NPM Build Artifact
+        run: Get-ChildItem -Path .\build | Compress-Archive -DestinationPath .\bitwarden-cli-${{ env._PACKAGE_VERSION }}-npm-build.zip
+
       - name: Upload NPM Build Directory asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        if: matrix.license_type.build_prefix == 'bit'
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: bitwarden-cli-${{ env._PACKAGE_VERSION }}-npm-build.zip
-          path: apps/cli/build
+          path: apps/cli/bitwarden-cli-${{ env._PACKAGE_VERSION }}-npm-build.zip
           if-no-files-found: error
 
   snap:
     name: Build Snap
+    # Note, before updating the ubuntu version of the workflow, ensure the snap base image
+    # is equal or greater than the new version. Otherwise there might be GLIBC version issues.
+    # The snap base for CLI is defined in `apps/cli/stores/snap/snapcraft.yaml`
     runs-on: ubuntu-22.04
     needs: [setup, cli]
     env:
       _PACKAGE_VERSION: ${{ needs.setup.outputs.package_version }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Check out repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{  github.event.pull_request.head.sha }}
 
       - name: Print environment
         run: |
@@ -310,7 +333,7 @@ jobs:
           echo "BW Package Version: $_PACKAGE_VERSION"
 
       - name: Get bw linux cli
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: bw-linux-${{ env._PACKAGE_VERSION }}.zip
           path: apps/cli/dist/snap
@@ -323,7 +346,7 @@ jobs:
           ls -alth
 
       - name: Build snap
-        uses: snapcore/action-build@2ee46bc29d163c9c836f2820cc46b39664bf0de2 # v1.1.3
+        uses: snapcore/action-build@3bdaa03e1ba6bf59a65f84a751d943d549a54e79 # v1.3.0
         with:
           path: apps/cli/dist/snap
 
@@ -352,14 +375,14 @@ jobs:
         run: sudo snap remove bw
 
       - name: Upload snap asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: bw_${{ env._PACKAGE_VERSION }}_amd64.snap
           path: apps/cli/dist/snap/bw_${{ env._PACKAGE_VERSION }}_amd64.snap
           if-no-files-found: error
 
       - name: Upload snap checksum asset
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: bw-snap-sha256-${{ env._PACKAGE_VERSION }}.txt
           path: apps/cli/dist/snap/bw-snap-sha256-${{ env._PACKAGE_VERSION }}.txt
@@ -371,33 +394,19 @@ jobs:
     if: always()
     runs-on: ubuntu-22.04
     needs:
-      - cloc
       - setup
       - cli
       - cli-windows
       - snap
+      - check-run
     steps:
       - name: Check if any job failed
         working-directory: ${{ github.workspace }}
-        if: ${{ (github.ref == 'refs/heads/main') || (github.ref == 'refs/heads/rc') }}
-        env:
-          CLOC_STATUS: ${{ needs.cloc.result }}
-          SETUP_STATUS: ${{ needs.setup.result }}
-          CLI_STATUS: ${{ needs.cli.result }}
-          SNAP_STATUS: ${{ needs.snap.result }}
-        run: |
-          if [ "$CLOC_STATUS" = "failure" ]; then
-              exit 1
-          elif [ "$SETUP_STATUS" = "failure" ]; then
-              exit 1
-          elif [ "$CLI_STATUS" = "failure" ]; then
-              exit 1
-          elif [ "$SNAP_STATUS" = "failure" ]; then
-              exit 1
-          fi
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/rc' || github.ref == 'refs/heads/hotfix-rc') && contains(needs.*.result, 'failure')
+        run: exit 1
 
       - name: Login to Azure - Prod Subscription
-        uses: Azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2 # v1.4.7
+        uses: Azure/login@e15b166166a8746d1a47596803bd8c1b595455cf # v1.6.0
         if: failure()
         with:
           creds: ${{ secrets.AZURE_KV_CI_SERVICE_PRINCIPAL }}
@@ -411,7 +420,7 @@ jobs:
           secrets: "devops-alerts-slack-webhook-url"
 
       - name: Notify Slack on failure
-        uses: act10ns/slack@ed1309ab9862e57e9e583e51c7889486b9a00b0f # v2.0.0
+        uses: act10ns/slack@44541246747a30eb3102d87f7a4cc5471b0ffb7d # v2.1.0
         if: failure()
         env:
           SLACK_WEBHOOK_URL: ${{ steps.retrieve-secrets.outputs.devops-alerts-slack-webhook-url }}

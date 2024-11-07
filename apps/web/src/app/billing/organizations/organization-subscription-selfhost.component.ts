@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { concatMap, Subject, takeUntil } from "rxjs";
+import { concatMap, firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
@@ -9,13 +9,14 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { OrganizationConnectionType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { OrganizationConnectionResponse } from "@bitwarden/common/admin-console/models/response/organization-connection.response";
+import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { BillingSyncConfigApi } from "@bitwarden/common/billing/models/api/billing-sync-config.api";
 import { SelfHostedOrganizationSubscriptionView } from "@bitwarden/common/billing/models/view/self-hosted-organization-subscription.view";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { DialogService } from "@bitwarden/components";
+import { DialogService, ToastService } from "@bitwarden/components";
 
 import { BillingSyncKeyComponent } from "./billing-sync-key.component";
 
@@ -32,6 +33,7 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
   organizationId: string;
   userOrg: Organization;
   cloudWebVaultUrl: string;
+  showAutomaticSyncAndManualUpload: boolean;
 
   licenseOptions = LicenseOptions;
   form = new FormGroup({
@@ -82,11 +84,12 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
     private i18nService: I18nService,
     private environmentService: EnvironmentService,
     private dialogService: DialogService,
-  ) {
-    this.cloudWebVaultUrl = this.environmentService.getCloudWebVaultUrl();
-  }
+    private toastService: ToastService,
+  ) {}
 
   async ngOnInit() {
+    this.cloudWebVaultUrl = await firstValueFrom(this.environmentService.cloudWebVaultUrl$);
+
     this.route.params
       .pipe(
         concatMap(async (params) => {
@@ -110,7 +113,9 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
       return;
     }
     this.loading = true;
-    this.userOrg = this.organizationService.get(this.organizationId);
+    this.userOrg = await this.organizationService.get(this.organizationId);
+    this.showAutomaticSyncAndManualUpload =
+      this.userOrg.productTierType == ProductTierType.Families ? false : true;
     if (this.userOrg.canViewSubscription) {
       const subscriptionResponse = await this.organizationApiService.getSubscription(
         this.organizationId,
@@ -139,6 +144,8 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
   }
 
   licenseUploaded() {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.load();
     this.messagingService.send("updatedOrgLicense");
   }
@@ -158,10 +165,16 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
     this.form.get("updateMethod").setValue(LicenseOptions.SYNC);
     await this.organizationApiService.selfHostedSyncLicense(this.organizationId);
 
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.load();
     await this.loadOrganizationConnection();
     this.messagingService.send("updatedOrgLicense");
-    this.platformUtilsService.showToast("success", null, this.i18nService.t("licenseSyncSuccess"));
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("licenseSyncSuccess"),
+    });
   };
 
   get billingSyncSetUp() {

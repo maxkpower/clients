@@ -1,37 +1,38 @@
 import { Location } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { LoginViaAuthRequestComponent as BaseLoginWithDeviceComponent } from "@bitwarden/angular/auth/components/login-via-auth-request.component";
+import {
+  AuthRequestServiceAbstraction,
+  LoginStrategyServiceAbstraction,
+  LoginEmailServiceAbstraction,
+} from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AnonymousHubService } from "@bitwarden/common/auth/abstractions/anonymous-hub.service";
-import { AuthRequestCryptoServiceAbstraction } from "@bitwarden/common/auth/abstractions/auth-request-crypto.service.abstraction";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
-import { DeviceTrustCryptoServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust-crypto.service.abstraction";
-import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
+import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { ToastService } from "@bitwarden/components";
+import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { KeyService } from "@bitwarden/key-management";
 
 @Component({
   selector: "app-login-via-auth-request",
   templateUrl: "login-via-auth-request.component.html",
 })
-export class LoginViaAuthRequestComponent
-  extends BaseLoginWithDeviceComponent
-  implements OnInit, OnDestroy
-{
+export class LoginViaAuthRequestComponent extends BaseLoginWithDeviceComponent {
   constructor(
     router: Router,
-    cryptoService: CryptoService,
+    keyService: KeyService,
     cryptoFunctionService: CryptoFunctionService,
     appIdService: AppIdService,
     passwordGenerationService: PasswordGenerationServiceAbstraction,
@@ -43,16 +44,18 @@ export class LoginViaAuthRequestComponent
     platformUtilsService: PlatformUtilsService,
     anonymousHubService: AnonymousHubService,
     validationService: ValidationService,
-    stateService: StateService,
-    loginService: LoginService,
+    loginEmailService: LoginEmailServiceAbstraction,
     syncService: SyncService,
-    deviceTrustCryptoService: DeviceTrustCryptoServiceAbstraction,
-    authReqCryptoService: AuthRequestCryptoServiceAbstraction,
+    deviceTrustService: DeviceTrustServiceAbstraction,
+    authRequestService: AuthRequestServiceAbstraction,
+    loginStrategyService: LoginStrategyServiceAbstraction,
+    accountService: AccountService,
     private location: Location,
+    toastService: ToastService,
   ) {
     super(
       router,
-      cryptoService,
+      keyService,
       cryptoFunctionService,
       appIdService,
       passwordGenerationService,
@@ -64,12 +67,14 @@ export class LoginViaAuthRequestComponent
       platformUtilsService,
       anonymousHubService,
       validationService,
-      stateService,
-      loginService,
-      deviceTrustCryptoService,
-      authReqCryptoService,
+      accountService,
+      loginEmailService,
+      deviceTrustService,
+      authRequestService,
+      loginStrategyService,
+      toastService,
     );
-    super.onSuccessfulLogin = async () => {
+    this.onSuccessfulLogin = async () => {
       await syncService.fullSync(true);
     };
   }

@@ -1,54 +1,86 @@
-import { Component } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { CommonModule } from "@angular/common";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, RouterModule } from "@angular/router";
+import { switchMap, Observable, Subject, combineLatest, map } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
+import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { Provider } from "@bitwarden/common/admin-console/models/domain/provider";
+import { hasConsolidatedBilling } from "@bitwarden/common/billing/abstractions/provider-billing.service.abstraction";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
+import { BannerModule, IconModule, LinkModule } from "@bitwarden/components";
+import { ProviderPortalLogo } from "@bitwarden/web-vault/app/admin-console/icons/provider-portal-logo";
+import { WebLayoutModule } from "@bitwarden/web-vault/app/layouts/web-layout.module";
+
+import { ProviderClientVaultPrivacyBannerService } from "./services/provider-client-vault-privacy-banner.service";
 
 @Component({
   selector: "providers-layout",
   templateUrl: "providers-layout.component.html",
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    JslibModule,
+    WebLayoutModule,
+    IconModule,
+    LinkModule,
+    BannerModule,
+  ],
 })
-// eslint-disable-next-line rxjs-angular/prefer-takeuntil
-export class ProvidersLayoutComponent {
-  provider: Provider;
-  private providerId: string;
+export class ProvidersLayoutComponent implements OnInit, OnDestroy {
+  protected readonly logo = ProviderPortalLogo;
+
+  private destroy$ = new Subject<void>();
+  protected provider$: Observable<Provider>;
+
+  protected hasConsolidatedBilling$: Observable<boolean>;
+  protected canAccessBilling$: Observable<boolean>;
+
+  protected showProviderClientVaultPrivacyWarningBanner$ = this.configService.getFeatureFlag$(
+    FeatureFlag.ProviderClientVaultPrivacyBanner,
+  );
 
   constructor(
     private route: ActivatedRoute,
     private providerService: ProviderService,
+    private configService: ConfigService,
+    protected providerClientVaultPrivacyBannerService: ProviderClientVaultPrivacyBannerService,
   ) {}
 
   ngOnInit() {
     document.body.classList.remove("layout_frontend");
-    // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
-    this.route.params.subscribe(async (params) => {
-      this.providerId = params.providerId;
-      await this.load();
-    });
+
+    this.provider$ = this.route.params.pipe(
+      switchMap((params) => this.providerService.get$(params.providerId)),
+      takeUntil(this.destroy$),
+    );
+
+    this.hasConsolidatedBilling$ = this.provider$.pipe(
+      hasConsolidatedBilling(this.configService),
+      takeUntil(this.destroy$),
+    );
+
+    this.canAccessBilling$ = combineLatest([this.hasConsolidatedBilling$, this.provider$]).pipe(
+      map(
+        ([hasConsolidatedBilling, provider]) => hasConsolidatedBilling && provider.isProviderAdmin,
+      ),
+      takeUntil(this.destroy$),
+    );
   }
 
-  async load() {
-    this.provider = await this.providerService.get(this.providerId);
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  get showMenuBar() {
-    return this.showManageTab || this.showSettingsTab;
+  showManageTab(provider: Provider) {
+    return provider.canManageUsers || provider.canAccessEventLogs;
   }
 
-  get showManageTab() {
-    return this.provider.canManageUsers || this.provider.canAccessEventLogs;
-  }
-
-  get showSettingsTab() {
-    return this.provider.isProviderAdmin;
-  }
-
-  get manageRoute(): string {
-    switch (true) {
-      case this.provider.canManageUsers:
-        return "manage/people";
-      case this.provider.canAccessEventLogs:
-        return "manage/events";
-    }
+  showSettingsTab(provider: Provider) {
+    return provider.isProviderAdmin;
   }
 }

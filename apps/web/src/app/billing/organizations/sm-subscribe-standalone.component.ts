@@ -9,10 +9,9 @@ import { Organization } from "@bitwarden/common/admin-console/models/domain/orga
 import { SecretsManagerSubscribeRequest } from "@bitwarden/common/billing/models/request/sm-subscribe.request";
 import { BillingCustomerDiscount } from "@bitwarden/common/billing/models/response/organization-subscription.response";
 import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.response";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
-import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { ToastService } from "@bitwarden/components";
 
 import { secretsManagerSubscribeFormFactory } from "../shared";
 
@@ -35,7 +34,7 @@ export class SecretsManagerSubscribeStandaloneComponent {
     private i18nService: I18nService,
     private organizationApiService: OrganizationApiServiceAbstraction,
     private organizationService: InternalOrganizationServiceAbstraction,
-    private configService: ConfigServiceAbstraction,
+    private toastService: ToastService,
   ) {}
 
   submit = async () => {
@@ -55,11 +54,7 @@ export class SecretsManagerSubscribeStandaloneComponent {
       isMember: this.organization.isMember,
       isProviderUser: this.organization.isProviderUser,
     });
-    const flexibleCollectionsEnabled = await this.configService.getFeatureFlag(
-      FeatureFlag.FlexibleCollections,
-      false,
-    );
-    await this.organizationService.upsert(organizationData, flexibleCollectionsEnabled);
+    await this.organizationService.upsert(organizationData);
 
     /*
       Because subscribing to Secrets Manager automatically provides access to Secrets Manager for the
@@ -67,11 +62,11 @@ export class SecretsManagerSubscribeStandaloneComponent {
     */
     await this.apiService.refreshIdentityToken();
 
-    this.platformUtilsService.showToast(
-      "success",
-      null,
-      this.i18nService.t("subscribedToSecretsManager"),
-    );
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("subscribedToSecretsManager"),
+    });
 
     this.onSubscribe.emit();
   };

@@ -1,9 +1,12 @@
+import { DatePipe } from "@angular/common";
 import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
   NgZone,
   OnChanges,
+  OnDestroy,
+  OnInit,
   Output,
 } from "@angular/core";
 
@@ -11,9 +14,11 @@ import { ViewComponent as BaseViewComponent } from "@bitwarden/angular/vault/com
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
+import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -24,7 +29,9 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService } from "@bitwarden/components";
+import { KeyService } from "@bitwarden/key-management";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 const BroadcasterSubscriptionId = "ViewComponent";
@@ -33,7 +40,7 @@ const BroadcasterSubscriptionId = "ViewComponent";
   selector: "app-vault-view",
   templateUrl: "view.component.html",
 })
-export class ViewComponent extends BaseViewComponent implements OnChanges {
+export class ViewComponent extends BaseViewComponent implements OnInit, OnDestroy, OnChanges {
   @Output() onViewCipherPasswordHistory = new EventEmitter<CipherView>();
 
   constructor(
@@ -42,7 +49,8 @@ export class ViewComponent extends BaseViewComponent implements OnChanges {
     totpService: TotpService,
     tokenService: TokenService,
     i18nService: I18nService,
-    cryptoService: CryptoService,
+    keyService: KeyService,
+    encryptService: EncryptService,
     platformUtilsService: PlatformUtilsService,
     auditService: AuditService,
     broadcasterService: BroadcasterService,
@@ -56,6 +64,10 @@ export class ViewComponent extends BaseViewComponent implements OnChanges {
     stateService: StateService,
     fileDownloadService: FileDownloadService,
     dialogService: DialogService,
+    datePipe: DatePipe,
+    billingAccountProfileStateService: BillingAccountProfileStateService,
+    accountService: AccountService,
+    cipherAuthorizationService: CipherAuthorizationService,
   ) {
     super(
       cipherService,
@@ -63,7 +75,8 @@ export class ViewComponent extends BaseViewComponent implements OnChanges {
       totpService,
       tokenService,
       i18nService,
-      cryptoService,
+      keyService,
+      encryptService,
       platformUtilsService,
       auditService,
       window,
@@ -77,6 +90,10 @@ export class ViewComponent extends BaseViewComponent implements OnChanges {
       stateService,
       fileDownloadService,
       dialogService,
+      datePipe,
+      accountService,
+      billingAccountProfileStateService,
+      cipherAuthorizationService,
     );
   }
   ngOnInit() {

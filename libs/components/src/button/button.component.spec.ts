@@ -17,6 +17,8 @@ describe("Button", () => {
       declarations: [TestApp],
     });
 
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.compileComponents();
     fixture = TestBed.createComponent(TestApp);
     testAppComponent = fixture.debugElement.componentInstance;
@@ -28,8 +30,8 @@ describe("Button", () => {
   it("should apply classes based on type", () => {
     testAppComponent.buttonType = "primary";
     fixture.detectChanges();
-    expect(buttonDebugElement.nativeElement.classList.contains("tw-bg-primary-500")).toBe(true);
-    expect(linkDebugElement.nativeElement.classList.contains("tw-bg-primary-500")).toBe(true);
+    expect(buttonDebugElement.nativeElement.classList.contains("tw-bg-primary-600")).toBe(true);
+    expect(linkDebugElement.nativeElement.classList.contains("tw-bg-primary-600")).toBe(true);
 
     testAppComponent.buttonType = "secondary";
     fixture.detectChanges();
@@ -38,8 +40,8 @@ describe("Button", () => {
 
     testAppComponent.buttonType = "danger";
     fixture.detectChanges();
-    expect(buttonDebugElement.nativeElement.classList.contains("tw-border-danger-500")).toBe(true);
-    expect(linkDebugElement.nativeElement.classList.contains("tw-border-danger-500")).toBe(true);
+    expect(buttonDebugElement.nativeElement.classList.contains("tw-border-danger-600")).toBe(true);
+    expect(linkDebugElement.nativeElement.classList.contains("tw-border-danger-600")).toBe(true);
 
     testAppComponent.buttonType = "unstyled";
     fixture.detectChanges();

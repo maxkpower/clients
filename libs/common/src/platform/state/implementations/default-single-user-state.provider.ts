@@ -1,12 +1,8 @@
 import { UserId } from "../../../types/guid";
-import { EncryptService } from "../../abstractions/encrypt.service";
-import {
-  AbstractMemoryStorageService,
-  AbstractStorageService,
-  ObservableStorageService,
-} from "../../abstractions/storage.service";
-import { KeyDefinition } from "../key-definition";
-import { StorageLocation } from "../state-definition";
+import { LogService } from "../../abstractions/log.service";
+import { StorageServiceProvider } from "../../services/storage-service.provider";
+import { StateEventRegistrarService } from "../state-event-registrar.service";
+import { UserKeyDefinition } from "../user-key-definition";
 import { SingleUserState } from "../user-state";
 import { SingleUserStateProvider } from "../user-state.provider";
 
@@ -16,13 +12,17 @@ export class DefaultSingleUserStateProvider implements SingleUserStateProvider {
   private cache: Record<string, SingleUserState<unknown>> = {};
 
   constructor(
-    protected encryptService: EncryptService,
-    protected memoryStorage: AbstractMemoryStorageService & ObservableStorageService,
-    protected diskStorage: AbstractStorageService & ObservableStorageService,
+    private readonly storageServiceProvider: StorageServiceProvider,
+    private readonly stateEventRegistrarService: StateEventRegistrarService,
+    private readonly logService: LogService,
   ) {}
 
-  get<T>(userId: UserId, keyDefinition: KeyDefinition<T>): SingleUserState<T> {
-    const cacheKey = keyDefinition.buildCacheKey("user", userId);
+  get<T>(userId: UserId, keyDefinition: UserKeyDefinition<T>): SingleUserState<T> {
+    const [location, storageService] = this.storageServiceProvider.get(
+      keyDefinition.stateDefinition.defaultStorageLocation,
+      keyDefinition.stateDefinition.storageLocationOverrides,
+    );
+    const cacheKey = this.buildCacheKey(location, userId, keyDefinition);
     const existingUserState = this.cache[cacheKey];
     if (existingUserState != null) {
       // I have to cast out of the unknown generic but this should be safe if rules
@@ -30,29 +30,22 @@ export class DefaultSingleUserStateProvider implements SingleUserStateProvider {
       return existingUserState as SingleUserState<T>;
     }
 
-    const newUserState = this.buildSingleUserState(userId, keyDefinition);
+    const newUserState = new DefaultSingleUserState<T>(
+      userId,
+      keyDefinition,
+      storageService,
+      this.stateEventRegistrarService,
+      this.logService,
+    );
     this.cache[cacheKey] = newUserState;
     return newUserState;
   }
 
-  protected buildSingleUserState<T>(
+  private buildCacheKey(
+    location: string,
     userId: UserId,
-    keyDefinition: KeyDefinition<T>,
-  ): SingleUserState<T> {
-    return new DefaultSingleUserState<T>(
-      userId,
-      keyDefinition,
-      this.encryptService,
-      this.getLocation(keyDefinition.stateDefinition.storageLocation),
-    );
-  }
-
-  private getLocation(location: StorageLocation) {
-    switch (location) {
-      case "disk":
-        return this.diskStorage;
-      case "memory":
-        return this.memoryStorage;
-    }
+    keyDefinition: UserKeyDefinition<unknown>,
+  ) {
+    return `${location}_${keyDefinition.fullName}_${userId}`;
   }
 }

@@ -1,5 +1,9 @@
-import { Component, Input } from "@angular/core";
+import { Component, ElementRef, Input, ViewChild } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+
+import { isBrowserSafariApi } from "@bitwarden/platform";
+
+import { FocusableElement } from "../shared/focusable-element";
 
 let nextId = 0;
 
@@ -12,17 +16,29 @@ let nextId = 0;
       multi: true,
       useExisting: SearchComponent,
     },
+    {
+      provide: FocusableElement,
+      useExisting: SearchComponent,
+    },
   ],
 })
-export class SearchComponent implements ControlValueAccessor {
+export class SearchComponent implements ControlValueAccessor, FocusableElement {
   private notifyOnChange: (v: string) => void;
   private notifyOnTouch: () => void;
 
+  @ViewChild("input") private input: ElementRef<HTMLInputElement>;
+
   protected id = `search-id-${nextId++}`;
   protected searchText: string;
+  // Use `type="text"` for Safari to improve rendering performance
+  protected inputType = isBrowserSafariApi() ? ("text" as const) : ("search" as const);
 
   @Input() disabled: boolean;
   @Input() placeholder: string;
+
+  getFocusTarget() {
+    return this.input.nativeElement;
+  }
 
   onChange(searchText: string) {
     if (this.notifyOnChange != undefined) {

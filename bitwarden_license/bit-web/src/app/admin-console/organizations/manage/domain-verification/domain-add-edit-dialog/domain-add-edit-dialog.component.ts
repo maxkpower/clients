@@ -13,8 +13,7 @@ import { CryptoFunctionService as CryptoFunctionServiceAbstraction } from "@bitw
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
-import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { DialogService } from "@bitwarden/components";
+import { DialogService, ToastService } from "@bitwarden/components";
 
 import { domainNameValidator } from "./validators/domain-name.validator";
 import { uniqueInArrayValidator } from "./validators/unique-in-array.validator";
@@ -67,6 +66,7 @@ export class DomainAddEditDialogComponent implements OnInit, OnDestroy {
     private orgDomainService: OrgDomainServiceAbstraction,
     private validationService: ValidationService,
     private dialogService: DialogService,
+    private toastService: ToastService,
   ) {}
 
   // Angular Method Implementations
@@ -90,17 +90,6 @@ export class DomainAddEditDialogComponent implements OnInit, OnDestroy {
       // Edit
       this.domainForm.patchValue(this.data.orgDomain);
       this.domainForm.disable();
-    } else {
-      // Add
-
-      // Figuring out the proper length of our DNS TXT Record value was fun.
-      // DNS-Based Service Discovery RFC: https://www.ietf.org/rfc/rfc6763.txt; see section 6.1
-      // Google uses 43 chars for their TXT record value: https://support.google.com/a/answer/2716802
-      // So, chose a magic # of 33 bytes to achieve at least that once converted to base 64 (47 char length).
-      const generatedTxt = `bw=${Utils.fromBufferToB64(
-        await this.cryptoFunctionService.randomBytes(33),
-      )}`;
-      this.txtCtrl.setValue(generatedTxt);
     }
 
     this.setupFormListeners();
@@ -116,28 +105,42 @@ export class DomainAddEditDialogComponent implements OnInit, OnDestroy {
 
   copyDnsTxt(): void {
     this.orgDomainService.copyDnsTxt(this.txtCtrl.value);
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("valueCopied", this.i18nService.t("dnsTxtRecord")),
+    });
   }
 
   // End Form methods
 
   // Async Form Actions
+  // Creates a new domain record. The DNS TXT Record will be generated server-side and returned in the response.
   saveDomain = async (): Promise<void> => {
     if (this.domainForm.invalid) {
-      this.platformUtilsService.showToast("error", null, this.i18nService.t("domainFormInvalid"));
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("domainFormInvalid"),
+      });
       return;
     }
 
     this.domainNameCtrl.disable();
 
     const request: OrganizationDomainRequest = new OrganizationDomainRequest(
-      this.txtCtrl.value,
       this.domainNameCtrl.value,
     );
 
     try {
       this.data.orgDomain = await this.orgDomainApiService.post(this.data.organizationId, request);
-      this.platformUtilsService.showToast("success", null, this.i18nService.t("domainSaved"));
-      await this.verifyDomain();
+      // Patch the DNS TXT Record that was generated server-side
+      this.domainForm.controls.txt.patchValue(this.data.orgDomain.txt);
+      this.toastService.showToast({
+        variant: "success",
+        title: null,
+        message: this.i18nService.t("domainSaved"),
+      });
     } catch (e) {
       this.handleDomainSaveError(e);
     }
@@ -188,7 +191,11 @@ export class DomainAddEditDialogComponent implements OnInit, OnDestroy {
   verifyDomain = async (): Promise<void> => {
     if (this.domainForm.invalid) {
       // Note: shouldn't be possible, but going to leave this to be safe.
-      this.platformUtilsService.showToast("error", null, this.i18nService.t("domainFormInvalid"));
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("domainFormInvalid"),
+      });
       return;
     }
 
@@ -199,7 +206,11 @@ export class DomainAddEditDialogComponent implements OnInit, OnDestroy {
       );
 
       if (this.data.orgDomain.verifiedDate) {
-        this.platformUtilsService.showToast("success", null, this.i18nService.t("domainVerified"));
+        this.toastService.showToast({
+          variant: "success",
+          title: null,
+          message: this.i18nService.t("domainVerified"),
+        });
         this.dialogRef.close();
       } else {
         this.domainNameCtrl.setErrors({
@@ -261,7 +272,11 @@ export class DomainAddEditDialogComponent implements OnInit, OnDestroy {
     }
 
     await this.orgDomainApiService.delete(this.data.organizationId, this.data.orgDomain.id);
-    this.platformUtilsService.showToast("success", null, this.i18nService.t("domainRemoved"));
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("domainRemoved"),
+    });
 
     this.dialogRef.close();
   };

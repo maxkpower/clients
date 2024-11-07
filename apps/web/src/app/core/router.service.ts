@@ -1,14 +1,45 @@
 import { Injectable } from "@angular/core";
 import { Title } from "@angular/platform-browser";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
-import { filter } from "rxjs";
+import { filter, firstValueFrom } from "rxjs";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import {
+  KeyDefinition,
+  ROUTER_DISK,
+  StateProvider,
+  GlobalState,
+} from "@bitwarden/common/platform/state";
+
+/**
+ * Data properties acceptable for use in route objects (see usage in oss-routing.module.ts for example)
+ */
+export interface RouteDataProperties {
+  /**
+   * Title of the current HTML document (shows in browser tab)
+   */
+  titleId?: string;
+  /**
+   * doNotSaveUrl - choose to not keep track of the previous URL in memory in the RouterService
+   */
+  doNotSaveUrl?: boolean;
+}
+
+const DEEP_LINK_REDIRECT_URL = new KeyDefinition(ROUTER_DISK, "deepLinkRedirectUrl", {
+  deserializer: (value: string) => value,
+});
 
 @Injectable()
 export class RouterService {
+  /**
+   * The string value of the URL the user tried to navigate to while unauthenticated.
+   *
+   * Developed to allow users to deep link even when the navigation gets interrupted
+   * by the authentication process.
+   */
+  private deepLinkRedirectUrlState: GlobalState<string>;
+
   private previousUrl: string = undefined;
   private currentUrl: string = undefined;
 
@@ -16,9 +47,11 @@ export class RouterService {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private titleService: Title,
-    private stateService: StateService,
+    private stateProvider: StateProvider,
     i18nService: I18nService,
   ) {
+    this.deepLinkRedirectUrlState = this.stateProvider.getGlobal(DEEP_LINK_REDIRECT_URL);
+
     this.currentUrl = this.router.url;
 
     router.events
@@ -67,14 +100,14 @@ export class RouterService {
    * @param url URL being saved to the Global State
    */
   async persistLoginRedirectUrl(url: string): Promise<void> {
-    await this.stateService.setDeepLinkRedirectUrl(url);
+    await this.deepLinkRedirectUrlState.update(() => url);
   }
 
   /**
    * Fetch and clear persisted LoginRedirectUrl if present in state
    */
-  async getAndClearLoginRedirectUrl(): Promise<string> | undefined {
-    const persistedPreLoginUrl = await this.stateService.getDeepLinkRedirectUrl();
+  async getAndClearLoginRedirectUrl(): Promise<string | undefined> {
+    const persistedPreLoginUrl = await firstValueFrom(this.deepLinkRedirectUrlState.state$);
 
     if (!Utils.isNullOrEmpty(persistedPreLoginUrl)) {
       await this.persistLoginRedirectUrl(null);

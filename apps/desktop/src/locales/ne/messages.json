@@ -27,28 +27,28 @@
     "message": "सुरक्षित नोट"
   },
   "folders": {
-    "message": "Folders"
+    "message": "फोल्डरहरू"
   },
   "collections": {
-    "message": "Collections"
+    "message": "संग्रह"
   },
   "searchVault": {
-    "message": "Search vault"
+    "message": "भल्टमा खोज्नुहोस्"
   },
   "addItem": {
-    "message": "Add item"
+    "message": "आइटम थप्नुहोस्"
   },
   "shared": {
-    "message": "Shared"
+    "message": "साझा गरियो"
   },
   "share": {
-    "message": "Share"
+    "message": "शेयर"
   },
   "moveToOrganization": {
-    "message": "Move to organization"
+    "message": "संस्थामा सार्नुहोस्"
   },
   "movedItemToOrg": {
-    "message": "$ITEMNAME$ moved to $ORGNAME$",
+    "message": "$ITEMNAME$ लाई $ORGNAME$ मा सारियो",
     "placeholders": {
       "itemname": {
         "content": "$1",
@@ -60,17 +60,20 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Welcome back"
+  },
   "moveToOrgDesc": {
-    "message": "Choose an organization that you wish to move this item to. Moving to an organization transfers ownership of the item to that organization. You will no longer be the direct owner of this item once it has been moved."
+    "message": "तपाईंले यो आइटम सार्न चाहनुहुने संस्था छान्नुहोस्। संस्थामा सर्दा आइटमको स्वामित्व त्यो संस्थामा हस्तान्तरण हुन्छ। एकपटक सारिएपछि तपाईं अब यस आइटमको प्रत्यक्ष मालिक हुनुहुनेछैन।"
   },
   "attachments": {
-    "message": "Attachments"
+    "message": "अट्याचमेंटहरू"
   },
   "viewItem": {
-    "message": "View item"
+    "message": "आइटम हेर्नुहोस्"
   },
   "name": {
-    "message": "Name"
+    "message": "नाम"
   },
   "uri": {
     "message": "URI"
@@ -86,120 +89,120 @@
     }
   },
   "newUri": {
-    "message": "New URI"
+    "message": "नयाँ URI"
   },
   "username": {
-    "message": "Username"
+    "message": "युजरनेम"
   },
   "password": {
-    "message": "Password"
+    "message": "पासवर्ड"
   },
   "passphrase": {
-    "message": "Passphrase"
+    "message": "पासफ्रेज"
   },
   "editItem": {
-    "message": "Edit item"
+    "message": "आइटम सम्पादन"
   },
   "emailAddress": {
-    "message": "Email address"
+    "message": "इमेल ठेगाना"
   },
   "verificationCodeTotp": {
-    "message": "Verification code (TOTP)"
+    "message": "प्रमाणीकरण कोड (TOTP)"
   },
   "website": {
-    "message": "Website"
+    "message": "वेबसाइट"
   },
   "notes": {
-    "message": "Notes"
+    "message": "टिपोट"
   },
   "customFields": {
-    "message": "Custom fields"
+    "message": "अनुकूलन फिल्डहरू"
   },
   "launch": {
-    "message": "Launch"
+    "message": "वेबसाइटमा जानुहोस्"
   },
   "copyValue": {
     "message": "Copy value",
     "description": "Copy value to clipboard"
   },
   "minimizeOnCopyToClipboard": {
-    "message": "Minimize when copying to clipboard"
+    "message": "क्लिपबोर्डमा प्रतिलिपि गर्दा मिनीमाइज गर्नुहोस्"
   },
   "minimizeOnCopyToClipboardDesc": {
-    "message": "Minimize application when copying an item's data to the clipboard."
+    "message": "क्लिपबोर्डमा आइटमको डेटा प्रतिलिपि गर्दा अनुप्रयोगलाई मिनिमाइज गर्नुहोस्।"
   },
   "toggleVisibility": {
-    "message": "Toggle visibility"
+    "message": "दृश्यता टगल गर्नुहोस्"
   },
   "toggleCollapse": {
     "message": "Toggle collapse",
     "description": "Toggling an expand/collapse state."
   },
   "cardholderName": {
-    "message": "Cardholder name"
+    "message": "कार्डधारकको नाम"
   },
   "number": {
-    "message": "Number"
+    "message": "नम्बर"
   },
   "brand": {
-    "message": "Brand"
+    "message": "ब्राण्ड"
   },
   "expiration": {
-    "message": "Expiration"
+    "message": "म्याद समाप्ति"
   },
   "securityCode": {
-    "message": "Security code"
+    "message": "सुरक्षा कोड (CVV)"
   },
   "identityName": {
-    "message": "Identity name"
+    "message": "पहिचान नाम"
   },
   "company": {
-    "message": "Company"
+    "message": "कम्पनी"
   },
   "ssn": {
-    "message": "Social Security number"
+    "message": "सामाजिक सुरक्षा नम्बर"
   },
   "passportNumber": {
-    "message": "Passport number"
+    "message": "राहदानी नम्बर"
   },
   "licenseNumber": {
-    "message": "License number"
+    "message": "लाइसेन्स नम्बर"
   },
   "email": {
-    "message": "Email"
+    "message": "ईमेल"
   },
   "phone": {
-    "message": "Phone"
+    "message": "फोन नं"
   },
   "address": {
-    "message": "Address"
+    "message": "ठेगाना"
   },
   "premiumRequired": {
-    "message": "Premium required"
+    "message": "प्रिमियम आवश्यक छ"
   },
   "premiumRequiredDesc": {
-    "message": "A Premium membership is required to use this feature."
+    "message": "यो सुविधा प्रयोग गर्न प्रिमियम सदस्यता आवश्यक छ।"
   },
   "errorOccurred": {
-    "message": "An error has occurred."
+    "message": "त्रुटि देखा पर्‍यो।"
   },
   "error": {
-    "message": "Error"
+    "message": "त्रुटि"
   },
   "january": {
-    "message": "January"
+    "message": "जनवरी"
   },
   "february": {
-    "message": "February"
+    "message": "फेब्रुअरी"
   },
   "march": {
-    "message": "March"
+    "message": "मार्च"
   },
   "april": {
-    "message": "April"
+    "message": "अप्रिल"
   },
   "may": {
-    "message": "May"
+    "message": "मे"
   },
   "june": {
     "message": "June"
@@ -258,6 +261,9 @@
   },
   "generatePassword": {
     "message": "Generate password"
+  },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
   },
   "type": {
     "message": "Type"
@@ -349,106 +355,161 @@
     "message": "Name is required."
   },
   "addedItem": {
-    "message": "Item added"
+    "message": "आइटम थपियो"
   },
   "editedItem": {
-    "message": "Item saved"
+    "message": "आइटम सेभ गरियो"
   },
   "deleteItem": {
-    "message": "Delete item"
+    "message": "आइटम हटाउनुहोस्"
   },
   "deleteFolder": {
-    "message": "Delete folder"
+    "message": "फोल्डर हटाउनुहोस्"
   },
   "deleteAttachment": {
-    "message": "Delete attachment"
+    "message": "अट्याचमेंट हटाउनुहोस्"
   },
   "deleteItemConfirmation": {
-    "message": "Do you really want to send to the trash?"
+    "message": "के तपाई साँच्चै रद्दीटोकरीमा पठाउन चाहनुहुन्छ?"
   },
   "deletedItem": {
-    "message": "Item sent to trash"
+    "message": "आइटम रद्दीटोकरीमा पठाइयो"
   },
   "overwritePasswordConfirmation": {
-    "message": "Are you sure you want to overwrite the current password?"
+    "message": "के तपाइँ निश्चित हुनुहुन्छ कि तपाइँ हालको पासवर्ड अधिलेखन (ओभरराइट) गर्न चाहनुहुन्छ?"
   },
   "overwriteUsername": {
-    "message": "Overwrite username"
+    "message": "युजरनेम अधिलेखन गर्नुहोस्"
   },
   "overwriteUsernameConfirmation": {
-    "message": "Are you sure you want to overwrite the current username?"
+    "message": "के तपाइँ निश्चित हुनुहुन्छ कि तपाइँ हालको युजरनेम अधिलेखन (ओभरराइट) गर्न चाहनुहुन्छ?"
   },
   "noneFolder": {
-    "message": "No folder",
+    "message": "कुनै फोल्डर हैन",
     "description": "This is the folder for uncategorized items"
   },
   "addFolder": {
-    "message": "Add folder"
+    "message": "फोल्डर थप्नुहोस्"
   },
   "editFolder": {
-    "message": "Edit folder"
+    "message": "फोल्डर सम्पादन गर्नुहोस्"
   },
   "regeneratePassword": {
-    "message": "Regenerate password"
+    "message": "पासवर्ड पुन: उत्पन्न गर्नुहोस्"
   },
   "copyPassword": {
-    "message": "Copy password"
+    "message": "पासवर्ड प्रतिलिपि गर्नुहोस्"
+  },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
-    "message": "Copy URI"
+    "message": "URI प्रतिलिपि गर्नुहोस्"
   },
   "copyVerificationCodeTotp": {
-    "message": "Copy verification code (TOTP)"
+    "message": "प्रमाणीकरण कोड (TOTP) प्रतिलिपि गर्नुहोस्"
   },
   "length": {
-    "message": "Length"
+    "message": "लम्बाइ"
+  },
+  "passwordMinLength": {
+    "message": "न्यूनतम पासवर्ड लम्बाइ"
   },
   "uppercase": {
-    "message": "Uppercase (A-Z)"
+    "message": "Uppercase (A-Z)",
+    "description": "deprecated. Use uppercaseLabel instead."
   },
   "lowercase": {
-    "message": "Lowercase (a-z)"
+    "message": "Lowercase (a-z)",
+    "description": "deprecated. Use lowercaseLabel instead."
   },
   "numbers": {
-    "message": "Numbers (0-9)"
+    "message": "नम्बरहरू (0-9)",
+    "description": "deprecated. Use numbersLabel instead."
   },
   "specialCharacters": {
-    "message": "Special characters (!@#$%^&*)"
+    "message": "विशेष अक्षरहरू (!@#$%^&*)"
+  },
+  "include": {
+    "message": "Include",
+    "description": "Card header for password generator include block"
+  },
+  "uppercaseDescription": {
+    "message": "Include uppercase characters",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "Include lowercase characters",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "Include numbers",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "Include special characters",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
   },
   "numWords": {
-    "message": "Number of words"
+    "message": "शब्द संख्या"
   },
   "wordSeparator": {
-    "message": "Word separator"
+    "message": "शब्द विभाजक"
   },
   "capitalize": {
     "message": "Capitalize",
     "description": "Make the first letter of a word uppercase."
   },
   "includeNumber": {
-    "message": "Include number"
+    "message": "नम्बर समावेश गर्नुहोस्"
   },
   "close": {
-    "message": "Close"
+    "message": "बन्द गर्नुहोस्"
   },
   "minNumbers": {
-    "message": "Minimum numbers"
+    "message": "न्यूनतम नम्बरहरू"
   },
   "minSpecial": {
-    "message": "Minimum special",
+    "message": "न्यूनतम विषेश अक्षरहरू",
     "description": "Minimum Special Characters"
   },
   "ambiguous": {
-    "message": "Avoid ambiguous characters"
+    "message": "अस्पष्ट अक्षरहरूबाट बच्नुहोस्",
+    "description": "deprecated. Use avoidAmbiguous instead."
+  },
+  "avoidAmbiguous": {
+    "message": "Avoid ambiguous characters",
+    "description": "Label for the avoid ambiguous characters checkbox."
+  },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
   },
   "searchCollection": {
-    "message": "Search collection"
+    "message": "सङ्ग्रह खोज्नुहोस्"
   },
   "searchFolder": {
-    "message": "Search folder"
+    "message": "फोल्डर खोज्नुहोस्"
   },
   "searchFavorites": {
-    "message": "Search favorites"
+    "message": "मनपर्ने खोज्नुहोस्"
   },
   "searchType": {
     "message": "Search type",
@@ -496,8 +557,29 @@
   "createAccount": {
     "message": "Create account"
   },
+  "newToBitwarden": {
+    "message": "New to Bitwarden?"
+  },
+  "setAStrongPassword": {
+    "message": "Set a strong password"
+  },
+  "finishCreatingYourAccountBySettingAPassword": {
+    "message": "Finish creating your account by setting a password"
+  },
   "logIn": {
     "message": "Log in"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "loginWithDevice": {
+    "message": "Log in with device"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
   },
   "submit": {
     "message": "Submit"
@@ -517,8 +599,60 @@
   "masterPassHint": {
     "message": "Master password hint (optional)"
   },
+  "masterPassHintText": {
+    "message": "If you forget your password, the password hint can be sent to your email. $CURRENT$/$MAXIMUM$ character maximum.",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "maximum": {
+        "content": "$2",
+        "example": "50"
+      }
+    }
+  },
+  "masterPassword": {
+    "message": "Master password"
+  },
+  "masterPassImportant": {
+    "message": "Your master password cannot be recovered if you forget it!"
+  },
+  "confirmMasterPassword": {
+    "message": "Confirm master password"
+  },
+  "masterPassHintLabel": {
+    "message": "Master password hint"
+  },
+  "joinOrganization": {
+    "message": "Join organization"
+  },
+  "joinOrganizationName": {
+    "message": "Join $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
+  "finishJoiningThisOrganizationBySettingAMasterPassword": {
+    "message": "Finish joining this organization by setting a master password."
+  },
   "settings": {
     "message": "Settings"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Password hint"
@@ -551,11 +685,23 @@
       }
     }
   },
+  "youSuccessfullyLoggedIn": {
+    "message": "You successfully logged in"
+  },
+  "youMayCloseThisWindow": {
+    "message": "You may close this window"
+  },
   "masterPassDoesntMatch": {
     "message": "Master password confirmation does not match."
   },
   "newAccountCreated": {
     "message": "Your new account has been created! You may now log in."
+  },
+  "newAccountCreated2": {
+    "message": "Your new account has been created!"
+  },
+  "youHaveBeenLoggedIn": {
+    "message": "You have been logged in!"
   },
   "masterPassSent": {
     "message": "We've sent you an email with your master password hint."
@@ -586,6 +732,9 @@
   },
   "verificationCodeRequired": {
     "message": "Verification code is required."
+  },
+  "webauthnCancelOrTimeout": {
+    "message": "The authentication was cancelled or took too long. Please try again."
   },
   "invalidVerificationCode": {
     "message": "Invalid verification code"
@@ -638,18 +787,18 @@
   "authenticatorAppTitle": {
     "message": "Authenticator app"
   },
-  "authenticatorAppDesc": {
-    "message": "Use an authenticator app (such as Authy or Google Authenticator) to generate time-based verification codes.",
-    "description": "'Authy' and 'Google Authenticator' are product names and should not be translated."
+  "authenticatorAppDescV2": {
+    "message": "Enter a code generated by an authenticator app like Bitwarden Authenticator.",
+    "description": "'Bitwarden Authenticator' is a product name and should not be translated."
   },
-  "yubiKeyTitle": {
-    "message": "YubiKey OTP security key"
+  "yubiKeyTitleV2": {
+    "message": "Yubico OTP security key"
   },
   "yubiKeyDesc": {
     "message": "Use a YubiKey to access your account. Works with YubiKey 4, 4 Nano, 4C, and NEO devices."
   },
-  "duoDesc": {
-    "message": "Verify with Duo Security using the Duo Mobile app, SMS, phone call, or U2F security key.",
+  "duoDescV2": {
+    "message": "Enter a code generated by Duo Security.",
     "description": "'Duo Security' and 'Duo Mobile' are product names and should not be translated."
   },
   "duoOrganizationDesc": {
@@ -665,8 +814,8 @@
   "emailTitle": {
     "message": "Email"
   },
-  "emailDesc": {
-    "message": "Verification codes will be emailed to you."
+  "emailDescV2": {
+    "message": "Enter a code sent to your email."
   },
   "loginUnavailable": {
     "message": "Login unavailable"
@@ -686,6 +835,15 @@
   "selfHostedEnvironmentFooter": {
     "message": "Specify the base URL of your on-premises hosted Bitwarden installation."
   },
+  "selfHostedBaseUrlHint": {
+    "message": "Specify the base URL of your on-premises hosted Bitwarden installation. Example: https://bitwarden.company.com"
+  },
+  "selfHostedCustomEnvHeader": {
+    "message": "For advanced configuration, you can specify the base URL of each service independently."
+  },
+  "selfHostedEnvFormInvalid": {
+    "message": "You must add either the base Server URL or at least one custom environment."
+  },
   "customEnvironment": {
     "message": "Custom environment"
   },
@@ -694,6 +852,10 @@
   },
   "baseUrl": {
     "message": "Server URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "API server URL"
@@ -734,8 +896,23 @@
   "loggedOut": {
     "message": "Logged out"
   },
+  "loggedOutDesc": {
+    "message": "You have been logged out of your account."
+  },
   "loginExpired": {
     "message": "Your login session has expired."
+  },
+  "restartRegistration": {
+    "message": "Restart registration"
+  },
+  "expiredLink": {
+    "message": "Expired link"
+  },
+  "pleaseRestartRegistrationOrTryLoggingIn": {
+    "message": "Please restart registration or try logging in."
+  },
+  "youMayAlreadyHaveAnAccount": {
+    "message": "You may already have an account"
   },
   "logOutConfirmation": {
     "message": "Are you sure you want to log out?"
@@ -791,8 +968,11 @@
   "changeMasterPass": {
     "message": "Change master password"
   },
-  "changeMasterPasswordConfirmation": {
-    "message": "You can change your master password on the bitwarden.com web vault. Do you want to visit the website now?"
+  "continueToWebApp": {
+    "message": "Continue to web app?"
+  },
+  "changeMasterPasswordOnWebConfirmation": {
+    "message": "You can change your master password on the Bitwarden web app."
   },
   "fingerprintPhrase": {
     "message": "Fingerprint phrase",
@@ -819,6 +999,18 @@
   },
   "yourVaultIsLocked": {
     "message": "Your vault is locked. Verify your identity to continue."
+  },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
+  },
+  "unlockWithBiometrics": {
+    "message": "Unlock with biometrics"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
   },
   "unlock": {
     "message": "Unlock"
@@ -847,6 +1039,9 @@
   },
   "vaultTimeout": {
     "message": "Vault timeout"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "vaultTimeoutDesc": {
     "message": "Choose when your vault will take the vault timeout action."
@@ -1052,6 +1247,9 @@
     "message": "Copy number",
     "description": "Copy credit card number"
   },
+  "copyEmail": {
+    "message": "Copy email"
+  },
   "copySecurityCode": {
     "message": "Copy security code",
     "description": "Copy credit card security code (CVV)"
@@ -1097,6 +1295,9 @@
   },
   "premiumPurchaseAlert": {
     "message": "You can purchase premium membership on the bitwarden.com web vault. Do you want to visit the website now?"
+  },
+  "premiumPurchaseAlertV2": {
+    "message": "You can purchase Premium from your account settings on the Bitwarden web app."
   },
   "premiumCurrentMember": {
     "message": "You are a premium member!"
@@ -1200,6 +1401,15 @@
       }
     }
   },
+  "copySuccessful": {
+    "message": "Copy Successful"
+  },
+  "errorRefreshingAccessToken": {
+    "message": "Access Token Refresh Error"
+  },
+  "errorRefreshingAccessTokenDesc": {
+    "message": "No refresh token or API keys found. Please try logging out and logging back in."
+  },
   "help": {
     "message": "Help"
   },
@@ -1287,11 +1497,41 @@
     "message": "Password updated",
     "description": "ex. Date this password was updated"
   },
+  "exportFrom": {
+    "message": "Export from"
+  },
   "exportVault": {
     "message": "Export vault"
   },
   "fileFormat": {
     "message": "File format"
+  },
+  "fileEncryptedExportWarningDesc": {
+    "message": "This file export will be password protected and require the file password to decrypt."
+  },
+  "filePassword": {
+    "message": "File password"
+  },
+  "exportPasswordDescription": {
+    "message": "This password will be used to export and import this file"
+  },
+  "accountRestrictedOptionDescription": {
+    "message": "Use your account encryption key, derived from your account's username and Master Password, to encrypt the export and restrict import to only the current Bitwarden account."
+  },
+  "passwordProtected": {
+    "message": "Password protected"
+  },
+  "passwordProtectedOptionDescription": {
+    "message": "Set a file password to encrypt the export and import it to any Bitwarden account using the password for decryption."
+  },
+  "exportTypeHeading": {
+    "message": "Export type"
+  },
+  "accountRestricted": {
+    "message": "Account restricted"
+  },
+  "filePasswordAndConfirmFilePasswordDoNotMatch": {
+    "message": "“File password”  and “Confirm file password“ do not match."
   },
   "hCaptchaUrl": {
     "message": "hCaptcha Url",
@@ -1389,14 +1629,23 @@
   "invalidPin": {
     "message": "Invalid PIN code."
   },
+  "tooManyInvalidPinEntryAttemptsLoggingOut": {
+    "message": "Too many invalid PIN entry attempts. Logging out."
+  },
   "unlockWithWindowsHello": {
     "message": "Unlock with Windows Hello"
   },
   "additionalWindowsHelloSettings": {
     "message": "Additional Windows Hello settings"
   },
+  "unlockWithPolkit": {
+    "message": "Unlock with system authentication"
+  },
   "windowsHelloConsentMessage": {
     "message": "Verify for Bitwarden."
+  },
+  "polkitConsentMessage": {
+    "message": "Authenticate to unlock Bitwarden."
   },
   "unlockWithTouchId": {
     "message": "Unlock with Touch ID"
@@ -1410,6 +1659,9 @@
   "autoPromptWindowsHello": {
     "message": "Ask for Windows Hello on app start"
   },
+  "autoPromptPolkit": {
+    "message": "Ask for system authentication on launch"
+  },
   "autoPromptTouchId": {
     "message": "Ask for Touch ID on app start"
   },
@@ -1419,7 +1671,7 @@
   "recommendedForSecurity": {
     "message": "Recommended for security."
   },
-  "lockWithMasterPassOnRestart": {
+  "lockWithMasterPassOnRestart1": {
     "message": "Lock with master password on restart"
   },
   "deleteAccount": {
@@ -1430,6 +1682,12 @@
   },
   "deleteAccountWarning": {
     "message": "Deleting your account is permanent. It cannot be undone."
+  },
+  "cannotDeleteAccount": {
+    "message": "Cannot delete account"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "This action cannot be completed because your account is owned by an organization. Contact your organization administrator for additional details."
   },
   "accountDeleted": {
     "message": "Account deleted"
@@ -1497,7 +1755,7 @@
   },
   "lock": {
     "message": "Lock",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Trash",
@@ -1540,6 +1798,19 @@
   "orgRequiresYouToSetPassword": {
     "message": "Your organization requires you to set a master password.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "out of $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "verificationRequired": {
+    "message": "Verification required",
+    "description": "Default title for the user verification dialog."
   },
   "currentMasterPass": {
     "message": "Current master password"
@@ -1592,6 +1863,21 @@
   "masterPasswordPolicyRequirementsNotMet": {
     "message": "Your new master password does not meet the policy requirements."
   },
+  "receiveMarketingEmailsV2": {
+    "message": "Get advice, announcements, and research opportunities from Bitwarden in your inbox."
+  },
+  "unsubscribe": {
+    "message": "Unsubscribe"
+  },
+  "atAnyTime": {
+    "message": "at any time."
+  },
+  "byContinuingYouAgreeToThe": {
+    "message": "By continuing, you agree to the"
+  },
+  "and": {
+    "message": "and"
+  },
   "acceptPolicies": {
     "message": "By checking this box you agree to the following:"
   },
@@ -1601,8 +1887,8 @@
   "enableBrowserIntegration": {
     "message": "Allow browser integration"
   },
-  "enableBrowserIntegrationDesc": {
-    "message": "Used for biometrics in browser."
+  "enableBrowserIntegrationDesc1": {
+    "message": "Used to allow biometric unlock in browsers that are not Safari."
   },
   "enableDuckDuckGoBrowserIntegration": {
     "message": "Allow DuckDuckGo browser integration"
@@ -1612,6 +1898,12 @@
   },
   "browserIntegrationUnsupportedTitle": {
     "message": "Browser integration not supported"
+  },
+  "browserIntegrationErrorTitle": {
+    "message": "Error enabling browser integration"
+  },
+  "browserIntegrationErrorDesc": {
+    "message": "An error has occurred while enabling browser integration."
   },
   "browserIntegrationMasOnlyDesc": {
     "message": "Unfortunately browser integration is only supported in the Mac App Store version for now."
@@ -1627,6 +1919,12 @@
   },
   "enableBrowserIntegrationFingerprintDesc": {
     "message": "Add an additional layer of security by requiring fingerprint phrase confirmation when establishing a link between your desktop and browser. This requires user action and verification each time a connection is created."
+  },
+  "enableHardwareAcceleration": {
+    "message": "Use hardware acceleration"
+  },
+  "enableHardwareAccelerationDesc": {
+    "message": "By default this setting is ON. Turn OFF only if you experience graphical issues. Restart is required."
   },
   "approve": {
     "message": "Approve"
@@ -1657,6 +1955,12 @@
   },
   "biometricsNotEnabledDesc": {
     "message": "Browser biometrics requires desktop biometrics to be set up in the settings first."
+  },
+  "biometricsManualSetupTitle": {
+    "message": "Automatic setup not available"
+  },
+  "biometricsManualSetupDesc": {
+    "message": "Due to the installation method, biometrics support could not be automatically enabled. Would you like to open the documentation on how to do this manually?"
   },
   "personalOwnershipSubmitError": {
     "message": "Due to an enterprise policy, you are restricted from saving items to your individual vault. Change the ownership option to an organization and choose from available collections."
@@ -1842,6 +2146,9 @@
   "emailVerificationRequired": {
     "message": "Email verification required"
   },
+  "emailVerifiedV2": {
+    "message": "Email verified"
+  },
   "emailVerificationRequiredDesc": {
     "message": "You must verify your email to use this feature."
   },
@@ -1866,14 +2173,53 @@
   "updateWeakMasterPasswordWarning": {
     "message": "Your master password does not meet one or more of your organization policies. In order to access the vault, you must update your master password now. Proceeding will log you out of your current session, requiring you to log back in. Active sessions on other devices may continue to remain active for up to one hour."
   },
+  "tdeDisabledMasterPasswordRequired": {
+    "message": "Your organization has disabled trusted device encryption. Please set a master password to access your vault."
+  },
+  "tryAgain": {
+    "message": "Try again"
+  },
+  "verificationRequiredForActionSetPinToContinue": {
+    "message": "Verification required for this action. Set a PIN to continue."
+  },
+  "setPin": {
+    "message": "Set PIN"
+  },
+  "verifyWithBiometrics": {
+    "message": "Verify with biometrics"
+  },
+  "awaitingConfirmation": {
+    "message": "Awaiting confirmation"
+  },
+  "couldNotCompleteBiometrics": {
+    "message": "Could not complete biometrics."
+  },
+  "needADifferentMethod": {
+    "message": "Need a different method?"
+  },
+  "useMasterPassword": {
+    "message": "Use master password"
+  },
+  "usePin": {
+    "message": "Use PIN"
+  },
+  "useBiometrics": {
+    "message": "Use biometrics"
+  },
+  "enterVerificationCodeSentToEmail": {
+    "message": "Enter the verification code that was sent to your email."
+  },
+  "resendCode": {
+    "message": "Resend code"
+  },
   "hours": {
     "message": "Hours"
   },
   "minutes": {
     "message": "Minutes"
   },
-  "vaultTimeoutPolicyInEffect": {
-    "message": "Your organization policies have set your maximum allowed vault timeout to $HOURS$ hour(s) and $MINUTES$ minute(s).",
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -1913,6 +2259,9 @@
   },
   "vaultTimeoutTooLarge": {
     "message": "Your vault timeout exceeds the restrictions set by your organization."
+  },
+  "inviteAccepted": {
+    "message": "Invitation accepted"
   },
   "resetPasswordPolicyAutoEnroll": {
     "message": "Automatic enrollment"
@@ -1983,6 +2332,9 @@
   "switchAccount": {
     "message": "Switch account"
   },
+  "alreadyHaveAccount": {
+    "message": "Already have an account?"
+  },
   "options": {
     "message": "Options"
   },
@@ -2001,14 +2353,30 @@
       }
     }
   },
+  "exportingOrganizationVaultTitle": {
+    "message": "Exporting organization vault"
+  },
+  "exportingOrganizationVaultDesc": {
+    "message": "Only the organization vault associated with $ORGANIZATION$ will be exported. Items in individual vaults or other organizations will not be included.",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "ACME Moving Co."
+      }
+    }
+  },
   "locked": {
     "message": "Locked"
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
   },
   "unlocked": {
     "message": "Unlocked"
   },
   "generator": {
-    "message": "Generator"
+    "message": "Generator",
+    "description": "Short for 'credential generator'."
   },
   "whatWouldYouLikeToGenerate": {
     "message": "What would you like to generate?"
@@ -2021,6 +2389,23 @@
   },
   "generateUsername": {
     "message": "Generate username"
+  },
+  "generateEmail": {
+    "message": "Generate email"
+  },
+  "generatorBoundariesHint": {
+    "message": "Value must be between $MIN$ and $MAX$",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "Username type"
@@ -2064,6 +2449,116 @@
   },
   "forwardedEmailDesc": {
     "message": "Generate an email alias with an external forwarding service."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
+  },
+  "forwarderError": {
+    "message": "$SERVICENAME$ error: $ERRORMESSAGE$",
+    "description": "Reports an error returned by a forwarding service to the user.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      },
+      "errormessage": {
+        "content": "$2",
+        "example": "Invalid characters in domain name."
+      }
+    }
+  },
+  "forwarderGeneratedBy": {
+    "message": "Generated by Bitwarden.",
+    "description": "Displayed with the address on the forwarding service's configuration screen."
+  },
+  "forwarderGeneratedByWithWebsite": {
+    "message": "Website: $WEBSITE$. Generated by Bitwarden.",
+    "description": "Displayed with the address on the forwarding service's configuration screen.",
+    "placeholders": {
+      "WEBSITE": {
+        "content": "$1",
+        "example": "www.example.com"
+      }
+    }
+  },
+  "forwaderInvalidToken": {
+    "message": "Invalid $SERVICENAME$ API token",
+    "description": "Displayed when the user's API token is empty or rejected by the forwarding service.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwaderInvalidTokenWithMessage": {
+    "message": "Invalid $SERVICENAME$ API token: $ERRORMESSAGE$",
+    "description": "Displayed when the user's API token is rejected by the forwarding service with an error message.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      },
+      "errormessage": {
+        "content": "$2",
+        "example": "Please verify your email address to continue."
+      }
+    }
+  },
+  "forwarderNoAccountId": {
+    "message": "Unable to obtain $SERVICENAME$ masked email account ID.",
+    "description": "Displayed when the forwarding service fails to return an account ID.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderNoDomain": {
+    "message": "Invalid $SERVICENAME$ domain.",
+    "description": "Displayed when the domain is empty or domain authorization failed at the forwarding service.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderNoUrl": {
+    "message": "Invalid $SERVICENAME$ url.",
+    "description": "Displayed when the url of the forwarding service wasn't supplied.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderUnknownError": {
+    "message": "Unknown $SERVICENAME$ error occurred.",
+    "description": "Displayed when the forwarding service failed due to an unknown error.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "SimpleLogin"
+      }
+    }
+  },
+  "forwarderUnknownForwarder": {
+    "message": "Unknown forwarder: '$SERVICENAME$'.",
+    "description": "Displayed when the forwarding service is not supported.",
+    "placeholders": {
+      "servicename": {
+        "content": "$1",
+        "example": "JustTrust.us"
+      }
+    }
   },
   "hostname": {
     "message": "Hostname",
@@ -2169,9 +2664,6 @@
   "denyLogIn": {
     "message": "Deny login"
   },
-  "approveLoginRequests": {
-    "message": "Approve login requests"
-  },
   "logInConfirmedForEmailOnDevice": {
     "message": "Login confirmed for $EMAIL$ on $DEVICE$",
     "placeholders": {
@@ -2206,9 +2698,6 @@
   "thisRequestIsNoLongerValid": {
     "message": "This request is no longer valid."
   },
-  "approveLoginRequestDesc": {
-    "message": "Use this device to approve login requests made from other devices."
-  },
   "confirmLoginAtemptForMail": {
     "message": "Confirm login attempt for $EMAIL$",
     "placeholders": {
@@ -2220,6 +2709,27 @@
   },
   "logInRequested": {
     "message": "Log in requested"
+  },
+  "creatingAccountOn": {
+    "message": "Creating account on"
+  },
+  "checkYourEmail": {
+    "message": "Check your email"
+  },
+  "followTheLinkInTheEmailSentTo": {
+    "message": "Follow the link in the email sent to"
+  },
+  "andContinueCreatingYourAccount": {
+    "message": "and continue creating your account."
+  },
+  "noEmail": {
+    "message": "No email?"
+  },
+  "goBack": {
+    "message": "Go back"
+  },
+  "toEditYourEmailAddress": {
+    "message": "to edit your email address."
   },
   "exposedMasterPassword": {
     "message": "Exposed Master Password"
@@ -2238,6 +2748,15 @@
   },
   "important": {
     "message": "Important:"
+  },
+  "accessing": {
+    "message": "Accessing"
+  },
+  "accessTokenUnableToBeDecrypted": {
+    "message": "You have been logged out because your access token could not be decrypted. Please log in again to resolve this issue."
+  },
+  "refreshTokenSecureStorageRetrievalFailure": {
+    "message": "You have been logged out because your refresh token could not be retrieved. Please log in again to resolve this issue."
   },
   "masterPasswordHint": {
     "message": "Your master password cannot be recovered if you forget it!"
@@ -2284,15 +2803,6 @@
   "eu": {
     "message": "EU",
     "description": "European Union"
-  },
-  "loggingInOn": {
-    "message": "Logging in on"
-  },
-  "usDomain": {
-    "message": "bitwarden.com"
-  },
-  "euDomain": {
-    "message": "bitwarden.eu"
   },
   "selfHostedServer": {
     "message": "self-hosted"
@@ -2424,6 +2934,12 @@
   "submenu": {
     "message": "Submenu"
   },
+  "toggleSideNavigation": {
+    "message": "Toggle side navigation"
+  },
+  "skipToContent": {
+    "message": "Skip to content"
+  },
   "typePasskey": {
     "message": "Passkey"
   },
@@ -2476,6 +2992,18 @@
       }
     }
   },
+  "duoHealthCheckResultsInNullAuthUrlError": {
+    "message": "Error connecting with the Duo service. Use a different two-step login method or contact Duo for assistance."
+  },
+  "launchDuoAndFollowStepsToFinishLoggingIn": {
+    "message": "Launch Duo and follow the steps to finish logging in."
+  },
+  "duoRequiredByOrgForAccount": {
+    "message": "Duo two-step login is required for your account."
+  },
+  "launchDuo": {
+    "message": "Launch Duo in Browser"
+  },
   "importFormatError": {
     "message": "Data is not formatted correctly. Please check your import file and try again."
   },
@@ -2488,8 +3016,8 @@
   "invalidFilePassword": {
     "message": "Invalid file password, please use the password you entered when you created the export file."
   },
-  "importDestination": {
-    "message": "Import destination"
+  "destination": {
+    "message": "Destination"
   },
   "learnAboutImportOptions": {
     "message": "Learn about your import options"
@@ -2547,6 +3075,9 @@
   "confirmFilePassword": {
     "message": "Confirm file password"
   },
+  "exportSuccess": {
+    "message": "Vault data exported"
+  },
   "multifactorAuthenticationCancelled": {
     "message": "Multifactor authentication cancelled"
   },
@@ -2555,6 +3086,15 @@
   },
   "incorrectUsernameOrPassword": {
     "message": "Incorrect username or password"
+  },
+  "incorrectPassword": {
+    "message": "Incorrect password"
+  },
+  "incorrectCode": {
+    "message": "Incorrect code"
+  },
+  "incorrectPin": {
+    "message": "Incorrect PIN"
   },
   "multifactorAuthenticationFailed": {
     "message": "Multifactor authentication failed"
@@ -2610,5 +3150,82 @@
   },
   "lastPassYubikeyDesc": {
     "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
+  },
+  "commonImportFormats": {
+    "message": "Common formats",
+    "description": "Label indicating the most common import formats"
+  },
+  "success": {
+    "message": "Success"
+  },
+  "troubleshooting": {
+    "message": "Troubleshooting"
+  },
+  "disableHardwareAccelerationRestart": {
+    "message": "Disable hardware acceleration and restart"
+  },
+  "enableHardwareAccelerationRestart": {
+    "message": "Enable hardware acceleration and restart"
+  },
+  "removePasskey": {
+    "message": "Remove passkey"
+  },
+  "passkeyRemoved": {
+    "message": "Passkey removed"
+  },
+  "errorAssigningTargetCollection": {
+    "message": "Error assigning target collection."
+  },
+  "errorAssigningTargetFolder": {
+    "message": "Error assigning target folder."
+  },
+  "viewItemsIn": {
+    "message": "View items in $NAME$",
+    "description": "Button to view the contents of a folder or collection",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "backTo": {
+    "message": "Back to $NAME$",
+    "description": "Navigate back to a previous folder or collection",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "back": {
+    "message": "Back",
+    "description": "Button text to navigate back"
+  },
+  "removeItem": {
+    "message": "Remove $NAME$",
+    "description": "Remove a selected option, such as a folder or collection",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "data": {
+    "message": "Data"
+  },
+  "fileSends": {
+    "message": "File Sends"
+  },
+  "textSends": {
+    "message": "Text Sends"
+  },
+  "ssoError": {
+    "message": "No free ports could be found for the sso login."
+  },
+  "fileSavedToDevice": {
+    "message": "File saved to device. Manage from your device downloads."
   }
 }

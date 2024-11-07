@@ -1,26 +1,33 @@
 import { DatePipe } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
+import { CollectionService } from "@bitwarden/admin-console/common";
 import { AddEditComponent as BaseAddEditComponent } from "@bitwarden/angular/vault/components/add-edit.component";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
-import { EventType, ProductType } from "@bitwarden/common/enums";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { isCardExpired } from "@bitwarden/common/autofill/utils";
+import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
+import { ProductTierType } from "@bitwarden/common/billing/enums";
+import { EventType } from "@bitwarden/common/enums";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { Launchable } from "@bitwarden/common/vault/interfaces/launchable";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService } from "@bitwarden/components";
+import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 @Component({
@@ -39,18 +46,10 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
   viewingPasswordHistory = false;
   viewOnly = false;
   showPasswordCount = false;
+  cardIsExpired: boolean = false;
 
   protected totpInterval: number;
   protected override componentName = "app-vault-add-edit";
-
-  get fido2CredentialCreationDateValue(): string {
-    const dateCreated = this.i18nService.t("dateCreated");
-    const creationDate = this.datePipe.transform(
-      this.cipher?.login?.fido2Credentials?.[0]?.creationDate,
-      "short",
-    );
-    return `${dateCreated} ${creationDate}`;
-  }
 
   constructor(
     cipherService: CipherService,
@@ -58,7 +57,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     i18nService: I18nService,
     platformUtilsService: PlatformUtilsService,
     auditService: AuditService,
-    stateService: StateService,
+    accountService: AccountService,
     collectionService: CollectionService,
     protected totpService: TotpService,
     protected passwordGenerationService: PasswordGenerationServiceAbstraction,
@@ -70,7 +69,10 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     passwordRepromptService: PasswordRepromptService,
     sendApiService: SendApiService,
     dialogService: DialogService,
-    private datePipe: DatePipe,
+    datePipe: DatePipe,
+    configService: ConfigService,
+    private billingAccountProfileStateService: BillingAccountProfileStateService,
+    cipherAuthorizationService: CipherAuthorizationService,
   ) {
     super(
       cipherService,
@@ -78,7 +80,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
       i18nService,
       platformUtilsService,
       auditService,
-      stateService,
+      accountService,
       collectionService,
       messagingService,
       eventCollectionService,
@@ -88,12 +90,17 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
       organizationService,
       sendApiService,
       dialogService,
+      window,
+      datePipe,
+      configService,
+      cipherAuthorizationService,
     );
   }
 
   async ngOnInit() {
     await super.ngOnInit();
     await this.load();
+    this.viewOnly = !this.cipher.edit && this.editMode;
     // remove when all the title for all clients are updated to New Item
     if (this.cloneMode || !this.editMode) {
       this.title = this.i18nService.t("newItem");
@@ -102,7 +109,9 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     this.hasPasswordHistory = this.cipher.hasPasswordHistory;
     this.cleanUp();
 
-    this.canAccessPremium = await this.stateService.getCanAccessPremium();
+    this.canAccessPremium = await firstValueFrom(
+      this.billingAccountProfileStateService.hasPremiumFromAnySource$,
+    );
     if (this.showTotp()) {
       await this.totpUpdateCode();
       const interval = this.totpService.getTimeInterval(this.cipher.login.totp);
@@ -112,6 +121,12 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
         await this.totpTick(interval);
       }, 1000);
     }
+
+    const extensionRefreshEnabled = await firstValueFrom(
+      this.configService.getFeatureFlag$(FeatureFlag.ExtensionRefresh),
+    );
+
+    this.cardIsExpired = extensionRefreshEnabled && isCardExpired(this.cipher.card);
   }
 
   ngOnDestroy() {
@@ -135,6 +150,8 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     this.showPasswordCount = !this.showPasswordCount;
 
     if (this.editMode && this.showPasswordCount) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.eventCollectionService.collect(
         EventType.Cipher_ClientToggledPasswordVisible,
         this.cipherId,
@@ -150,9 +167,9 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     this.platformUtilsService.launchUri(uri.launchUri);
   }
 
-  copy(value: string, typeI18nKey: string, aType: string) {
+  async copy(value: string, typeI18nKey: string, aType: string): Promise<boolean> {
     if (value == null) {
-      return;
+      return false;
     }
 
     this.platformUtilsService.copyToClipboard(value, { window: window });
@@ -164,16 +181,24 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
 
     if (this.editMode) {
       if (typeI18nKey === "password") {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventCollectionService.collect(EventType.Cipher_ClientCopiedPassword, this.cipherId);
       } else if (typeI18nKey === "securityCode") {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventCollectionService.collect(EventType.Cipher_ClientCopiedCardCode, this.cipherId);
       } else if (aType === "H_Field") {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventCollectionService.collect(
           EventType.Cipher_ClientCopiedHiddenField,
           this.cipherId,
         );
       }
     }
+
+    return true;
   }
 
   async generatePassword(): Promise<boolean> {
@@ -260,7 +285,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     return (
       this.cipher.type === CipherType.Login &&
       this.cipher.login.totp &&
-      this.organization?.planProductType != ProductType.Free &&
+      this.organization?.productTierType != ProductTierType.Free &&
       (this.cipher.organizationUseTotp || this.canAccessPremium)
     );
   }

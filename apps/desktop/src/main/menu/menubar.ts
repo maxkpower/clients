@@ -3,6 +3,7 @@ import { Menu, MenuItemConstructorOptions } from "electron";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 
+import { DesktopSettingsService } from "../../platform/services/desktop-settings.service";
 import { isMac } from "../../utils";
 import { UpdaterMain } from "../updater.main";
 import { WindowMain } from "../window.main";
@@ -47,10 +48,12 @@ export class Menubar {
   constructor(
     i18nService: I18nService,
     messagingService: MessagingService,
+    desktopSettingsService: DesktopSettingsService,
     updaterMain: UpdaterMain,
     windowMain: WindowMain,
     webVaultUrl: string,
     appVersion: string,
+    hardwareAccelerationEnabled: boolean,
     updateRequest?: MenuUpdateRequest,
   ) {
     let isLocked = true;
@@ -62,9 +65,10 @@ export class Menubar {
       isLocked = updateRequest.accounts[updateRequest.activeUserId]?.isLocked ?? true;
     }
 
-    const isLockable = !isLocked && updateRequest?.accounts[updateRequest.activeUserId]?.isLockable;
+    const isLockable =
+      !isLocked && updateRequest?.accounts?.[updateRequest.activeUserId]?.isLockable;
     const hasMasterPassword =
-      updateRequest?.accounts[updateRequest.activeUserId]?.hasMasterPassword ?? false;
+      updateRequest?.accounts?.[updateRequest.activeUserId]?.hasMasterPassword ?? false;
 
     this.items = [
       new FileMenu(
@@ -89,7 +93,9 @@ export class Menubar {
       new WindowMenu(i18nService, messagingService, windowMain),
       new HelpMenu(
         i18nService,
+        desktopSettingsService,
         webVaultUrl,
+        hardwareAccelerationEnabled,
         new AboutMenu(i18nService, appVersion, windowMain.win, updaterMain),
       ),
     ];

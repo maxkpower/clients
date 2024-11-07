@@ -1,44 +1,60 @@
-import { firstValueFrom, timeout } from "rxjs";
+import { combineLatest, concatMap, filter, firstValueFrom, map, timeout } from "rxjs";
+
+import { CollectionService } from "@bitwarden/admin-console/common";
+import { LogoutReason } from "@bitwarden/auth/common";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { TaskSchedulerService, ScheduledTaskNames } from "@bitwarden/common/platform/scheduling";
 
 import { SearchService } from "../../abstractions/search.service";
 import { VaultTimeoutSettingsService } from "../../abstractions/vault-timeout/vault-timeout-settings.service";
 import { VaultTimeoutService as VaultTimeoutServiceAbstraction } from "../../abstractions/vault-timeout/vault-timeout.service";
+import { AccountService } from "../../auth/abstractions/account.service";
 import { AuthService } from "../../auth/abstractions/auth.service";
+import { InternalMasterPasswordServiceAbstraction } from "../../auth/abstractions/master-password.service.abstraction";
 import { AuthenticationStatus } from "../../auth/enums/authentication-status";
-import { ClientType } from "../../enums";
 import { VaultTimeoutAction } from "../../enums/vault-timeout-action.enum";
-import { CryptoService } from "../../platform/abstractions/crypto.service";
 import { MessagingService } from "../../platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "../../platform/abstractions/platform-utils.service";
 import { StateService } from "../../platform/abstractions/state.service";
+import { StateEventRunnerService } from "../../platform/state";
+import { UserId } from "../../types/guid";
 import { CipherService } from "../../vault/abstractions/cipher.service";
-import { CollectionService } from "../../vault/abstractions/collection.service";
 import { FolderService } from "../../vault/abstractions/folder/folder.service.abstraction";
 
 export class VaultTimeoutService implements VaultTimeoutServiceAbstraction {
   private inited = false;
 
   constructor(
+    private accountService: AccountService,
+    private masterPasswordService: InternalMasterPasswordServiceAbstraction,
     private cipherService: CipherService,
     private folderService: FolderService,
     private collectionService: CollectionService,
-    private cryptoService: CryptoService,
     protected platformUtilsService: PlatformUtilsService,
     private messagingService: MessagingService,
     private searchService: SearchService,
     private stateService: StateService,
     private authService: AuthService,
     private vaultTimeoutSettingsService: VaultTimeoutSettingsService,
+    private stateEventRunnerService: StateEventRunnerService,
+    private taskSchedulerService: TaskSchedulerService,
+    protected logService: LogService,
     private lockedCallback: (userId?: string) => Promise<void> = null,
-    private loggedOutCallback: (expired: boolean, userId?: string) => Promise<void> = null,
-  ) {}
+    private loggedOutCallback: (
+      logoutReason: LogoutReason,
+      userId?: string,
+    ) => Promise<void> = null,
+  ) {
+    this.taskSchedulerService.registerTaskHandler(
+      ScheduledTaskNames.vaultTimeoutCheckInterval,
+      () => this.checkVaultTimeout(),
+    );
+  }
 
   async init(checkOnInterval: boolean) {
     if (this.inited) {
       return;
     }
-    // TODO: Remove after 2023.10 release (https://bitwarden.atlassian.net/browse/PM-3483)
-    await this.migrateKeyForNeverLockIfNeeded();
 
     this.inited = true;
     if (checkOnInterval) {
@@ -47,25 +63,39 @@ export class VaultTimeoutService implements VaultTimeoutServiceAbstraction {
   }
 
   startCheck() {
-    this.checkVaultTimeout();
-    setInterval(() => this.checkVaultTimeout(), 10 * 1000); // check every 10 seconds
+    this.checkVaultTimeout().catch((error) => this.logService.error(error));
+    this.taskSchedulerService.setInterval(
+      ScheduledTaskNames.vaultTimeoutCheckInterval,
+      10 * 1000, // check every 10 seconds
+    );
   }
 
   async checkVaultTimeout(): Promise<void> {
     // Get whether or not the view is open a single time so it can be compared for each user
     const isViewOpen = await this.platformUtilsService.isViewOpen();
 
-    const activeUserId = await firstValueFrom(this.stateService.activeAccount$.pipe(timeout(500)));
-
-    const accounts = await firstValueFrom(this.stateService.accounts$);
-    for (const userId in accounts) {
-      if (userId != null && (await this.shouldLock(userId, activeUserId, isViewOpen))) {
-        await this.executeTimeoutAction(userId);
-      }
-    }
+    await firstValueFrom(
+      combineLatest([
+        this.accountService.activeAccount$,
+        this.accountService.accountActivity$,
+      ]).pipe(
+        concatMap(async ([activeAccount, accountActivity]) => {
+          const activeUserId = activeAccount?.id;
+          for (const userIdString in accountActivity) {
+            const userId = userIdString as UserId;
+            if (
+              userId != null &&
+              (await this.shouldLock(userId, accountActivity[userId], activeUserId, isViewOpen))
+            ) {
+              await this.executeTimeoutAction(userId);
+            }
+          }
+        }),
+      ),
+    );
   }
 
-  async lock(userId?: string): Promise<void> {
+  async lock(userId?: UserId): Promise<void> {
     const authed = await this.stateService.getIsAuthenticated({ userId: userId });
     if (!authed) {
       return;
@@ -79,24 +109,49 @@ export class VaultTimeoutService implements VaultTimeoutServiceAbstraction {
       await this.logOut(userId);
     }
 
-    if (userId == null || userId === (await this.stateService.getUserId())) {
-      this.searchService.clearIndex();
+    const currentUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
+
+    const lockingUserId = userId ?? currentUserId;
+
+    // HACK: Start listening for the transition of the locking user from something to the locked state.
+    // This is very much a hack to ensure that the authentication status to retrievable right after
+    // it does its work. Particularly the `lockedCallback` and `"locked"` message. Instead
+    // lockedCallback should be deprecated and people should subscribe and react to `authStatusFor$` themselves.
+    const lockPromise = firstValueFrom(
+      this.authService.authStatusFor$(lockingUserId).pipe(
+        filter((authStatus) => authStatus === AuthenticationStatus.Locked),
+        timeout({
+          first: 5_000,
+          with: () => {
+            throw new Error("The lock process did not complete in a reasonable amount of time.");
+          },
+        }),
+      ),
+    );
+
+    if (userId == null || userId === currentUserId) {
+      await this.searchService.clearIndex();
       await this.folderService.clearCache();
+      await this.collectionService.clearActiveUserCache();
     }
 
-    await this.stateService.setEverBeenUnlocked(true, { userId: userId });
-    await this.stateService.setUserKeyAutoUnlock(null, { userId: userId });
-    await this.stateService.setCryptoMasterKeyAuto(null, { userId: userId });
+    await this.masterPasswordService.clearMasterKey(lockingUserId);
 
-    await this.cryptoService.clearUserKey(false, userId);
-    await this.cryptoService.clearMasterKey(userId);
-    await this.cryptoService.clearOrgKeys(true, userId);
-    await this.cryptoService.clearKeyPair(true, userId);
+    await this.stateService.setUserKeyAutoUnlock(null, { userId: lockingUserId });
+    await this.stateService.setCryptoMasterKeyAuto(null, { userId: lockingUserId });
 
-    await this.cipherService.clearCache(userId);
-    await this.collectionService.clearCache(userId);
+    await this.cipherService.clearCache(lockingUserId);
 
-    this.messagingService.send("locked", { userId: userId });
+    await this.stateEventRunnerService.handleEvent("lock", lockingUserId);
+
+    // HACK: Sit here and wait for the the auth status to transition to `Locked`
+    // to ensure the message and lockedCallback will get the correct status
+    // if/when they call it.
+    await lockPromise;
+
+    this.messagingService.send("locked", { userId: lockingUserId });
 
     if (this.lockedCallback != null) {
       await this.lockedCallback(userId);
@@ -105,12 +160,13 @@ export class VaultTimeoutService implements VaultTimeoutServiceAbstraction {
 
   async logOut(userId?: string): Promise<void> {
     if (this.loggedOutCallback != null) {
-      await this.loggedOutCallback(false, userId);
+      await this.loggedOutCallback("vaultTimeout", userId);
     }
   }
 
   private async shouldLock(
     userId: string,
+    lastActive: Date,
     activeUserId: string,
     isViewOpen: boolean,
   ): Promise<boolean> {
@@ -129,44 +185,29 @@ export class VaultTimeoutService implements VaultTimeoutServiceAbstraction {
       return false;
     }
 
-    const vaultTimeout = await this.vaultTimeoutSettingsService.getVaultTimeout(userId);
-    if (vaultTimeout == null || vaultTimeout < 0) {
+    const vaultTimeout = await firstValueFrom(
+      this.vaultTimeoutSettingsService.getVaultTimeoutByUserId$(userId),
+    );
+
+    if (typeof vaultTimeout === "string") {
       return false;
     }
 
-    const lastActive = await this.stateService.getLastActive({ userId: userId });
     if (lastActive == null) {
       return false;
     }
 
     const vaultTimeoutSeconds = vaultTimeout * 60;
-    const diffSeconds = (new Date().getTime() - lastActive) / 1000;
+    const diffSeconds = (new Date().getTime() - lastActive.getTime()) / 1000;
     return diffSeconds >= vaultTimeoutSeconds;
   }
 
-  private async executeTimeoutAction(userId: string): Promise<void> {
+  private async executeTimeoutAction(userId: UserId): Promise<void> {
     const timeoutAction = await firstValueFrom(
-      this.vaultTimeoutSettingsService.vaultTimeoutAction$(userId),
+      this.vaultTimeoutSettingsService.getVaultTimeoutActionByUserId$(userId),
     );
     timeoutAction === VaultTimeoutAction.LogOut
       ? await this.logOut(userId)
       : await this.lock(userId);
-  }
-
-  private async migrateKeyForNeverLockIfNeeded(): Promise<void> {
-    // Web can't set vault timeout to never
-    if (this.platformUtilsService.getClientType() == ClientType.Web) {
-      return;
-    }
-    const accounts = await firstValueFrom(this.stateService.accounts$);
-    for (const userId in accounts) {
-      if (userId != null) {
-        await this.cryptoService.migrateAutoKeyIfNeeded(userId);
-        // Legacy users should be logged out since we're not on the web vault and can't migrate.
-        if (await this.cryptoService.isLegacyUser(null, userId)) {
-          await this.logOut(userId);
-        }
-      }
-    }
   }
 }

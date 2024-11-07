@@ -52,6 +52,8 @@ describe("AccessSelectorComponent", () => {
   let fixture: ComponentFixture<TestableAccessSelectorComponent>;
 
   beforeEach(() => {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule({
       imports: [
         ButtonModule,
@@ -203,7 +205,7 @@ describe("AccessSelectorComponent", () => {
           labelName: "Member 1",
           listName: "Member 1 (member1@email.com)",
           email: "member1@email.com",
-          role: OrganizationUserType.Manager,
+          role: OrganizationUserType.User,
           status: OrganizationUserStatusType.Confirmed,
         },
       ];

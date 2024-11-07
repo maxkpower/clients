@@ -1,3 +1,6 @@
+import { CollectionView } from "@bitwarden/admin-console/common";
+import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
+
 import { Importer } from "../importers/importer";
 import { ImportOption, ImportType } from "../models/import-options";
 import { ImportResult } from "../models/import-result";
@@ -10,7 +13,7 @@ export abstract class ImportServiceAbstraction {
     importer: Importer,
     fileContents: string,
     organizationId?: string,
-    selectedImportTarget?: string,
+    selectedImportTarget?: FolderView | CollectionView,
     canAccessImportExport?: boolean,
   ) => Promise<ImportResult>;
   getImporter: (

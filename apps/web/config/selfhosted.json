@@ -7,8 +7,6 @@
     "port": 8081
   },
   "flags": {
-    "secretsManager": true,
-    "showPasswordless": true,
-    "enableCipherKeyEncryption": false
+    "showPasswordless": true
   }
 }

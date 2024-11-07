@@ -2,24 +2,23 @@ import { Directive, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
+import { LoginStrategyServiceAbstraction, PasswordLoginCredentials } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
-import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
-import { PasswordLoginCredentials } from "@bitwarden/common/auth/models/domain/login-credentials";
+import { DEFAULT_KDF_CONFIG } from "@bitwarden/common/auth/models/domain/kdf-config";
 import { RegisterResponse } from "@bitwarden/common/auth/models/response/register.response";
 import { KeysRequest } from "@bitwarden/common/models/request/keys.request";
 import { ReferenceEventRequest } from "@bitwarden/common/models/request/reference-event.request";
 import { RegisterRequest } from "@bitwarden/common/models/request/register.request";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { DEFAULT_KDF_CONFIG, DEFAULT_KDF_TYPE } from "@bitwarden/common/platform/enums";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
-import { DialogService } from "@bitwarden/components";
+import { DialogService, ToastService } from "@bitwarden/components";
+import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { KeyService } from "@bitwarden/key-management";
 
 import {
   AllValidationErrors,
@@ -79,13 +78,17 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
 
   protected captchaBypassToken: string = null;
 
+  // allows for extending classes to modify the register request before sending
+  // currently used by web to add organization invitation details
+  protected modifyRegisterRequest: (request: RegisterRequest) => Promise<void>;
+
   constructor(
     protected formValidationErrorService: FormValidationErrorsService,
     protected formBuilder: UntypedFormBuilder,
-    protected authService: AuthService,
+    protected loginStrategyService: LoginStrategyServiceAbstraction,
     protected router: Router,
     i18nService: I18nService,
-    protected cryptoService: CryptoService,
+    protected keyService: KeyService,
     protected apiService: ApiService,
     protected stateService: StateService,
     platformUtilsService: PlatformUtilsService,
@@ -94,13 +97,16 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
     protected logService: LogService,
     protected auditService: AuditService,
     protected dialogService: DialogService,
+    protected toastService: ToastService,
   ) {
-    super(environmentService, i18nService, platformUtilsService);
+    super(environmentService, i18nService, platformUtilsService, toastService);
     this.showTerms = !platformUtilsService.isSelfHost();
     this.characterMinimumMessage = this.i18nService.t("characterMinimum", this.minimumLength);
   }
 
   async ngOnInit() {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.setupCaptcha();
   }
 
@@ -124,11 +130,11 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
       }
       if (this.isInTrialFlow) {
         if (!this.accountCreated) {
-          this.platformUtilsService.showToast(
-            "success",
-            null,
-            this.i18nService.t("trialAccountCreated"),
-          );
+          this.toastService.showToast({
+            variant: "success",
+            title: null,
+            message: this.i18nService.t("trialAccountCreated"),
+          });
         }
         const loginResponse = await this.logIn(email, masterPassword, this.captchaBypassToken);
         if (loginResponse.captchaRequired) {
@@ -136,11 +142,13 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
         }
         this.createdAccount.emit(this.formGroup.value.email);
       } else {
-        this.platformUtilsService.showToast(
-          "success",
-          null,
-          this.i18nService.t("newAccountCreated"),
-        );
+        this.toastService.showToast({
+          variant: "success",
+          title: null,
+          message: this.i18nService.t("newAccountCreated"),
+        });
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.router.navigate([this.successRoute], { queryParams: { email: email } });
       }
     } catch (e) {
@@ -203,11 +211,11 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
     this.showErrorSummary = true;
 
     if (this.formGroup.get("acceptPolicies").hasError("required")) {
-      this.platformUtilsService.showToast(
-        "error",
-        this.i18nService.t("errorOccurred"),
-        this.i18nService.t("acceptPoliciesRequired"),
-      );
+      this.toastService.showToast({
+        variant: "error",
+        title: this.i18nService.t("errorOccurred"),
+        message: this.i18nService.t("acceptPoliciesRequired"),
+      });
       return { isValid: false };
     }
 
@@ -219,7 +227,11 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
     //desktop, browser
     if (this.formGroup.invalid && showToast) {
       const errorText = this.getErrorToastMessage();
-      this.platformUtilsService.showToast("error", this.i18nService.t("errorOccurred"), errorText);
+      this.toastService.showToast({
+        variant: "error",
+        title: this.i18nService.t("errorOccurred"),
+        message: errorText,
+      });
       return { isValid: false };
     }
 
@@ -270,12 +282,11 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
     name: string,
   ): Promise<RegisterRequest> {
     const hint = this.formGroup.value.hint;
-    const kdf = DEFAULT_KDF_TYPE;
     const kdfConfig = DEFAULT_KDF_CONFIG;
-    const key = await this.cryptoService.makeMasterKey(masterPassword, email, kdf, kdfConfig);
-    const newUserKey = await this.cryptoService.makeUserKey(key);
-    const masterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, key);
-    const keys = await this.cryptoService.makeKeyPair(newUserKey[0]);
+    const key = await this.keyService.makeMasterKey(masterPassword, email, kdfConfig);
+    const newUserKey = await this.keyService.makeUserKey(key);
+    const masterKeyHash = await this.keyService.hashMasterKey(masterPassword, key);
+    const keys = await this.keyService.makeKeyPair(newUserKey[0]);
     const request = new RegisterRequest(
       email,
       name,
@@ -284,16 +295,12 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
       newUserKey[1].encryptedString,
       this.referenceData,
       this.captchaToken,
-      kdf,
+      kdfConfig.kdfType,
       kdfConfig.iterations,
-      kdfConfig.memory,
-      kdfConfig.parallelism,
     );
     request.keys = new KeysRequest(keys[0], keys[1].encryptedString);
-    const orgInvite = await this.stateService.getOrganizationInvitation();
-    if (orgInvite != null && orgInvite.token != null && orgInvite.organizationUserId != null) {
-      request.token = orgInvite.token;
-      request.organizationUserId = orgInvite.organizationUserId;
+    if (this.modifyRegisterRequest) {
+      await this.modifyRegisterRequest(request);
     }
     return request;
   }
@@ -329,7 +336,7 @@ export class RegisterComponent extends CaptchaProtectedComponent implements OnIn
       captchaBypassToken,
       null,
     );
-    const loginResponse = await this.authService.logIn(credentials);
+    const loginResponse = await this.loginStrategyService.logIn(credentials);
     if (this.handleCaptchaRequired(loginResponse)) {
       return { captchaRequired: true };
     }

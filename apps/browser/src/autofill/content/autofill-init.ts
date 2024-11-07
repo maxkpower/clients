@@ -1,8 +1,14 @@
+import { EVENTS } from "@bitwarden/common/autofill/constants";
+
 import AutofillPageDetails from "../models/autofill-page-details";
+import { AutofillInlineMenuContentService } from "../overlay/inline-menu/abstractions/autofill-inline-menu-content.service";
+import { OverlayNotificationsContentService } from "../overlay/notifications/abstractions/overlay-notifications-content.service";
 import { AutofillOverlayContentService } from "../services/abstractions/autofill-overlay-content.service";
-import CollectAutofillContentService from "../services/collect-autofill-content.service";
-import DomElementVisibilityService from "../services/dom-element-visibility.service";
+import { DomElementVisibilityService } from "../services/abstractions/dom-element-visibility.service";
+import { DomQueryService } from "../services/abstractions/dom-query.service";
+import { CollectAutofillContentService } from "../services/collect-autofill-content.service";
 import InsertAutofillContentService from "../services/insert-autofill-content.service";
+import { sendExtensionMessage } from "../utils";
 
 import {
   AutofillExtensionMessage,
@@ -11,39 +17,40 @@ import {
 } from "./abstractions/autofill-init";
 
 class AutofillInit implements AutofillInitInterface {
-  private readonly autofillOverlayContentService: AutofillOverlayContentService | undefined;
-  private readonly domElementVisibilityService: DomElementVisibilityService;
+  private readonly sendExtensionMessage = sendExtensionMessage;
   private readonly collectAutofillContentService: CollectAutofillContentService;
   private readonly insertAutofillContentService: InsertAutofillContentService;
+  private collectPageDetailsOnLoadTimeout: number | NodeJS.Timeout | undefined;
   private readonly extensionMessageHandlers: AutofillExtensionMessageHandlers = {
     collectPageDetails: ({ message }) => this.collectPageDetails(message),
     collectPageDetailsImmediately: ({ message }) => this.collectPageDetails(message, true),
     fillForm: ({ message }) => this.fillForm(message),
-    openAutofillOverlay: ({ message }) => this.openAutofillOverlay(message),
-    closeAutofillOverlay: ({ message }) => this.removeAutofillOverlay(message),
-    addNewVaultItemFromOverlay: () => this.addNewVaultItemFromOverlay(),
-    redirectOverlayFocusOut: ({ message }) => this.redirectOverlayFocusOut(message),
-    updateIsOverlayCiphersPopulated: ({ message }) => this.updateIsOverlayCiphersPopulated(message),
-    bgUnlockPopoutOpened: () => this.blurAndRemoveOverlay(),
-    bgVaultItemRepromptPopoutOpened: () => this.blurAndRemoveOverlay(),
-    updateAutofillOverlayVisibility: ({ message }) => this.updateAutofillOverlayVisibility(message),
   };
 
   /**
    * AutofillInit constructor. Initializes the DomElementVisibilityService,
    * CollectAutofillContentService and InsertAutofillContentService classes.
    *
+   * @param domQueryService - Service used to handle DOM queries.
+   * @param domElementVisibilityService - Used to check if an element is viewable.
    * @param autofillOverlayContentService - The autofill overlay content service, potentially undefined.
+   * @param autofillInlineMenuContentService - The inline menu content service, potentially undefined.
+   * @param overlayNotificationsContentService - The overlay notifications content service, potentially undefined.
    */
-  constructor(autofillOverlayContentService?: AutofillOverlayContentService) {
-    this.autofillOverlayContentService = autofillOverlayContentService;
-    this.domElementVisibilityService = new DomElementVisibilityService();
+  constructor(
+    domQueryService: DomQueryService,
+    domElementVisibilityService: DomElementVisibilityService,
+    private autofillOverlayContentService?: AutofillOverlayContentService,
+    private autofillInlineMenuContentService?: AutofillInlineMenuContentService,
+    private overlayNotificationsContentService?: OverlayNotificationsContentService,
+  ) {
     this.collectAutofillContentService = new CollectAutofillContentService(
-      this.domElementVisibilityService,
+      domElementVisibilityService,
+      domQueryService,
       this.autofillOverlayContentService,
     );
     this.insertAutofillContentService = new InsertAutofillContentService(
-      this.domElementVisibilityService,
+      domElementVisibilityService,
       this.collectAutofillContentService,
     );
   }
@@ -56,6 +63,28 @@ class AutofillInit implements AutofillInitInterface {
   init() {
     this.setupExtensionMessageListeners();
     this.autofillOverlayContentService?.init();
+    this.collectPageDetailsOnLoad();
+  }
+
+  /**
+   * Triggers a collection of the page details from the
+   * background script, ensuring that autofill is ready
+   * to act on the page.
+   */
+  private collectPageDetailsOnLoad() {
+    const sendCollectDetailsMessage = () => {
+      this.clearCollectPageDetailsOnLoadTimeout();
+      this.collectPageDetailsOnLoadTimeout = setTimeout(
+        () => this.sendExtensionMessage("bgCollectPageDetails", { sender: "autofillInit" }),
+        750,
+      );
+    };
+
+    if (globalThis.document.readyState === "complete") {
+      sendCollectDetailsMessage();
+    }
+
+    globalThis.addEventListener(EVENTS.LOAD, sendCollectDetailsMessage);
   }
 
   /**
@@ -78,8 +107,7 @@ class AutofillInit implements AutofillInitInterface {
       return pageDetails;
     }
 
-    chrome.runtime.sendMessage({
-      command: "collectPageDetailsResponse",
+    void this.sendExtensionMessage("collectPageDetailsResponse", {
       tab: message.tab,
       details: pageDetails,
       sender: message.sender,
@@ -96,136 +124,37 @@ class AutofillInit implements AutofillInitInterface {
       return;
     }
 
-    this.updateOverlayIsCurrentlyFilling(true);
+    this.blurFocusedFieldAndCloseInlineMenu();
+    await this.sendExtensionMessage("updateIsFieldCurrentlyFilling", {
+      isFieldCurrentlyFilling: true,
+    });
     await this.insertAutofillContentService.fillForm(fillScript);
 
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    setTimeout(() => {
-      this.updateOverlayIsCurrentlyFilling(false);
-      this.autofillOverlayContentService.focusMostRecentOverlayField();
-    }, 250);
-  }
-
-  /**
-   * Handles updating the overlay is currently filling value.
-   *
-   * @param isCurrentlyFilling - Indicates if the overlay is currently filling
-   */
-  private updateOverlayIsCurrentlyFilling(isCurrentlyFilling: boolean) {
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    this.autofillOverlayContentService.isCurrentlyFilling = isCurrentlyFilling;
-  }
-
-  /**
-   * Opens the autofill overlay.
-   *
-   * @param data - The extension message data.
-   */
-  private openAutofillOverlay({ data }: AutofillExtensionMessage) {
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    this.autofillOverlayContentService.openAutofillOverlay(data);
-  }
-
-  /**
-   * Blurs the most recent overlay field and removes the overlay. Used
-   * in cases where the background unlock or vault item reprompt popout
-   * is opened.
-   */
-  private blurAndRemoveOverlay() {
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    this.autofillOverlayContentService.blurMostRecentOverlayField();
-    this.removeAutofillOverlay();
-  }
-
-  /**
-   * Removes the autofill overlay if the field is not currently focused.
-   * If the autofill is currently filling, only the overlay list will be
-   * removed.
-   */
-  private removeAutofillOverlay(message?: AutofillExtensionMessage) {
-    if (message?.data?.forceCloseOverlay) {
-      this.autofillOverlayContentService?.removeAutofillOverlay();
-      return;
-    }
-
-    if (
-      !this.autofillOverlayContentService ||
-      this.autofillOverlayContentService.isFieldCurrentlyFocused
-    ) {
-      return;
-    }
-
-    if (this.autofillOverlayContentService.isCurrentlyFilling) {
-      this.autofillOverlayContentService.removeAutofillOverlayList();
-      return;
-    }
-
-    this.autofillOverlayContentService.removeAutofillOverlay();
-  }
-
-  /**
-   * Adds a new vault item from the overlay.
-   */
-  private addNewVaultItemFromOverlay() {
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    this.autofillOverlayContentService.addNewVaultItem();
-  }
-
-  /**
-   * Redirects the overlay focus out of an overlay iframe.
-   *
-   * @param data - Contains the direction to redirect the focus.
-   */
-  private redirectOverlayFocusOut({ data }: AutofillExtensionMessage) {
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    this.autofillOverlayContentService.redirectOverlayFocusOut(data?.direction);
-  }
-
-  /**
-   * Updates whether the current tab has ciphers that can populate the overlay list
-   *
-   * @param data - Contains the isOverlayCiphersPopulated value
-   *
-   */
-  private updateIsOverlayCiphersPopulated({ data }: AutofillExtensionMessage) {
-    if (!this.autofillOverlayContentService) {
-      return;
-    }
-
-    this.autofillOverlayContentService.isOverlayCiphersPopulated = Boolean(
-      data?.isOverlayCiphersPopulated,
+    setTimeout(
+      () =>
+        this.sendExtensionMessage("updateIsFieldCurrentlyFilling", {
+          isFieldCurrentlyFilling: false,
+        }),
+      250,
     );
   }
 
   /**
-   * Updates the autofill overlay visibility.
-   *
-   * @param data - Contains the autoFillOverlayVisibility value
+   * Blurs the most recently focused field and removes the inline menu. Used
+   * in cases where the background unlock or vault item reprompt popout
+   * is opened.
    */
-  private updateAutofillOverlayVisibility({ data }: AutofillExtensionMessage) {
-    if (!this.autofillOverlayContentService || isNaN(data?.autofillOverlayVisibility)) {
-      return;
-    }
+  private blurFocusedFieldAndCloseInlineMenu() {
+    this.autofillOverlayContentService?.blurMostRecentlyFocusedField(true);
+  }
 
-    this.autofillOverlayContentService.autofillOverlayVisibility = data?.autofillOverlayVisibility;
+  /**
+   * Clears the send collect details message timeout.
+   */
+  private clearCollectPageDetailsOnLoadTimeout() {
+    if (this.collectPageDetailsOnLoadTimeout) {
+      clearTimeout(this.collectPageDetailsOnLoadTimeout);
+    }
   }
 
   /**
@@ -248,28 +177,52 @@ class AutofillInit implements AutofillInitInterface {
     sendResponse: (response?: any) => void,
   ): boolean => {
     const command: string = message.command;
-    const handler: CallableFunction | undefined = this.extensionMessageHandlers[command];
+    const handler: CallableFunction | undefined = this.getExtensionMessageHandler(command);
     if (!handler) {
-      return;
+      return null;
     }
 
     const messageResponse = handler({ message, sender });
-    if (!messageResponse) {
-      return;
+    if (typeof messageResponse === "undefined") {
+      return null;
     }
 
-    Promise.resolve(messageResponse).then((response) => sendResponse(response));
+    void Promise.resolve(messageResponse).then((response) => sendResponse(response));
     return true;
   };
+
+  /**
+   * Gets the extension message handler for the given command.
+   *
+   * @param command - The extension message command.
+   */
+  private getExtensionMessageHandler(command: string): CallableFunction | undefined {
+    if (this.autofillOverlayContentService?.messageHandlers?.[command]) {
+      return this.autofillOverlayContentService.messageHandlers[command];
+    }
+
+    if (this.autofillInlineMenuContentService?.messageHandlers?.[command]) {
+      return this.autofillInlineMenuContentService.messageHandlers[command];
+    }
+
+    if (this.overlayNotificationsContentService?.messageHandlers?.[command]) {
+      return this.overlayNotificationsContentService.messageHandlers[command];
+    }
+
+    return this.extensionMessageHandlers[command];
+  }
 
   /**
    * Handles destroying the autofill init content script. Removes all
    * listeners, timeouts, and object instances to prevent memory leaks.
    */
   destroy() {
+    this.clearCollectPageDetailsOnLoadTimeout();
     chrome.runtime.onMessage.removeListener(this.handleExtensionMessage);
     this.collectAutofillContentService.destroy();
     this.autofillOverlayContentService?.destroy();
+    this.autofillInlineMenuContentService?.destroy();
+    this.overlayNotificationsContentService?.destroy();
   }
 }
 

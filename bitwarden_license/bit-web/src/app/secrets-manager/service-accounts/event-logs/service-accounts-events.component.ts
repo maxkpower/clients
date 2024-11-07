@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 
@@ -6,6 +6,7 @@ import { FileDownloadService } from "@bitwarden/common/platform/abstractions/fil
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { ToastService } from "@bitwarden/components";
 import { BaseEventsComponent } from "@bitwarden/web-vault/app/admin-console/common/base.events.component";
 import { EventService } from "@bitwarden/web-vault/app/core";
 import { EventExportService } from "@bitwarden/web-vault/app/tools/event-export";
@@ -16,8 +17,11 @@ import { ServiceAccountEventLogApiService } from "./service-account-event-log-ap
   selector: "sm-service-accounts-events",
   templateUrl: "./service-accounts-events.component.html",
 })
-export class ServiceAccountEventsComponent extends BaseEventsComponent implements OnDestroy {
-  exportFileName = "service-account-events";
+export class ServiceAccountEventsComponent
+  extends BaseEventsComponent
+  implements OnInit, OnDestroy
+{
+  exportFileName = "machine-account-events";
   private destroy$ = new Subject<void>();
   private serviceAccountId: string;
 
@@ -30,6 +34,7 @@ export class ServiceAccountEventsComponent extends BaseEventsComponent implement
     platformUtilsService: PlatformUtilsService,
     logService: LogService,
     fileDownloadService: FileDownloadService,
+    toastService: ToastService,
   ) {
     super(
       eventService,
@@ -38,6 +43,7 @@ export class ServiceAccountEventsComponent extends BaseEventsComponent implement
       platformUtilsService,
       logService,
       fileDownloadService,
+      toastService,
     );
   }
 
@@ -50,7 +56,7 @@ export class ServiceAccountEventsComponent extends BaseEventsComponent implement
   }
 
   async load() {
-    await this.loadEvents(true);
+    await this.refreshEvents();
     this.loaded = true;
   }
 
@@ -65,7 +71,7 @@ export class ServiceAccountEventsComponent extends BaseEventsComponent implement
 
   protected getUserName() {
     return {
-      name: this.i18nService.t("serviceAccount") + " " + this.serviceAccountId,
+      name: this.i18nService.t("machineAccount") + " " + this.serviceAccountId,
       email: "",
     };
   }

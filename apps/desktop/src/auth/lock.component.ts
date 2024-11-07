@@ -1,27 +1,32 @@
-import { Component, NgZone } from "@angular/core";
+import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { switchMap } from "rxjs";
+import { firstValueFrom, map, switchMap } from "rxjs";
 
 import { LockComponent as BaseLockComponent } from "@bitwarden/angular/auth/components/lock.component";
+import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
 import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { InternalPolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
-import { DeviceTrustCryptoServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust-crypto.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
+import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
+import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { DeviceType } from "@bitwarden/common/enums";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
-import { DialogService } from "@bitwarden/components";
-
-import { ElectronStateService } from "../platform/services/electron-state.service.abstraction";
+import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { DialogService, ToastService } from "@bitwarden/components";
+import { KeyService, BiometricsService, BiometricStateService } from "@bitwarden/key-management";
 
 const BroadcasterSubscriptionId = "LockComponent";
 
@@ -29,22 +34,24 @@ const BroadcasterSubscriptionId = "LockComponent";
   selector: "app-lock",
   templateUrl: "lock.component.html",
 })
-export class LockComponent extends BaseLockComponent {
+export class LockComponent extends BaseLockComponent implements OnInit, OnDestroy {
   private deferFocus: boolean = null;
   protected biometricReady = false;
   private biometricAsked = false;
   private autoPromptBiometric = false;
+  private timerId: any;
 
   constructor(
+    masterPasswordService: InternalMasterPasswordServiceAbstraction,
     router: Router,
     i18nService: I18nService,
     platformUtilsService: PlatformUtilsService,
     messagingService: MessagingService,
-    cryptoService: CryptoService,
+    keyService: KeyService,
     vaultTimeoutService: VaultTimeoutService,
     vaultTimeoutSettingsService: VaultTimeoutSettingsService,
     environmentService: EnvironmentService,
-    protected override stateService: ElectronStateService,
+    protected override stateService: StateService,
     apiService: ApiService,
     private route: ActivatedRoute,
     private broadcasterService: BroadcasterService,
@@ -54,15 +61,24 @@ export class LockComponent extends BaseLockComponent {
     passwordStrengthService: PasswordStrengthServiceAbstraction,
     logService: LogService,
     dialogService: DialogService,
-    deviceTrustCryptoService: DeviceTrustCryptoServiceAbstraction,
+    deviceTrustService: DeviceTrustServiceAbstraction,
     userVerificationService: UserVerificationService,
+    pinService: PinServiceAbstraction,
+    biometricStateService: BiometricStateService,
+    biometricsService: BiometricsService,
+    accountService: AccountService,
+    authService: AuthService,
+    kdfConfigService: KdfConfigService,
+    syncService: SyncService,
+    toastService: ToastService,
   ) {
     super(
+      masterPasswordService,
       router,
       i18nService,
       platformUtilsService,
       messagingService,
-      cryptoService,
+      keyService,
       vaultTimeoutService,
       vaultTimeoutSettingsService,
       environmentService,
@@ -74,18 +90,30 @@ export class LockComponent extends BaseLockComponent {
       policyService,
       passwordStrengthService,
       dialogService,
-      deviceTrustCryptoService,
+      deviceTrustService,
       userVerificationService,
+      pinService,
+      biometricStateService,
+      biometricsService,
+      accountService,
+      authService,
+      kdfConfigService,
+      syncService,
+      toastService,
     );
   }
 
   async ngOnInit() {
     await super.ngOnInit();
-    this.autoPromptBiometric = !(await this.stateService.getDisableAutoBiometricsPrompt());
+    this.autoPromptBiometric = await firstValueFrom(
+      this.biometricStateService.promptAutomatically$,
+    );
     this.biometricReady = await this.canUseBiometric();
 
     await this.displayBiometricUpdateWarning();
 
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.delayedAskForBiometric(500);
     this.route.queryParams.pipe(switchMap((params) => this.delayedAskForBiometric(500, params)));
 
@@ -111,11 +139,18 @@ export class LockComponent extends BaseLockComponent {
       });
     });
     this.messagingService.send("getWindowIsFocused");
+
+    // start background listener until destroyed on interval
+    this.timerId = setInterval(async () => {
+      this.supportsBiometric = await this.biometricsService.supportsBiometric();
+      this.biometricReady = await this.canUseBiometric();
+    }, 1000);
   }
 
   ngOnDestroy() {
     super.ngOnDestroy();
     this.broadcasterService.unsubscribe(BroadcasterSubscriptionId);
+    clearInterval(this.timerId);
   }
 
   onWindowHidden() {
@@ -133,15 +168,21 @@ export class LockComponent extends BaseLockComponent {
       return;
     }
 
+    if (await firstValueFrom(this.biometricStateService.promptCancelled$)) {
+      return;
+    }
+
     this.biometricAsked = true;
     if (await ipc.platform.isWindowVisible()) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.unlockBiometric();
     }
   }
 
   private async canUseBiometric() {
-    const userId = await this.stateService.getUserId();
-    return await ipc.platform.biometric.enabled(userId);
+    const userId = await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id)));
+    return await ipc.keyManagement.biometric.enabled(userId);
   }
 
   private focusInput() {
@@ -149,7 +190,7 @@ export class LockComponent extends BaseLockComponent {
   }
 
   private async displayBiometricUpdateWarning(): Promise<void> {
-    if (await this.stateService.getDismissedBiometricRequirePasswordOnStart()) {
+    if (await firstValueFrom(this.biometricStateService.dismissedRequirePasswordOnStartCallout$)) {
       return;
     }
 
@@ -157,19 +198,32 @@ export class LockComponent extends BaseLockComponent {
       return;
     }
 
-    if (await this.stateService.getBiometricUnlock()) {
+    if (await firstValueFrom(this.biometricStateService.biometricUnlockEnabled$)) {
       const response = await this.dialogService.openSimpleDialog({
         title: { key: "windowsBiometricUpdateWarningTitle" },
         content: { key: "windowsBiometricUpdateWarning" },
         type: "warning",
       });
 
-      await this.stateService.setBiometricRequirePasswordOnStart(response);
+      await this.biometricStateService.setRequirePasswordOnStart(response);
       if (response) {
-        await this.stateService.setDisableAutoBiometricsPrompt(true);
+        await this.biometricStateService.setPromptAutomatically(false);
       }
       this.supportsBiometric = await this.canUseBiometric();
-      await this.stateService.setDismissedBiometricRequirePasswordOnStart();
+      await this.biometricStateService.setDismissedRequirePasswordOnStartCallout();
+    }
+  }
+
+  get biometricText() {
+    switch (this.platformUtilsService.getDevice()) {
+      case DeviceType.MacOsDesktop:
+        return "unlockWithTouchId";
+      case DeviceType.WindowsDesktop:
+        return "unlockWithWindowsHello";
+      case DeviceType.LinuxDesktop:
+        return "unlockWithPolkit";
+      default:
+        throw new Error("Unsupported platform");
     }
   }
 }

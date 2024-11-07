@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, FormControl, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
+import { lastValueFrom } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
@@ -12,8 +13,13 @@ import { VerifyBankRequest } from "@bitwarden/common/models/request/verify-bank.
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { DialogService } from "@bitwarden/components";
+import { DialogService, ToastService } from "@bitwarden/components";
 
+import { AddCreditDialogResult, openAddCreditDialog } from "./add-credit-dialog.component";
+import {
+  AdjustPaymentDialogResult,
+  openAdjustPaymentDialog,
+} from "./adjust-payment-dialog/adjust-payment-dialog.component";
 import { TaxInfoComponent } from "./tax-info.component";
 
 @Component({
@@ -25,17 +31,12 @@ export class PaymentMethodComponent implements OnInit {
 
   loading = false;
   firstLoaded = false;
-  showAdjustPayment = false;
-  showAddCredit = false;
   billing: BillingPaymentResponse;
   org: OrganizationSubscriptionResponse;
   sub: SubscriptionResponse;
   paymentMethodType = PaymentMethodType;
   organizationId: string;
   isUnpaid = false;
-
-  verifyBankPromise: Promise<any>;
-  taxFormPromise: Promise<any>;
 
   verifyBankForm = this.formBuilder.group({
     amount1: new FormControl<number>(null, [
@@ -50,6 +51,8 @@ export class PaymentMethodComponent implements OnInit {
     ]),
   });
 
+  taxForm = this.formBuilder.group({});
+
   constructor(
     protected apiService: ApiService,
     protected organizationApiService: OrganizationApiServiceAbstraction,
@@ -60,6 +63,7 @@ export class PaymentMethodComponent implements OnInit {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
+    private toastService: ToastService,
   ) {}
 
   async ngOnInit() {
@@ -68,6 +72,8 @@ export class PaymentMethodComponent implements OnInit {
       if (params.organizationId) {
         this.organizationId = params.organizationId;
       } else if (this.platformUtilsService.isSelfHost()) {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.router.navigate(["/settings/subscription"]);
         return;
       }
@@ -77,7 +83,7 @@ export class PaymentMethodComponent implements OnInit {
     });
   }
 
-  async load() {
+  load = async () => {
     if (this.loading) {
       return;
     }
@@ -103,80 +109,58 @@ export class PaymentMethodComponent implements OnInit {
     this.isUnpaid = this.subscription?.status === "unpaid" ?? false;
 
     this.loading = false;
-  }
+  };
 
-  addCredit() {
-    if (this.paymentSourceInApp) {
-      this.dialogService.openSimpleDialog({
-        title: { key: "addCredit" },
-        content: { key: "cannotPerformInAppPurchase" },
-        acceptButtonText: { key: "ok" },
-        cancelButtonText: null,
-        type: "warning",
-      });
-
-      return;
+  addCredit = async () => {
+    const dialogRef = openAddCreditDialog(this.dialogService, {
+      data: {
+        organizationId: this.organizationId,
+      },
+    });
+    const result = await lastValueFrom(dialogRef.closed);
+    if (result === AddCreditDialogResult.Added) {
+      await this.load();
     }
-    this.showAddCredit = true;
-  }
+  };
 
-  closeAddCredit(load: boolean) {
-    this.showAddCredit = false;
-    if (load) {
-      this.load();
+  changePayment = async () => {
+    const dialogRef = openAdjustPaymentDialog(this.dialogService, {
+      data: {
+        organizationId: this.organizationId,
+        currentType: this.paymentSource !== null ? this.paymentSource.type : null,
+      },
+    });
+    const result = await lastValueFrom(dialogRef.closed);
+    if (result === AdjustPaymentDialogResult.Adjusted) {
+      await this.load();
     }
-  }
+  };
 
-  changePayment() {
-    if (this.paymentSourceInApp) {
-      this.dialogService.openSimpleDialog({
-        title: { key: "changePaymentMethod" },
-        content: { key: "cannotPerformInAppPurchase" },
-        acceptButtonText: { key: "ok" },
-        cancelButtonText: null,
-        type: "warning",
-      });
-
-      return;
-    }
-
-    this.showAdjustPayment = true;
-  }
-
-  closePayment(load: boolean) {
-    this.showAdjustPayment = false;
-    if (load) {
-      this.load();
-    }
-  }
-
-  async verifyBank() {
+  verifyBank = async () => {
     if (this.loading || !this.forOrganization) {
       return;
     }
 
-    try {
-      const request = new VerifyBankRequest();
-      request.amount1 = this.verifyBankForm.value.amount1;
-      request.amount2 = this.verifyBankForm.value.amount2;
-      this.verifyBankPromise = this.organizationApiService.verifyBank(this.organizationId, request);
-      await this.verifyBankPromise;
-      this.platformUtilsService.showToast(
-        "success",
-        null,
-        this.i18nService.t("verifiedBankAccount"),
-      );
-      this.load();
-    } catch (e) {
-      this.logService.error(e);
-    }
-  }
+    const request = new VerifyBankRequest();
+    request.amount1 = this.verifyBankForm.value.amount1;
+    request.amount2 = this.verifyBankForm.value.amount2;
+    await this.organizationApiService.verifyBank(this.organizationId, request);
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("verifiedBankAccount"),
+    });
+    await this.load();
+  };
 
-  async submitTaxInfo() {
-    this.taxFormPromise = this.taxInfo.submitTaxInfo();
-    await this.taxFormPromise;
-    this.platformUtilsService.showToast("success", null, this.i18nService.t("taxInfoUpdated"));
-  }
+  submitTaxInfo = async () => {
+    await this.taxInfo.submitTaxInfo();
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("taxInfoUpdated"),
+    });
+  };
 
   get isCreditBalance() {
     return this.billing == null || this.billing.balance <= 0;
@@ -209,23 +193,11 @@ export class PaymentMethodComponent implements OnInit {
         return ["bwi-bank"];
       case PaymentMethodType.Check:
         return ["bwi-money"];
-      case PaymentMethodType.AppleInApp:
-        return ["bwi-apple text-muted"];
-      case PaymentMethodType.GoogleInApp:
-        return ["bwi-google text-muted"];
       case PaymentMethodType.PayPal:
         return ["bwi-paypal text-primary"];
       default:
         return [];
     }
-  }
-
-  get paymentSourceInApp() {
-    return (
-      this.paymentSource != null &&
-      (this.paymentSource.type === PaymentMethodType.AppleInApp ||
-        this.paymentSource.type === PaymentMethodType.GoogleInApp)
-    );
   }
 
   get subscription() {

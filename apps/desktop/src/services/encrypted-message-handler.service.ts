@@ -1,16 +1,18 @@
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
+import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
+import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
 
 import { DecryptedCommandData } from "../models/native-messaging/decrypted-command-data";
 import { CredentialCreatePayload } from "../models/native-messaging/encrypted-message-payloads/credential-create-payload";
@@ -24,11 +26,10 @@ import { GenerateResponse } from "../models/native-messaging/encrypted-message-r
 import { MessageResponseData } from "../models/native-messaging/encrypted-message-responses/message-response-data";
 import { SuccessStatusResponse } from "../models/native-messaging/encrypted-message-responses/success-status-response";
 import { UserStatusErrorResponse } from "../models/native-messaging/encrypted-message-responses/user-status-error-response";
-import { ElectronStateService } from "../platform/services/electron-state.service";
 
 export class EncryptedMessageHandlerService {
   constructor(
-    private stateService: ElectronStateService,
+    private accountService: AccountService,
     private authService: AuthService,
     private cipherService: CipherService,
     private policyService: PolicyService,
@@ -62,7 +63,9 @@ export class EncryptedMessageHandlerService {
   }
 
   private async checkUserStatus(userId: string): Promise<string> {
-    const activeUserId = await this.stateService.getUserId();
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
 
     if (userId !== activeUserId) {
       return "not-active-user";
@@ -77,17 +80,19 @@ export class EncryptedMessageHandlerService {
   }
 
   private async statusCommandHandler(): Promise<AccountStatusResponse[]> {
-    const accounts = await firstValueFrom(this.stateService.accounts$);
-    const activeUserId = await this.stateService.getUserId();
+    const accounts = await firstValueFrom(this.accountService.accounts$);
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
 
     if (!accounts || !Object.keys(accounts)) {
       return [];
     }
 
     return Promise.all(
-      Object.keys(accounts).map(async (userId) => {
+      Object.keys(accounts).map(async (userId: UserId) => {
         const authStatus = await this.authService.getAuthStatus(userId);
-        const email = await this.stateService.getEmail({ userId });
+        const email = accounts[userId].email;
 
         return {
           id: userId,
@@ -107,7 +112,9 @@ export class EncryptedMessageHandlerService {
     }
 
     const ciphersResponse: CipherResponse[] = [];
-    const activeUserId = await this.stateService.getUserId();
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
     const authStatus = await this.authService.getAuthStatus(activeUserId);
 
     if (authStatus !== AuthenticationStatus.Unlocked) {
@@ -157,7 +164,10 @@ export class EncryptedMessageHandlerService {
     cipherView.login.uris[0].uri = credentialCreatePayload.uri;
 
     try {
-      const encrypted = await this.cipherService.encrypt(cipherView);
+      const activeUserId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      const encrypted = await this.cipherService.encrypt(cipherView, activeUserId);
       await this.cipherService.createWithServer(encrypted);
 
       // Notify other clients of new login
@@ -190,14 +200,17 @@ export class EncryptedMessageHandlerService {
       if (cipher === null) {
         return { status: "failure" };
       }
+      const activeUserId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
       const cipherView = await cipher.decrypt(
-        await this.cipherService.getKeyForCipherKeyDecryption(cipher),
+        await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
       );
       cipherView.name = credentialUpdatePayload.name;
       cipherView.login.password = credentialUpdatePayload.password;
       cipherView.login.username = credentialUpdatePayload.userName;
       cipherView.login.uris[0].uri = credentialUpdatePayload.uri;
-      const encrypted = await this.cipherService.encrypt(cipherView);
+      const encrypted = await this.cipherService.encrypt(cipherView, activeUserId);
 
       await this.cipherService.updateWithServer(encrypted);
 

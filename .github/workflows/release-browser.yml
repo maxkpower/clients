@@ -1,4 +1,3 @@
----
 name: Release Browser
 run-name: Release Browser ${{ inputs.release_type }}
 
@@ -27,7 +26,7 @@ jobs:
       release-version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Branch check
         if: ${{ github.event.inputs.release_type != 'Dry Run' }}
@@ -56,7 +55,7 @@ jobs:
     needs: setup
     steps:
       - name: Checkout repo
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Testing locales - extName length
         run: |
@@ -91,16 +90,6 @@ jobs:
       - setup
       - locales-test
     steps:
-      - name: Create GitHub deployment
-        uses: chrnorm/deployment-action@d42cde7132fcec920de534fffc3be83794335c00 # v2.0.5
-        id: deployment
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          initial-status: 'in_progress'
-          environment: 'Browser - Production'
-          description: 'Deployment ${{ needs.setup.outputs.release-version }} from branch ${{ github.ref_name }}'
-          task: release
-
       - name: Download latest Release build artifacts
         if: ${{ github.event.inputs.release_type != 'Dry Run' }}
         uses: bitwarden/gh-actions/download-artifacts@main
@@ -132,14 +121,14 @@ jobs:
           PACKAGE_VERSION: ${{ needs.setup.outputs.release-version }}
         run: |
           mv browser-source.zip browser-source-$PACKAGE_VERSION.zip
-          mv dist-chrome.zip dist-chrome-$PACKAGE_VERSION.zip
+          mv dist-chrome-mv3.zip dist-chrome-$PACKAGE_VERSION.zip
           mv dist-opera.zip dist-opera-$PACKAGE_VERSION.zip
           mv dist-firefox.zip dist-firefox-$PACKAGE_VERSION.zip
           mv dist-edge.zip dist-edge-$PACKAGE_VERSION.zip
 
       - name: Create release
         if: ${{ github.event.inputs.release_type != 'Dry Run' }}
-        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1.12.0
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
           artifacts: 'browser-source-${{ needs.setup.outputs.release-version }}.zip,
                       dist-chrome-${{ needs.setup.outputs.release-version }}.zip,
@@ -152,19 +141,3 @@ jobs:
           body: "<insert release notes here>"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
-
-      - name: Update deployment status to Success
-        if: ${{ success() }}
-        uses: chrnorm/deployment-status@2afb7d27101260f4a764219439564d954d10b5b0 # v2.0.1
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          state: 'success'
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
-
-      - name: Update deployment status to Failure
-        if: ${{ failure() }}
-        uses: chrnorm/deployment-status@2afb7d27101260f4a764219439564d954d10b5b0 # v2.0.1
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          state: 'failure'
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}

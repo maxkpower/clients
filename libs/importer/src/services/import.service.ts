@@ -1,20 +1,27 @@
+import { firstValueFrom, map } from "rxjs";
+
+import {
+  CollectionService,
+  CollectionWithIdRequest,
+  CollectionView,
+} from "@bitwarden/admin-console/common";
+import { PinServiceAbstraction } from "@bitwarden/auth/common";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ImportCiphersRequest } from "@bitwarden/common/models/request/import-ciphers.request";
 import { ImportOrganizationCiphersRequest } from "@bitwarden/common/models/request/import-organization-ciphers.request";
 import { KvpRequest } from "@bitwarden/common/models/request/kvp.request";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherRequest } from "@bitwarden/common/vault/models/request/cipher.request";
-import { CollectionWithIdRequest } from "@bitwarden/common/vault/models/request/collection-with-id.request";
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
+import { KeyService } from "@bitwarden/key-management";
 
 import {
   AscendoCsvImporter,
@@ -99,7 +106,10 @@ export class ImportService implements ImportServiceAbstraction {
     private importApiService: ImportApiServiceAbstraction,
     private i18nService: I18nService,
     private collectionService: CollectionService,
-    private cryptoService: CryptoService,
+    private keyService: KeyService,
+    private encryptService: EncryptService,
+    private pinService: PinServiceAbstraction,
+    private accountService: AccountService,
   ) {}
 
   getImportOptions(): ImportOption[] {
@@ -110,7 +120,7 @@ export class ImportService implements ImportServiceAbstraction {
     importer: Importer,
     fileContents: string,
     organizationId: string = null,
-    selectedImportTarget: string = null,
+    selectedImportTarget: FolderView | CollectionView = null,
     canAccessImportExport: boolean,
   ): Promise<ImportResult> {
     let importResult: ImportResult;
@@ -147,14 +157,9 @@ export class ImportService implements ImportServiceAbstraction {
       }
     }
 
-    if (
-      organizationId &&
-      Utils.isNullOrWhitespace(selectedImportTarget) &&
-      !canAccessImportExport
-    ) {
-      const hasUnassignedCollections = importResult.ciphers.some(
-        (c) => !Array.isArray(c.collectionIds) || c.collectionIds.length == 0,
-      );
+    if (organizationId && !selectedImportTarget && !canAccessImportExport) {
+      const hasUnassignedCollections =
+        importResult.collectionRelationships.length < importResult.ciphers.length;
       if (hasUnassignedCollections) {
         throw new Error(this.i18nService.t("importUnassignedItemsError"));
       }
@@ -205,9 +210,12 @@ export class ImportService implements ImportServiceAbstraction {
       case "bitwardenjson":
       case "bitwardenpasswordprotected":
         return new BitwardenPasswordProtectedImporter(
-          this.cryptoService,
+          this.keyService,
+          this.encryptService,
           this.i18nService,
           this.cipherService,
+          this.pinService,
+          this.accountService,
           promptForPassword_callback,
         );
       case "lastpasscsv":
@@ -334,13 +342,17 @@ export class ImportService implements ImportServiceAbstraction {
 
   private async handleIndividualImport(importResult: ImportResult) {
     const request = new ImportCiphersRequest();
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
     for (let i = 0; i < importResult.ciphers.length; i++) {
-      const c = await this.cipherService.encrypt(importResult.ciphers[i]);
+      const c = await this.cipherService.encrypt(importResult.ciphers[i], activeUserId);
       request.ciphers.push(new CipherRequest(c));
     }
+    const userKey = await this.keyService.getUserKeyWithLegacySupport(activeUserId);
     if (importResult.folders != null) {
       for (let i = 0; i < importResult.folders.length; i++) {
-        const f = await this.folderService.encrypt(importResult.folders[i]);
+        const f = await this.folderService.encrypt(importResult.folders[i], userKey);
         request.folders.push(new FolderWithIdRequest(f));
       }
     }
@@ -354,9 +366,12 @@ export class ImportService implements ImportServiceAbstraction {
 
   private async handleOrganizationalImport(importResult: ImportResult, organizationId: string) {
     const request = new ImportOrganizationCiphersRequest();
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
     for (let i = 0; i < importResult.ciphers.length; i++) {
       importResult.ciphers[i].organizationId = organizationId;
-      const c = await this.cipherService.encrypt(importResult.ciphers[i]);
+      const c = await this.cipherService.encrypt(importResult.ciphers[i], activeUserId);
       request.ciphers.push(new CipherRequest(c));
     }
     if (importResult.collections != null) {
@@ -429,29 +444,32 @@ export class ImportService implements ImportServiceAbstraction {
   private async setImportTarget(
     importResult: ImportResult,
     organizationId: string,
-    importTarget: string,
+    importTarget: FolderView | CollectionView,
   ) {
-    if (Utils.isNullOrWhitespace(importTarget)) {
+    if (!importTarget) {
       return;
     }
 
     if (organizationId) {
-      const collectionViews: CollectionView[] = await this.collectionService.getAllDecrypted();
-      const targetCollection = collectionViews.find((c) => c.id === importTarget);
+      if (!(importTarget instanceof CollectionView)) {
+        throw new Error(this.i18nService.t("errorAssigningTargetCollection"));
+      }
 
       const noCollectionRelationShips: [number, number][] = [];
       importResult.ciphers.forEach((c, index) => {
-        if (!Array.isArray(c.collectionIds) || c.collectionIds.length == 0) {
-          c.collectionIds = [targetCollection.id];
+        if (
+          !Array.isArray(importResult.collectionRelationships) ||
+          !importResult.collectionRelationships.some(([cipherPos]) => cipherPos === index)
+        ) {
           noCollectionRelationShips.push([index, 0]);
         }
       });
 
       const collections: CollectionView[] = [...importResult.collections];
-      importResult.collections = [targetCollection];
+      importResult.collections = [importTarget as CollectionView];
       collections.map((x) => {
         const f = new CollectionView();
-        f.name = `${targetCollection.name}/${x.name}`;
+        f.name = `${importTarget.name}/${x.name}`;
         importResult.collections.push(f);
       });
 
@@ -464,21 +482,22 @@ export class ImportService implements ImportServiceAbstraction {
       return;
     }
 
-    const folderViews = await this.folderService.getAllDecryptedFromState();
-    const targetFolder = folderViews.find((f) => f.id === importTarget);
+    if (!(importTarget instanceof FolderView)) {
+      throw new Error(this.i18nService.t("errorAssigningTargetFolder"));
+    }
 
     const noFolderRelationShips: [number, number][] = [];
     importResult.ciphers.forEach((c, index) => {
       if (Utils.isNullOrEmpty(c.folderId)) {
-        c.folderId = targetFolder.id;
+        c.folderId = importTarget.id;
         noFolderRelationShips.push([index, 0]);
       }
     });
 
     const folders: FolderView[] = [...importResult.folders];
-    importResult.folders = [targetFolder];
+    importResult.folders = [importTarget as FolderView];
     folders.map((x) => {
-      const newFolderName = `${targetFolder.name}/${x.name}`;
+      const newFolderName = `${importTarget.name}/${x.name}`;
       const f = new FolderView();
       f.name = newFolderName;
       importResult.folders.push(f);

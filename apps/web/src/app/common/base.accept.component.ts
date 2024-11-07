@@ -1,11 +1,13 @@
 import { Directive, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
-import { Subject } from "rxjs";
+import { Subject, firstValueFrom } from "rxjs";
 import { first, switchMap, takeUntil } from "rxjs/operators";
 
+import { RegisterRouteService } from "@bitwarden/auth/common";
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 
 @Directive()
 export abstract class BaseAcceptComponent implements OnInit {
@@ -18,6 +20,9 @@ export abstract class BaseAcceptComponent implements OnInit {
   protected failedShortMessage = "inviteAcceptFailedShort";
   protected failedMessage = "inviteAcceptFailed";
 
+  // TODO: remove when email verification flag is removed
+  registerRoute$ = this.registerRouteService.registerRoute$();
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -25,13 +30,14 @@ export abstract class BaseAcceptComponent implements OnInit {
     protected platformUtilService: PlatformUtilsService,
     protected i18nService: I18nService,
     protected route: ActivatedRoute,
-    protected stateService: StateService,
+    protected authService: AuthService,
+    protected registerRouteService: RegisterRouteService,
   ) {}
 
   abstract authedHandler(qParams: Params): Promise<void>;
   abstract unauthedHandler(qParams: Params): Promise<void>;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.route.queryParams
       .pipe(
         first(),
@@ -41,10 +47,10 @@ export abstract class BaseAcceptComponent implements OnInit {
           );
           let errorMessage: string = null;
           if (!error) {
-            this.authed = await this.stateService.getIsAuthenticated();
             this.email = qParams.email;
 
-            if (this.authed) {
+            const status = await firstValueFrom(this.authService.activeAccountStatus$);
+            if (status !== AuthenticationStatus.LoggedOut) {
               try {
                 await this.authedHandler(qParams);
               } catch (e) {
@@ -62,6 +68,8 @@ export abstract class BaseAcceptComponent implements OnInit {
                 ? this.i18nService.t(this.failedShortMessage, errorMessage)
                 : this.i18nService.t(this.failedMessage);
             this.platformUtilService.showToast("error", null, message, { timeout: 10000 });
+            // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.router.navigate(["/"]);
           }
 

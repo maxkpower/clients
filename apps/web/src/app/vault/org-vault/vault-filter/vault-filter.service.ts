@@ -1,16 +1,15 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { map, Observable, ReplaySubject, Subject } from "rxjs";
 
+import { CollectionAdminView, CollectionService } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { StateProvider } from "@bitwarden/common/platform/state";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 
-import { StateService } from "../../../core";
-import { CollectionAdminView } from "../../../vault/core/views/collection-admin.view";
-import { CollectionAdminService } from "../../core/collection-admin.service";
 import { VaultFilterService as BaseVaultFilterService } from "../../individual-vault/vault-filter/services/vault-filter.service";
 import { CollectionFilter } from "../../individual-vault/vault-filter/shared/models/vault-filter.type";
 
@@ -26,21 +25,22 @@ export class VaultFilterService extends BaseVaultFilterService implements OnDest
   );
 
   constructor(
-    stateService: StateService,
     organizationService: OrganizationService,
     folderService: FolderService,
     cipherService: CipherService,
     policyService: PolicyService,
     i18nService: I18nService,
-    protected collectionAdminService: CollectionAdminService,
+    stateProvider: StateProvider,
+    collectionService: CollectionService,
   ) {
     super(
-      stateService,
       organizationService,
       folderService,
       cipherService,
       policyService,
       i18nService,
+      stateProvider,
+      collectionService,
     );
   }
 

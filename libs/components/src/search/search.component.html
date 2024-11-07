@@ -8,8 +8,9 @@
     <i class="bwi bwi-search bwi-fw tw-text-muted"></i>
   </label>
   <input
+    #input
     bitInput
-    type="search"
+    [type]="inputType"
     [id]="id"
     [placeholder]="placeholder ?? ('search' | i18n)"
     class="tw-rounded-l tw-pl-9"

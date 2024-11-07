@@ -1,11 +1,16 @@
+import {
+  CollectionRequest,
+  CollectionAccessDetailsResponse,
+  CollectionDetailsResponse,
+  CollectionResponse,
+} from "@bitwarden/admin-console/common";
+
 import { OrganizationConnectionType } from "../admin-console/enums";
 import { OrganizationSponsorshipCreateRequest } from "../admin-console/models/request/organization/organization-sponsorship-create.request";
 import { OrganizationSponsorshipRedeemRequest } from "../admin-console/models/request/organization/organization-sponsorship-redeem.request";
 import { OrganizationConnectionRequest } from "../admin-console/models/request/organization-connection.request";
 import { ProviderAddOrganizationRequest } from "../admin-console/models/request/provider/provider-add-organization.request";
 import { ProviderOrganizationCreateRequest } from "../admin-console/models/request/provider/provider-organization-create.request";
-import { ProviderSetupRequest } from "../admin-console/models/request/provider/provider-setup.request";
-import { ProviderUpdateRequest } from "../admin-console/models/request/provider/provider-update.request";
 import { ProviderUserAcceptRequest } from "../admin-console/models/request/provider/provider-user-accept.request";
 import { ProviderUserBulkConfirmRequest } from "../admin-console/models/request/provider/provider-user-bulk-confirm.request";
 import { ProviderUserBulkRequest } from "../admin-console/models/request/provider/provider-user-bulk.request";
@@ -29,10 +34,10 @@ import {
   ProviderUserResponse,
   ProviderUserUserDetailsResponse,
 } from "../admin-console/models/response/provider/provider-user.response";
-import { ProviderResponse } from "../admin-console/models/response/provider/provider.response";
 import { SelectionReadOnlyResponse } from "../admin-console/models/response/selection-read-only.response";
 import { CreateAuthRequest } from "../auth/models/request/create-auth.request";
 import { DeviceVerificationRequest } from "../auth/models/request/device-verification.request";
+import { DisableTwoFactorAuthenticatorRequest } from "../auth/models/request/disable-two-factor-authenticator.request";
 import { EmailTokenRequest } from "../auth/models/request/email-token.request";
 import { EmailRequest } from "../auth/models/request/email.request";
 import { PasswordTokenRequest } from "../auth/models/request/identity-token/password-token.request";
@@ -50,13 +55,14 @@ import { TwoFactorEmailRequest } from "../auth/models/request/two-factor-email.r
 import { TwoFactorProviderRequest } from "../auth/models/request/two-factor-provider.request";
 import { TwoFactorRecoveryRequest } from "../auth/models/request/two-factor-recovery.request";
 import { UpdateProfileRequest } from "../auth/models/request/update-profile.request";
+import { UpdateTdeOffboardingPasswordRequest } from "../auth/models/request/update-tde-offboarding-password.request";
 import { UpdateTempPasswordRequest } from "../auth/models/request/update-temp-password.request";
 import { UpdateTwoFactorAuthenticatorRequest } from "../auth/models/request/update-two-factor-authenticator.request";
 import { UpdateTwoFactorDuoRequest } from "../auth/models/request/update-two-factor-duo.request";
 import { UpdateTwoFactorEmailRequest } from "../auth/models/request/update-two-factor-email.request";
 import { UpdateTwoFactorWebAuthnDeleteRequest } from "../auth/models/request/update-two-factor-web-authn-delete.request";
 import { UpdateTwoFactorWebAuthnRequest } from "../auth/models/request/update-two-factor-web-authn.request";
-import { UpdateTwoFactorYubioOtpRequest } from "../auth/models/request/update-two-factor-yubio-otp.request";
+import { UpdateTwoFactorYubikeyOtpRequest } from "../auth/models/request/update-two-factor-yubikey-otp.request";
 import { ApiKeyResponse } from "../auth/models/response/api-key.response";
 import { AuthRequestResponse } from "../auth/models/response/auth-request.response";
 import { DeviceVerificationResponse } from "../auth/models/response/device-verification.response";
@@ -64,7 +70,6 @@ import { IdentityCaptchaResponse } from "../auth/models/response/identity-captch
 import { IdentityTokenResponse } from "../auth/models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "../auth/models/response/identity-two-factor.response";
 import { KeyConnectorUserKeyResponse } from "../auth/models/response/key-connector-user-key.response";
-import { MasterPasswordPolicyResponse } from "../auth/models/response/master-password-policy.response";
 import { PreloginResponse } from "../auth/models/response/prelogin.response";
 import { RegisterResponse } from "../auth/models/response/register.response";
 import { SsoPreValidateResponse } from "../auth/models/response/sso-pre-validate.response";
@@ -90,16 +95,13 @@ import { TaxInfoResponse } from "../billing/models/response/tax-info.response";
 import { TaxRateResponse } from "../billing/models/response/tax-rate.response";
 import { DeleteRecoverRequest } from "../models/request/delete-recover.request";
 import { EventRequest } from "../models/request/event.request";
-import { IapCheckRequest } from "../models/request/iap-check.request";
 import { KdfRequest } from "../models/request/kdf.request";
 import { KeysRequest } from "../models/request/keys.request";
-import { OrganizationImportRequest } from "../models/request/organization-import.request";
 import { PreloginRequest } from "../models/request/prelogin.request";
 import { RegisterRequest } from "../models/request/register.request";
 import { StorageRequest } from "../models/request/storage.request";
 import { UpdateAvatarRequest } from "../models/request/update-avatar.request";
 import { UpdateDomainsRequest } from "../models/request/update-domains.request";
-import { UpdateKeyRequest } from "../models/request/update-key.request";
 import { VerifyDeleteRecoverRequest } from "../models/request/verify-delete-recover.request";
 import { VerifyEmailRequest } from "../models/request/verify-email.request";
 import { BreachAccountResponse } from "../models/response/breach-account.response";
@@ -108,6 +110,8 @@ import { EventResponse } from "../models/response/event.response";
 import { ListResponse } from "../models/response/list.response";
 import { ProfileResponse } from "../models/response/profile.response";
 import { UserKeyResponse } from "../models/response/user-key.response";
+import { SyncResponse } from "../platform/sync";
+import { UserId } from "../types/guid";
 import { AttachmentRequest } from "../vault/models/request/attachment.request";
 import { CipherBulkDeleteRequest } from "../vault/models/request/cipher-bulk-delete.request";
 import { CipherBulkMoveRequest } from "../vault/models/request/cipher-bulk-move.request";
@@ -118,15 +122,10 @@ import { CipherCreateRequest } from "../vault/models/request/cipher-create.reque
 import { CipherPartialRequest } from "../vault/models/request/cipher-partial.request";
 import { CipherShareRequest } from "../vault/models/request/cipher-share.request";
 import { CipherRequest } from "../vault/models/request/cipher.request";
-import { CollectionRequest } from "../vault/models/request/collection.request";
 import { AttachmentUploadDataResponse } from "../vault/models/response/attachment-upload-data.response";
 import { AttachmentResponse } from "../vault/models/response/attachment.response";
 import { CipherResponse } from "../vault/models/response/cipher.response";
-import {
-  CollectionAccessDetailsResponse,
-  CollectionResponse,
-} from "../vault/models/response/collection.response";
-import { SyncResponse } from "../vault/models/response/sync.response";
+import { OptionalCipherResponse } from "../vault/models/response/optional-cipher.response";
 
 /**
  * @deprecated The `ApiService` class is deprecated and calls should be extracted into individual
@@ -170,25 +169,20 @@ export abstract class ApiService {
   postPasswordHint: (request: PasswordHintRequest) => Promise<any>;
   postRegister: (request: RegisterRequest) => Promise<RegisterResponse>;
   postPremium: (data: FormData) => Promise<PaymentResponse>;
-  postIapCheck: (request: IapCheckRequest) => Promise<any>;
   postReinstatePremium: () => Promise<any>;
-  postCancelPremium: () => Promise<any>;
   postAccountStorage: (request: StorageRequest) => Promise<PaymentResponse>;
   postAccountPayment: (request: PaymentRequest) => Promise<void>;
   postAccountLicense: (data: FormData) => Promise<any>;
-  postAccountKey: (request: UpdateKeyRequest) => Promise<any>;
   postAccountKeys: (request: KeysRequest) => Promise<any>;
   postAccountVerifyEmail: () => Promise<any>;
   postAccountVerifyEmailToken: (request: VerifyEmailRequest) => Promise<any>;
-  postAccountVerifyPassword: (
-    request: SecretVerificationRequest,
-  ) => Promise<MasterPasswordPolicyResponse>;
   postAccountRecoverDelete: (request: DeleteRecoverRequest) => Promise<any>;
   postAccountRecoverDeleteToken: (request: VerifyDeleteRecoverRequest) => Promise<any>;
   postAccountKdf: (request: KdfRequest) => Promise<any>;
   postUserApiKey: (id: string, request: SecretVerificationRequest) => Promise<ApiKeyResponse>;
   postUserRotateApiKey: (id: string, request: SecretVerificationRequest) => Promise<ApiKeyResponse>;
   putUpdateTempPassword: (request: UpdateTempPasswordRequest) => Promise<any>;
+  putUpdateTdeOffboardingPassword: (request: UpdateTdeOffboardingPasswordRequest) => Promise<any>;
   postConvertToKeyConnector: () => Promise<void>;
   //passwordless
   postAuthRequest: (request: CreateAuthRequest) => Promise<AuthRequestResponse>;
@@ -224,7 +218,10 @@ export abstract class ApiService {
   putMoveCiphers: (request: CipherBulkMoveRequest) => Promise<any>;
   putShareCipher: (id: string, request: CipherShareRequest) => Promise<CipherResponse>;
   putShareCiphers: (request: CipherBulkShareRequest) => Promise<any>;
-  putCipherCollections: (id: string, request: CipherCollectionsRequest) => Promise<any>;
+  putCipherCollections: (
+    id: string,
+    request: CipherCollectionsRequest,
+  ) => Promise<OptionalCipherResponse>;
   putCipherCollectionsAdmin: (id: string, request: CipherCollectionsRequest) => Promise<any>;
   postPurgeCiphers: (request: SecretVerificationRequest, organizationId?: string) => Promise<any>;
   putDeleteCipher: (id: string) => Promise<any>;
@@ -281,7 +278,7 @@ export abstract class ApiService {
   postCollection: (
     organizationId: string,
     request: CollectionRequest,
-  ) => Promise<CollectionResponse>;
+  ) => Promise<CollectionDetailsResponse>;
   putCollectionUsers: (
     organizationId: string,
     id: string,
@@ -291,7 +288,7 @@ export abstract class ApiService {
     organizationId: string,
     id: string,
     request: CollectionRequest,
-  ) => Promise<CollectionResponse>;
+  ) => Promise<CollectionDetailsResponse>;
   deleteCollection: (organizationId: string, id: string) => Promise<any>;
   deleteManyCollections: (organizationId: string, collectionIds: string[]) => Promise<any>;
   deleteCollectionUser: (
@@ -301,11 +298,9 @@ export abstract class ApiService {
   ) => Promise<any>;
 
   getGroupUsers: (organizationId: string, id: string) => Promise<string[]>;
-  putGroupUsers: (organizationId: string, id: string, request: string[]) => Promise<any>;
   deleteGroupUser: (organizationId: string, id: string, organizationUserId: string) => Promise<any>;
 
   getSync: () => Promise<SyncResponse>;
-  postPublicImportDirectory: (request: OrganizationImportRequest) => Promise<any>;
 
   getSettingsDomains: () => Promise<DomainsResponse>;
   putSettingsDomains: (request: UpdateDomainsRequest) => Promise<DomainsResponse>;
@@ -330,6 +325,9 @@ export abstract class ApiService {
   putTwoFactorAuthenticator: (
     request: UpdateTwoFactorAuthenticatorRequest,
   ) => Promise<TwoFactorAuthenticatorResponse>;
+  deleteTwoFactorAuthenticator: (
+    request: DisableTwoFactorAuthenticatorRequest,
+  ) => Promise<TwoFactorProviderResponse>;
   putTwoFactorEmail: (request: UpdateTwoFactorEmailRequest) => Promise<TwoFactorEmailResponse>;
   putTwoFactorDuo: (request: UpdateTwoFactorDuoRequest) => Promise<TwoFactorDuoResponse>;
   putTwoFactorOrganizationDuo: (
@@ -337,7 +335,7 @@ export abstract class ApiService {
     request: UpdateTwoFactorDuoRequest,
   ) => Promise<TwoFactorDuoResponse>;
   putTwoFactorYubiKey: (
-    request: UpdateTwoFactorYubioOtpRequest,
+    request: UpdateTwoFactorYubikeyOtpRequest,
   ) => Promise<TwoFactorYubiKeyResponse>;
   putTwoFactorWebAuthn: (
     request: UpdateTwoFactorWebAuthnRequest,
@@ -376,10 +374,6 @@ export abstract class ApiService {
   deleteOrganizationConnection: (id: string) => Promise<void>;
   getPlans: () => Promise<ListResponse<PlanResponse>>;
   getTaxRates: () => Promise<ListResponse<TaxRateResponse>>;
-
-  postProviderSetup: (id: string, request: ProviderSetupRequest) => Promise<ProviderResponse>;
-  getProvider: (id: string) => Promise<ProviderResponse>;
-  putProvider: (id: string, request: ProviderUpdateRequest) => Promise<ProviderResponse>;
 
   getProviderUsers: (providerId: string) => Promise<ListResponse<ProviderUserUserDetailsResponse>>;
   getProviderUser: (providerId: string, id: string) => Promise<ProviderUserResponse>;
@@ -463,7 +457,13 @@ export abstract class ApiService {
     end: string,
     token: string,
   ) => Promise<ListResponse<EventResponse>>;
-  postEventsCollect: (request: EventRequest[]) => Promise<any>;
+
+  /**
+   * Posts events for a user
+   * @param request The array of events to upload
+   * @param userId The optional user id the events belong to. If no user id is provided the active user id is used.
+   */
+  postEventsCollect: (request: EventRequest[], userId?: UserId) => Promise<any>;
 
   deleteSsoUser: (organizationId: string) => Promise<void>;
   getSsoUserIdentifier: () => Promise<string>;

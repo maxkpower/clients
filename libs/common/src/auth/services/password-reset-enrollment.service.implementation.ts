@@ -1,11 +1,17 @@
+import { firstValueFrom, map } from "rxjs";
+
+import {
+  OrganizationUserApiService,
+  OrganizationUserResetPasswordEnrollmentRequest,
+} from "@bitwarden/admin-console/common";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
+
+import { KeyService } from "../../../../key-management/src/abstractions/key.service";
 import { OrganizationApiServiceAbstraction } from "../../admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationUserService } from "../../admin-console/abstractions/organization-user/organization-user.service";
-import { OrganizationUserResetPasswordEnrollmentRequest } from "../../admin-console/abstractions/organization-user/requests";
-import { CryptoService } from "../../platform/abstractions/crypto.service";
 import { I18nService } from "../../platform/abstractions/i18n.service";
-import { StateService } from "../../platform/abstractions/state.service";
 import { Utils } from "../../platform/misc/utils";
-import { UserKey } from "../../platform/models/domain/symmetric-crypto-key";
+import { UserKey } from "../../types/key";
+import { AccountService } from "../abstractions/account.service";
 import { PasswordResetEnrollmentServiceAbstraction } from "../abstractions/password-reset-enrollment.service.abstraction";
 
 export class PasswordResetEnrollmentServiceImplementation
@@ -13,9 +19,10 @@ export class PasswordResetEnrollmentServiceImplementation
 {
   constructor(
     protected organizationApiService: OrganizationApiServiceAbstraction,
-    protected stateService: StateService,
-    protected cryptoService: CryptoService,
-    protected organizationUserService: OrganizationUserService,
+    protected accountService: AccountService,
+    protected keyService: KeyService,
+    protected encryptService: EncryptService,
+    protected organizationUserApiService: OrganizationUserApiService,
     protected i18nService: I18nService,
   ) {}
 
@@ -38,15 +45,16 @@ export class PasswordResetEnrollmentServiceImplementation
 
     const orgPublicKey = Utils.fromB64ToArray(orgKeyResponse.publicKey);
 
-    userId = userId ?? (await this.stateService.getUserId());
-    userKey = userKey ?? (await this.cryptoService.getUserKey(userId));
+    userId =
+      userId ?? (await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id))));
+    userKey = userKey ?? (await this.keyService.getUserKey(userId));
     // RSA Encrypt user's userKey.key with organization public key
-    const encryptedKey = await this.cryptoService.rsaEncrypt(userKey.key, orgPublicKey);
+    const encryptedKey = await this.encryptService.rsaEncrypt(userKey.key, orgPublicKey);
 
     const resetRequest = new OrganizationUserResetPasswordEnrollmentRequest();
     resetRequest.resetPasswordKey = encryptedKey.encryptedString;
 
-    await this.organizationUserService.putOrganizationUserResetPasswordEnrollment(
+    await this.organizationUserApiService.putOrganizationUserResetPasswordEnrollment(
       organizationId,
       userId,
       resetRequest,

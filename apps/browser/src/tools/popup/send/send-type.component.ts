@@ -1,5 +1,5 @@
 import { Location } from "@angular/common";
-import { ChangeDetectorRef, Component, NgZone } from "@angular/core";
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { first } from "rxjs/operators";
 
@@ -15,11 +15,11 @@ import { SendType } from "@bitwarden/common/tools/send/enums/send-type";
 import { SendView } from "@bitwarden/common/tools/send/models/view/send.view";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
 import { SendService } from "@bitwarden/common/tools/send/services/send.service.abstraction";
-import { DialogService } from "@bitwarden/components";
+import { DialogService, ToastService } from "@bitwarden/components";
 
 import { BrowserComponentState } from "../../../models/browserComponentState";
 import BrowserPopupUtils from "../../../platform/popup/browser-popup-utils";
-import { BrowserStateService } from "../../../platform/services/abstractions/browser-state.service";
+import { BrowserSendStateService } from "../services/browser-send-state.service";
 
 const ComponentId = "SendTypeComponent";
 
@@ -27,7 +27,7 @@ const ComponentId = "SendTypeComponent";
   selector: "app-send-type",
   templateUrl: "send-type.component.html",
 })
-export class SendTypeComponent extends BaseSendComponent {
+export class SendTypeComponent extends BaseSendComponent implements OnInit, OnDestroy {
   groupingTitle: string;
   // State Handling
   state: BrowserComponentState;
@@ -42,7 +42,7 @@ export class SendTypeComponent extends BaseSendComponent {
     ngZone: NgZone,
     policyService: PolicyService,
     searchService: SearchService,
-    private stateService: BrowserStateService,
+    private stateService: BrowserSendStateService,
     private route: ActivatedRoute,
     private location: Location,
     private changeDetectorRef: ChangeDetectorRef,
@@ -51,6 +51,7 @@ export class SendTypeComponent extends BaseSendComponent {
     logService: LogService,
     sendApiService: SendApiService,
     dialogService: DialogService,
+    toastService: ToastService,
   ) {
     super(
       sendService,
@@ -63,8 +64,9 @@ export class SendTypeComponent extends BaseSendComponent {
       logService,
       sendApiService,
       dialogService,
+      toastService,
     );
-    super.onSuccessfulLoad = async () => {
+    this.onSuccessfulLoad = async () => {
       this.selectType(this.type);
     };
     this.applySavedState =
@@ -101,18 +103,26 @@ export class SendTypeComponent extends BaseSendComponent {
 
       // Restore state and remove reference
       if (this.applySavedState && this.state != null) {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         BrowserPopupUtils.setContentScrollY(window, this.state?.scrollY);
       }
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.stateService.setBrowserSendTypeComponentState(null);
     });
 
     // Refresh Send list if sync completed in background
     this.broadcasterService.subscribe(ComponentId, (message: any) => {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.ngZone.run(async () => {
         switch (message.command) {
           case "syncCompleted":
             if (message.successfully) {
               this.refreshTimeout = window.setTimeout(() => {
+                // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 this.refresh();
               }, 500);
             }
@@ -132,12 +142,16 @@ export class SendTypeComponent extends BaseSendComponent {
       window.clearTimeout(this.refreshTimeout);
     }
     // Save state
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.saveState();
     // Unsubscribe
     this.broadcasterService.unsubscribe(ComponentId);
   }
 
   async selectSend(s: SendView) {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/edit-send"], { queryParams: { sendId: s.id } });
   }
 
@@ -145,6 +159,8 @@ export class SendTypeComponent extends BaseSendComponent {
     if (this.disableSend) {
       return;
     }
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/add-send"], { queryParams: { type: this.type } });
   }
 
@@ -152,6 +168,8 @@ export class SendTypeComponent extends BaseSendComponent {
     if (this.disableSend) {
       return;
     }
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     super.removePassword(s);
   }
 

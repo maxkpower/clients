@@ -144,12 +144,16 @@
         </div>
 
         <!--Passkey-->
-        <div class="box" *ngIf="cipher.login.hasFido2Credentials">
+        <div
+          class="box"
+          *ngIf="cipher.login.hasFido2Credentials"
+          tabindex="0"
+          attr.aria-label="{{ 'typePasskey' | i18n }} {{ fido2CredentialCreationDateValue }}"
+        >
           <div class="box-content">
             <div class="box-content-row text-muted">
               <span class="row-label">{{ "typePasskey" | i18n }}</span>
-              {{ "dateCreated" | i18n }}
-              {{ cipher.login.fido2Credentials[0].creationDate | date: "short" }}
+              {{ fido2CredentialCreationDateValue }}
             </div>
           </div>
         </div>
@@ -468,7 +472,7 @@
             attr.aria-label="{{ 'launch' | i18n }} {{ u.uri }}"
             appA11yTitle="{{ 'launch' | i18n }}"
             *ngIf="u.canLaunch"
-            (click)="launch(u)"
+            (click)="launch(u, cipher.id)"
           >
             <i class="bwi bwi-lg bwi-share-square" aria-hidden="true"></i>
           </button>
@@ -640,7 +644,7 @@
         class="box-content-row"
         appStopClick
         (click)="delete()"
-        *ngIf="cipher.edit"
+        *ngIf="canDeleteCipher$ | async"
       >
         <div class="row-main text-danger">
           <div class="icon text-danger" aria-hidden="true">

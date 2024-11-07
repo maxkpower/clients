@@ -3,19 +3,26 @@ import { Injectable } from "@angular/core";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyData } from "@bitwarden/common/admin-console/models/data/policy.data";
 import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
-import { KdfConfig } from "@bitwarden/common/auth/models/domain/kdf-config";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import {
+  Argon2KdfConfig,
+  KdfConfig,
+  PBKDF2KdfConfig,
+} from "@bitwarden/common/auth/models/domain/kdf-config";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { BulkEncryptService } from "@bitwarden/common/platform/abstractions/bulk-encrypt.service";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { KdfType } from "@bitwarden/common/platform/enums";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { EncryptedString } from "@bitwarden/common/platform/models/domain/enc-string";
-import {
-  SymmetricCryptoKey,
-  UserKey,
-} from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { EncryptedString, EncString } from "@bitwarden/common/platform/models/domain/enc-string";
+import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { UserId } from "@bitwarden/common/types/guid";
+import { UserKey } from "@bitwarden/common/types/key";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { UserKeyRotationDataProvider, KeyService } from "@bitwarden/key-management";
 
 import { EmergencyAccessStatusType } from "../enums/emergency-access-status-type";
 import { EmergencyAccessType } from "../enums/emergency-access-type";
@@ -24,19 +31,26 @@ import { EmergencyAccessAcceptRequest } from "../request/emergency-access-accept
 import { EmergencyAccessConfirmRequest } from "../request/emergency-access-confirm.request";
 import { EmergencyAccessInviteRequest } from "../request/emergency-access-invite.request";
 import { EmergencyAccessPasswordRequest } from "../request/emergency-access-password.request";
-import { EmergencyAccessUpdateRequest } from "../request/emergency-access-update.request";
+import {
+  EmergencyAccessUpdateRequest,
+  EmergencyAccessWithIdRequest,
+} from "../request/emergency-access-update.request";
 
 import { EmergencyAccessApiService } from "./emergency-access-api.service";
 
 @Injectable()
-export class EmergencyAccessService {
+export class EmergencyAccessService
+  implements UserKeyRotationDataProvider<EmergencyAccessWithIdRequest>
+{
   constructor(
     private emergencyAccessApiService: EmergencyAccessApiService,
     private apiService: ApiService,
-    private cryptoService: CryptoService,
+    private keyService: KeyService,
     private encryptService: EncryptService,
+    private bulkEncryptService: BulkEncryptService,
     private cipherService: CipherService,
     private logService: LogService,
+    private configService: ConfigService,
   ) {}
 
   /**
@@ -138,7 +152,7 @@ export class EmergencyAccessService {
    * @param token secret token provided in email
    */
   async confirm(id: string, granteeId: string) {
-    const userKey = await this.cryptoService.getUserKey();
+    const userKey = await this.keyService.getUserKey();
     if (!userKey) {
       throw new Error("No user key found");
     }
@@ -148,7 +162,7 @@ export class EmergencyAccessService {
     try {
       this.logService.debug(
         "User's fingerprint: " +
-          (await this.cryptoService.getFingerprint(granteeId, publicKey)).join("-"),
+          (await this.keyService.getFingerprint(granteeId, publicKey)).join("-"),
       );
     } catch {
       // Ignore errors since it's just a debug message
@@ -203,13 +217,30 @@ export class EmergencyAccessService {
   async getViewOnlyCiphers(id: string): Promise<CipherView[]> {
     const response = await this.emergencyAccessApiService.postEmergencyAccessView(id);
 
-    const grantorKeyBuffer = await this.cryptoService.rsaDecrypt(response.keyEncrypted);
+    const activeUserPrivateKey = await this.keyService.getPrivateKey();
+
+    if (activeUserPrivateKey == null) {
+      throw new Error("Active user does not have a private key, cannot get view only ciphers.");
+    }
+
+    const grantorKeyBuffer = await this.encryptService.rsaDecrypt(
+      new EncString(response.keyEncrypted),
+      activeUserPrivateKey,
+    );
     const grantorUserKey = new SymmetricCryptoKey(grantorKeyBuffer) as UserKey;
 
-    const ciphers = await this.encryptService.decryptItems(
-      response.ciphers.map((c) => new Cipher(c)),
-      grantorUserKey,
-    );
+    let ciphers: CipherView[] = [];
+    if (await this.configService.getFeatureFlag(FeatureFlag.PM4154_BulkEncryptionService)) {
+      ciphers = await this.bulkEncryptService.decryptItems(
+        response.ciphers.map((c) => new Cipher(c)),
+        grantorUserKey,
+      );
+    } else {
+      ciphers = await this.encryptService.decryptItems(
+        response.ciphers.map((c) => new Cipher(c)),
+        grantorUserKey,
+      );
+    }
     return ciphers.sort(this.cipherService.getLocaleSortingFunction());
   }
 
@@ -223,42 +254,77 @@ export class EmergencyAccessService {
   async takeover(id: string, masterPassword: string, email: string) {
     const takeoverResponse = await this.emergencyAccessApiService.postEmergencyAccessTakeover(id);
 
-    const grantorKeyBuffer = await this.cryptoService.rsaDecrypt(takeoverResponse.keyEncrypted);
+    const activeUserPrivateKey = await this.keyService.getPrivateKey();
+
+    if (activeUserPrivateKey == null) {
+      throw new Error("Active user does not have a private key, cannot complete a takeover.");
+    }
+
+    const grantorKeyBuffer = await this.encryptService.rsaDecrypt(
+      new EncString(takeoverResponse.keyEncrypted),
+      activeUserPrivateKey,
+    );
     if (grantorKeyBuffer == null) {
       throw new Error("Failed to decrypt grantor key");
     }
 
     const grantorUserKey = new SymmetricCryptoKey(grantorKeyBuffer) as UserKey;
 
-    const masterKey = await this.cryptoService.makeMasterKey(
-      masterPassword,
-      email,
-      takeoverResponse.kdf,
-      new KdfConfig(
-        takeoverResponse.kdfIterations,
-        takeoverResponse.kdfMemory,
-        takeoverResponse.kdfParallelism,
-      ),
-    );
-    const masterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, masterKey);
+    let config: KdfConfig;
 
-    const encKey = await this.cryptoService.encryptUserKeyWithMasterKey(masterKey, grantorUserKey);
+    switch (takeoverResponse.kdf) {
+      case KdfType.PBKDF2_SHA256:
+        config = new PBKDF2KdfConfig(takeoverResponse.kdfIterations);
+        break;
+      case KdfType.Argon2id:
+        config = new Argon2KdfConfig(
+          takeoverResponse.kdfIterations,
+          takeoverResponse.kdfMemory,
+          takeoverResponse.kdfParallelism,
+        );
+        break;
+    }
+
+    const masterKey = await this.keyService.makeMasterKey(masterPassword, email, config);
+    const masterKeyHash = await this.keyService.hashMasterKey(masterPassword, masterKey);
+
+    const encKey = await this.keyService.encryptUserKeyWithMasterKey(masterKey, grantorUserKey);
 
     const request = new EmergencyAccessPasswordRequest();
     request.newMasterPasswordHash = masterKeyHash;
     request.key = encKey[1].encryptedString;
 
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.emergencyAccessApiService.postEmergencyAccessPassword(id, request);
   }
 
   /**
-   * Rotates the user key for all existing emergency access.
+   * Returns existing emergency access keys re-encrypted with new user key.
    * Intended for grantor.
+   * @param originalUserKey the original user key
    * @param newUserKey the new user key
+   * @param userId the user id
+   * @throws Error if newUserKey is nullish
+   * @returns an array of re-encrypted emergency access requests or an empty array if there are no requests
    */
-  async rotate(newUserKey: UserKey): Promise<void> {
+  async getRotatedData(
+    originalUserKey: UserKey,
+    newUserKey: UserKey,
+    userId: UserId,
+  ): Promise<EmergencyAccessWithIdRequest[]> {
+    if (newUserKey == null) {
+      throw new Error("New user key is required for rotation.");
+    }
+
+    const requests: EmergencyAccessWithIdRequest[] = [];
     const existingEmergencyAccess =
       await this.emergencyAccessApiService.getEmergencyAccessTrusted();
+
+    if (!existingEmergencyAccess || existingEmergencyAccess.data.length === 0) {
+      return requests;
+    }
+
     // Any Invited or Accepted requests won't have the key yet, so we don't need to update them
     const allowedStatuses = new Set([
       EmergencyAccessStatusType.Confirmed,
@@ -277,16 +343,17 @@ export class EmergencyAccessService {
       // Encrypt new user key with public key
       const encryptedKey = await this.encryptKey(newUserKey, publicKey);
 
-      const updateRequest = new EmergencyAccessUpdateRequest();
+      const updateRequest = new EmergencyAccessWithIdRequest();
+      updateRequest.id = details.id;
       updateRequest.type = details.type;
       updateRequest.waitTimeDays = details.waitTimeDays;
       updateRequest.keyEncrypted = encryptedKey;
-
-      await this.emergencyAccessApiService.putEmergencyAccess(details.id, updateRequest);
+      requests.push(updateRequest);
     }
+    return requests;
   }
 
   private async encryptKey(userKey: UserKey, publicKey: Uint8Array): Promise<EncryptedString> {
-    return (await this.cryptoService.rsaEncrypt(userKey.key, publicKey)).encryptedString;
+    return (await this.encryptService.rsaEncrypt(userKey.key, publicKey)).encryptedString;
   }
 }

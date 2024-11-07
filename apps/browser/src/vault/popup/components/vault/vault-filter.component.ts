@@ -1,26 +1,26 @@
 import { Location } from "@angular/common";
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { firstValueFrom } from "rxjs";
-import { first } from "rxjs/operators";
+import { BehaviorSubject, Subject, firstValueFrom, from } from "rxjs";
+import { first, switchMap, takeUntil } from "rxjs/operators";
 
+import { CollectionView } from "@bitwarden/admin-console/common";
 import { VaultFilter } from "@bitwarden/angular/vault/vault-filter/models/vault-filter.model";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { SyncService } from "@bitwarden/common/platform/sync";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
 import { BrowserGroupingsComponentState } from "../../../../models/browserGroupingsComponentState";
 import { BrowserApi } from "../../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../../platform/popup/browser-popup-utils";
-import { BrowserStateService } from "../../../../platform/services/abstractions/browser-state.service";
+import { VaultBrowserStateService } from "../../../services/vault-browser-state.service";
 import { VaultFilterService } from "../../../services/vault-filter.service";
 
 const ComponentId = "VaultComponent";
@@ -53,7 +53,6 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   folderCounts = new Map<string, number>();
   collectionCounts = new Map<string, number>();
   typeCounts = new Map<CipherType, number>();
-  searchText: string;
   state: BrowserGroupingsComponentState;
   showLeftHeader = true;
   searchPending = false;
@@ -71,6 +70,16 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   private hasSearched = false;
   private hasLoadedAllCiphers = false;
   private allCiphers: CipherView[] = null;
+  private destroy$ = new Subject<void>();
+  private _searchText$ = new BehaviorSubject<string>("");
+  private isSearchable: boolean = false;
+
+  get searchText() {
+    return this._searchText$.value;
+  }
+  set searchText(value: string) {
+    this._searchText$.next(value);
+  }
 
   constructor(
     private i18nService: I18nService,
@@ -84,8 +93,8 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     private platformUtilsService: PlatformUtilsService,
     private searchService: SearchService,
     private location: Location,
-    private browserStateService: BrowserStateService,
     private vaultFilterService: VaultFilterService,
+    private vaultBrowserStateService: VaultBrowserStateService,
   ) {
     this.noFolderListSize = 100;
   }
@@ -95,13 +104,17 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     this.showLeftHeader = !(
       BrowserPopupUtils.inSidebar(window) && this.platformUtilsService.isFirefox()
     );
-    await this.browserStateService.setBrowserVaultItemsComponentState(null);
+    await this.vaultBrowserStateService.setBrowserVaultItemsComponentState(null);
 
     this.broadcasterService.subscribe(ComponentId, (message: any) => {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.ngZone.run(async () => {
         switch (message.command) {
           case "syncCompleted":
             window.setTimeout(() => {
+              // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               this.load();
             }, 500);
             break;
@@ -116,7 +129,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     const restoredScopeState = await this.restoreState();
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
     this.route.queryParams.pipe(first()).subscribe(async (params) => {
-      this.state = await this.browserStateService.getBrowserGroupingComponentState();
+      this.state = await this.vaultBrowserStateService.getBrowserGroupingsComponentState();
       if (this.state?.searchText) {
         this.searchText = this.state.searchText;
       } else if (params.searchText) {
@@ -125,19 +138,34 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
       }
 
       if (!this.syncService.syncInProgress) {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.load();
       } else {
         this.loadedTimeout = window.setTimeout(() => {
           if (!this.loaded) {
+            // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.load();
           }
         }, 5000);
       }
 
       if (!this.syncService.syncInProgress || restoredScopeState) {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         BrowserPopupUtils.setContentScrollY(window, this.state?.scrollY);
       }
     });
+
+    this._searchText$
+      .pipe(
+        switchMap((searchText) => from(this.searchService.isSearchable(searchText))),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((isSearchable) => {
+        this.isSearchable = isSearchable;
+      });
   }
 
   ngOnDestroy() {
@@ -147,8 +175,12 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     if (this.selectedTimeout != null) {
       window.clearTimeout(this.selectedTimeout);
     }
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.saveState();
     this.broadcasterService.unsubscribe(ComponentId);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async load() {
@@ -169,7 +201,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   async loadCiphers() {
     this.allCiphers = await this.cipherService.getAllDecrypted();
     if (!this.hasLoadedAllCiphers) {
-      this.hasLoadedAllCiphers = !this.searchService.isSearchable(this.searchText);
+      this.hasLoadedAllCiphers = !(await this.searchService.isSearchable(this.searchText));
     }
     await this.search(null);
     this.getCounts();
@@ -198,7 +230,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     }
     const filterDeleted = (c: CipherView) => !c.isDeleted;
     if (timeout == null) {
-      this.hasSearched = this.searchService.isSearchable(this.searchText);
+      this.hasSearched = this.isSearchable;
       this.ciphers = await this.searchService.searchCiphers(
         this.searchText,
         filterDeleted,
@@ -211,7 +243,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     }
     this.searchPending = true;
     this.searchTimeout = setTimeout(async () => {
-      this.hasSearched = this.searchService.isSearchable(this.searchText);
+      this.hasSearched = this.isSearchable;
       if (!this.hasLoadedAllCiphers && !this.hasSearched) {
         await this.loadCiphers();
       } else {
@@ -229,24 +261,34 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   }
 
   async selectType(type: CipherType) {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/ciphers"], { queryParams: { type: type } });
   }
 
   async selectFolder(folder: FolderView) {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/ciphers"], { queryParams: { folderId: folder.id || "none" } });
   }
 
   async selectCollection(collection: CollectionView) {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/ciphers"], { queryParams: { collectionId: collection.id } });
   }
 
   async selectTrash() {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/ciphers"], { queryParams: { deleted: true } });
   }
 
   async selectCipher(cipher: CipherView) {
     this.selectedTimeout = window.setTimeout(() => {
       if (!this.preventSelected) {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.router.navigate(["/view-cipher"], { queryParams: { cipherId: cipher.id } });
       }
       this.preventSelected = false;
@@ -263,6 +305,8 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     }
     this.preventSelected = true;
     await this.cipherService.updateLastLaunchedDate(cipher.id);
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     BrowserApi.createNewTab(cipher.login.launchUri);
     if (BrowserPopupUtils.inPopup(window)) {
       BrowserApi.closePopup(window);
@@ -270,6 +314,8 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   }
 
   async addCipher() {
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/add-cipher"], {
       queryParams: { selectedVault: this.vaultFilter.selectedOrganizationId },
     });
@@ -355,9 +401,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   }
 
   showSearching() {
-    return (
-      this.hasSearched || (!this.searchPending && this.searchService.isSearchable(this.searchText))
-    );
+    return this.hasSearched || (!this.searchPending && this.isSearchable);
   }
 
   closeOnEsc(e: KeyboardEvent) {
@@ -387,11 +431,11 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
       collections: this.collections,
       deletedCount: this.deletedCount,
     });
-    await this.browserStateService.setBrowserGroupingComponentState(this.state);
+    await this.vaultBrowserStateService.setBrowserGroupingsComponentState(this.state);
   }
 
   private async restoreState(): Promise<boolean> {
-    this.state = await this.browserStateService.getBrowserGroupingComponentState();
+    this.state = await this.vaultBrowserStateService.getBrowserGroupingsComponentState();
     if (this.state == null) {
       return false;
     }

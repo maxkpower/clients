@@ -1,16 +1,18 @@
-import { Location } from "@angular/common";
-import { ChangeDetectorRef, Component, NgZone } from "@angular/core";
+import { DatePipe, Location } from "@angular/common";
+import { ChangeDetectorRef, Component, NgZone, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Subject, firstValueFrom, takeUntil } from "rxjs";
-import { first } from "rxjs/operators";
+import { Subject, firstValueFrom, takeUntil, Subscription } from "rxjs";
+import { first, map } from "rxjs/operators";
 
 import { ViewComponent as BaseViewComponent } from "@bitwarden/angular/vault/components/view.component";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
+import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -19,20 +21,20 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
-import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
+import { TotpService as TotpServiceAbstraction } from "@bitwarden/common/vault/abstractions/totp.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService } from "@bitwarden/components";
+import { KeyService } from "@bitwarden/key-management";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
+import { BrowserFido2UserInterfaceSession } from "../../../../autofill/fido2/services/browser-fido2-user-interface.service";
 import { AutofillService } from "../../../../autofill/services/abstractions/autofill.service";
 import { BrowserApi } from "../../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../../platform/popup/browser-popup-utils";
-import {
-  BrowserFido2UserInterfaceSession,
-  fido2PopoutSessionData$,
-} from "../../../fido2/browser-fido2-user-interface.service";
+import { fido2PopoutSessionData$ } from "../../utils/fido2-popout-session-data";
 import { closeViewVaultItemPopout, VaultPopoutType } from "../../utils/vault-popout-window";
 
 const BroadcasterSubscriptionId = "ChildViewComponent";
@@ -53,7 +55,7 @@ type LoadAction = typeof AUTOFILL_ID | typeof SHOW_AUTOFILL_BUTTON | CopyAction;
   selector: "app-vault-view",
   templateUrl: "view.component.html",
 })
-export class ViewComponent extends BaseViewComponent {
+export class ViewComponent extends BaseViewComponent implements OnInit, OnDestroy {
   showAttachments = true;
   pageDetails: any[] = [];
   tab: any;
@@ -69,16 +71,18 @@ export class ViewComponent extends BaseViewComponent {
   inPopout = false;
   cipherType = CipherType;
   private fido2PopoutSessionData$ = fido2PopoutSessionData$();
+  private collectPageDetailsSubscription: Subscription;
 
   private destroy$ = new Subject<void>();
 
   constructor(
     cipherService: CipherService,
     folderService: FolderService,
-    totpService: TotpService,
+    totpService: TotpServiceAbstraction,
     tokenService: TokenService,
     i18nService: I18nService,
-    cryptoService: CryptoService,
+    keyService: KeyService,
+    encryptService: EncryptService,
     platformUtilsService: PlatformUtilsService,
     auditService: AuditService,
     private route: ActivatedRoute,
@@ -96,6 +100,10 @@ export class ViewComponent extends BaseViewComponent {
     logService: LogService,
     fileDownloadService: FileDownloadService,
     dialogService: DialogService,
+    datePipe: DatePipe,
+    accountService: AccountService,
+    billingAccountProfileStateService: BillingAccountProfileStateService,
+    cipherAuthorizationService: CipherAuthorizationService,
   ) {
     super(
       cipherService,
@@ -103,7 +111,8 @@ export class ViewComponent extends BaseViewComponent {
       totpService,
       tokenService,
       i18nService,
-      cryptoService,
+      keyService,
+      encryptService,
       platformUtilsService,
       auditService,
       window,
@@ -117,6 +126,10 @@ export class ViewComponent extends BaseViewComponent {
       stateService,
       fileDownloadService,
       dialogService,
+      datePipe,
+      accountService,
+      billingAccountProfileStateService,
+      cipherAuthorizationService,
     );
   }
 
@@ -133,7 +146,15 @@ export class ViewComponent extends BaseViewComponent {
     this.route.queryParams.pipe(first()).subscribe(async (params) => {
       if (params.cipherId) {
         this.cipherId = params.cipherId;
-      } else {
+      }
+
+      if (params.collectionId) {
+        this.collectionId = params.collectionId;
+      }
+
+      if (!params.cipherId) {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.close();
       }
 
@@ -143,17 +164,10 @@ export class ViewComponent extends BaseViewComponent {
     super.ngOnInit();
 
     this.broadcasterService.subscribe(BroadcasterSubscriptionId, (message: any) => {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.ngZone.run(async () => {
         switch (message.command) {
-          case "collectPageDetailsResponse":
-            if (message.sender === BroadcasterSubscriptionId) {
-              this.pageDetails.push({
-                frameId: message.webExtSender.frameId,
-                tab: message.tab,
-                details: message.details,
-              });
-            }
-            break;
           case "tabChanged":
           case "windowChanged":
             if (this.loadPageDetailsTimeout != null) {
@@ -189,7 +203,16 @@ export class ViewComponent extends BaseViewComponent {
       return false;
     }
 
-    this.router.navigate(["/edit-cipher"], { queryParams: { cipherId: this.cipher.id } });
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.router.navigate(["/edit-cipher"], {
+      queryParams: {
+        cipherId: this.cipher.id,
+        type: this.cipher.type,
+        isNew: false,
+        collectionId: this.collectionId,
+      },
+    });
     return true;
   }
 
@@ -202,6 +225,8 @@ export class ViewComponent extends BaseViewComponent {
       return false;
     }
 
+    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate(["/clone-cipher"], {
       queryParams: {
         cloneMode: true,
@@ -217,6 +242,8 @@ export class ViewComponent extends BaseViewComponent {
     }
 
     if (this.cipher.organizationId == null) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.router.navigate(["/share-cipher"], {
         replaceUrl: true,
         queryParams: { cipherId: this.cipher.id },
@@ -260,7 +287,10 @@ export class ViewComponent extends BaseViewComponent {
       this.cipher.login.uris.push(loginUri);
 
       try {
-        const cipher: Cipher = await this.cipherService.encrypt(this.cipher);
+        const activeUserId = await firstValueFrom(
+          this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+        );
+        const cipher: Cipher = await this.cipherService.encrypt(this.cipher, activeUserId);
         await this.cipherService.updateWithServer(cipher);
         this.platformUtilsService.showToast(
           "success",
@@ -279,6 +309,8 @@ export class ViewComponent extends BaseViewComponent {
       return false;
     }
     if (await super.restore()) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.close();
       return true;
     }
@@ -288,6 +320,8 @@ export class ViewComponent extends BaseViewComponent {
   async delete() {
     if (await super.delete()) {
       this.messagingService.send("deletedCipher");
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.close();
       return true;
     }
@@ -305,7 +339,11 @@ export class ViewComponent extends BaseViewComponent {
       BrowserPopupUtils.inSingleActionPopout(window, VaultPopoutType.viewVaultItem) &&
       this.senderTabId
     ) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       BrowserApi.focusTab(this.senderTabId);
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       closeViewVaultItemPopout(`${VaultPopoutType.viewVaultItem}_${this.cipher.id}`);
       return;
     }
@@ -314,6 +352,7 @@ export class ViewComponent extends BaseViewComponent {
   }
 
   private async loadPageDetails() {
+    this.collectPageDetailsSubscription?.unsubscribe();
     this.pageDetails = [];
     this.tab = this.senderTabId
       ? await BrowserApi.getTab(this.senderTabId)
@@ -323,11 +362,10 @@ export class ViewComponent extends BaseViewComponent {
       return;
     }
 
-    BrowserApi.tabSendMessage(this.tab, {
-      command: "collectPageDetails",
-      tab: this.tab,
-      sender: BroadcasterSubscriptionId,
-    });
+    this.collectPageDetailsSubscription = this.autofillService
+      .collectPageDetailsFromTab$(this.tab)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((pageDetails) => (this.pageDetails = pageDetails));
   }
 
   private async doAutofill() {

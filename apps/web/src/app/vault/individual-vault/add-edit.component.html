@@ -20,9 +20,12 @@
         </button>
       </div>
       <div class="modal-body" *ngIf="cipher">
-        <app-callout type="info" *ngIf="allowOwnershipAssignment() && !allowPersonal">
+        <bit-callout type="info" *ngIf="allowOwnershipAssignment() && !allowPersonal">
           {{ "personalOwnershipPolicyInEffect" | i18n }}
-        </app-callout>
+        </bit-callout>
+        <bit-callout *ngIf="cardIsExpired" type="info" [title]="'cardExpiredTitle' | i18n">
+          {{ "cardExpiredMessage" | i18n }}
+        </bit-callout>
         <div class="row" *ngIf="!editMode && !viewOnly">
           <div class="col-6 form-group">
             <label for="type">{{ "whatTypeOfItem" | i18n }}</label>
@@ -192,10 +195,16 @@
             </div>
           </div>
           <ng-container *ngIf="cipher.login.hasFido2Credentials">
-            <div class="row">
-              <div class="col-6 form-group">
+            <div class="tw-flex tw-flex-row">
+              <div class="tw-mb-4 tw-w-1/2">
                 <label for="loginFido2credential">{{ "typePasskey" | i18n }}</label>
-                <div class="input-group">
+                <div
+                  class="tw-flex tw-flex-row"
+                  tabindex="0"
+                  attr.aria-label="{{ 'typePasskey' | i18n }} {{
+                    fido2CredentialCreationDateValue
+                  }}"
+                >
                   <input
                     id="loginFido2credential"
                     class="form-control"
@@ -206,6 +215,15 @@
                     disabled
                     readonly
                   />
+                  <button
+                    type="button"
+                    class="tw-items-center tw-border-none tw-bg-transparent tw-text-danger tw-ml-3"
+                    appA11yTitle="{{ 'removePasskey' | i18n }}"
+                    (click)="removePasskey()"
+                    *ngIf="!cipher.isDeleted && !viewOnly"
+                  >
+                    <i class="bwi bwi-lg bwi-minus-circle"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -267,7 +285,7 @@
                   href="#"
                   appStopClick
                   bitBadge
-                  badgeType="primary"
+                  variant="primary"
                   class="tw-ml-4"
                   (click)="upgradeOrganization()"
                   *ngIf="
@@ -307,7 +325,7 @@
                 >
                 <button
                   type="button"
-                  class="tw-items-center tw-border-none tw-bg-transparent tw-text-primary-500"
+                  class="tw-items-center tw-border-none tw-bg-transparent tw-text-primary-600"
                   appA11yTitle="{{ 'copyVerificationCode' | i18n }}"
                   (click)="copy(totpCode, 'verificationCodeTotp', 'TOTP')"
                 >
@@ -366,8 +384,8 @@
                     class="ml-auto"
                     href="https://bitwarden.com/help/uri-match-detection/"
                     target="_blank"
-                    rel="noopener"
-                    appA11yTitle="{{ 'learnMore' | i18n }}"
+                    rel="noreferrer"
+                    appA11yTitle="{{ 'learnMoreAboutMatchDetection' | i18n }}"
                   >
                     <i class="bwi bwi-question-circle" aria-hidden="true"></i>
                   </a>
@@ -400,6 +418,7 @@
           </ng-container>
           <a
             href="#"
+            bitLink
             appStopClick
             (click)="addUri()"
             class="d-inline-block mb-3"
@@ -478,7 +497,7 @@
                       aria-hidden="true"
                       [ngClass]="{
                         'bwi-eye': !showCardNumber,
-                        'bwi-eye-slash': showCardNumber
+                        'bwi-eye-slash': showCardNumber,
                       }"
                     ></i>
                   </button>
@@ -905,7 +924,7 @@
             </div>
             <div *ngIf="hasPasswordHistory">
               <b class="font-weight-semibold">{{ "passwordHistory" | i18n }}:</b>
-              <a href="#" appStopClick (click)="viewHistory()" title="{{ 'view' | i18n }}">
+              <a href="#" bitLink appStopClick (click)="viewHistory()" title="{{ 'view' | i18n }}">
                 {{ cipher.passwordHistory.length }}
               </a>
             </div>
@@ -934,8 +953,8 @@
             }}</label>
             <a
               target="_blank"
-              rel="noopener"
-              appA11yTitle="{{ 'learnMore' | i18n }}"
+              rel="noreferrer"
+              appA11yTitle="{{ 'learnMoreAboutMasterPasswordReprompt' | i18n }}"
               href="https://bitwarden.com/help/managing-items/#protect-individual-items"
             >
               <i class="bwi bwi-question-circle" aria-hidden="true"></i>
@@ -976,7 +995,7 @@
             (click)="delete()"
             class="btn btn-outline-danger"
             appA11yTitle="{{ (cipher.isDeleted ? 'permanentlyDelete' : 'delete') | i18n }}"
-            *ngIf="editMode && !cloneMode && !(!cipher.edit && editMode)"
+            *ngIf="editMode && !cloneMode && (canDeleteCipher$ | async)"
             [disabled]="$any(deleteBtn).loading"
             [appApiAction]="deletePromise"
           >

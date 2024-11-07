@@ -3,16 +3,16 @@ import { firstValueFrom } from "rxjs";
 
 import { NativeMessagingVersion } from "@bitwarden/common/enums";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
-import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncryptedString, EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
-import { StateService } from "@bitwarden/common/platform/services/state.service";
 import { DialogService } from "@bitwarden/components";
 
 import { VerifyNativeMessagingDialogComponent } from "../app/components/verify-native-messaging-dialog.component";
+import { DesktopAutofillSettingsService } from "../autofill/services/desktop-autofill-settings.service";
 import { DecryptedCommandData } from "../models/native-messaging/decrypted-command-data";
 import { EncryptedMessage } from "../models/native-messaging/encrypted-message";
 import { EncryptedMessageResponse } from "../models/native-messaging/encrypted-message-response";
@@ -22,20 +22,21 @@ import { UnencryptedMessageResponse } from "../models/native-messaging/unencrypt
 
 import { EncryptedMessageHandlerService } from "./encrypted-message-handler.service";
 
-const EncryptionAlgorithm = "sha1";
+const HashAlgorithmForAsymmetricEncryption = "sha1";
 
+// This service handles messages using the protocol created for the DuckDuckGo integration.
 @Injectable()
 export class NativeMessageHandlerService {
   private ddgSharedSecret: SymmetricCryptoKey;
 
   constructor(
     private stateService: StateService,
-    private cryptoService: CryptoService,
+    private encryptService: EncryptService,
     private cryptoFunctionService: CryptoFunctionService,
     private messagingService: MessagingService,
-    private i18nService: I18nService,
     private encryptedMessageHandlerService: EncryptedMessageHandlerService,
     private dialogService: DialogService,
+    private desktopAutofillSettingsService: DesktopAutofillSettingsService,
   ) {}
 
   async handleMessage(message: Message) {
@@ -73,7 +74,9 @@ export class NativeMessageHandlerService {
 
     try {
       const remotePublicKey = Utils.fromB64ToArray(publicKey);
-      const ddgEnabled = await this.stateService.getEnableDuckDuckGoBrowserIntegration();
+      const ddgEnabled = await firstValueFrom(
+        this.desktopAutofillSettingsService.enableDuckDuckGoBrowserIntegration$,
+      );
 
       if (!ddgEnabled) {
         this.sendResponse({
@@ -114,7 +117,7 @@ export class NativeMessageHandlerService {
       const encryptedSecret = await this.cryptoFunctionService.rsaEncrypt(
         secret,
         remotePublicKey,
-        EncryptionAlgorithm,
+        HashAlgorithmForAsymmetricEncryption,
       );
 
       this.sendResponse({
@@ -149,6 +152,8 @@ export class NativeMessageHandlerService {
 
       await this.sendEncryptedResponse(message, { command, payload: responseData });
     } catch (error) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.sendEncryptedResponse(message, { command, payload: {} });
     }
   }
@@ -157,7 +162,7 @@ export class NativeMessageHandlerService {
     payload: DecryptedCommandData,
     key: SymmetricCryptoKey,
   ): Promise<EncString> {
-    return await this.cryptoService.encrypt(JSON.stringify(payload), key);
+    return await this.encryptService.encrypt(JSON.stringify(payload), key);
   }
 
   private async decryptPayload(message: EncryptedMessage): Promise<DecryptedCommandData> {
@@ -177,9 +182,10 @@ export class NativeMessageHandlerService {
     }
 
     try {
-      let decryptedResult = await this.cryptoService.decryptToUtf8(
+      let decryptedResult = await this.encryptService.decryptToUtf8(
         message.encryptedCommand as EncString,
         this.ddgSharedSecret,
+        "ddg-shared-key",
       );
 
       decryptedResult = this.trimNullCharsFromMessage(decryptedResult);

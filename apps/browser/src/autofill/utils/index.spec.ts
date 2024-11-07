@@ -1,5 +1,5 @@
-import { AutofillPort } from "../enums/autofill-port.enums";
-import { triggerPortOnDisconnectEvent } from "../jest/testing-utils";
+import { AutofillPort } from "../enums/autofill-port.enum";
+import { triggerPortOnDisconnectEvent } from "../spec/testing-utils";
 
 import { logoIcon, logoLockedIcon } from "./svg-icons";
 
@@ -8,9 +8,9 @@ import {
   generateRandomCustomElementName,
   sendExtensionMessage,
   setElementStyles,
-  getFromLocalStorage,
   setupExtensionDisconnectAction,
   setupAutofillInitDisconnectAction,
+  debounce,
 } from "./index";
 
 describe("buildSvgDomElement", () => {
@@ -38,14 +38,26 @@ describe("generateRandomCustomElementName", () => {
 });
 
 describe("sendExtensionMessage", () => {
-  it("sends a message to the extention", () => {
-    const extensionMessageResponse = sendExtensionMessage("updateAutofillOverlayHidden", {
-      display: "none",
-    });
-    jest.spyOn(chrome.runtime, "sendMessage");
+  it("sends a message to the extension", async () => {
+    const extensionMessagePromise = sendExtensionMessage("some-extension-message");
 
-    expect(chrome.runtime.sendMessage).toHaveBeenCalled();
-    expect(extensionMessageResponse).toEqual(Promise.resolve({}));
+    // Jest doesn't give anyway to select the typed overload of "sendMessage",
+    // a cast is needed to get the correct spy type.
+    const sendMessageSpy = jest.spyOn(chrome.runtime, "sendMessage") as unknown as jest.SpyInstance<
+      void,
+      [message: string, responseCallback: (response: string) => void],
+      unknown
+    >;
+
+    expect(sendMessageSpy).toHaveBeenCalled();
+
+    const [latestCall] = sendMessageSpy.mock.calls;
+    const responseCallback = latestCall[1];
+
+    responseCallback("sendMessageResponse");
+
+    const response = await extensionMessagePromise;
+    expect(response).toEqual("sendMessageResponse");
   });
 });
 
@@ -124,33 +136,6 @@ describe("setElementStyles", () => {
   });
 });
 
-describe("getFromLocalStorage", () => {
-  it("returns a promise with the storage object pulled from the extension storage api", async () => {
-    const localStorage: Record<string, any> = {
-      testValue: "test",
-      another: "another",
-    };
-    jest.spyOn(chrome.storage.local, "get").mockImplementation((keys, callback) => {
-      const localStorageObject: Record<string, string> = {};
-
-      if (typeof keys === "string") {
-        localStorageObject[keys] = localStorage[keys];
-      } else if (Array.isArray(keys)) {
-        for (const key of keys) {
-          localStorageObject[key] = localStorage[key];
-        }
-      }
-
-      callback(localStorageObject);
-    });
-
-    const returnValue = await getFromLocalStorage("testValue");
-
-    expect(chrome.storage.local.get).toHaveBeenCalled();
-    expect(returnValue).toEqual({ testValue: "test" });
-  });
-});
-
 describe("setupExtensionDisconnectAction", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -225,5 +210,37 @@ describe("setupAutofillInitDisconnectAction", () => {
     expect(port.onDisconnect.addListener).toHaveBeenCalled();
     expect(autofillInitDestroy).toHaveBeenCalled();
     expect(window.bitwardenAutofillInit).toBeUndefined();
+  });
+});
+
+describe("debounce", () => {
+  const debouncedFunction = jest.fn();
+  const debounced = debounce(debouncedFunction, 100);
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it("does not call the method until the delay is complete", () => {
+    debounced();
+    jest.advanceTimersByTime(50);
+    expect(debouncedFunction).not.toHaveBeenCalled();
+  });
+
+  it("calls the method a single time when the debounce is triggered multiple times", () => {
+    debounced();
+    debounced();
+    debounced();
+    jest.advanceTimersByTime(100);
+
+    expect(debouncedFunction).toHaveBeenCalledTimes(1);
   });
 });

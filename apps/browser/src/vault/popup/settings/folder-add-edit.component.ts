@@ -1,25 +1,29 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { first } from "rxjs/operators";
 
 import { FolderAddEditComponent as BaseFolderAddEditComponent } from "@bitwarden/angular/vault/components/folder-add-edit.component";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { FolderApiServiceAbstraction } from "@bitwarden/common/vault/abstractions/folder/folder-api.service.abstraction";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { DialogService } from "@bitwarden/components";
+import { KeyService } from "@bitwarden/key-management";
 
 @Component({
   selector: "app-folder-add-edit",
   templateUrl: "folder-add-edit.component.html",
 })
 // eslint-disable-next-line rxjs-angular/prefer-takeuntil
-export class FolderAddEditComponent extends BaseFolderAddEditComponent {
+export class FolderAddEditComponent extends BaseFolderAddEditComponent implements OnInit {
   constructor(
     folderService: FolderService,
     folderApiService: FolderApiServiceAbstraction,
+    accountService: AccountService,
+    keyService: KeyService,
     i18nService: I18nService,
     platformUtilsService: PlatformUtilsService,
     private router: Router,
@@ -31,6 +35,8 @@ export class FolderAddEditComponent extends BaseFolderAddEditComponent {
     super(
       folderService,
       folderApiService,
+      accountService,
+      keyService,
       i18nService,
       platformUtilsService,
       logService,
@@ -51,6 +57,8 @@ export class FolderAddEditComponent extends BaseFolderAddEditComponent {
 
   async submit(): Promise<boolean> {
     if (await super.submit()) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.router.navigate(["/folders"]);
       return true;
     }
@@ -61,6 +69,8 @@ export class FolderAddEditComponent extends BaseFolderAddEditComponent {
   async delete(): Promise<boolean> {
     const confirmed = await super.delete();
     if (confirmed) {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.router.navigate(["/folders"]);
     }
     return confirmed;

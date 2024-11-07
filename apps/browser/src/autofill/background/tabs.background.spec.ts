@@ -8,10 +8,10 @@ import {
   triggerTabOnReplacedEvent,
   triggerTabOnUpdatedEvent,
   triggerWindowOnFocusedChangedEvent,
-} from "../jest/testing-utils";
+} from "../spec/testing-utils";
 
 import NotificationBackground from "./notification.background";
-import OverlayBackground from "./overlay.background";
+import { OverlayBackground } from "./overlay.background";
 import TabsBackground from "./tabs.background";
 
 describe("TabsBackground", () => {
@@ -39,6 +39,8 @@ describe("TabsBackground", () => {
         "handleWindowOnFocusChanged",
       );
 
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       tabsBackground.init();
 
       expect(chrome.windows.onFocusChanged.addListener).toHaveBeenCalledWith(
@@ -144,24 +146,13 @@ describe("TabsBackground", () => {
 
       beforeEach(() => {
         mainBackground.onUpdatedRan = false;
+        mainBackground.configService.getFeatureFlag = jest.fn().mockResolvedValue(true);
         tabsBackground["focusedWindowId"] = focusedWindowId;
         tab = mock<chrome.tabs.Tab>({
           windowId: focusedWindowId,
           active: true,
           status: "loading",
         });
-      });
-
-      it("removes the cached page details from the overlay background if the tab status is `loading`", () => {
-        triggerTabOnUpdatedEvent(focusedWindowId, { status: "loading" }, tab);
-
-        expect(overlayBackground.removePageDetails).toHaveBeenCalledWith(focusedWindowId);
-      });
-
-      it("removes the cached page details from the overlay background if the tab status is `unloaded`", () => {
-        triggerTabOnUpdatedEvent(focusedWindowId, { status: "unloaded" }, tab);
-
-        expect(overlayBackground.removePageDetails).toHaveBeenCalledWith(focusedWindowId);
       });
 
       it("skips updating the current tab data the focusedWindowId is set to a value less than zero", async () => {

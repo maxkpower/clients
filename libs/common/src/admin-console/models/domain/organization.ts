@@ -1,6 +1,6 @@
 import { Jsonify } from "type-fest";
 
-import { ProductType } from "../../../enums";
+import { ProductTierType } from "../../../billing/enums";
 import { OrganizationUserStatusType, OrganizationUserType, ProviderType } from "../../enums";
 import { PermissionsApi } from "../api/permissions.api";
 import { OrganizationData } from "../data/organization.data";
@@ -43,6 +43,7 @@ export class Organization {
   permissions: PermissionsApi;
   resetPasswordEnrolled: boolean;
   userId: string;
+  organizationUserId: string;
   hasPublicAndPrivateKeys: boolean;
   providerId: string;
   providerName: string;
@@ -57,7 +58,7 @@ export class Organization {
   isMember: boolean;
   familySponsorshipFriendlyName: string;
   familySponsorshipAvailable: boolean;
-  planProductType: ProductType;
+  productTierType: ProductTierType;
   keyConnectorEnabled: boolean;
   keyConnectorUrl: string;
   familySponsorshipLastSyncDate?: Date;
@@ -67,7 +68,21 @@ export class Organization {
   /**
    * Refers to the ability for an organization to limit collection creation and deletion to owners and admins only
    */
+  limitCollectionCreation: boolean;
+  limitCollectionDeletion: boolean;
+  // Deprecated: https://bitwarden.atlassian.net/browse/PM-10863
   limitCollectionCreationDeletion: boolean;
+
+  /**
+   * Refers to the ability for an owner/admin to access all collection items, regardless of assigned collections
+   */
+  allowAdminAccessToAllCollectionItems: boolean;
+  /**
+   * Indicates if this organization manages the user.
+   * A user is considered managed by an organization if their email domain
+   * matches one of the verified domains of that organization, and the user is a member of it.
+   */
+  userIsManagedByOrganization: boolean;
 
   constructor(obj?: OrganizationData) {
     if (obj == null) {
@@ -104,6 +119,7 @@ export class Organization {
     this.permissions = obj.permissions;
     this.resetPasswordEnrolled = obj.resetPasswordEnrolled;
     this.userId = obj.userId;
+    this.organizationUserId = obj.organizationUserId;
     this.hasPublicAndPrivateKeys = obj.hasPublicAndPrivateKeys;
     this.providerId = obj.providerId;
     this.providerName = obj.providerName;
@@ -112,14 +128,19 @@ export class Organization {
     this.isMember = obj.isMember;
     this.familySponsorshipFriendlyName = obj.familySponsorshipFriendlyName;
     this.familySponsorshipAvailable = obj.familySponsorshipAvailable;
-    this.planProductType = obj.planProductType;
+    this.productTierType = obj.productTierType;
     this.keyConnectorEnabled = obj.keyConnectorEnabled;
     this.keyConnectorUrl = obj.keyConnectorUrl;
     this.familySponsorshipLastSyncDate = obj.familySponsorshipLastSyncDate;
     this.familySponsorshipValidUntil = obj.familySponsorshipValidUntil;
     this.familySponsorshipToDelete = obj.familySponsorshipToDelete;
     this.accessSecretsManager = obj.accessSecretsManager;
+    this.limitCollectionCreation = obj.limitCollectionCreation;
+    this.limitCollectionDeletion = obj.limitCollectionDeletion;
+    // Deprecated: https://bitwarden.atlassian.net/browse/PM-10863
     this.limitCollectionCreationDeletion = obj.limitCollectionCreationDeletion;
+    this.allowAdminAccessToAllCollectionItems = obj.allowAdminAccessToAllCollectionItems;
+    this.userIsManagedByOrganization = obj.userIsManagedByOrganization;
   }
 
   get canAccess() {
@@ -127,16 +148,6 @@ export class Organization {
       return true;
     }
     return this.enabled && this.status === OrganizationUserStatusType.Confirmed;
-  }
-
-  /**
-   * Whether a user has Manager permissions or greater
-   *
-   * @deprecated
-   * This is deprecated with the introduction of Flexible Collections.
-   */
-  get isManager() {
-    return this.type === OrganizationUserType.Manager || this.isAdmin;
   }
 
   /**
@@ -166,54 +177,69 @@ export class Organization {
   }
 
   get canCreateNewCollections() {
-    return (
-      !this.limitCollectionCreationDeletion ||
-      this.isManager ||
-      this.permissions.createNewCollections
-    );
+    return !this.limitCollectionCreation || this.isAdmin || this.permissions.createNewCollections;
   }
 
   get canEditAnyCollection() {
+    // The allowAdminAccessToAllCollectionItems flag can restrict admins
+    // Providers and custom users with canEditAnyCollection are not affected by allowAdminAccessToAllCollectionItems flag
+    return (
+      this.isProviderUser ||
+      (this.type === OrganizationUserType.Custom && this.permissions.editAnyCollection) ||
+      (this.allowAdminAccessToAllCollectionItems && this.isAdmin)
+    );
+  }
+
+  get canEditUnmanagedCollections() {
+    // Any admin or custom user with editAnyCollection permission can edit unmanaged collections
     return this.isAdmin || this.permissions.editAnyCollection;
   }
 
-  get canUseAdminCollections() {
-    return this.canEditAnyCollection;
+  get canEditUnassignedCiphers() {
+    return (
+      this.type === OrganizationUserType.Admin ||
+      this.type === OrganizationUserType.Owner ||
+      this.permissions.editAnyCollection
+    );
   }
 
+  get canEditAllCiphers() {
+    // The allowAdminAccessToAllCollectionItems flag can restrict admins
+    // Custom users with canEditAnyCollection are not affected by allowAdminAccessToAllCollectionItems flag
+    return (
+      (this.type === OrganizationUserType.Custom && this.permissions.editAnyCollection) ||
+      (this.allowAdminAccessToAllCollectionItems &&
+        (this.type === OrganizationUserType.Admin || this.type === OrganizationUserType.Owner))
+    );
+  }
+
+  /**
+   * @returns True if the user can delete any collection
+   */
   get canDeleteAnyCollection() {
-    return this.isAdmin || this.permissions.deleteAnyCollection;
+    // Providers and Users with DeleteAnyCollection permission can always delete collections
+    if (this.isProviderUser || this.permissions.deleteAnyCollection) {
+      return true;
+    }
+
+    // If AllowAdminAccessToAllCollectionItems is true, Owners and Admins can delete any collection, regardless of LimitCollectionCreationDeletion setting
+    // Using explicit type checks because provider users are handled above and this mimics the server's permission checks closely
+    if (this.allowAdminAccessToAllCollectionItems) {
+      return this.type == OrganizationUserType.Owner || this.type == OrganizationUserType.Admin;
+    }
+
+    return false;
   }
 
+  /**
+   * Whether the user can view all collection information, such as collection name and access.
+   * This does not indicate that the user can view items inside any collection - for that, see {@link canEditAllCiphers}
+   */
   get canViewAllCollections() {
-    return this.canEditAnyCollection || this.canDeleteAnyCollection;
-  }
-
-  /**
-   * @deprecated
-   * This is deprecated with the introduction of Flexible Collections.
-   * This will always return false if FlexibleCollections flag is on.
-   */
-  get canEditAssignedCollections() {
-    return this.isManager || this.permissions.editAssignedCollections;
-  }
-
-  /**
-   * @deprecated
-   * This is deprecated with the introduction of Flexible Collections.
-   * This will always return false if FlexibleCollections flag is on.
-   */
-  get canDeleteAssignedCollections() {
-    return this.isManager || this.permissions.deleteAssignedCollections;
-  }
-
-  /**
-   * @deprecated
-   * This is deprecated with the introduction of Flexible Collections.
-   * This will always return false if FlexibleCollections flag is on.
-   */
-  get canViewAssignedCollections() {
-    return this.canDeleteAssignedCollections || this.canEditAssignedCollections;
+    // Admins can always see all collections even if collection management settings prevent them from editing them or seeing items
+    return (
+      this.isAdmin || this.permissions.editAnyCollection || this.permissions.deleteAnyCollection
+    );
   }
 
   get canManageGroups() {
@@ -289,6 +315,10 @@ export class Organization {
   get isFreeOrg() {
     // return true if organization needs to be upgraded from a free org
     return !this.useTotp;
+  }
+
+  get canManageSponsorships() {
+    return this.familySponsorshipAvailable || this.familySponsorshipFriendlyName !== null;
   }
 
   static fromJSON(json: Jsonify<Organization>) {

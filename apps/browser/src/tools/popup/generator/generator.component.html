@@ -1,4 +1,4 @@
-<app-header>
+<app-header [hideAccountSwitcher]="comingFromAddEdit">
   <div class="left">
     <app-pop-out [show]="!comingFromAddEdit"></app-pop-out>
     <button type="button" (click)="close()" *ngIf="comingFromAddEdit">
@@ -240,7 +240,7 @@
             />
           </div>
           <div class="box-content-row box-content-row-checkbox" appBoxRow>
-            <label for="special">!@#$%^&*</label>
+            <label for="special">!&#64;#$%^&*</label>
             <input
               id="special"
               type="checkbox"
@@ -309,7 +309,7 @@
             <a
               href="https://bitwarden.com/help/generator/#username-types"
               target="_blank"
-              rel="noopener"
+              rel="noreferrer"
               appA11yTitle="{{ 'learnMore' | i18n }}"
             >
               <i class="bwi bwi-question-circle" aria-hidden="true"></i>

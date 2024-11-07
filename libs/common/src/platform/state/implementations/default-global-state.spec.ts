@@ -3,12 +3,13 @@
  * @jest-environment ../shared/test.environment.ts
  */
 
-import { anySymbol } from "jest-mock-extended";
+import { mock } from "jest-mock-extended";
 import { firstValueFrom, of } from "rxjs";
 import { Jsonify } from "type-fest";
 
 import { trackEmissions, awaitAsync } from "../../../../spec";
 import { FakeStorageService } from "../../../../spec/fake-storage.service";
+import { LogService } from "../../abstractions/log.service";
 import { KeyDefinition, globalKeyBuilder } from "../key-definition";
 import { StateDefinition } from "../state-definition";
 
@@ -39,11 +40,12 @@ const globalKey = globalKeyBuilder(testKeyDefinition);
 describe("DefaultGlobalState", () => {
   let diskStorageService: FakeStorageService;
   let globalState: DefaultGlobalState<TestState>;
+  const logService = mock<LogService>();
   const newData = { date: new Date() };
 
   beforeEach(() => {
     diskStorageService = new FakeStorageService();
-    globalState = new DefaultGlobalState(testKeyDefinition, diskStorageService);
+    globalState = new DefaultGlobalState(testKeyDefinition, diskStorageService, logService);
   });
 
   afterEach(() => {
@@ -309,29 +311,11 @@ describe("DefaultGlobalState", () => {
         return newData;
       });
     });
-
-    test("updates with FAKE_DEFAULT initial value should resolve correctly", async () => {
-      expect(globalState["stateSubject"].value).toEqual(anySymbol()); // FAKE_DEFAULT
-      const val = await globalState.update((state) => {
-        return newData;
-      });
-
-      expect(val).toEqual(newData);
-      const call = diskStorageService.mock.save.mock.calls[0];
-      expect(call[0]).toEqual("global_fake_fake");
-      expect(call[1]).toEqual(newData);
-    });
   });
 
   describe("cleanup", () => {
-    async function assertClean() {
-      const emissions = trackEmissions(globalState["stateSubject"]);
-      const initial = structuredClone(emissions);
-
-      diskStorageService.save(globalKey, newData);
-      await awaitAsync(); // storage updates are behind a promise
-
-      expect(emissions).toEqual(initial); // no longer listening to storage updates
+    function assertClean() {
+      expect(diskStorageService["updatesSubject"]["observers"]).toHaveLength(0);
     }
 
     it("should cleanup after last subscriber", async () => {
@@ -339,11 +323,10 @@ describe("DefaultGlobalState", () => {
       await awaitAsync(); // storage updates are behind a promise
 
       subscription.unsubscribe();
-      expect(globalState["subscriberCount"].getValue()).toBe(0);
       // Wait for cleanup
       await awaitAsync(cleanupDelayMs * 2);
 
-      await assertClean();
+      assertClean();
     });
 
     it("should not cleanup if there are still subscribers", async () => {
@@ -357,9 +340,11 @@ describe("DefaultGlobalState", () => {
       // Wait for cleanup
       await awaitAsync(cleanupDelayMs * 2);
 
-      expect(globalState["subscriberCount"].getValue()).toBe(1);
+      expect(diskStorageService["updatesSubject"]["observers"]).toHaveLength(1);
 
       // Still be listening to storage updates
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       diskStorageService.save(globalKey, newData);
       await awaitAsync(); // storage updates are behind a promise
       expect(sub2Emissions).toEqual([null, newData]);
@@ -368,7 +353,7 @@ describe("DefaultGlobalState", () => {
       // Wait for cleanup
       await awaitAsync(cleanupDelayMs * 2);
 
-      await assertClean();
+      assertClean();
     });
 
     it("can re-initialize after cleanup", async () => {
@@ -382,6 +367,8 @@ describe("DefaultGlobalState", () => {
       const emissions = trackEmissions(globalState.state$);
       await awaitAsync();
 
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       diskStorageService.save(globalKey, newData);
       await awaitAsync();
 
@@ -396,12 +383,11 @@ describe("DefaultGlobalState", () => {
       await awaitAsync();
 
       subscription.unsubscribe();
-      expect(globalState["subscriberCount"].getValue()).toBe(0);
+      expect(diskStorageService["updatesSubject"]["observers"]).toHaveLength(1);
       // Do not wait long enough for cleanup
       await awaitAsync(cleanupDelayMs / 2);
 
-      expect(globalState["stateSubject"].value).toEqual(newData); // digging in to check that it hasn't been cleared
-      expect(globalState["storageUpdateSubscription"]).not.toBeNull(); // still listening to storage updates
+      expect(diskStorageService["updatesSubject"]["observers"]).toHaveLength(1);
     });
 
     it("state$ observables are durable to cleanup", async () => {

@@ -8,6 +8,8 @@ export function invokeMenu(menu: RendererMenuItem[]) {
   const menuWithoutClick = menu.map((m) => {
     return { label: m.label, type: m.type };
   });
+  // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   ipc.platform.openContextMenu(menuWithoutClick).then((i: number) => {
     if (i !== -1) {
       menu[i].click();
@@ -53,11 +55,15 @@ export function isWindowsStore() {
   if (
     windows &&
     !windowsStore &&
-    process.resourcesPath.indexOf("8bitSolutionsLLC.bitwardendesktop_") > -1
+    process.resourcesPath?.indexOf("8bitSolutionsLLC.bitwardendesktop_") > -1
   ) {
     windowsStore = true;
   }
   return windows && windowsStore === true;
+}
+
+export function isFlatpak() {
+  return process.platform === "linux" && process.env.container != null;
 }
 
 export function isWindowsPortable() {

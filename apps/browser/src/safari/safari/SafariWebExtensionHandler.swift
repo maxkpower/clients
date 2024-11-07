@@ -88,12 +88,9 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             return
         case "biometricUnlock":
 
-            var error: NSError?
             let laContext = LAContext()
 
-            laContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
-
-            if let e = error, e.code != kLAErrorBiometryLockout {
+            if(!laContext.isBiometricsAvailable()){
                 response.userInfo = [
                     SFExtensionMessageKey: [
                         "message": [
@@ -133,12 +130,6 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                         status = SecKeychainFindGenericPassword(nil, UInt32(ServiceNameBiometric.utf8.count), ServiceNameBiometric, UInt32(fallbackName.utf8.count), fallbackName, &passwordLength, &passwordPtr, nil)
                     }
 
-                    // TODO: Remove after 2023.10 release (https://bitwarden.atlassian.net/browse/PM-3473)
-                    if status != errSecSuccess {
-                        let secondaryFallbackName = "_masterkey_biometric"
-                        status = SecKeychainFindGenericPassword(nil, UInt32(ServiceNameBiometric.utf8.count), ServiceNameBiometric, UInt32(secondaryFallbackName.utf8.count), secondaryFallbackName, &passwordLength, &passwordPtr, nil)
-                    }
-
                     if status == errSecSuccess {
                         let result = NSString(bytes: passwordPtr!, length: Int(passwordLength), encoding: String.Encoding.utf8.rawValue) as String?
                                     SecKeychainItemFreeContent(nil, passwordPtr)
@@ -168,6 +159,20 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             }
 
             return
+        case "biometricUnlockAvailable":
+            let laContext = LAContext()
+            var isAvailable = laContext.isBiometricsAvailable();
+
+            response.userInfo = [
+                SFExtensionMessageKey: [
+                    "message": [
+                        "command": "biometricUnlockAvailable",
+                        "response": isAvailable ? "available" : "not available",
+                        "timestamp": Int64(NSDate().timeIntervalSince1970 * 1000),
+                    ],
+                ],
+            ]
+            break
         default:
             return
         }
@@ -197,6 +202,20 @@ func jsonDeserialize<T: Decodable>(json: String?) -> T? {
         return obj
     } catch _ {
         return nil
+    }
+}
+
+extension LAContext {
+    func isBiometricsAvailable() -> Bool {
+        var error: NSError?
+
+        self.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+
+        if let e = error, e.code != kLAErrorBiometryLockout {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 

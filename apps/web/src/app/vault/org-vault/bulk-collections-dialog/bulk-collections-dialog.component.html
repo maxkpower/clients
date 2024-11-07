@@ -13,11 +13,10 @@
         [permissionMode]="PermissionMode.Edit"
         formControlName="access"
         [items]="accessItems"
-        [columnHeader]="'groupAndMemberColumnHeader' | i18n"
+        [columnHeader]="'groupSlashMemberColumnHeader' | i18n"
         [selectorLabelText]="'selectGroupsAndMembers' | i18n"
-        [selectorHelpText]="'userPermissionOverrideHelper' | i18n"
+        [selectorHelpText]="'userPermissionOverrideHelperDesc' | i18n"
         [emptySelectionText]="'noMembersOrGroupsAdded' | i18n"
-        [flexibleCollectionsEnabled]="flexibleCollectionsEnabled$ | async"
       ></bit-access-selector>
       <bit-access-selector
         *ngIf="!organization?.useGroups"
@@ -27,7 +26,6 @@
         [columnHeader]="'memberColumnHeader' | i18n"
         [selectorLabelText]="'selectMembers' | i18n"
         [emptySelectionText]="'noMembersAdded' | i18n"
-        [flexibleCollectionsEnabled]="flexibleCollectionsEnabled$ | async"
       ></bit-access-selector>
     </div>
 

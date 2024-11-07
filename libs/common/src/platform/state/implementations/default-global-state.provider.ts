@@ -1,12 +1,8 @@
-import {
-  AbstractMemoryStorageService,
-  AbstractStorageService,
-  ObservableStorageService,
-} from "../../abstractions/storage.service";
+import { LogService } from "../../abstractions/log.service";
+import { StorageServiceProvider } from "../../services/storage-service.provider";
 import { GlobalState } from "../global-state";
 import { GlobalStateProvider } from "../global-state.provider";
 import { KeyDefinition } from "../key-definition";
-import { StorageLocation } from "../state-definition";
 
 import { DefaultGlobalState } from "./default-global-state";
 
@@ -14,12 +10,16 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
   private globalStateCache: Record<string, GlobalState<unknown>> = {};
 
   constructor(
-    private memoryStorage: AbstractMemoryStorageService & ObservableStorageService,
-    private diskStorage: AbstractStorageService & ObservableStorageService,
+    private storageServiceProvider: StorageServiceProvider,
+    private readonly logService: LogService,
   ) {}
 
   get<T>(keyDefinition: KeyDefinition<T>): GlobalState<T> {
-    const cacheKey = keyDefinition.buildCacheKey("global");
+    const [location, storageService] = this.storageServiceProvider.get(
+      keyDefinition.stateDefinition.defaultStorageLocation,
+      keyDefinition.stateDefinition.storageLocationOverrides,
+    );
+    const cacheKey = this.buildCacheKey(location, keyDefinition);
     const existingGlobalState = this.globalStateCache[cacheKey];
     if (existingGlobalState != null) {
       // The cast into the actual generic is safe because of rules around key definitions
@@ -29,19 +29,15 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
 
     const newGlobalState = new DefaultGlobalState<T>(
       keyDefinition,
-      this.getLocation(keyDefinition.stateDefinition.storageLocation),
+      storageService,
+      this.logService,
     );
 
     this.globalStateCache[cacheKey] = newGlobalState;
     return newGlobalState;
   }
 
-  private getLocation(location: StorageLocation) {
-    switch (location) {
-      case "disk":
-        return this.diskStorage;
-      case "memory":
-        return this.memoryStorage;
-    }
+  private buildCacheKey(location: string, keyDefinition: KeyDefinition<unknown>) {
+    return `${location}_${keyDefinition.fullName}`;
   }
 }

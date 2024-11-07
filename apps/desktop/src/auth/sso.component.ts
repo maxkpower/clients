@@ -2,17 +2,24 @@ import { Component } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 
 import { SsoComponent as BaseSsoComponent } from "@bitwarden/angular/auth/components/sso.component";
+import {
+  LoginStrategyServiceAbstraction,
+  UserDecryptionOptionsServiceAbstraction,
+} from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
-import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
+import { SsoLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/sso-login.service.abstraction";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { ToastService } from "@bitwarden/components";
+import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
 
 @Component({
   selector: "app-sso",
@@ -20,7 +27,8 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 })
 export class SsoComponent extends BaseSsoComponent {
   constructor(
-    authService: AuthService,
+    ssoLoginService: SsoLoginServiceAbstraction,
+    loginStrategyService: LoginStrategyServiceAbstraction,
     router: Router,
     i18nService: I18nService,
     syncService: SyncService,
@@ -32,10 +40,15 @@ export class SsoComponent extends BaseSsoComponent {
     environmentService: EnvironmentService,
     passwordGenerationService: PasswordGenerationServiceAbstraction,
     logService: LogService,
-    configService: ConfigServiceAbstraction,
+    userDecryptionOptionsService: UserDecryptionOptionsServiceAbstraction,
+    configService: ConfigService,
+    masterPasswordService: InternalMasterPasswordServiceAbstraction,
+    accountService: AccountService,
+    toastService: ToastService,
   ) {
     super(
-      authService,
+      ssoLoginService,
+      loginStrategyService,
       router,
       i18nService,
       route,
@@ -46,13 +59,21 @@ export class SsoComponent extends BaseSsoComponent {
       environmentService,
       passwordGenerationService,
       logService,
+      userDecryptionOptionsService,
       configService,
+      masterPasswordService,
+      accountService,
+      toastService,
     );
-    super.onSuccessfulLogin = async () => {
+    this.onSuccessfulLogin = async () => {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       syncService.fullSync(true);
     };
 
-    super.onSuccessfulLoginTde = async () => {
+    this.onSuccessfulLoginTde = async () => {
+      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       syncService.fullSync(true);
     };
 

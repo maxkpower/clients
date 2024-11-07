@@ -1,20 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-    ":combinePatchMinorReleases",
-    ":dependencyDashboard",
-    ":maintainLockFilesWeekly",
-    ":pinAllExceptPeerDependencies",
-    ":prConcurrentLimit10",
-    ":rebaseStalePrs",
-    ":separateMajorReleases",
-    "group:monorepos",
-    "schedule:weekends"
-  ],
+  "extends": ["github>bitwarden/renovate-config"],
   "enabledManagers": ["cargo", "github-actions", "npm"],
-  "commitMessagePrefix": "[deps]:",
-  "commitMessageTopic": "{{depName}}",
   "packageRules": [
     {
       "groupName": "gh minor",
@@ -28,6 +15,10 @@
     {
       "matchManagers": ["cargo"],
       "commitMessagePrefix": "[deps] Platform:"
+    },
+    {
+      "groupName": "napi",
+      "matchPackageNames": ["napi", "napi-build", "napi-derive"]
     },
     {
       "matchPackageNames": ["typescript", "zone.js"],
@@ -45,12 +36,15 @@
       "matchUpdateTypes": "major"
     },
     {
+      "groupName": "macOS/iOS bindings",
+      "matchPackageNames": ["core-foundation", "security-framework", "security-framework-sys"]
+    },
+    {
       "matchPackageNames": [
         "@ngtools/webpack",
         "base64-loader",
         "buffer",
         "bufferutil",
-        "clean-webpack-plugin",
         "copy-webpack-plugin",
         "core-js",
         "css-loader",
@@ -79,14 +73,7 @@
       "reviewers": ["team:team-admin-console-dev"]
     },
     {
-      "matchPackageNames": [
-        "@types/duo_web_sdk",
-        "@types/node-ipc",
-        "duo_web_sdk",
-        "node-ipc",
-        "qrious",
-        "regedit"
-      ],
+      "matchPackageNames": ["@types/node-ipc", "node-ipc", "qrious"],
       "description": "Auth owned dependencies",
       "commitMessagePrefix": "[deps] Auth:",
       "reviewers": ["team:team-auth-dev"]
@@ -98,7 +85,6 @@
         "cross-env",
         "del",
         "gulp",
-        "gulp-filter",
         "gulp-if",
         "gulp-json-editor",
         "gulp-replace",
@@ -124,6 +110,34 @@
     },
     {
       "matchPackageNames": [
+        "@electron/notarize",
+        "@electron/rebuild",
+        "@types/argon2-browser",
+        "@types/chrome",
+        "@types/firefox-webext-browser",
+        "@types/jquery",
+        "@types/node",
+        "@types/node-forge",
+        "argon2",
+        "argon2-browser",
+        "big-integer",
+        "electron-builder",
+        "electron-log",
+        "electron-reload",
+        "electron-store",
+        "electron-updater",
+        "electron",
+        "node-forge",
+        "rxjs",
+        "type-fest",
+        "typescript"
+      ],
+      "description": "Platform owned dependencies",
+      "commitMessagePrefix": "[deps] Platform:",
+      "reviewers": ["team:team-platform-dev"]
+    },
+    {
+      "matchPackageNames": [
         "@angular-devkit/build-angular",
         "@angular/animations",
         "@angular/cdk",
@@ -136,30 +150,6 @@
         "@angular/platform",
         "@angular/compiler",
         "@angular/router",
-        "@types/argon2-browser",
-        "@types/chrome",
-        "@types/firefox-webext-browser",
-        "@types/jquery",
-        "@types/node",
-        "@types/node-forge",
-        "argon2",
-        "argon2-browser",
-        "big-integer",
-        "bootstrap",
-        "jquery",
-        "node-forge",
-        "popper.js",
-        "rxjs",
-        "type-fest",
-        "typescript",
-        "zone.js"
-      ],
-      "description": "Platform owned dependencies",
-      "commitMessagePrefix": "[deps] Platform:",
-      "reviewers": ["team:team-platform-dev"]
-    },
-    {
-      "matchPackageNames": [
         "@compodoc/compodoc",
         "@ng-select/ng-select",
         "@storybook/addon-a11y",
@@ -170,17 +160,21 @@
         "@storybook/angular",
         "@types/react",
         "autoprefixer",
+        "bootstrap",
         "chromatic",
+        "jquery",
         "ngx-toastr",
+        "popper.js",
         "react",
         "react-dom",
         "remark-gfm",
         "storybook",
-        "tailwindcss"
+        "tailwindcss",
+        "zone.js"
       ],
       "description": "Component library owned dependencies",
-      "commitMessagePrefix": "[deps] Platform (CL):",
-      "reviewers": ["team:team-platform-dev"]
+      "commitMessagePrefix": "[deps] Design System:",
+      "reviewers": ["team:team-design-system"]
     },
     {
       "matchPackageNames": [
@@ -211,19 +205,11 @@
     },
     {
       "matchPackageNames": [
-        "@electron/notarize",
-        "@electron/rebuild",
         "@microsoft/signalr-protocol-msgpack",
         "@microsoft/signalr",
         "@types/jsdom",
         "@types/papaparse",
         "@types/zxcvbn",
-        "electron-builder",
-        "electron-log",
-        "electron-reload",
-        "electron-store",
-        "electron-updater",
-        "electron",
         "jsdom",
         "jszip",
         "oidc-client-ts",
@@ -264,12 +250,13 @@
         "node-fetch",
         "open",
         "pkg",
-        "proper-lockfile"
+        "proper-lockfile",
+        "qrcode-parser"
       ],
       "description": "Vault owned dependencies",
       "commitMessagePrefix": "[deps] Vault:",
       "reviewers": ["team:team-vault-dev"]
     }
   ],
-  "ignoreDeps": ["@types/koa-bodyparser", "bootstrap", "node-ipc", "node", "npm", "regedit"]
+  "ignoreDeps": ["@types/koa-bodyparser", "bootstrap", "node-ipc", "node", "npm"]
 }

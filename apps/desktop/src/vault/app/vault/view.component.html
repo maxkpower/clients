@@ -119,10 +119,14 @@
             </div>
           </div>
           <!--Passkey-->
-          <div class="box-content-row text-muted" *ngIf="cipher.login.hasFido2Credentials">
+          <div
+            class="box-content-row text-muted"
+            *ngIf="cipher.login.hasFido2Credentials"
+            tabindex="0"
+            attr.aria-label="{{ 'typePasskey' | i18n }} {{ fido2CredentialCreationDateValue }}"
+          >
             <span class="row-label">{{ "typePasskey" | i18n }}</span>
-            {{ "dateCreated" | i18n }}
-            {{ cipher.login.fido2Credentials[0].creationDate | date: "short" }}
+            {{ fido2CredentialCreationDateValue }}
           </div>
           <div
             class="box-content-row box-content-row-flex totp"
@@ -562,7 +566,7 @@
   >
     <i class="bwi bwi-files bwi-fw bwi-lg" aria-hidden="true"></i>
   </button>
-  <div class="right" *ngIf="cipher.edit">
+  <div class="right" *ngIf="canDeleteCipher$ | async">
     <button
       type="button"
       (click)="delete()"

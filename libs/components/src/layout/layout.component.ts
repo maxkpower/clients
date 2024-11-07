@@ -1,14 +1,23 @@
 import { CommonModule } from "@angular/common";
-import { Component, Input } from "@angular/core";
+import { Component } from "@angular/core";
+import { RouterModule } from "@angular/router";
 
-export type LayoutVariant = "primary" | "secondary";
+import { LinkModule } from "../link";
+import { SideNavService } from "../navigation/side-nav.service";
+import { SharedModule } from "../shared";
 
 @Component({
   selector: "bit-layout",
   templateUrl: "layout.component.html",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SharedModule, LinkModule, RouterModule],
 })
 export class LayoutComponent {
-  @Input() variant: LayoutVariant = "primary";
+  protected mainContentId = "main-content";
+
+  constructor(protected sideNavService: SideNavService) {}
+
+  focusMainContent() {
+    document.getElementById(this.mainContentId)?.focus();
+  }
 }
