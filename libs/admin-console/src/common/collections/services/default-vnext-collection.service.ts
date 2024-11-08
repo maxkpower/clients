@@ -204,5 +204,7 @@ export class DefaultvNextCollectionService implements vNextCollectionService {
         collectionService: this,
       },
     );
+
+    // TODO: handle errors and log a useful message, just to be robust about it
   }
 }
