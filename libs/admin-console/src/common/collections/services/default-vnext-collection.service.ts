@@ -1,5 +1,7 @@
-import { combineLatest, firstValueFrom, map, Observable, of, switchMap } from "rxjs";
+import { combineLatest, firstValueFrom, map, Observable, of, switchMap, takeWhile } from "rxjs";
 
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -25,7 +27,8 @@ export class DefaultvNextCollectionService implements vNextCollectionService {
     private keyService: KeyService,
     private encryptService: EncryptService,
     private i18nService: I18nService,
-    protected stateProvider: StateProvider,
+    private stateProvider: StateProvider,
+    private authService: AuthService,
   ) {}
 
   encryptedCollections$(userId$: Observable<UserId>) {
@@ -177,10 +180,19 @@ export class DefaultvNextCollectionService implements vNextCollectionService {
 
   /**
    * @returns a SingleUserState for decrypted collection data.
+   * Completes when the user locks or logs out.
+   *
    */
   private decryptedState(userId: UserId): DerivedState<CollectionView[]> {
-    const encryptedCollectionsWithKeys = this.encryptedState(userId).combinedState$.pipe(
-      switchMap(([userId, collectionData]) =>
+    // We complete the stream when the user is locked or logged out because:
+    // 1. we cannot update decrypted collections without keys, so this stream cannot produce any further emissions
+    // 2. nobody should be accessing decrypted data when a vault is locked or logged out
+    const encryptedCollectionsWithKeys = combineLatest([
+      this.encryptedState(userId).state$,
+      this.authService.authStatusFor$(userId),
+    ]).pipe(
+      takeWhile(([_, authStatus]) => authStatus === AuthenticationStatus.Unlocked),
+      switchMap(([collectionData, _]) =>
         combineLatest([of(collectionData), this.keyService.orgKeys$(userId)]),
       ),
     );

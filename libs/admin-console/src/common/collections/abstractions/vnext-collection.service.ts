@@ -7,7 +7,15 @@ import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 import { CollectionData, Collection, CollectionView } from "../models";
 
 export abstract class vNextCollectionService {
+  /**
+   * @returns a stream of encrypted collections for a user. This is sourced from sync data.
+   */
   encryptedCollections$: (userId$: Observable<UserId>) => Observable<Collection[]>;
+
+  /**
+   * @returns a stream of decrypted collections for a user. This is sourced from sync data.
+   * The stream will complete when the user locks or logs out.
+   */
   decryptedCollections$: (userId$: Observable<UserId>) => Observable<CollectionView[]>;
   upsert: (collection: CollectionData | CollectionData[], userId: UserId) => Promise<any>;
   replace: (collections: { [id: string]: CollectionData }, userId: UserId) => Promise<any>;

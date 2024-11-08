@@ -1,4 +1,15 @@
-import { Observable, ReplaySubject, Subject, concatMap, merge, share, timer } from "rxjs";
+import {
+  Observable,
+  ReplaySubject,
+  Subject,
+  concatMap,
+  endWith,
+  ignoreElements,
+  merge,
+  share,
+  takeUntil,
+  timer,
+} from "rxjs";
 
 import { DerivedStateDependencies } from "../../../types/state";
 import { DeriveDefinition } from "../derive-definition";
@@ -33,7 +44,11 @@ export class DefaultDerivedState<TFrom, TTo, TDeps extends DerivedStateDependenc
       }),
     );
 
-    this.state$ = merge(this.forcedValueSubject, derivedState$).pipe(
+    this.state$ = merge(
+      // Complete when derived state errors or completes
+      this.forcedValueSubject.pipe(takeUntil(derivedState$.pipe(ignoreElements(), endWith()))),
+      derivedState$,
+    ).pipe(
       share({
         connector: () => {
           return new ReplaySubject<TTo>(1);
