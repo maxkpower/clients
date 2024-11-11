@@ -11,16 +11,6 @@ export abstract class CollectionService {
   decryptedCollections$: (userId$: Observable<UserId>) => Observable<CollectionView[]>;
   upsert: (collection: CollectionData | CollectionData[], userId: UserId) => Promise<any>;
   replace: (collections: { [id: string]: CollectionData }, userId: UserId) => Promise<any>;
-  /**
-   * Clear decrypted state without affecting encrypted state.
-   * Used for locking the vault.
-   */
-  clearDecryptedState: (userId: UserId) => Promise<void>;
-  /**
-   * Clear decrypted and encrypted state.
-   * Used for logging out.
-   */
-  clear: (userId: string) => Promise<void>;
   delete: (id: string | string[], userId: UserId) => Promise<any>;
   encrypt: (model: CollectionView) => Promise<Collection>;
   /**
