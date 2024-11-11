@@ -6,8 +6,10 @@ import { CollectionService, CollectionView } from "@bitwarden/admin-console/comm
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { isCardExpired } from "@bitwarden/common/autofill/utils";
-import { CollectionId } from "@bitwarden/common/types/guid";
+import { getByIds } from "@bitwarden/common/platform/misc";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
@@ -60,10 +62,13 @@ export class CipherViewComponent implements OnChanges, OnDestroy {
   private destroyed$: Subject<void> = new Subject();
   cardIsExpired: boolean = false;
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     private organizationService: OrganizationService,
     private collectionService: CollectionService,
     private folderService: FolderService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnChanges() {
@@ -103,9 +108,9 @@ export class CipherViewComponent implements OnChanges, OnDestroy {
       (!this.collections || this.collections.length === 0)
     ) {
       this.collections = await firstValueFrom(
-        this.collectionService.decryptedCollectionViews$(
-          this.cipher.collectionIds as CollectionId[],
-        ),
+        this.collectionService
+          .decryptedCollections$(this.activeUserId$)
+          .pipe(getByIds(this.cipher.collectionIds)),
       );
     }
 

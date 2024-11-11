@@ -22,6 +22,8 @@ import {
 import { CollectionService } from "@bitwarden/admin-console/common";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
@@ -45,6 +47,7 @@ import { MY_VAULT_ID, VaultPopupListFiltersService } from "./vault-popup-list-fi
 })
 export class VaultPopupItemsService {
   private _searchText$ = new BehaviorSubject<string>("");
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
 
   /**
    * Subject that emits whenever new ciphers are being processed/filtered.
@@ -90,7 +93,7 @@ export class VaultPopupItemsService {
     switchMap((ciphers) =>
       combineLatest([
         this.organizationService.organizations$,
-        this.collectionService.decryptedCollections$,
+        this.collectionService.decryptedCollections$(this.activeUserId$),
       ]).pipe(
         map(([organizations, collections]) => {
           const orgMap = Object.fromEntries(organizations.map((org) => [org.id, org]));
@@ -260,6 +263,7 @@ export class VaultPopupItemsService {
     private collectionService: CollectionService,
     private vaultPopupAutofillService: VaultPopupAutofillService,
     private syncService: SyncService,
+    private accountService: AccountService,
   ) {}
 
   applyFilter(newSearchText: string) {

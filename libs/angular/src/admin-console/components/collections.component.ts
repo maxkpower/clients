@@ -1,12 +1,12 @@
 import { Directive, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
@@ -25,6 +25,8 @@ export class CollectionsComponent implements OnInit {
   collections: CollectionView[] = [];
   organization: Organization;
 
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   protected cipherDomain: Cipher;
 
   constructor(
@@ -33,7 +35,6 @@ export class CollectionsComponent implements OnInit {
     protected i18nService: I18nService,
     protected cipherService: CipherService,
     protected organizationService: OrganizationService,
-    private logService: LogService,
     private accountService: AccountService,
     private toastService: ToastService,
   ) {}
@@ -45,9 +46,7 @@ export class CollectionsComponent implements OnInit {
   async load() {
     this.cipherDomain = await this.loadCipher();
     this.collectionIds = this.loadCipherCollections();
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(this.activeUserId$);
     this.cipher = await this.cipherDomain.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(this.cipherDomain, activeUserId),
     );
@@ -113,7 +112,9 @@ export class CollectionsComponent implements OnInit {
   }
 
   protected async loadCollections() {
-    const allCollections = await this.collectionService.getAllDecrypted();
+    const allCollections = await firstValueFrom(
+      this.collectionService.decryptedCollections$(this.activeUserId$),
+    );
     return allCollections.filter(
       (c) => !c.readOnly && c.organizationId === this.cipher.organizationId,
     );

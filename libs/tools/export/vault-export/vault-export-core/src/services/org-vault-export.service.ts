@@ -12,6 +12,7 @@ import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { CipherWithIdExport, CollectionWithIdExport } from "@bitwarden/common/models/export";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
@@ -38,6 +39,8 @@ export class OrganizationVaultExportService
   extends BaseVaultExportService
   implements OrganizationVaultExportServiceAbstraction
 {
+  protected activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     private cipherService: CipherService,
     private apiService: ApiService,
@@ -185,9 +188,13 @@ export class OrganizationVaultExportService
     const promises = [];
 
     promises.push(
-      this.collectionService.getAllDecrypted().then(async (collections) => {
-        decCollections = collections.filter((c) => c.organizationId == organizationId && c.manage);
-      }),
+      firstValueFrom(this.collectionService.decryptedCollections$(this.activeUserId$)).then(
+        (collections) => {
+          decCollections = collections.filter(
+            (c) => c.organizationId == organizationId && c.manage,
+          );
+        },
+      ),
     );
 
     promises.push(
@@ -217,9 +224,13 @@ export class OrganizationVaultExportService
     const promises = [];
 
     promises.push(
-      this.collectionService.getAll().then((collections) => {
-        encCollections = collections.filter((c) => c.organizationId == organizationId && c.manage);
-      }),
+      firstValueFrom(this.collectionService.encryptedCollections$(this.activeUserId$)).then(
+        (collections) => {
+          encCollections = collections.filter(
+            (c) => c.organizationId == organizationId && c.manage,
+          );
+        },
+      ),
     );
 
     promises.push(

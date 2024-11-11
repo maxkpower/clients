@@ -1,9 +1,12 @@
 import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
 import { Component, Inject } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -50,6 +53,8 @@ export class BulkDeleteDialogComponent {
   collections: CollectionView[];
   unassignedCiphers: string[];
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     @Inject(DIALOG_DATA) params: BulkDeleteDialogParams,
     private dialogRef: DialogRef<BulkDeleteDialogResult>,
@@ -58,6 +63,7 @@ export class BulkDeleteDialogComponent {
     private i18nService: I18nService,
     private apiService: ApiService,
     private collectionService: CollectionService,
+    private accountService: AccountService,
   ) {
     this.cipherIds = params.cipherIds ?? [];
     this.permanent = params.permanent;
@@ -100,7 +106,10 @@ export class BulkDeleteDialogComponent {
       );
     }
     if (this.collections.length) {
-      await this.collectionService.delete(this.collections.map((c) => c.id));
+      await this.collectionService.delete(
+        this.collections.map((c) => c.id),
+        await firstValueFrom(this.activeUserId$),
+      );
       this.platformUtilsService.showToast(
         "success",
         null,

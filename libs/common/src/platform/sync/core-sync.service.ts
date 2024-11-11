@@ -6,6 +6,7 @@ import { ApiService } from "../../abstractions/api.service";
 import { AccountService } from "../../auth/abstractions/account.service";
 import { AuthService } from "../../auth/abstractions/auth.service";
 import { AuthenticationStatus } from "../../auth/enums/authentication-status";
+import { getUserId } from "../../auth/services/account.service";
 import {
   SyncCipherNotification,
   SyncFolderNotification,
@@ -149,7 +150,10 @@ export abstract class CoreSyncService implements SyncService {
           notification.collectionIds != null &&
           notification.collectionIds.length > 0
         ) {
-          const collections = await this.collectionService.getAll();
+          const activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+          const collections = await firstValueFrom(
+            this.collectionService.encryptedCollections$(activeUserId$),
+          );
           if (collections != null) {
             for (let i = 0; i < collections.length; i++) {
               if (notification.collectionIds.indexOf(collections[i].id) > -1) {

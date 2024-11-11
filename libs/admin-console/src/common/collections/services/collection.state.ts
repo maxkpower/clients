@@ -8,7 +8,7 @@ import {
 import { CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
 import { OrgKey } from "@bitwarden/common/types/key";
 
-import { vNextCollectionService } from "../abstractions/vnext-collection.service";
+import { CollectionService } from "../abstractions/collection.service";
 import { Collection, CollectionData, CollectionView } from "../models";
 
 export const ENCRYPTED_COLLECTION_DATA_KEY = UserKeyDefinition.record<CollectionData, CollectionId>(
@@ -23,7 +23,7 @@ export const ENCRYPTED_COLLECTION_DATA_KEY = UserKeyDefinition.record<Collection
 export const DECRYPTED_COLLECTION_DATA_KEY = new DeriveDefinition<
   [Record<CollectionId, CollectionData>, Record<OrganizationId, OrgKey>],
   CollectionView[],
-  { collectionService: vNextCollectionService }
+  { collectionService: CollectionService }
 >(COLLECTION_DATA, "decryptedCollections", {
   deserializer: (obj) => obj.map((collection) => CollectionView.fromJSON(collection)),
   derive: async ([collections, orgKeys], { collectionService }) => {

@@ -13,9 +13,8 @@ export const getById = <TId, T extends { id: TId }>(id: TId) =>
  * @param id The IDs of the objects to return.
  * @returns An array containing objects with matching IDs, or an empty array if there are no matching objects.
  */
-export const getByIds = <TId, T extends { id: TId }>(ids: TId[]) => {
-  const idSet = new Set(ids);
-  return map<T[], T[]>((objects) => {
+export const getByIds = <TId, T extends { id: TId }>(ids: TId[]) =>
+  map<T[], T[]>((objects) => {
+    const idSet = new Set(ids);
     return objects.filter((o) => idSet.has(o.id));
   });
-};

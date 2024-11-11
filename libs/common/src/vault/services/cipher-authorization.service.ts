@@ -4,6 +4,9 @@ import { CollectionService } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { CollectionId } from "@bitwarden/common/types/guid";
 
+import { AccountService } from "../../auth/abstractions/account.service";
+import { getUserId } from "../../auth/services/account.service";
+import { getByIds } from "../../platform/misc/rxjs-operators";
 import { Cipher } from "../models/domain/cipher";
 import { CipherView } from "../models/view/cipher.view";
 
@@ -46,9 +49,12 @@ export abstract class CipherAuthorizationService {
  * {@link CipherAuthorizationService}
  */
 export class DefaultCipherAuthorizationService implements CipherAuthorizationService {
+  private activeUserId$ = this.accountService.activeAccount$.pipe(getUserId);
+
   constructor(
     private collectionService: CollectionService,
     private organizationService: OrganizationService,
+    private accountService: AccountService,
   ) {}
 
   /**
@@ -77,19 +83,18 @@ export class DefaultCipherAuthorizationService implements CipherAuthorizationSer
           }
         }
 
-        return this.collectionService
-          .decryptedCollectionViews$(cipher.collectionIds as CollectionId[])
-          .pipe(
-            map((allCollections) => {
-              const shouldFilter = allowedCollections?.some(Boolean);
+        return this.collectionService.decryptedCollections$(this.activeUserId$).pipe(
+          getByIds(cipher.collectionIds),
+          map((cipherCollections) => {
+            const shouldFilter = allowedCollections?.some(Boolean);
 
-              const collections = shouldFilter
-                ? allCollections.filter((c) => allowedCollections.includes(c.id as CollectionId))
-                : allCollections;
+            const collections = shouldFilter
+              ? cipherCollections.filter((c) => allowedCollections.includes(c.id as CollectionId))
+              : cipherCollections;
 
-              return collections.some((collection) => collection.manage);
-            }),
-          );
+            return collections.some((collection) => collection.manage);
+          }),
+        );
       }),
     );
   }
@@ -112,9 +117,10 @@ export class DefaultCipherAuthorizationService implements CipherAuthorizationSer
           return of(true);
         }
 
-        return this.collectionService
-          .decryptedCollectionViews$(cipher.collectionIds as CollectionId[])
-          .pipe(map((allCollections) => allCollections.some((collection) => collection.manage)));
+        return this.collectionService.decryptedCollections$(this.activeUserId$).pipe(
+          getByIds(cipher.collectionIds),
+          map((allCollections) => allCollections.some((collection) => collection.manage)),
+        );
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
