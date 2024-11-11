@@ -545,7 +545,13 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: CollectionService,
     useClass: DefaultCollectionService,
-    deps: [KeyServiceAbstraction, EncryptService, I18nServiceAbstraction, StateProvider],
+    deps: [
+      KeyServiceAbstraction,
+      EncryptService,
+      I18nServiceAbstraction,
+      StateProvider,
+      AuthServiceAbstraction,
+    ],
   }),
   safeProvider({
     provide: ENV_ADDITIONAL_REGIONS,

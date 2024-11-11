@@ -1,4 +1,13 @@
-import { combineLatest, firstValueFrom, map, Observable, of, switchMap } from "rxjs";
+import {
+  combineLatest,
+  firstValueFrom,
+  map,
+  Observable,
+  of,
+  switchMap,
+  takeWhile,
+  tap,
+} from "rxjs";
 
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -14,6 +23,8 @@ import { CollectionService } from "../abstractions/collection.service";
 import { Collection, CollectionData, CollectionView } from "../models";
 
 import { DECRYPTED_COLLECTION_DATA_KEY, ENCRYPTED_COLLECTION_DATA_KEY } from "./collection.state";
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 
 const NestingDelimiter = "/";
 
@@ -23,6 +34,7 @@ export class DefaultCollectionService implements CollectionService {
     private encryptService: EncryptService,
     private i18nService: I18nService,
     protected stateProvider: StateProvider,
+    private authService: AuthService,
   ) {}
 
   encryptedCollections$(userId$: Observable<UserId>) {
@@ -176,10 +188,16 @@ export class DefaultCollectionService implements CollectionService {
    * @returns a SingleUserState for decrypted collection data.
    */
   private decryptedState(userId: UserId): DerivedState<CollectionView[]> {
-    const encryptedCollectionsWithKeys = this.encryptedState(userId).combinedState$.pipe(
-      switchMap(([userId, collectionData]) =>
-        combineLatest([of(collectionData), this.keyService.orgKeys$(userId)]),
-      ),
+    // We complete the stream when the user is locked or logged out because:
+    // 1. we cannot update decrypted collections without keys, so this stream cannot produce any further emissions
+    // 2. nobody should be accessing decrypted data when a vault is locked or logged out
+    const encryptedCollectionsWithKeys = combineLatest([
+      this.authService.authStatusFor$(userId),
+      this.encryptedState(userId).state$,
+      this.keyService.orgKeys$(userId),
+    ]).pipe(
+      takeWhile(([authStatus]) => authStatus === AuthenticationStatus.Unlocked),
+      map(([_, encryptedState, orgKeys]) => [encryptedState, orgKeys]),
     );
 
     return this.stateProvider.getDerived(

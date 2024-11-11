@@ -22,6 +22,7 @@ export class DefaultDerivedStateProvider implements DerivedStateProvider {
     if (existingDerivedState != null) {
       // I have to cast out of the unknown generic but this should be safe if rules
       // around domain token are made
+      console.log("using existing derivedState");
       return existingDerivedState as DefaultDerivedState<TFrom, TTo, TDeps>;
     }
 

@@ -4,6 +4,7 @@ import {
   Subject,
   concatMap,
   endWith,
+  finalize,
   ignoreElements,
   merge,
   share,
@@ -55,6 +56,7 @@ export class DefaultDerivedState<TFrom, TTo, TDeps extends DerivedStateDependenc
         },
         resetOnRefCountZero: () => timer(this.deriveDefinition.cleanupDelayMs),
       }),
+      finalize(() => console.log("derived state finalized")),
     );
   }
 
