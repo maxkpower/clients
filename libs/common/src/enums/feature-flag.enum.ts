@@ -27,6 +27,8 @@ export enum FeatureFlag {
   EnableNewCardCombinedExpiryAutofill = "enable-new-card-combined-expiry-autofill",
   DelayFido2PageScriptInitWithinMv2 = "delay-fido2-page-script-init-within-mv2",
   AccountDeprovisioning = "pm-10308-account-deprovisioning",
+  SSHKeyVaultItem = "ssh-key-vault-item",
+  SSHAgent = "ssh-agent",
   NotificationBarAddLoginImprovements = "notification-bar-add-login-improvements",
   AC2476_DeprecateStripeSourcesAPI = "AC-2476-deprecate-stripe-sources-api",
   CipherKeyEncryption = "cipher-key-encryption",
@@ -35,6 +37,7 @@ export enum FeatureFlag {
   AccessIntelligence = "pm-13227-access-intelligence",
   Pm13322AddPolicyDefinitions = "pm-13322-add-policy-definitions",
   LimitCollectionCreationDeletionSplit = "pm-10863-limit-collection-creation-deletion-split",
+  CriticalApps = "pm-14466-risk-insights-critical-application",
 }
 
 export type AllowedFeatureFlagTypes = boolean | number | string;
@@ -72,6 +75,8 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.EnableNewCardCombinedExpiryAutofill]: FALSE,
   [FeatureFlag.DelayFido2PageScriptInitWithinMv2]: FALSE,
   [FeatureFlag.AccountDeprovisioning]: FALSE,
+  [FeatureFlag.SSHKeyVaultItem]: FALSE,
+  [FeatureFlag.SSHAgent]: FALSE,
   [FeatureFlag.NotificationBarAddLoginImprovements]: FALSE,
   [FeatureFlag.AC2476_DeprecateStripeSourcesAPI]: FALSE,
   [FeatureFlag.CipherKeyEncryption]: FALSE,
@@ -80,6 +85,7 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.AccessIntelligence]: FALSE,
   [FeatureFlag.Pm13322AddPolicyDefinitions]: FALSE,
   [FeatureFlag.LimitCollectionCreationDeletionSplit]: FALSE,
+  [FeatureFlag.CriticalApps]: FALSE,
 } satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>;
 
 export type DefaultFeatureFlagValueType = typeof DefaultFeatureFlagValue;
