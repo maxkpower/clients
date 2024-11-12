@@ -28,6 +28,7 @@ import {
 } from "../enums/autofill-overlay.enum";
 import AutofillField from "../models/autofill-field";
 import AutofillPageDetails from "../models/autofill-page-details";
+import { AutofillInlineMenuContentService } from "../overlay/inline-menu/abstractions/autofill-inline-menu-content.service";
 import { ElementWithOpId, FillableFormFieldElement, FormFieldElement } from "../types";
 import {
   currentlyInSandboxedIframe,
@@ -155,6 +156,7 @@ export class AutofillOverlayContentService implements AutofillOverlayContentServ
     private domQueryService: DomQueryService,
     private domElementVisibilityService: DomElementVisibilityService,
     private inlineMenuFieldQualificationService: InlineMenuFieldQualificationService,
+    private inlineMenuContentService?: AutofillInlineMenuContentService,
   ) {}
 
   /**
@@ -1566,40 +1568,46 @@ export class AutofillOverlayContentService implements AutofillOverlayContentServ
    * the overlay elements on scroll or resize.
    */
   private setOverlayRepositionEventListeners() {
+    let currentScrollY = globalThis.scrollY;
+    let currentScrollX = globalThis.scrollX;
+    let mostRecentTargetScrollY = 0;
     const repositionHandler = this.useEventHandlersMemo(
       throttle(this.handleOverlayRepositionEvent, 250),
       AUTOFILL_OVERLAY_HANDLE_REPOSITION,
     );
 
-    const eventTargetContainsFocusedField = (eventTarget: Element | Document) => {
-      if (!eventTarget || !this.mostRecentlyFocusedField) {
-        return false;
-      }
-
-      const activeElement = (eventTarget as Document).activeElement;
-      if (activeElement) {
-        return (
-          activeElement === this.mostRecentlyFocusedField ||
-          activeElement.contains(this.mostRecentlyFocusedField)
-        );
-      }
-
+    const eventTargetContainsFocusedField = (eventTarget: Element) => {
       if (typeof eventTarget.contains !== "function") {
         return false;
       }
-      return (
+
+      const targetScrollY = eventTarget.scrollTop;
+      if (targetScrollY === mostRecentTargetScrollY) {
+        return false;
+      }
+
+      if (
         eventTarget === this.mostRecentlyFocusedField ||
         eventTarget.contains(this.mostRecentlyFocusedField)
-      );
+      ) {
+        mostRecentTargetScrollY = targetScrollY;
+        return true;
+      }
+
+      return false;
     };
     const scrollHandler = this.useEventHandlersMemo(
       throttle(async (event) => {
         if (
-          eventTargetContainsFocusedField(event.target) ||
-          (await this.shouldRepositionSubFrameInlineMenuOnScroll())
+          currentScrollY !== globalThis.scrollY ||
+          currentScrollX !== globalThis.scrollX ||
+          eventTargetContainsFocusedField(event.target)
         ) {
           repositionHandler(event);
         }
+
+        currentScrollY = globalThis.scrollY;
+        currentScrollX = globalThis.scrollX;
       }, 50),
       AUTOFILL_OVERLAY_HANDLE_SCROLL,
     );

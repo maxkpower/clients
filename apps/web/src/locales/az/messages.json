@@ -2,17 +2,17 @@
   "allApplications": {
     "message": "Bütün tətbiqlər"
   },
-  "priorityApplications": {
-    "message": "Prioritet tətbiqlər"
+  "criticalApplications": {
+    "message": "Kritik tətbiqlər"
   },
-  "accessIntelligence": {
-    "message": "Müraciət Kəşfiyyatı"
+  "riskInsights": {
+    "message": "Risk Insights"
   },
   "passwordRisk": {
     "message": "Parol riski"
   },
   "discoverAtRiskPasswords": {
-    "message": "Riskli parolları kəşf edin və bu parolları dəyişdirməsi üçün istifadəçiləri məlumatlandırın."
+    "message": "Discover at-risk passwords and notify users to change those passwords."
   },
   "dataLastUpdated": {
     "message": "Datanın son güncəlləmə tarixi: $DATE$",
@@ -35,8 +35,11 @@
       }
     }
   },
-  "priorityApplicationsWithCount": {
-    "message": "Prioritet tətbiqlər ($COUNT$)",
+  "createNewLoginItem": {
+    "message": "Yeni giriş elementi yarat"
+  },
+  "criticalApplicationsWithCount": {
+    "message": "Kritik tətbiqlər ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -53,17 +56,32 @@
       }
     }
   },
-  "noPriorityApplicationsTitle": {
-    "message": "Heç bir tətbiqi prioritet olaraq işarələməmisiniz"
+  "noAppsInOrgTitle": {
+    "message": "$ORGNAME$ təşkilatında heç bir tətbiq tapılmadı",
+    "placeholders": {
+      "org name": {
+        "content": "$1",
+        "example": "Company Name"
+      }
+    }
   },
-  "noPriorityApplicationsDescription": {
+  "noAppsInOrgDescription": {
+    "message": "İstifadəçilər giriş məlumatlarını saxladıqda, tətbiqlər burada görünür və riskli parolları göstərir. Kritik tətbiqləri işarələyin və parollarını güncəlləməsi üçün istifadəçiləri məlumatlandırın."
+  },
+  "noCriticalAppsTitle": {
+    "message": "Heç bir tətbiqi Kritik olaraq işarələməmisiniz"
+  },
+  "noCriticalAppsDescription": {
     "message": "Riskli parolları kəşf etmək üçün ən kritik tətbiqlərinizi seçin və bu parolları dəyişdirməsi üçün istifadəçiləri məlumatlandırın."
   },
-  "markPriorityApps": {
-    "message": "Prioritet tətbiqləri işarələ"
+  "markCriticalApps": {
+    "message": "Kritik tətbiqləri işarələ"
   },
   "markAppAsCritical": {
     "message": "Tətbiqi kritik olaraq işarələ"
+  },
+  "appsMarkedAsCritical": {
+    "message": "Kritik olaraq işarələnmiş tətbiqlər"
   },
   "application": {
     "message": "Tətbiq"
@@ -71,8 +89,14 @@
   "atRiskPasswords": {
     "message": "Riskli parollar"
   },
+  "requestPasswordChange": {
+    "message": "Parol dəyişdirilməsini tələb et"
+  },
   "totalPasswords": {
     "message": "Cəmi parol"
+  },
+  "searchApps": {
+    "message": "Tətbiq axtar"
   },
   "atRiskMembers": {
     "message": "Riskli üzvlər"
@@ -1583,38 +1607,6 @@
   "specialCharacters": {
     "message": "Xüsusi simvollar (!@#$%^&*)"
   },
-  "uppercaseDescription": {
-    "message": "Böyük hərf xarakterlərini daxil et",
-    "description": "Tooltip for the password generator uppercase character checkbox"
-  },
-  "uppercaseLabel": {
-    "message": "A-Z",
-    "description": "Label for the password generator uppercase character checkbox"
-  },
-  "lowercaseDescription": {
-    "message": "Kiçik hərf xarakterlərini daxil et",
-    "description": "Full description for the password generator lowercase character checkbox"
-  },
-  "lowercaseLabel": {
-    "message": "a-z",
-    "description": "Label for the password generator lowercase character checkbox"
-  },
-  "numbersDescription": {
-    "message": "Rəqəmləri daxil et",
-    "description": "Full description for the password generator numbers checkbox"
-  },
-  "numbersLabel": {
-    "message": "0-9",
-    "description": "Label for the password generator numbers checkbox"
-  },
-  "specialCharactersDescription": {
-    "message": "Xüsusi xarakterləri daxil et",
-    "description": "Full description for the password generator special characters checkbox"
-  },
-  "specialCharactersLabel": {
-    "message": "!@#$%^&*",
-    "description": "Label for the password generator special characters checkbox"
-  },
   "numWords": {
     "message": "Söz sayı"
   },
@@ -1745,6 +1737,9 @@
   "dangerZoneDesc": {
     "message": "Diqqətli olun, bu əməliyyatları geri qaytara bilməzsiniz!"
   },
+  "dangerZoneDescSingular": {
+    "message": "Diqqətli olun, bu əməliyyatı geri qaytara bilməzsiniz!"
+  },
   "deauthorizeSessions": {
     "message": "Seansların səlahiyyətlərini götür"
   },
@@ -1756,6 +1751,15 @@
   },
   "sessionsDeauthorized": {
     "message": "Bütün seansların səlahiyyəti götürüldü"
+  },
+  "accountIsManagedMessage": {
+    "message": "Bu hesab $ORGANIZATIONNAME$ tərəfindən idarə olunur",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "Organization"
+      }
+    }
   },
   "purgeVault": {
     "message": "Seyfi boşalt"
@@ -4681,11 +4685,17 @@
   "singleOrgDesc": {
     "message": "İstifadəçilərin digər təşkilatlara qoşulmasını məhdudlaşdırın."
   },
+  "singleOrgPolicyDesc": {
+    "message": "Üzvlərin digər təşkilatlara qoşulmasını məhdudlaşdır. Bu siyasət, domen doğrulamasını fəallaşdıran təşkilatlar üçün tələb olunur."
+  },
   "singleOrgBlockCreateMessage": {
     "message": "Hazırkı təşkilatınızın, bir neçə təşkilata qoşulmasına icazə verməyən bir siyasəti var. Lütfən təşkilat adminləri ilə əlaqə saxlayın və ya fərqli bir Bitwarden hesabı ilə qeydiyyatdan keçin."
   },
   "singleOrgPolicyWarning": {
     "message": "Sahib və ya administrator olmayan və hal-hazırda başqa bir təşkilatın üzvü olan istifadəçilər təşkilatınızdan çıxarılacaq."
+  },
+  "singleOrgPolicyMemberWarning": {
+    "message": "Uyumlu olmayan üzvlər, digər bütün təşkilatları tərk edənə qədər rədd edilmiş statusa daxil ediləcək. Administratorlar azaddır və uyum təmin edildikdən sonra üzvləri bərpa edə bilər."
   },
   "requireSso": {
     "message": "Tək daxil olma kimlik doğrulaması"
@@ -6402,6 +6412,20 @@
   },
   "generateEmail": {
     "message": "E-poçt yarat"
+  },
+  "generatorBoundariesHint": {
+    "message": "Dəyər $MIN$-$MAX$ arasında olmalıdır",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "İstifadəçi adı növü"
@@ -9474,6 +9498,38 @@
   "linkedLabelHelpText": {
     "message": "Xana üçün bunları daxil edin: kimlik, ad, aria-label və ya placeholder."
   },
+  "uppercaseDescription": {
+    "message": "Böyük hərf xarakterlərini daxil et",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "Kiçik hərf xarakterlərini daxil et",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "Rəqəmləri daxil et",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "Xüsusi xarakterləri daxil et",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
+  },
   "addAttachment": {
     "message": "Qoşma əlavə et"
   },
@@ -9492,5 +9548,37 @@
   },
   "selfHostingTitleProper": {
     "message": "Self-Hosting"
+  },
+  "verified-domain-single-org-warning": {
+    "message": "Bir domeni doğrulamaq, tək təşkilat siyasətini işə salacaq."
+  },
+  "single-org-revoked-user-warning": {
+    "message": "Uyumlu olmayan üzvlər rədd ediləcək. Digər bütün təşkilatları tərk etdikdən sonra üzvlər, administratorlar tərəfindən bərpa edilə bilər."
+  },
+  "deleteOrganizationUser": {
+    "message": "$NAME$ - sil",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      },
+      "description": "Title for the delete organization user dialog"
+    }
+  },
+  "deleteOrganizationUserWarning": {
+    "message": "Bir hesab silindikdə, Bitwarden hesabı və onun fərdi seyf dataları həmişəlik silinir. Təşkilatdakı kolleksiya dataları qalır. Bunları yenidən fəallaşdırmaq üçün bir hesab yaradılmalı və yenidən təşkilata qoşulması lazımdır.",
+    "description": "Warning for the delete organization user dialog"
+  },
+  "organizationUserDeleted": {
+    "message": "$NAME$ silindi",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      }
+    }
+  },
+  "organizationUserDeletedDesc": {
+    "message": "İstifadəçi təşkilatdan çıxarıldı və əlaqələndirilmiş bütün istifadəçi dataları silindi."
   }
 }

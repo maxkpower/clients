@@ -77,22 +77,19 @@
       {
         "from": "desktop_native/dist/desktop_proxy.${platform}-${arch}",
         "to": "MacOS/desktop_proxy"
+      },
+      {
+        "from": "desktop_native/dist/desktop_proxy.${platform}-${arch}",
+        "to": "MacOS/desktop_proxy.inherit"
       }
     ],
-    "signIgnore": ["MacOS/desktop_proxy"],
+    "signIgnore": ["MacOS/desktop_proxy", "MacOS/desktop_proxy.inherit"],
     "target": ["dmg", "zip"]
   },
   "win": {
     "electronUpdaterCompatibility": ">=0.0.1",
     "target": ["portable", "nsis-web", "appx"],
     "sign": "./sign.js",
-    "extraResources": [
-      {
-        "from": "../../node_modules/regedit/vbs",
-        "to": "regedit/vbs",
-        "filter": ["**/*"]
-      }
-    ],
     "extraFiles": [
       {
         "from": "desktop_native/dist/desktop_proxy.${platform}-${arch}.exe",

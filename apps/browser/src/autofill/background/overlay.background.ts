@@ -33,6 +33,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { ThemeStateService } from "@bitwarden/common/platform/theming/theme-state.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
 import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault-settings/vault-settings.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { buildCipherIcon } from "@bitwarden/common/vault/icon/build-cipher-icon";
@@ -168,8 +169,6 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     getCurrentTabFrameId: ({ sender }) => this.getSenderFrameId(sender),
     updateSubFrameData: ({ message, sender }) => this.updateSubFrameData(message, sender),
     triggerSubFrameFocusInRebuild: ({ sender }) => this.triggerSubFrameFocusInRebuild(sender),
-    shouldRepositionSubFrameInlineMenuOnScroll: ({ sender }) =>
-      this.shouldRepositionSubFrameInlineMenuOnScroll(sender),
     destroyAutofillInlineMenuListeners: ({ message, sender }) =>
       this.triggerDestroyInlineMenuListeners(sender.tab, message.subFrameData.frameId),
     collectPageDetailsResponse: ({ message, sender }) => this.storePageDetails(message, sender),
@@ -219,6 +218,7 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     private fido2ActiveRequestManager: Fido2ActiveRequestManager,
     private inlineMenuFieldQualificationService: InlineMenuFieldQualificationService,
     private themeStateService: ThemeStateService,
+    private totpService: TotpService,
     private generatePasswordCallback: () => Promise<string>,
     private addPasswordCallback: (password: string) => Promise<void>,
   ) {
@@ -1010,7 +1010,7 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     );
 
     if (
-      !this.checkIsInlineMenuListVisible() &&
+      !this.inlineMenuListPort &&
       (await this.getInlineMenuVisibility()) === AutofillOverlayVisibility.OnButtonClick
     ) {
       return;
@@ -1060,7 +1060,6 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     }
 
     const cipher = this.inlineMenuCiphers.get(inlineMenuCipherId);
-
     if (usePasskey && cipher.login?.hasFido2Credentials) {
       await this.authenticatePasskeyCredential(
         sender,
@@ -1068,6 +1067,11 @@ export class OverlayBackground implements OverlayBackgroundInterface {
       );
       this.updateLastUsedInlineMenuCipher(inlineMenuCipherId, cipher);
 
+      if (cipher.login?.totp) {
+        this.platformUtilsService.copyToClipboard(
+          await this.totpService.getCode(cipher.login.totp),
+        );
+      }
       return;
     }
 
@@ -1819,7 +1823,7 @@ export class OverlayBackground implements OverlayBackgroundInterface {
       return;
     }
 
-    if (this.isInlineMenuListVisible) {
+    if (this.inlineMenuListPort) {
       this.closeInlineMenu(sender, {
         forceCloseInlineMenu: true,
         overlayElement: AutofillOverlayElement.List,
@@ -2598,20 +2602,6 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     this.resetFocusedFieldSubFrameOffsets(sender);
     this.rebuildSubFrameOffsets$.next(sender);
     this.repositionInlineMenu$.next(sender);
-  }
-
-  /**
-   * Triggers on scroll of a frame within the tab. Will reposition the inline menu
-   * if the focused field is within a sub-frame and the inline menu is visible.
-   *
-   * @param sender - The sender of the message
-   */
-  private shouldRepositionSubFrameInlineMenuOnScroll(sender: chrome.runtime.MessageSender) {
-    if (!this.isInlineMenuButtonVisible || sender.tab.id !== this.focusedFieldData?.tabId) {
-      return false;
-    }
-
-    return this.focusedFieldData.frameId > 0;
   }
 
   /**

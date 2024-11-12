@@ -2,11 +2,11 @@
   "allApplications": {
     "message": "Všechny aplikace"
   },
-  "priorityApplications": {
-    "message": "Prioritní aplikace"
+  "criticalApplications": {
+    "message": "Kritické aplikace"
   },
-  "accessIntelligence": {
-    "message": "Přístup k inteligenci"
+  "riskInsights": {
+    "message": "Risk Insights"
   },
   "passwordRisk": {
     "message": "Rizikové heslo"
@@ -35,8 +35,11 @@
       }
     }
   },
-  "priorityApplicationsWithCount": {
-    "message": "Prioritní aplikace ($COUNT$)",
+  "createNewLoginItem": {
+    "message": "Vytvořit novou položku přihlášení"
+  },
+  "criticalApplicationsWithCount": {
+    "message": "Kritické aplikace ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -53,17 +56,32 @@
       }
     }
   },
-  "noPriorityApplicationsTitle": {
-    "message": "Neoznačili jste žádné aplikace jako prioritu"
+  "noAppsInOrgTitle": {
+    "message": "V $ORG NAME$ nebyly nalezeny žádné aplikace",
+    "placeholders": {
+      "org name": {
+        "content": "$1",
+        "example": "Company Name"
+      }
+    }
   },
-  "noPriorityApplicationsDescription": {
+  "noAppsInOrgDescription": {
+    "message": "Jakmile uživatelé uloží přihlašovací údaje, zobrazí se zde aplikace, které zobrazují všechna ohrožená hesla. Označte kritické aplikace a upozorněte uživatele, aby hesla aktualizovali."
+  },
+  "noCriticalAppsTitle": {
+    "message": "Neoznačili jste žádné aplikace jako kritické"
+  },
+  "noCriticalAppsDescription": {
     "message": "Vyberte své nejkritičtější aplikace, abyste objevili riziková hesla a upozorněte uživatele na změnu těchto hesel."
   },
-  "markPriorityApps": {
-    "message": "Označit prioritní aplikace"
+  "markCriticalApps": {
+    "message": "Označit kritické aplikace"
   },
   "markAppAsCritical": {
     "message": "Označit aplikaci jako kritickou"
+  },
+  "appsMarkedAsCritical": {
+    "message": "Aplikace označené jako kritické"
   },
   "application": {
     "message": "Aplikace"
@@ -71,8 +89,14 @@
   "atRiskPasswords": {
     "message": "Ohrožená hesla"
   },
+  "requestPasswordChange": {
+    "message": "Vyžádat změnu hesla"
+  },
   "totalPasswords": {
     "message": "Celkem hesel"
+  },
+  "searchApps": {
+    "message": "Prohledat aplikace"
   },
   "atRiskMembers": {
     "message": "Ohrožení členové"
@@ -1583,38 +1607,6 @@
   "specialCharacters": {
     "message": "Speciální znaky (!@#$%^&*)"
   },
-  "uppercaseDescription": {
-    "message": "Zahrnout velká písmena",
-    "description": "Tooltip for the password generator uppercase character checkbox"
-  },
-  "uppercaseLabel": {
-    "message": "A-Z",
-    "description": "Label for the password generator uppercase character checkbox"
-  },
-  "lowercaseDescription": {
-    "message": "Zahrnout malá písmena",
-    "description": "Full description for the password generator lowercase character checkbox"
-  },
-  "lowercaseLabel": {
-    "message": "a-z",
-    "description": "Label for the password generator lowercase character checkbox"
-  },
-  "numbersDescription": {
-    "message": "Zahrnout číslice",
-    "description": "Full description for the password generator numbers checkbox"
-  },
-  "numbersLabel": {
-    "message": "0-9",
-    "description": "Label for the password generator numbers checkbox"
-  },
-  "specialCharactersDescription": {
-    "message": "Zahrnout speciální znaky",
-    "description": "Full description for the password generator special characters checkbox"
-  },
-  "specialCharactersLabel": {
-    "message": "!@#$%^&*",
-    "description": "Label for the password generator special characters checkbox"
-  },
   "numWords": {
     "message": "Počet slov"
   },
@@ -1745,6 +1737,9 @@
   "dangerZoneDesc": {
     "message": "Opatrně. Tyto akce se nedají vrátit!"
   },
+  "dangerZoneDescSingular": {
+    "message": "Opatrně, tato akce je nevratná!"
+  },
   "deauthorizeSessions": {
     "message": "Zrušit autorizaci relací"
   },
@@ -1756,6 +1751,15 @@
   },
   "sessionsDeauthorized": {
     "message": "Všechny relace byly zrušeny"
+  },
+  "accountIsManagedMessage": {
+    "message": "Tento účet je spravován: $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "Organization"
+      }
+    }
   },
   "purgeVault": {
     "message": "Vyčistit celý trezor"
@@ -4681,11 +4685,17 @@
   "singleOrgDesc": {
     "message": "Omezí uživatelům možnost připojit se k jiným organizacím."
   },
+  "singleOrgPolicyDesc": {
+    "message": "Omezí členům vstup do jiných organizací. Tato zásada je vyžadována u organizací, které povolily ověřování domény."
+  },
   "singleOrgBlockCreateMessage": {
     "message": "Vaše aktuální organizace má pravidla, která Vám nedovolují připojit se k více než jedné organizaci. Obraťte se na administrátory organizace nebo se zaregistrujte z jiného účtu na Bitwardenu."
   },
   "singleOrgPolicyWarning": {
     "message": "Členové organizace, kteří nejsou vlastníky nebo administrátory a jsou již členy jiné organizace, budou odebrání z Vaší organizace."
+  },
+  "singleOrgPolicyMemberWarning": {
+    "message": "Nevyhovující členové budou zařazeni do statusu odvolaných členů, dokud neopustí všechny ostatní organizace. Správci jsou osvobozeni a mohou obnovit členy, jakmile je splněna podmínka shody."
   },
   "requireSso": {
     "message": "Vyžadovat ověření jednotného přihlášení"
@@ -6402,6 +6412,20 @@
   },
   "generateEmail": {
     "message": "Vygenerovat e-mail"
+  },
+  "generatorBoundariesHint": {
+    "message": "Hodnota musí být mezi $MIN$ a $MAX$",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "Typ uživatelského jména"
@@ -9474,6 +9498,38 @@
   "linkedLabelHelpText": {
     "message": "Zadejte ID pole z HTML, název, popisek nebo zástupný znak pole."
   },
+  "uppercaseDescription": {
+    "message": "Zahrnout velká písmena",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "Zahrnout malá písmena",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "Zahrnout číslice",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "Zahrnout speciální znaky",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
+  },
   "addAttachment": {
     "message": "Přidat přílohu"
   },
@@ -9492,5 +9548,37 @@
   },
   "selfHostingTitleProper": {
     "message": "Vlastní hosting"
+  },
+  "verified-domain-single-org-warning": {
+    "message": "Ověřením domény se zapnou zásady jediné organizace."
+  },
+  "single-org-revoked-user-warning": {
+    "message": "Nevyhovujícím členům bude členství zrušeno. Správci mohou obnovit členy, jakmile opustí všechny ostatní organizace."
+  },
+  "deleteOrganizationUser": {
+    "message": "Smazat $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      },
+      "description": "Title for the delete organization user dialog"
+    }
+  },
+  "deleteOrganizationUserWarning": {
+    "message": "Pokud je člen smazán, jeho účet Bitwarden a individuální údaje z trezoru budou trvale smazány. Data kolekce zůstanou v organizaci. Pro jejich obnovení si musí vytvořit účet a být znovu zařazen do systému.",
+    "description": "Warning for the delete organization user dialog"
+  },
+  "organizationUserDeleted": {
+    "message": "$NAME$ - smazán",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      }
+    }
+  },
+  "organizationUserDeletedDesc": {
+    "message": "Uživatel byl odebrán z organizace a všechna přidružená uživatelská data byla smazána."
   }
 }

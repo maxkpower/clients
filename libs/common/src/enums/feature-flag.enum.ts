@@ -17,7 +17,6 @@ export enum FeatureFlag {
   InlineMenuFieldQualification = "inline-menu-field-qualification",
   MemberAccessReport = "ac-2059-member-access-report",
   TwoFactorComponentRefactor = "two-factor-component-refactor",
-  EnableTimeThreshold = "PM-5864-dollar-threshold",
   InlineMenuPositioningImprovements = "inline-menu-positioning-improvements",
   ProviderClientVaultPrivacyBanner = "ac-2833-provider-client-vault-privacy-banner",
   VaultBulkManagementAction = "vault-bulk-management-action",
@@ -28,6 +27,8 @@ export enum FeatureFlag {
   EnableNewCardCombinedExpiryAutofill = "enable-new-card-combined-expiry-autofill",
   DelayFido2PageScriptInitWithinMv2 = "delay-fido2-page-script-init-within-mv2",
   AccountDeprovisioning = "pm-10308-account-deprovisioning",
+  SSHKeyVaultItem = "ssh-key-vault-item",
+  SSHAgent = "ssh-agent",
   NotificationBarAddLoginImprovements = "notification-bar-add-login-improvements",
   AC2476_DeprecateStripeSourcesAPI = "AC-2476-deprecate-stripe-sources-api",
   CipherKeyEncryption = "cipher-key-encryption",
@@ -36,6 +37,9 @@ export enum FeatureFlag {
   AccessIntelligence = "pm-13227-access-intelligence",
   Pm13322AddPolicyDefinitions = "pm-13322-add-policy-definitions",
   LimitCollectionCreationDeletionSplit = "pm-10863-limit-collection-creation-deletion-split",
+  CriticalApps = "pm-14466-risk-insights-critical-application",
+  TrialPaymentOptional = "PM-8163-trial-payment",
+  SecurityTasks = "security-tasks",
 }
 
 export type AllowedFeatureFlagTypes = boolean | number | string;
@@ -63,7 +67,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.InlineMenuFieldQualification]: FALSE,
   [FeatureFlag.MemberAccessReport]: FALSE,
   [FeatureFlag.TwoFactorComponentRefactor]: FALSE,
-  [FeatureFlag.EnableTimeThreshold]: FALSE,
   [FeatureFlag.InlineMenuPositioningImprovements]: FALSE,
   [FeatureFlag.ProviderClientVaultPrivacyBanner]: FALSE,
   [FeatureFlag.VaultBulkManagementAction]: FALSE,
@@ -74,6 +77,8 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.EnableNewCardCombinedExpiryAutofill]: FALSE,
   [FeatureFlag.DelayFido2PageScriptInitWithinMv2]: FALSE,
   [FeatureFlag.AccountDeprovisioning]: FALSE,
+  [FeatureFlag.SSHKeyVaultItem]: FALSE,
+  [FeatureFlag.SSHAgent]: FALSE,
   [FeatureFlag.NotificationBarAddLoginImprovements]: FALSE,
   [FeatureFlag.AC2476_DeprecateStripeSourcesAPI]: FALSE,
   [FeatureFlag.CipherKeyEncryption]: FALSE,
@@ -82,6 +87,9 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.AccessIntelligence]: FALSE,
   [FeatureFlag.Pm13322AddPolicyDefinitions]: FALSE,
   [FeatureFlag.LimitCollectionCreationDeletionSplit]: FALSE,
+  [FeatureFlag.CriticalApps]: FALSE,
+  [FeatureFlag.TrialPaymentOptional]: FALSE,
+  [FeatureFlag.SecurityTasks]: FALSE,
 } satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>;
 
 export type DefaultFeatureFlagValueType = typeof DefaultFeatureFlagValue;
