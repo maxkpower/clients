@@ -1,7 +1,17 @@
 import { coerceBooleanProperty } from "@angular/cdk/coercion";
 import { OnInit, Input, Output, EventEmitter, Component, OnDestroy } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
-import { BehaviorSubject, takeUntil, Subject, map, filter, tap, skip, ReplaySubject } from "rxjs";
+import {
+  BehaviorSubject,
+  takeUntil,
+  Subject,
+  map,
+  filter,
+  tap,
+  skip,
+  ReplaySubject,
+  withLatestFrom,
+} from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -12,7 +22,7 @@ import {
   PasswordGenerationOptions,
 } from "@bitwarden/generator-core";
 
-import { completeOnAccountSwitch, toValidators } from "./util";
+import { completeOnAccountSwitch } from "./util";
 
 const Controls = Object.freeze({
   length: "length",
@@ -118,23 +128,11 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
         this.settings.patchValue(s, { emitEvent: false });
       });
 
-    // bind policy to the template
+    // explain policy & disable policy-overridden fields
     this.generatorService
       .policy$(Generators.password, { userId$: singleUserId$ })
       .pipe(takeUntil(this.destroyed$))
       .subscribe(({ constraints }) => {
-        this.settings
-          .get(Controls.length)
-          .setValidators(toValidators(Controls.length, Generators.password, constraints));
-
-        this.minNumber.setValidators(
-          toValidators(Controls.minNumber, Generators.password, constraints),
-        );
-
-        this.minSpecial.setValidators(
-          toValidators(Controls.minSpecial, Generators.password, constraints),
-        );
-
         this.policyInEffect = constraints.policyInEffect;
 
         const toggles = [
@@ -153,8 +151,8 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
 
         const boundariesHint = this.i18nService.t(
           "generatorBoundariesHint",
-          constraints.length.min,
-          constraints.length.max,
+          constraints.length.min?.toString(),
+          constraints.length.max?.toString(),
         );
         this.lengthBoundariesHint.next(boundariesHint);
       });
@@ -173,10 +171,10 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
     this.minNumber.valueChanges
       .pipe(
         map((value) => [value, value > 0] as const),
-        tap(([value]) => (lastMinNumber = this.numbers.value ? value : lastMinNumber)),
+        tap(([value, checkNumbers]) => (lastMinNumber = checkNumbers ? value : lastMinNumber)),
         takeUntil(this.destroyed$),
       )
-      .subscribe(([, checked]) => this.numbers.setValue(checked, { emitEvent: false }));
+      .subscribe(([, checkNumbers]) => this.numbers.setValue(checkNumbers, { emitEvent: false }));
 
     let lastMinSpecial = 1;
     this.special.valueChanges
@@ -190,10 +188,10 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
     this.minSpecial.valueChanges
       .pipe(
         map((value) => [value, value > 0] as const),
-        tap(([value]) => (lastMinSpecial = this.special.value ? value : lastMinSpecial)),
+        tap(([value, checkSpecial]) => (lastMinSpecial = checkSpecial ? value : lastMinSpecial)),
         takeUntil(this.destroyed$),
       )
-      .subscribe(([, checked]) => this.special.setValue(checked, { emitEvent: false }));
+      .subscribe(([, checkSpecial]) => this.special.setValue(checkSpecial, { emitEvent: false }));
 
     // `onUpdated` depends on `settings` because the UserStateSubject is asynchronous;
     // subscribing directly to `this.settings.valueChanges` introduces a race condition.
@@ -201,9 +199,10 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
     settings.pipe(skip(1), takeUntil(this.destroyed$)).subscribe(this.onUpdated);
 
     // now that outputs are set up, connect inputs
-    this.settings.valueChanges
+    this.saveSettings
       .pipe(
-        map((settings) => {
+        withLatestFrom(this.settings.valueChanges),
+        map(([, settings]) => {
           // interface is "avoid" while storage is "include"
           const s: any = { ...settings };
           s.ambiguous = s.avoidAmbiguous;
@@ -213,6 +212,11 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
         takeUntil(this.destroyed$),
       )
       .subscribe(settings);
+  }
+
+  private saveSettings = new Subject<string>();
+  save(site: string = "component api call") {
+    this.saveSettings.next(site);
   }
 
   /** display binding for enterprise policy notice */
@@ -246,6 +250,7 @@ export class PasswordSettingsComponent implements OnInit, OnDestroy {
 
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void {
+    this.destroyed$.next();
     this.destroyed$.complete();
   }
 }

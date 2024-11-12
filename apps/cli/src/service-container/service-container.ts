@@ -404,6 +404,7 @@ export class ServiceContainer {
       this.stateService,
       this.keyGenerationService,
       this.encryptService,
+      this.logService,
     );
 
     this.kdfConfigService = new KdfConfigService(this.stateProvider);
@@ -872,7 +873,7 @@ export class ServiceContainer {
       }
 
       if (!supported) {
-        this.sdkService.failedToInitialize().catch((e) => this.logService.error(e));
+        this.sdkService.failedToInitialize("cli").catch((e) => this.logService.error(e));
       }
     }
   }

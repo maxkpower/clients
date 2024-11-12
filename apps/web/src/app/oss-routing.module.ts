@@ -104,7 +104,7 @@ const routes: Routes = [
       {
         path: "login-with-passkey",
         component: LoginViaWebAuthnComponent,
-        data: { titleId: "loginWithPasskey" } satisfies RouteDataProperties,
+        data: { titleId: "logInWithPasskey" } satisfies RouteDataProperties,
       },
       {
         path: "admin-approval-requested",
@@ -119,7 +119,10 @@ const routes: Routes = [
       {
         path: "register",
         component: TrialInitiationComponent,
-        canActivate: [unauthGuardFn()],
+        canActivate: [
+          canAccessFeature(FeatureFlag.EmailVerification, false, "/signup"),
+          unauthGuardFn(),
+        ],
         data: { titleId: "createAccount" } satisfies RouteDataProperties,
       },
       {

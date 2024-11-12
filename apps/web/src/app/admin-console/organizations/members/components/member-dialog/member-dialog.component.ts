@@ -29,6 +29,8 @@ import { PermissionsApi } from "@bitwarden/common/admin-console/models/api/permi
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ProductTierType } from "@bitwarden/common/billing/enums";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { DialogService, ToastService } from "@bitwarden/components";
 
@@ -65,6 +67,7 @@ export interface MemberDialogParams {
   isOnSecretsManagerStandalone: boolean;
   initialTab?: MemberDialogTab;
   numConfirmedMembers: number;
+  managedByOrganization?: boolean;
 }
 
 export enum MemberDialogResult {
@@ -89,7 +92,6 @@ export class MemberDialogComponent implements OnDestroy {
   PermissionMode = PermissionMode;
   showNoMasterPasswordWarning = false;
   isOnSecretsManagerStandalone: boolean;
-  remainingSeats$: Observable<number>;
 
   protected organization$: Observable<Organization>;
   protected collectionAccessItems: AccessItemView[] = [];
@@ -125,6 +127,10 @@ export class MemberDialogComponent implements OnDestroy {
     manageResetPassword: false,
   });
 
+  protected accountDeprovisioningEnabled$: Observable<boolean> = this.configService.getFeatureFlag$(
+    FeatureFlag.AccountDeprovisioning,
+  );
+
   private destroy$ = new Subject<void>();
 
   get customUserTypeSelected(): boolean {
@@ -145,6 +151,7 @@ export class MemberDialogComponent implements OnDestroy {
     private accountService: AccountService,
     organizationService: OrganizationService,
     private toastService: ToastService,
+    private configService: ConfigService,
   ) {
     this.organization$ = organizationService
       .get$(this.params.organizationId)
@@ -251,10 +258,6 @@ export class MemberDialogComponent implements OnDestroy {
 
         this.loading = false;
       });
-
-    this.remainingSeats$ = this.organization$.pipe(
-      map((organization) => organization.seats - this.params.numConfirmedMembers),
-    );
   }
 
   private setFormValidators(organization: Organization) {
@@ -469,7 +472,7 @@ export class MemberDialogComponent implements OnDestroy {
     this.close(MemberDialogResult.Saved);
   };
 
-  delete = async () => {
+  remove = async () => {
     if (!this.editMode) {
       return;
     }
@@ -564,6 +567,39 @@ export class MemberDialogComponent implements OnDestroy {
     });
     this.isRevoked = false;
     this.close(MemberDialogResult.Restored);
+  };
+
+  delete = async () => {
+    if (!this.editMode) {
+      return;
+    }
+
+    const confirmed = await this.dialogService.openSimpleDialog({
+      title: {
+        key: "deleteOrganizationUser",
+        placeholders: [this.params.name],
+      },
+      content: { key: "deleteOrganizationUserWarning" },
+      type: "warning",
+      acceptButtonText: { key: "delete" },
+      cancelButtonText: { key: "cancel" },
+    });
+
+    if (!confirmed) {
+      return false;
+    }
+
+    await this.organizationUserApiService.deleteOrganizationUser(
+      this.params.organizationId,
+      this.params.organizationUserId,
+    );
+
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("organizationUserDeleted", this.params.name),
+    });
+    this.close(MemberDialogResult.Deleted);
   };
 
   ngOnDestroy() {

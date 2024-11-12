@@ -2,11 +2,11 @@
   "allApplications": {
     "message": "Todas as aplicações"
   },
-  "priorityApplications": {
-    "message": "Aplicações prioritárias"
+  "criticalApplications": {
+    "message": "Aplicações críticas"
   },
-  "accessIntelligence": {
-    "message": "Acesso à informação"
+  "riskInsights": {
+    "message": "Risk Insights"
   },
   "passwordRisk": {
     "message": "Risco da palavra-passe"
@@ -35,8 +35,11 @@
       }
     }
   },
-  "priorityApplicationsWithCount": {
-    "message": "Aplicações prioritárias ($COUNT$)",
+  "createNewLoginItem": {
+    "message": "Criar novo item de credencial"
+  },
+  "criticalApplicationsWithCount": {
+    "message": "Aplicações críticas ($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -53,17 +56,32 @@
       }
     }
   },
-  "noPriorityApplicationsTitle": {
-    "message": "Não marcou nenhuma aplicação como prioritária"
+  "noAppsInOrgTitle": {
+    "message": "Não foram encontradas aplicações em $ORG NAME$",
+    "placeholders": {
+      "org name": {
+        "content": "$1",
+        "example": "Company Name"
+      }
+    }
   },
-  "noPriorityApplicationsDescription": {
+  "noAppsInOrgDescription": {
+    "message": "À medida que os utilizadores guardam as credenciais, as aplicações aparecem aqui, mostrando quaisquer palavras-passe em risco. Marque as aplicações críticas e notifique os utilizadores para atualizarem as palavras-passe."
+  },
+  "noCriticalAppsTitle": {
+    "message": "Não marcou nenhuma aplicação como crítica"
+  },
+  "noCriticalAppsDescription": {
     "message": "Selecione as suas aplicações mais críticas para descobrir palavras-passe em risco e notifique os utilizadores para alterarem essas palavras-passe."
   },
-  "markPriorityApps": {
-    "message": "Marcar aplicações prioritárias"
+  "markCriticalApps": {
+    "message": "Marcar aplicações críticas"
   },
   "markAppAsCritical": {
     "message": "Marcar a aplicação como crítica"
+  },
+  "appsMarkedAsCritical": {
+    "message": "Apps marcadas como críticas"
   },
   "application": {
     "message": "Aplicação"
@@ -71,8 +89,14 @@
   "atRiskPasswords": {
     "message": "Palavras-passe em risco"
   },
+  "requestPasswordChange": {
+    "message": "Pedir alteração da palavra-passe"
+  },
   "totalPasswords": {
     "message": "Total de palavras-passe"
+  },
+  "searchApps": {
+    "message": "Procurar aplicações"
   },
   "atRiskMembers": {
     "message": "Membros em risco"
@@ -1583,38 +1607,6 @@
   "specialCharacters": {
     "message": "Caracteres especiais (!@#$%^&*)"
   },
-  "uppercaseDescription": {
-    "message": "Incluir caracteres em maiúsculas",
-    "description": "Tooltip for the password generator uppercase character checkbox"
-  },
-  "uppercaseLabel": {
-    "message": "A-Z",
-    "description": "Label for the password generator uppercase character checkbox"
-  },
-  "lowercaseDescription": {
-    "message": "Incluir caracteres em minúsculas",
-    "description": "Full description for the password generator lowercase character checkbox"
-  },
-  "lowercaseLabel": {
-    "message": "a-z",
-    "description": "Label for the password generator lowercase character checkbox"
-  },
-  "numbersDescription": {
-    "message": "Incluir números",
-    "description": "Full description for the password generator numbers checkbox"
-  },
-  "numbersLabel": {
-    "message": "0-9",
-    "description": "Label for the password generator numbers checkbox"
-  },
-  "specialCharactersDescription": {
-    "message": "Incluir caracteres especiais",
-    "description": "Full description for the password generator special characters checkbox"
-  },
-  "specialCharactersLabel": {
-    "message": "!@#$%^&*",
-    "description": "Label for the password generator special characters checkbox"
-  },
   "numWords": {
     "message": "Número de palavras"
   },
@@ -1745,6 +1737,9 @@
   "dangerZoneDesc": {
     "message": "Cuidado, estas ações são irreversíveis!"
   },
+  "dangerZoneDescSingular": {
+    "message": "Cuidado, esta ação não é reversível!"
+  },
   "deauthorizeSessions": {
     "message": "Desautorizar sessões"
   },
@@ -1756,6 +1751,15 @@
   },
   "sessionsDeauthorized": {
     "message": "Todas as sessões desautorizadas"
+  },
+  "accountIsManagedMessage": {
+    "message": "Esta conta é gerida por $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "Organization"
+      }
+    }
   },
   "purgeVault": {
     "message": "Purgar cofre"
@@ -4681,11 +4685,17 @@
   "singleOrgDesc": {
     "message": "Impedir os membros de aderirem a outras organizações."
   },
+  "singleOrgPolicyDesc": {
+    "message": "Restringir a adesão de membros a outras organizações. Esta política é necessária para organizações que tenham ativado a verificação de domínio."
+  },
   "singleOrgBlockCreateMessage": {
     "message": "A sua organização atual tem uma política que não lhe permite aderir a mais do que uma organização. Por favor, contacte os administradores da sua organização ou registe-se a partir de uma conta Bitwarden diferente."
   },
   "singleOrgPolicyWarning": {
     "message": "Os membros da organização que não sejam proprietários ou administradores e que já sejam membros de outra organização serão removidos da sua organização."
+  },
+  "singleOrgPolicyMemberWarning": {
+    "message": "Os membros não conformes serão colocados no estado revogado até deixarem todas as outras organizações. Os administradores estão isentos e podem restaurar os membros assim que a conformidade for cumprida."
   },
   "requireSso": {
     "message": "Exigir autenticação de início de sessão único"
@@ -6402,6 +6412,20 @@
   },
   "generateEmail": {
     "message": "Gerar e-mail"
+  },
+  "generatorBoundariesHint": {
+    "message": "O valor deve estar entre $MIN$ e $MAX$",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "Tipo de nome de utilizador"
@@ -9474,6 +9498,38 @@
   "linkedLabelHelpText": {
     "message": "Introduza o ID do HTML, o nome, a aria-label ou o placeholder do campo."
   },
+  "uppercaseDescription": {
+    "message": "Incluir caracteres em maiúsculas",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "Incluir caracteres em minúsculas",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "Incluir números",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "Incluir caracteres especiais",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
+  },
   "addAttachment": {
     "message": "Adicionar anexo"
   },
@@ -9492,5 +9548,37 @@
   },
   "selfHostingTitleProper": {
     "message": "Auto-hospedagem"
+  },
+  "verified-domain-single-org-warning": {
+    "message": "A verificação de um domínio ativará a política de organização única."
+  },
+  "single-org-revoked-user-warning": {
+    "message": "Os membros não conformes serão revogados. Os administradores podem restaurar os membros quando estes saírem de todas as outras organizações."
+  },
+  "deleteOrganizationUser": {
+    "message": "Eliminar $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      },
+      "description": "Title for the delete organization user dialog"
+    }
+  },
+  "deleteOrganizationUserWarning": {
+    "message": "Quando um membro é eliminado, a sua conta Bitwarden e os dados individuais do cofre serão permanentemente eliminados. Os dados da coleção permanecerão na organização. Para os reintegrar, têm de criar uma conta e ser novamente integrados.",
+    "description": "Warning for the delete organization user dialog"
+  },
+  "organizationUserDeleted": {
+    "message": "$NAME$ eliminado",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      }
+    }
+  },
+  "organizationUserDeletedDesc": {
+    "message": "O utilizador foi removido da organização e todos os dados de utilizador associados foram eliminados."
   }
 }
