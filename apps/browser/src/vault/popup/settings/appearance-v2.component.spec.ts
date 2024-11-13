@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { mock } from "jest-mock-extended";
 import { BehaviorSubject } from "rxjs";
@@ -12,6 +12,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { ThemeType } from "@bitwarden/common/platform/enums";
 import { ThemeStateService } from "@bitwarden/common/platform/theming/theme-state.service";
+import { DesignSystemService } from "@bitwarden/components";
 
 import { PopupHeaderComponent } from "../../../platform/popup/layout/popup-header.component";
 import { PopupPageComponent } from "../../../platform/popup/layout/popup-page.component";
@@ -47,6 +48,7 @@ describe("AppearanceV2Component", () => {
   const setShowFavicons = jest.fn().mockResolvedValue(undefined);
   const setEnableBadgeCounter = jest.fn().mockResolvedValue(undefined);
   const setEnableRoutingAnimation = jest.fn().mockResolvedValue(undefined);
+  const compactModeSignal = signal(false);
 
   beforeEach(async () => {
     setSelectedTheme.mockClear();
@@ -71,6 +73,10 @@ describe("AppearanceV2Component", () => {
           provide: BadgeSettingsServiceAbstraction,
           useValue: { enableBadgeCounter$, setEnableBadgeCounter },
         },
+        {
+          provide: DesignSystemService,
+          useValue: { compactMode: compactModeSignal },
+        },
       ],
     })
       .overrideComponent(AppearanceV2Component, {
@@ -94,6 +100,7 @@ describe("AppearanceV2Component", () => {
       enableFavicon: true,
       enableBadgeCounter: true,
       theme: ThemeType.Nord,
+      compactMode: false,
     });
   });
 
@@ -120,6 +127,12 @@ describe("AppearanceV2Component", () => {
       component.appearanceForm.controls.enableAnimations.setValue(false);
 
       expect(setEnableRoutingAnimation).toHaveBeenCalledWith(false);
+    });
+
+    it("updates the animation setting", () => {
+      component.appearanceForm.controls.compactMode.setValue(true);
+
+      expect(compactModeSignal()).toBeTrue();
     });
   });
 });

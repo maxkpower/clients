@@ -12,7 +12,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { ThemeType } from "@bitwarden/common/platform/enums";
 import { ThemeStateService } from "@bitwarden/common/platform/theming/theme-state.service";
-import { CheckboxModule } from "@bitwarden/components";
+import { BadgeModule, CheckboxModule, DesignSystemService } from "@bitwarden/components";
 
 import { CardComponent } from "../../../../../../libs/components/src/card/card.component";
 import { FormFieldModule } from "../../../../../../libs/components/src/form-field/form-field.module";
@@ -35,6 +35,7 @@ import { PopupPageComponent } from "../../../platform/popup/layout/popup-page.co
     SelectModule,
     ReactiveFormsModule,
     CheckboxModule,
+    BadgeModule,
   ],
 })
 export class AppearanceV2Component implements OnInit {
@@ -43,6 +44,7 @@ export class AppearanceV2Component implements OnInit {
     enableBadgeCounter: true,
     theme: ThemeType.System,
     enableAnimations: true,
+    compactMode: false,
   });
 
   /** To avoid flashes of inaccurate values, only show the form after the entire form is populated. */
@@ -59,6 +61,7 @@ export class AppearanceV2Component implements OnInit {
     private formBuilder: FormBuilder,
     private destroyRef: DestroyRef,
     private animationControlService: AnimationControlService,
+    private designSystemService: DesignSystemService,
     i18nService: I18nService,
   ) {
     this.themeOptions = [
@@ -75,6 +78,7 @@ export class AppearanceV2Component implements OnInit {
     const enableAnimations = await firstValueFrom(
       this.animationControlService.enableRoutingAnimation$,
     );
+    const compactMode = this.designSystemService.compactMode;
 
     // Set initial values for the form
     this.appearanceForm.setValue({
@@ -82,6 +86,7 @@ export class AppearanceV2Component implements OnInit {
       enableBadgeCounter,
       theme,
       enableAnimations,
+      compactMode: compactMode(),
     });
 
     this.formLoading = false;
@@ -108,6 +113,12 @@ export class AppearanceV2Component implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((enableBadgeCounter) => {
         void this.updateAnimations(enableBadgeCounter);
+      });
+
+    this.appearanceForm.controls.compactMode.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((compactModeEnabled) => {
+        this.designSystemService.compactMode.set(compactModeEnabled);
       });
   }
 
