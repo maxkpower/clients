@@ -32,7 +32,8 @@ export class MenuTriggerForDirective implements OnDestroy {
   private overlayRef: OverlayRef;
   private defaultMenuConfig: OverlayConfig = {
     panelClass: "bit-menu-panel",
-    hasBackdrop: false,
+    hasBackdrop: true,
+    backdropClass: "cdk-overlay-transparent-backdrop",
     scrollStrategy: this.overlay.scrollStrategies.reposition(),
     positionStrategy: this.overlay
       .position()
@@ -103,7 +104,7 @@ export class MenuTriggerForDirective implements OnDestroy {
           ])
       : this.defaultMenuConfig.positionStrategy;
 
-    const config = { ...this.defaultMenuConfig, positionStrategy };
+    const config = { ...this.defaultMenuConfig, positionStrategy, hasBackdrop: !event };
 
     this.overlayRef = this.overlay.create(config);
 
@@ -188,7 +189,7 @@ export class MenuTriggerForDirective implements OnDestroy {
 
   private disposeAll() {
     this.closedEventsSub?.unsubscribe();
-    this.overlayRef?.dispose();
     this.keyDownEventsSub?.unsubscribe();
+    this.overlayRef?.dispose();
   }
 }
