@@ -67,6 +67,13 @@ pub mod biometrics {
     }
 
     #[napi]
+    async fn needs_setup() -> napi::Result<bool> {
+        Biometric::needs_setup()
+            .await
+            .map_err(|e| napi::Error::from_reason(e.to_string()))
+    }
+
+    #[napi]
     pub async fn set_biometric_secret(
         service: String,
         account: String,
@@ -516,3 +523,16 @@ pub mod ipc {
         }
     }
 }
+
+#[napi]
+pub mod autostart {
+    #[napi]
+    pub async fn set_autostart(autostart: bool, params: Vec<String>) -> napi::Result<()> {
+        desktop_core::autostart::set_autostart(autostart, params)
+            .await
+            .map_err(|e| {
+                napi::Error::from_reason(format!("Error setting autostart - {e} - {e:?}"))
+            })
+    }
+}
+
