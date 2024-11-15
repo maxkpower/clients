@@ -67,13 +67,6 @@ pub mod biometrics {
     }
 
     #[napi]
-    async fn needs_setup() -> napi::Result<bool> {
-        Biometric::needs_setup()
-            .await
-            .map_err(|e| napi::Error::from_reason(e.to_string()))
-    }
-
-    #[napi]
     pub async fn set_biometric_secret(
         service: String,
         account: String,
