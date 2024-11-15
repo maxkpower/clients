@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "欢迎回来"
+  },
   "moveToOrgDesc": {
     "message": "选择一个您想将此项目移至的组织。移动到组织会将该项目的所有权转让给该组织。移动后，您将不再是此项目的直接所有者。"
   },
@@ -259,6 +262,9 @@
   "generatePassword": {
     "message": "生成密码"
   },
+  "generatePassphrase": {
+    "message": "生成密码短语"
+  },
   "type": {
     "message": "类型"
   },
@@ -394,6 +400,10 @@
   "copyPassword": {
     "message": "复制密码"
   },
+  "copyPassphrase": {
+    "message": "复制密码短语",
+    "description": "Copy passphrase to clipboard"
+  },
   "copyUri": {
     "message": "复制 URI"
   },
@@ -407,16 +417,55 @@
     "message": "最小密码长度"
   },
   "uppercase": {
-    "message": "大写 (A-Z)"
+    "message": "大写 (A-Z)",
+    "description": "deprecated. Use uppercaseLabel instead."
   },
   "lowercase": {
-    "message": "小写 (a-z)"
+    "message": "小写 (a-z)",
+    "description": "deprecated. Use lowercaseLabel instead."
   },
   "numbers": {
-    "message": "数字 (0-9)"
+    "message": "数字 (0-9)",
+    "description": "deprecated. Use numbersLabel instead."
   },
   "specialCharacters": {
     "message": "特殊字符 (!@#$%^&*)"
+  },
+  "include": {
+    "message": "包含",
+    "description": "Card header for password generator include block"
+  },
+  "uppercaseDescription": {
+    "message": "包含大写字符",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "包含小写字符",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "包含数字",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "包含特殊字符",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
   },
   "numWords": {
     "message": "单词数"
@@ -442,7 +491,12 @@
     "description": "Minimum Special Characters"
   },
   "ambiguous": {
-    "message": "避免易混淆的字符"
+    "message": "避免易混淆的字符",
+    "description": "deprecated. Use avoidAmbiguous instead."
+  },
+  "avoidAmbiguous": {
+    "message": "避免易混淆的字符",
+    "description": "Label for the avoid ambiguous characters checkbox."
   },
   "generatorPolicyInEffect": {
     "message": "企业策略要求已应用到您的生成器选项中。",
@@ -503,6 +557,9 @@
   "createAccount": {
     "message": "创建账户"
   },
+  "newToBitwarden": {
+    "message": "Bitwarden 新手吗？"
+  },
   "setAStrongPassword": {
     "message": "设置强密码"
   },
@@ -511,6 +568,18 @@
   },
   "logIn": {
     "message": "登录"
+  },
+  "logInToBitwarden": {
+    "message": "登录到 Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "使用通行密钥登录"
+  },
+  "loginWithDevice": {
+    "message": "使用设备登录"
+  },
+  "useSingleSignOn": {
+    "message": "使用单点登录"
   },
   "submit": {
     "message": "提交"
@@ -557,6 +626,15 @@
   },
   "joinOrganization": {
     "message": "加入组织"
+  },
+  "joinOrganizationName": {
+    "message": "加入 $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
     "message": "通过设置主密码完成加入此组织。"
@@ -774,6 +852,10 @@
   },
   "baseUrl": {
     "message": "服务器 URL"
+  },
+  "selfHostBaseUrl": {
+    "message": "自托管服务器 URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "API 服务器 URL"
@@ -1164,6 +1246,9 @@
   "copyNumber": {
     "message": "复制号码",
     "description": "Copy credit card number"
+  },
+  "copyEmail": {
+    "message": "复制电子邮件地址"
   },
   "copySecurityCode": {
     "message": "复制安全码",
@@ -1598,6 +1683,12 @@
   "deleteAccountWarning": {
     "message": "删除账户是永久性操作，无法撤销！"
   },
+  "cannotDeleteAccount": {
+    "message": "无法删除账户"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "此操作无法完成，因为您的账户归组织所有。请联系您的组织管理员获取详细信息。"
+  },
   "accountDeleted": {
     "message": "账户已删除"
   },
@@ -1707,6 +1798,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "您的组织要求您设置主密码。",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "$TOTAL$ 不足",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "verificationRequired": {
     "message": "需要验证",
@@ -2275,7 +2375,8 @@
     "message": "已解锁"
   },
   "generator": {
-    "message": "生成器"
+    "message": "生成器",
+    "description": "Short for 'credential generator'."
   },
   "whatWouldYouLikeToGenerate": {
     "message": "您想要生成什么？"
@@ -2288,6 +2389,23 @@
   },
   "generateUsername": {
     "message": "生成用户名"
+  },
+  "generateEmail": {
+    "message": "生成邮件地址"
+  },
+  "generatorBoundariesHint": {
+    "message": "值必须在 $MIN$ 和 $MAX$ 之间",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "用户名类型"
@@ -2331,6 +2449,14 @@
   },
   "forwardedEmailDesc": {
     "message": "使用外部转发服务生成一个电子邮件别名。"
+  },
+  "forwarderDomainName": {
+    "message": "邮件域名",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "选择一个所选服务支持的域名",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ 错误：$ERRORMESSAGE$",
@@ -2624,7 +2750,7 @@
     "message": "重要事项："
   },
   "accessing": {
-    "message": "Accessing"
+    "message": "正在访问"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "由于无法解密您的访问令牌，您已被注销。请重新登录以解决此问题。"
@@ -2677,9 +2803,6 @@
   "eu": {
     "message": "欧盟",
     "description": "European Union"
-  },
-  "loggingInOn": {
-    "message": "登录到"
   },
   "selfHostedServer": {
     "message": "自托管"
@@ -3098,12 +3221,6 @@
   },
   "textSends": {
     "message": "文本 Send"
-  },
-  "allowScreenshots": {
-    "message": "允许截屏"
-  },
-  "allowScreenshotsDesc": {
-    "message": "允许对 Bitwarden 桌面应用程序截屏。"
   },
   "ssoError": {
     "message": "找不到用于 SSO 登录的可用端口。"

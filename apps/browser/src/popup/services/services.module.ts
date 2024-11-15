@@ -6,29 +6,37 @@ import { ViewCacheService } from "@bitwarden/angular/platform/abstractions/view-
 import { AngularThemingService } from "@bitwarden/angular/platform/services/theming/angular-theming.service";
 import { SafeProvider, safeProvider } from "@bitwarden/angular/platform/utils/safe-provider";
 import {
-  MEMORY_STORAGE,
-  SECURE_STORAGE,
-  OBSERVABLE_DISK_STORAGE,
-  OBSERVABLE_MEMORY_STORAGE,
-  SYSTEM_THEME_OBSERVABLE,
-  SafeInjectionToken,
+  CLIENT_TYPE,
   DEFAULT_VAULT_TIMEOUT,
   INTRAPROCESS_MESSAGING_SUBJECT,
-  CLIENT_TYPE,
+  MEMORY_STORAGE,
+  OBSERVABLE_DISK_STORAGE,
+  OBSERVABLE_MEMORY_STORAGE,
+  SECURE_STORAGE,
+  SYSTEM_THEME_OBSERVABLE,
+  SafeInjectionToken,
   ENV_ADDITIONAL_REGIONS,
 } from "@bitwarden/angular/services/injection-tokens";
 import { JslibServicesModule } from "@bitwarden/angular/services/jslib-services.module";
-import { AnonLayoutWrapperDataService, LockComponentService } from "@bitwarden/auth/angular";
-import { LockService, PinServiceAbstraction } from "@bitwarden/auth/common";
+import {
+  AnonLayoutWrapperDataService,
+  LoginComponentService,
+  LockComponentService,
+} from "@bitwarden/auth/angular";
+import { LockService, LoginEmailService, PinServiceAbstraction } from "@bitwarden/auth/common";
+import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService as EventCollectionServiceAbstraction } from "@bitwarden/common/abstractions/event/event-collection.service";
-import { NotificationsService } from "@bitwarden/common/abstractions/notifications.service";
 import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
-import { AccountService as AccountServiceAbstraction } from "@bitwarden/common/auth/abstractions/account.service";
+import {
+  AccountService,
+  AccountService as AccountServiceAbstraction,
+} from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
+import { SsoLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/sso-login.service.abstraction";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import {
   AutofillSettingsService,
@@ -50,7 +58,6 @@ import {
 } from "@bitwarden/common/platform/abstractions/animation-control.service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
@@ -85,21 +92,30 @@ import { InlineDerivedStateProvider } from "@bitwarden/common/platform/state/imp
 import { PrimarySecondaryStorageService } from "@bitwarden/common/platform/storage/primary-secondary-storage.service";
 import { WindowStorageService } from "@bitwarden/common/platform/storage/window-storage.service";
 import { SyncService } from "@bitwarden/common/platform/sync";
+import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
+import { InternalSendService } from "@bitwarden/common/tools/send/services/send.service.abstraction";
 import { VaultTimeoutStringType } from "@bitwarden/common/types/vault-timeout.type";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { FolderService as FolderServiceAbstraction } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
+import { FolderApiServiceAbstraction } from "@bitwarden/common/vault/abstractions/folder/folder-api.service.abstraction";
+import {
+  FolderService as FolderServiceAbstraction,
+  InternalFolderService,
+} from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { TotpService as TotpServiceAbstraction } from "@bitwarden/common/vault/abstractions/totp.service";
 import { TotpService } from "@bitwarden/common/vault/services/totp.service";
 import { DialogService, ToastService } from "@bitwarden/components";
-import { BiometricsService, BiometricStateService } from "@bitwarden/key-management";
+import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { BiometricStateService, BiometricsService, KeyService } from "@bitwarden/key-management";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { ForegroundLockService } from "../../auth/popup/accounts/foreground-lock.service";
 import { ExtensionAnonLayoutWrapperDataService } from "../../auth/popup/extension-anon-layout-wrapper/extension-anon-layout-wrapper-data.service";
+import { ExtensionLoginComponentService } from "../../auth/popup/login/extension-login-component.service";
 import { AutofillService as AutofillServiceAbstraction } from "../../autofill/services/abstractions/autofill.service";
 import AutofillService from "../../autofill/services/autofill.service";
-import MainBackground from "../../background/main.background";
+import { InlineMenuFieldQualificationService } from "../../autofill/services/inline-menu-field-qualification.service";
 import { ForegroundBrowserBiometricsService } from "../../key-management/biometrics/foreground-browser-biometrics";
+import { BrowserKeyService } from "../../key-management/browser-key.service";
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { runInsideAngular } from "../../platform/browser/run-inside-angular.operator";
 /* eslint-disable no-restricted-imports */
@@ -107,13 +123,12 @@ import { ChromeMessageSender } from "../../platform/messaging/chrome-message.sen
 /* eslint-enable no-restricted-imports */
 import { OffscreenDocumentService } from "../../platform/offscreen-document/abstractions/offscreen-document";
 import { DefaultOffscreenDocumentService } from "../../platform/offscreen-document/offscreen-document.service";
-import BrowserPopupUtils from "../../platform/popup/browser-popup-utils";
 import { BrowserFileDownloadService } from "../../platform/popup/services/browser-file-download.service";
 import { PopupViewCacheService } from "../../platform/popup/view-cache/popup-view-cache.service";
 import { ScriptInjectorService } from "../../platform/services/abstractions/script-injector.service";
-import { BrowserCryptoService } from "../../platform/services/browser-crypto.service";
 import { BrowserEnvironmentService } from "../../platform/services/browser-environment.service";
 import BrowserLocalStorageService from "../../platform/services/browser-local-storage.service";
+import BrowserMemoryStorageService from "../../platform/services/browser-memory-storage.service";
 import { BrowserScriptInjectorService } from "../../platform/services/browser-script-injector.service";
 import I18nService from "../../platform/services/i18n.service";
 import { ForegroundPlatformUtilsService } from "../../platform/services/platform-utils/foreground-platform-utils.service";
@@ -121,6 +136,7 @@ import { BrowserSdkClientFactory } from "../../platform/services/sdk/browser-sdk
 import { ForegroundTaskSchedulerService } from "../../platform/services/task-scheduler/foreground-task-scheduler.service";
 import { BrowserStorageServiceProvider } from "../../platform/storage/browser-storage-service.provider";
 import { ForegroundMemoryStorageService } from "../../platform/storage/foreground-memory-storage.service";
+import { ForegroundSyncService } from "../../platform/sync/foreground-sync.service";
 import { fromChromeRuntimeMessaging } from "../../platform/utils/from-chrome-runtime-messaging";
 import { ExtensionLockComponentService } from "../../services/extension-lock-component.service";
 import { ForegroundVaultTimeoutService } from "../../services/vault-timeout/foreground-vault-timeout.service";
@@ -142,26 +158,6 @@ const DISK_BACKUP_LOCAL_STORAGE = new SafeInjectionToken<
   AbstractStorageService & ObservableStorageService
 >("DISK_BACKUP_LOCAL_STORAGE");
 
-const needsBackgroundInit = BrowserPopupUtils.backgroundInitializationRequired();
-const mainBackground: MainBackground = needsBackgroundInit
-  ? createLocalBgService()
-  : BrowserApi.getBackgroundPage().bitwardenMain;
-
-function createLocalBgService() {
-  const localBgService = new MainBackground(true);
-  // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  localBgService.bootstrap();
-  return localBgService;
-}
-
-/** @deprecated This method needs to be removed as part of MV3 conversion. Please do not add more and actively try to remove usages */
-function getBgService<T>(service: keyof MainBackground) {
-  return (): T => {
-    return mainBackground ? (mainBackground[service] as any as T) : null;
-  };
-}
-
 /**
  * Provider definitions used in the ngModule.
  * Add your provider definition here using the safeProvider function as a wrapper. This will give you type safety.
@@ -172,6 +168,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider(DebounceNavigationService),
   safeProvider(DialogService),
   safeProvider(PopupCloseWarningService),
+  safeProvider(InlineMenuFieldQualificationService),
   safeProvider({
     provide: DEFAULT_VAULT_TIMEOUT,
     useValue: VaultTimeoutStringType.OnRestart,
@@ -212,7 +209,7 @@ const safeProviders: SafeProvider[] = [
     deps: [GlobalStateProvider],
   }),
   safeProvider({
-    provide: CryptoService,
+    provide: KeyService,
     useFactory: (
       pinService: PinServiceAbstraction,
       masterPasswordService: InternalMasterPasswordServiceAbstraction,
@@ -228,7 +225,7 @@ const safeProviders: SafeProvider[] = [
       biometricsService: BiometricsService,
       kdfConfigService: KdfConfigService,
     ) => {
-      const cryptoService = new BrowserCryptoService(
+      const keyService = new BrowserKeyService(
         pinService,
         masterPasswordService,
         keyGenerationService,
@@ -243,8 +240,8 @@ const safeProviders: SafeProvider[] = [
         biometricsService,
         kdfConfigService,
       );
-      new ContainerService(cryptoService, encryptService).attachToGlobal(self);
-      return cryptoService;
+      new ContainerService(keyService, encryptService).attachToGlobal(self);
+      return keyService;
     },
     deps: [
       PinServiceAbstraction,
@@ -298,8 +295,23 @@ const safeProviders: SafeProvider[] = [
   }),
   safeProvider({
     provide: SyncService,
-    useFactory: getBgService<SyncService>("syncService"),
-    deps: [],
+    useClass: ForegroundSyncService,
+    deps: [
+      StateService,
+      InternalFolderService,
+      FolderApiServiceAbstraction,
+      MessageSender,
+      LogService,
+      CipherService,
+      CollectionService,
+      ApiService,
+      AccountServiceAbstraction,
+      AuthService,
+      InternalSendService,
+      SendApiService,
+      MessageListener,
+      StateProvider,
+    ],
   }),
   safeProvider({
     provide: DomainSettingsService,
@@ -350,11 +362,6 @@ const safeProviders: SafeProvider[] = [
     deps: [MessagingServiceAbstraction],
   }),
   safeProvider({
-    provide: NotificationsService,
-    useFactory: getBgService<NotificationsService>("notificationsService"),
-    deps: [],
-  }),
-  safeProvider({
     provide: VaultFilterService,
     useClass: VaultFilterService,
     deps: [
@@ -373,8 +380,8 @@ const safeProviders: SafeProvider[] = [
   }),
   safeProvider({
     provide: MEMORY_STORAGE,
-    useFactory: getBgService<AbstractStorageService>("memoryStorageService"),
-    deps: [],
+    useFactory: (memoryStorage: AbstractStorageService) => memoryStorage,
+    deps: [OBSERVABLE_MEMORY_STORAGE],
   }),
   safeProvider({
     provide: OBSERVABLE_MEMORY_STORAGE,
@@ -383,9 +390,7 @@ const safeProviders: SafeProvider[] = [
         return new ForegroundMemoryStorageService();
       }
 
-      return getBgService<AbstractStorageService & ObservableStorageService>(
-        "memoryStorageForStateProviders",
-      )();
+      return new BrowserMemoryStorageService();
     },
     deps: [],
   }),
@@ -398,9 +403,7 @@ const safeProviders: SafeProvider[] = [
         return regularMemoryStorageService;
       }
 
-      return getBgService<AbstractStorageService & ObservableStorageService>(
-        "largeObjectMemoryStorageForStateProviders",
-      )();
+      return new ForegroundMemoryStorageService();
     },
     deps: [OBSERVABLE_MEMORY_STORAGE],
   }),
@@ -485,15 +488,7 @@ const safeProviders: SafeProvider[] = [
   }),
   safeProvider({
     provide: INTRAPROCESS_MESSAGING_SUBJECT,
-    useFactory: () => {
-      if (BrowserPopupUtils.backgroundInitializationRequired()) {
-        // There is no persistent main background which means we have one in memory,
-        // we need the same instance that our in memory background is utilizing.
-        return getBgService("intraprocessMessagingSubject")();
-      } else {
-        return new Subject<Message<Record<string, unknown>>>();
-      }
-    },
+    useFactory: () => new Subject<Message<Record<string, unknown>>>(),
     deps: [],
   }),
   safeProvider({
@@ -504,23 +499,6 @@ const safeProviders: SafeProvider[] = [
         new ChromeMessageSender(logService), // For sending messages to different contexts
       ),
     deps: [INTRAPROCESS_MESSAGING_SUBJECT, LogService],
-  }),
-  safeProvider({
-    provide: INTRAPROCESS_MESSAGING_SUBJECT,
-    useFactory: () => {
-      if (needsBackgroundInit) {
-        // We will have created a popup within this context, in that case
-        // we want to make sure we have the same subject as that context so we
-        // can message with it.
-        return getBgService("intraprocessMessagingSubject")();
-      } else {
-        // There isn't a locally created background so we will communicate with
-        // the true background through chrome apis, in that case, we can just create
-        // one for ourself.
-        return new Subject<Message<Record<string, unknown>>>();
-      }
-    },
-    deps: [],
   }),
   safeProvider({
     provide: DISK_BACKUP_LOCAL_STORAGE,
@@ -563,13 +541,25 @@ const safeProviders: SafeProvider[] = [
   }),
   safeProvider({
     provide: ForegroundTaskSchedulerService,
-    useFactory: getBgService<ForegroundTaskSchedulerService>("taskSchedulerService"),
-    deps: [],
+    useClass: ForegroundTaskSchedulerService,
+    deps: [LogService, StateProvider],
   }),
   safeProvider({
     provide: AnonLayoutWrapperDataService,
-    useClass: ExtensionAnonLayoutWrapperDataService,
+    useExisting: ExtensionAnonLayoutWrapperDataService,
     deps: [],
+  }),
+  safeProvider({
+    provide: LoginComponentService,
+    useClass: ExtensionLoginComponentService,
+    deps: [
+      CryptoFunctionService,
+      EnvironmentService,
+      PasswordGenerationServiceAbstraction,
+      PlatformUtilsService,
+      SsoLoginServiceAbstraction,
+      ExtensionAnonLayoutWrapperDataService,
+    ],
   }),
   safeProvider({
     provide: LockService,
@@ -579,6 +569,16 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: SdkClientFactory,
     useClass: flagEnabled("sdk") ? BrowserSdkClientFactory : NoopSdkClientFactory,
+    deps: [],
+  }),
+  safeProvider({
+    provide: LoginEmailService,
+    useClass: LoginEmailService,
+    deps: [AccountService, AuthService, StateProvider],
+  }),
+  safeProvider({
+    provide: ExtensionAnonLayoutWrapperDataService,
+    useClass: ExtensionAnonLayoutWrapperDataService,
     deps: [],
   }),
 ];

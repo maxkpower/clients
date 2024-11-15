@@ -15,6 +15,7 @@ import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
+import { InlineMenuFieldQualificationService } from "../../../../../browser/src/autofill/services/inline-menu-field-qualification.service";
 import { BrowserApi } from "../../../platform/browser/browser-api";
 
 import { VaultPopupAutofillService } from "./vault-popup-autofill.service";
@@ -39,6 +40,7 @@ describe("VaultPopupItemsService", () => {
   const collectionService = mock<CollectionService>();
   const vaultAutofillServiceMock = mock<VaultPopupAutofillService>();
   const syncServiceMock = mock<SyncService>();
+  const inlineMenuFieldQualificationServiceMock = mock<InlineMenuFieldQualificationService>();
 
   beforeEach(() => {
     allCiphers = cipherFactory(10);
@@ -78,6 +80,11 @@ describe("VaultPopupItemsService", () => {
       url: "https://example.com",
     } as chrome.tabs.Tab);
 
+    vaultAutofillServiceMock.nonLoginCipherTypesOnPage$ = new BehaviorSubject({
+      [CipherType.Card]: true,
+      [CipherType.Identity]: true,
+    });
+
     mockOrg = {
       id: "org1",
       name: "Organization 1",
@@ -105,6 +112,10 @@ describe("VaultPopupItemsService", () => {
         { provide: CollectionService, useValue: collectionService },
         { provide: VaultPopupAutofillService, useValue: vaultAutofillServiceMock },
         { provide: SyncService, useValue: syncServiceMock },
+        {
+          provide: InlineMenuFieldQualificationService,
+          useValue: inlineMenuFieldQualificationServiceMock,
+        },
       ],
     });
 
@@ -202,6 +213,7 @@ describe("VaultPopupItemsService", () => {
         [CipherType.Card]: 2,
         [CipherType.Identity]: 3,
         [CipherType.SecureNote]: 4,
+        [CipherType.SshKey]: 5,
       };
 
       // Assume all ciphers are autofill ciphers to test sorting
@@ -277,6 +289,10 @@ describe("VaultPopupItemsService", () => {
   });
 
   describe("remainingCiphers$", () => {
+    beforeEach(() => {
+      searchService.isSearchable.mockImplementation(async (text) => text.length > 2);
+    });
+
     it("should exclude autofill and favorite ciphers", (done) => {
       service.remainingCiphers$.subscribe((ciphers) => {
         // 2 autofill ciphers, 2 favorite ciphers = 6 remaining ciphers to show
@@ -285,9 +301,17 @@ describe("VaultPopupItemsService", () => {
       });
     });
 
-    it("should sort by last used then by name", (done) => {
-      service.remainingCiphers$.subscribe((ciphers) => {
+    it("should sort by last used then by name by default", (done) => {
+      service.remainingCiphers$.subscribe(() => {
         expect(cipherServiceMock.getLocaleSortingFunction).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it("should NOT sort by last used then by name when search text is applied", (done) => {
+      service.applyFilter("Login");
+      service.remainingCiphers$.subscribe(() => {
+        expect(cipherServiceMock.getLocaleSortingFunction).not.toHaveBeenCalled();
         done();
       });
     });

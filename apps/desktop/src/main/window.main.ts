@@ -12,15 +12,7 @@ import { BiometricStateService } from "@bitwarden/key-management";
 
 import { WindowState } from "../platform/models/domain/window-state";
 import { DesktopSettingsService } from "../platform/services/desktop-settings.service";
-import {
-  cleanUserAgent,
-  isDev,
-  isLinux,
-  isMac,
-  isMacAppStore,
-  isSnapStore,
-  isWindows,
-} from "../utils";
+import { cleanUserAgent, isDev, isLinux, isMac, isMacAppStore, isWindows } from "../utils";
 
 const mainWindowSizeKey = "mainWindowSize";
 const WindowEventHandlingDelay = 100;
@@ -69,16 +61,22 @@ export class WindowMain {
       this.logService.info("Render process reloaded");
     });
 
-    this.desktopSettingsService.allowScreenshots$.subscribe((allowed) => {
-      if (this.win == null) {
-        return;
+    ipcMain.on("window-focus", () => {
+      if (this.win != null) {
+        this.win.show();
+        this.win.focus();
       }
-      this.win.setContentProtection(!allowed);
+    });
+
+    ipcMain.on("window-hide", () => {
+      if (this.win != null) {
+        this.win.hide();
+      }
     });
 
     return new Promise<void>((resolve, reject) => {
       try {
-        if (!isMacAppStore() && !isSnapStore()) {
+        if (!isMacAppStore()) {
           const gotTheLock = app.requestSingleInstanceLock();
           if (!gotTheLock) {
             app.quit();
@@ -276,14 +274,6 @@ export class WindowMain {
         windowIsFocused: true,
       });
     });
-
-    firstValueFrom(this.desktopSettingsService.allowScreenshots$)
-      .then((allowScreenshots) => {
-        this.win.setContentProtection(!allowScreenshots);
-      })
-      .catch((e) => {
-        this.logService.error(e);
-      });
 
     if (this.createWindowCallback) {
       this.createWindowCallback(this.win);

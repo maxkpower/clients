@@ -29,12 +29,14 @@ import { PermissionsApi } from "@bitwarden/common/admin-console/models/api/permi
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ProductTierType } from "@bitwarden/common/billing/enums";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { DialogService, ToastService } from "@bitwarden/components";
 
 import {
-  GroupService,
-  GroupView,
+  GroupApiService,
+  GroupDetailsView,
   OrganizationUserAdminView,
   UserAdminService,
 } from "../../../core";
@@ -65,6 +67,7 @@ export interface MemberDialogParams {
   isOnSecretsManagerStandalone: boolean;
   initialTab?: MemberDialogTab;
   numConfirmedMembers: number;
+  managedByOrganization?: boolean;
 }
 
 export enum MemberDialogResult {
@@ -124,6 +127,10 @@ export class MemberDialogComponent implements OnDestroy {
     manageResetPassword: false,
   });
 
+  protected accountDeprovisioningEnabled$: Observable<boolean> = this.configService.getFeatureFlag$(
+    FeatureFlag.AccountDeprovisioning,
+  );
+
   private destroy$ = new Subject<void>();
 
   get customUserTypeSelected(): boolean {
@@ -137,13 +144,14 @@ export class MemberDialogComponent implements OnDestroy {
     private formBuilder: FormBuilder,
     // TODO: We should really look into consolidating naming conventions for these services
     private collectionAdminService: CollectionAdminService,
-    private groupService: GroupService,
+    private groupService: GroupApiService,
     private userService: UserAdminService,
     private organizationUserApiService: OrganizationUserApiService,
     private dialogService: DialogService,
     private accountService: AccountService,
     organizationService: OrganizationService,
     private toastService: ToastService,
+    private configService: ConfigService,
   ) {
     this.organization$ = organizationService
       .get$(this.params.organizationId)
@@ -163,8 +171,8 @@ export class MemberDialogComponent implements OnDestroy {
     const groups$ = this.organization$.pipe(
       switchMap((organization) =>
         organization.useGroups
-          ? this.groupService.getAll(this.params.organizationId)
-          : of([] as GroupView[]),
+          ? this.groupService.getAllDetails(this.params.organizationId)
+          : of([] as GroupDetailsView[]),
       ),
     );
 
@@ -270,7 +278,7 @@ export class MemberDialogComponent implements OnDestroy {
 
   private loadOrganizationUser(
     userDetails: OrganizationUserAdminView,
-    groups: GroupView[],
+    groups: GroupDetailsView[],
     collections: CollectionAdminView[],
     organization: Organization,
   ) {
@@ -464,7 +472,7 @@ export class MemberDialogComponent implements OnDestroy {
     this.close(MemberDialogResult.Saved);
   };
 
-  delete = async () => {
+  remove = async () => {
     if (!this.editMode) {
       return;
     }
@@ -561,6 +569,39 @@ export class MemberDialogComponent implements OnDestroy {
     this.close(MemberDialogResult.Restored);
   };
 
+  delete = async () => {
+    if (!this.editMode) {
+      return;
+    }
+
+    const confirmed = await this.dialogService.openSimpleDialog({
+      title: {
+        key: "deleteOrganizationUser",
+        placeholders: [this.params.name],
+      },
+      content: { key: "deleteOrganizationUserWarning" },
+      type: "warning",
+      acceptButtonText: { key: "delete" },
+      cancelButtonText: { key: "cancel" },
+    });
+
+    if (!confirmed) {
+      return false;
+    }
+
+    await this.organizationUserApiService.deleteOrganizationUser(
+      this.params.organizationId,
+      this.params.organizationUserId,
+    );
+
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("organizationUserDeleted", this.params.name),
+    });
+    this.close(MemberDialogResult.Deleted);
+  };
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -594,7 +635,7 @@ function mapCollectionToAccessItemView(
   collection: CollectionAdminView,
   organization: Organization,
   accessSelection?: CollectionAccessSelectionView,
-  group?: GroupView,
+  group?: GroupDetailsView,
 ): AccessItemView {
   return {
     type: AccessItemType.Collection,
@@ -607,7 +648,7 @@ function mapCollectionToAccessItemView(
   };
 }
 
-function mapGroupToAccessItemView(group: GroupView): AccessItemView {
+function mapGroupToAccessItemView(group: GroupDetailsView): AccessItemView {
   return {
     type: AccessItemType.Group,
     id: group.id,

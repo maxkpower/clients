@@ -1,4 +1,5 @@
-import { Subject, switchMap, timer } from "rxjs";
+import { startWith, Subject, Subscription, switchMap, timer } from "rxjs";
+import { pairwise } from "rxjs/operators";
 
 import { CLEAR_NOTIFICATION_LOGIN_DATA_DURATION } from "@bitwarden/common/autofill/constants";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -23,7 +24,9 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
   private websiteOriginsWithFields: WebsiteOriginsWithFields = new Map();
   private activeFormSubmissionRequests: ActiveFormSubmissionRequests = new Set();
   private modifyLoginCipherFormData: ModifyLoginCipherFormDataForTab = new Map();
+  private featureFlagState$: Subscription;
   private clearLoginCipherFormDataSubject: Subject<void> = new Subject();
+  private notificationFallbackTimeout: number | NodeJS.Timeout | null;
   private readonly formSubmissionRequestMethods: Set<string> = new Set(["POST", "PUT", "PATCH"]);
   private readonly extensionMessageHandlers: OverlayNotificationsExtensionMessageHandlers = {
     formFieldSubmitted: ({ message, sender }) => this.storeModifiedLoginFormData(message, sender),
@@ -41,18 +44,34 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
    * Initialize the overlay notifications background service.
    */
   async init() {
-    const featureFlagActive = await this.configService.getFeatureFlag(
-      FeatureFlag.NotificationBarAddLoginImprovements,
-    );
-    if (!featureFlagActive) {
-      return;
-    }
-
-    this.setupExtensionListeners();
+    this.featureFlagState$ = this.configService
+      .getFeatureFlag$(FeatureFlag.NotificationBarAddLoginImprovements)
+      .pipe(startWith(undefined), pairwise())
+      .subscribe(([prev, current]) => this.handleInitFeatureFlagChange(prev, current));
     this.clearLoginCipherFormDataSubject
       .pipe(switchMap(() => timer(CLEAR_NOTIFICATION_LOGIN_DATA_DURATION)))
       .subscribe(() => this.modifyLoginCipherFormData.clear());
   }
+
+  /**
+   * Handles enabling/disabling the extension listeners that trigger the
+   * overlay notifications based on the feature flag state.
+   *
+   * @param previousValue - The previous value of the feature flag
+   * @param currentValue - The current value of the feature flag
+   */
+  private handleInitFeatureFlagChange = (previousValue: boolean, currentValue: boolean) => {
+    if (previousValue === currentValue) {
+      return;
+    }
+
+    if (currentValue) {
+      this.setupExtensionListeners();
+      return;
+    }
+
+    this.removeExtensionListeners();
+  };
 
   /**
    * Handles the response from the content script with the page details. Triggers an initialization
@@ -126,6 +145,10 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
     message: OverlayNotificationsExtensionMessage,
     sender: chrome.runtime.MessageSender,
   ) => {
+    if (!this.websiteOriginsWithFields.has(sender.tab.id)) {
+      return;
+    }
+
     const { uri, username, password, newPassword } = message;
     if (!username && !password && !newPassword) {
       return;
@@ -142,7 +165,28 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
     }
 
     this.modifyLoginCipherFormData.set(sender.tab.id, formData);
+
+    this.clearNotificationFallbackTimeout();
+    this.notificationFallbackTimeout = setTimeout(
+      () =>
+        this.setupNotificationInitTrigger(
+          sender.tab.id,
+          "",
+          this.modifyLoginCipherFormData.get(sender.tab.id),
+        ).catch((error) => this.logService.error(error)),
+      1500,
+    );
   };
+
+  /**
+   * Clears the timeout used when triggering a notification on click of the submit button.
+   */
+  private clearNotificationFallbackTimeout() {
+    if (this.notificationFallbackTimeout) {
+      clearTimeout(this.notificationFallbackTimeout);
+      this.notificationFallbackTimeout = null;
+    }
+  }
 
   /**
    * Determines if the sender of the message is from an excluded domain. This is used to prevent the
@@ -289,7 +333,7 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
 
     const response = (await BrowserApi.tabSendMessage(
       tab,
-      { command: "getFormFieldDataForNotification" },
+      { command: "getInlineMenuFormFieldData" },
       { frameId },
     )) as OverlayNotificationsExtensionMessage;
     if (response) {
@@ -306,9 +350,13 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
   private handleOnCompletedRequestEvent = async (details: chrome.webRequest.WebResponseDetails) => {
     if (
       this.requestHostIsInvalid(details) ||
-      isInvalidResponseStatusCode(details.statusCode) ||
       !this.activeFormSubmissionRequests.has(details.requestId)
     ) {
+      return;
+    }
+
+    if (isInvalidResponseStatusCode(details.statusCode)) {
+      this.clearNotificationFallbackTimeout();
       return;
     }
 
@@ -335,6 +383,8 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
     requestId: string,
     modifyLoginData: ModifyLoginCipherFormData,
   ) => {
+    this.clearNotificationFallbackTimeout();
+
     const tab = await BrowserApi.getTab(tabId);
     if (tab.status !== "complete") {
       await this.delayNotificationInitUntilTabIsComplete(tabId, requestId, modifyLoginData);
@@ -421,7 +471,7 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
   private shouldTriggerChangePasswordNotification = (
     modifyLoginData: ModifyLoginCipherFormData,
   ) => {
-    return modifyLoginData.newPassword && !modifyLoginData.username;
+    return modifyLoginData?.newPassword && !modifyLoginData.username;
   };
 
   /**
@@ -430,7 +480,7 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
    * @param modifyLoginData - The modified login form data
    */
   private shouldTriggerAddLoginNotification = (modifyLoginData: ModifyLoginCipherFormData) => {
-    return modifyLoginData.username && (modifyLoginData.password || modifyLoginData.newPassword);
+    return modifyLoginData?.username && (modifyLoginData.password || modifyLoginData.newPassword);
   };
 
   /**
@@ -463,9 +513,18 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
    * Sets up the listeners for the extension messages and the tab events.
    */
   private setupExtensionListeners() {
-    BrowserApi.messageListener("overlay-notifications", this.handleExtensionMessage);
+    BrowserApi.addListener(chrome.runtime.onMessage, this.handleExtensionMessage);
     chrome.tabs.onRemoved.addListener(this.handleTabRemoved);
     chrome.tabs.onUpdated.addListener(this.handleTabUpdated);
+  }
+
+  /**
+   * Removes the listeners for the extension messages and the tab events.
+   */
+  private removeExtensionListeners() {
+    BrowserApi.removeListener(chrome.runtime.onMessage, this.handleExtensionMessage);
+    chrome.tabs.onRemoved.removeListener(this.handleTabRemoved);
+    chrome.tabs.onUpdated.removeListener(this.handleTabUpdated);
   }
 
   /**
@@ -517,8 +576,20 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
    * @param changeInfo - The change info of the tab
    */
   private handleTabUpdated = (tabId: number, changeInfo: chrome.tabs.TabChangeInfo) => {
-    if (changeInfo.status === "loading" && this.websiteOriginsWithFields.has(tabId)) {
-      this.websiteOriginsWithFields.delete(tabId);
+    if (changeInfo.status !== "loading" || !changeInfo.url) {
+      return;
     }
+
+    const originPatterns = this.websiteOriginsWithFields.get(tabId);
+    if (!originPatterns) {
+      return;
+    }
+
+    const matchPatters = generateDomainMatchPatterns(changeInfo.url);
+    if (matchPatters.some((pattern) => originPatterns.has(pattern))) {
+      return;
+    }
+
+    this.websiteOriginsWithFields.delete(tabId);
   };
 }

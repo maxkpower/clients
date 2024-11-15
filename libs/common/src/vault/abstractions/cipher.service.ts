@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 
-import { UserKeyRotationDataProvider } from "@bitwarden/auth/common";
 import { LocalData } from "@bitwarden/common/vault/models/data/local.data";
+import { UserKeyRotationDataProvider } from "@bitwarden/key-management";
 
 import { UriMatchStrategySetting } from "../../models/domain/domain-service";
 import { SymmetricCryptoKey } from "../../platform/models/domain/symmetric-crypto-key";
@@ -17,7 +17,7 @@ import { FieldView } from "../models/view/field.view";
 import { AddEditCipherInfo } from "../types/add-edit-cipher-info";
 
 export abstract class CipherService implements UserKeyRotationDataProvider<CipherWithIdRequest> {
-  cipherViews$: Observable<Record<CipherId, CipherView>>;
+  cipherViews$: Observable<CipherView[]>;
   ciphers$: Observable<Record<CipherId, CipherData>>;
   localData$: Observable<Record<CipherId, LocalData>>;
   /**
@@ -119,7 +119,7 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
    * Used for Unassigned ciphers or when the user only has admin access to the cipher (not assigned normally).
    * @param cipher
    */
-  saveCollectionsWithServerAdmin: (cipher: Cipher) => Promise<void>;
+  saveCollectionsWithServerAdmin: (cipher: Cipher) => Promise<Cipher>;
   /**
    * Bulk update collections for many ciphers with the server
    * @param orgId

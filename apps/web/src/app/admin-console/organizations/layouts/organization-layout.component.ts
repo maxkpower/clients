@@ -51,12 +51,9 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
   showPaymentAndHistory$: Observable<boolean>;
   hideNewOrgButton$: Observable<boolean>;
   organizationIsUnmanaged$: Observable<boolean>;
+  isAccessIntelligenceFeatureEnabled = false;
 
   private _destroy = new Subject<void>();
-
-  protected consolidatedBillingEnabled$ = this.configService.getFeatureFlag$(
-    FeatureFlag.EnableConsolidatedBilling,
-  );
 
   constructor(
     private route: ActivatedRoute,
@@ -69,6 +66,10 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     document.body.classList.remove("layout_frontend");
+
+    this.isAccessIntelligenceFeatureEnabled = await this.configService.getFeatureFlag(
+      FeatureFlag.AccessIntelligence,
+    );
 
     this.organization$ = this.route.params
       .pipe(takeUntil(this._destroy))
@@ -96,14 +97,9 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
       switchMap((organization) => this.providerService.get$(organization.providerId)),
     );
 
-    this.organizationIsUnmanaged$ = combineLatest([
-      this.consolidatedBillingEnabled$,
-      this.organization$,
-      provider$,
-    ]).pipe(
+    this.organizationIsUnmanaged$ = combineLatest([this.organization$, provider$]).pipe(
       map(
-        ([consolidatedBillingEnabled, organization, provider]) =>
-          !consolidatedBillingEnabled ||
+        ([organization, provider]) =>
           !organization.hasProvider ||
           !provider ||
           provider.providerStatus !== ProviderStatusType.Billable,

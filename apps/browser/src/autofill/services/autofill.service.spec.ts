@@ -75,6 +75,8 @@ describe("AutofillService", () => {
   let autofillService: AutofillService;
   const cipherService = mock<CipherService>();
   let inlineMenuVisibilityMock$!: BehaviorSubject<InlineMenuVisibilitySetting>;
+  let showInlineMenuCardsMock$!: BehaviorSubject<boolean>;
+  let showInlineMenuIdentitiesMock$!: BehaviorSubject<boolean>;
   let autofillSettingsService: MockProxy<AutofillSettingsServiceAbstraction>;
   const mockUserId = Utils.newGuid() as UserId;
   const accountService: FakeAccountService = mockAccountServiceWith(mockUserId);
@@ -98,8 +100,12 @@ describe("AutofillService", () => {
   beforeEach(() => {
     scriptInjectorService = new BrowserScriptInjectorService(platformUtilsService, logService);
     inlineMenuVisibilityMock$ = new BehaviorSubject(AutofillOverlayVisibility.OnFieldFocus);
+    showInlineMenuCardsMock$ = new BehaviorSubject(false);
+    showInlineMenuIdentitiesMock$ = new BehaviorSubject(false);
     autofillSettingsService = mock<AutofillSettingsServiceAbstraction>();
     autofillSettingsService.inlineMenuVisibility$ = inlineMenuVisibilityMock$;
+    autofillSettingsService.showInlineMenuCards$ = showInlineMenuCardsMock$;
+    autofillSettingsService.showInlineMenuIdentities$ = showInlineMenuIdentitiesMock$;
     activeAccountStatusMock$ = new BehaviorSubject(AuthenticationStatus.Unlocked);
     authService = mock<AuthService>();
     authService.activeAccountStatus$ = activeAccountStatusMock$;
@@ -281,41 +287,6 @@ describe("AutofillService", () => {
 
         expect(BrowserApi.tabsQuery).toHaveBeenCalledTimes(1);
         expect(BrowserApi.tabSendMessageData).not.toHaveBeenCalled();
-      });
-
-      describe("updates the inline menu visibility setting", () => {
-        it("when changing the inline menu from on focus of field to on button click", async () => {
-          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnButtonClick);
-          await flushPromises();
-
-          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
-            tab1,
-            "updateAutofillInlineMenuVisibility",
-            { inlineMenuVisibility: AutofillOverlayVisibility.OnButtonClick },
-          );
-          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
-            tab2,
-            "updateAutofillInlineMenuVisibility",
-            { inlineMenuVisibility: AutofillOverlayVisibility.OnButtonClick },
-          );
-        });
-
-        it("when changing the inline menu from button click to field focus", async () => {
-          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnButtonClick);
-          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnFieldFocus);
-          await flushPromises();
-
-          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
-            tab1,
-            "updateAutofillInlineMenuVisibility",
-            { inlineMenuVisibility: AutofillOverlayVisibility.OnFieldFocus },
-          );
-          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
-            tab2,
-            "updateAutofillInlineMenuVisibility",
-            { inlineMenuVisibility: AutofillOverlayVisibility.OnFieldFocus },
-          );
-        });
       });
 
       describe("reloads the autofill scripts", () => {
@@ -3286,10 +3257,6 @@ describe("AutofillService", () => {
             );
 
             expect(AutofillService.forCustomFieldsOnly).toHaveBeenCalledWith(excludedField);
-            expect(AutofillService["isExcludedFieldType"]).toHaveBeenCalledWith(
-              excludedField,
-              AutoFillConstants.ExcludedAutofillTypes,
-            );
             expect(AutofillService["isFieldMatch"]).not.toHaveBeenCalled();
             expect(value.script).toStrictEqual([]);
           });
@@ -4719,8 +4686,6 @@ describe("AutofillService", () => {
 
       const result = AutofillService["fieldIsFuzzyMatch"](field, ["some-value"]);
 
-      expect(AutofillService.hasValue).toHaveBeenCalledTimes(7);
-      expect(AutofillService["fuzzyMatch"]).not.toHaveBeenCalled();
       expect(result).toBe(false);
     });
 

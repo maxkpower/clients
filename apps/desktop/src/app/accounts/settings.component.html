@@ -419,21 +419,21 @@
                   "enableHardwareAccelerationDesc" | i18n
                 }}</small>
               </div>
-              <div class="form-group" *ngIf="!isLinux">
+              <div class="form-group" *ngIf="showSshAgentOption">
                 <div class="checkbox">
-                  <label for="allowScreenshots">
+                  <label for="enableSshAgent">
                     <input
-                      id="allowScreenshots"
+                      id="enableSshAgent"
                       type="checkbox"
-                      aria-describedby="allowScreenshotsHelp"
-                      formControlName="allowScreenshots"
-                      (change)="saveAllowScreenshots()"
+                      aria-describedby="enableSshAgentHelp"
+                      formControlName="enableSshAgent"
+                      (change)="saveSshAgent()"
                     />
-                    {{ "allowScreenshots" | i18n }}
+                    {{ "enableSshAgent" | i18n }}
                   </label>
                 </div>
-                <small id="allowScreenshotsHelp" class="help-block">{{
-                  "allowScreenshotsDesc" | i18n
+                <small id="enableSshAgentHelp" class="help-block">{{
+                  "enableSshAgentDesc" | i18n
                 }}</small>
               </div>
               <div class="form-group" *ngIf="showDuckDuckGoIntegrationOption">

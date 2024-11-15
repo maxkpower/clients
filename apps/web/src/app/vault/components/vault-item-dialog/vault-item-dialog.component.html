@@ -7,6 +7,7 @@
       *ngIf="showCipherView"
       [cipher]="cipher"
       [collections]="collections"
+      [isAdminConsole]="formConfig.isAdminConsole"
     ></app-cipher-view>
     <vault-cipher-form
       *ngIf="loadForm"
@@ -72,7 +73,7 @@
         buttonType="danger"
         [appA11yTitle]="'delete' | i18n"
         [bitAction]="delete"
-        [disabled]="!canDelete"
+        [disabled]="!(canDeleteCipher$ | async)"
         data-testid="delete-cipher-btn"
       ></button>
     </div>

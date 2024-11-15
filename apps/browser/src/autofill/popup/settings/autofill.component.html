@@ -11,7 +11,7 @@
         <h2 bitTypography="h6">{{ "autofillSuggestionsSectionTitle" | i18n }}</h2>
       </bit-section-header>
       <bit-card>
-        <bit-form-control>
+        <bit-form-control [disableMargin]="!enableInlineMenu && !canOverrideBrowserAutofillSetting">
           <input
             bitCheckbox
             id="show-inline-menu"
@@ -26,19 +26,10 @@
           >
             {{ "showInlineMenuOnFormFieldsDescAlt" | i18n }}
           </bit-hint>
-        </bit-form-control>
-        <bit-form-control *ngIf="enableInlineMenu" class="tw-pl-5">
-          <input
-            bitCheckbox
-            id="show-autofill-suggestions-on-icon"
-            type="checkbox"
-            (change)="updateInlineMenuVisibility()"
-            [(ngModel)]="enableInlineMenuOnIconSelect"
-          />
-          <bit-label for="show-autofill-suggestions-on-icon">
-            {{ "showInlineMenuOnIconSelectionLabel" | i18n }}
-          </bit-label>
-          <bit-hint class="tw-text-sm" *ngIf="!canOverrideBrowserAutofillSetting">
+          <bit-hint
+            *ngIf="!canOverrideBrowserAutofillSetting"
+            [class]="!enableInlineMenu ? 'tw-text-sm tw-mb-6' : 'tw-text-sm'"
+          >
             {{ "turnOffBrowserBuiltInPasswordManagerSettings" | i18n }}
             <a
               bitLink
@@ -51,6 +42,48 @@
               {{ "turnOffBrowserBuiltInPasswordManagerSettingsLink" | i18n }}
             </a>
           </bit-hint>
+        </bit-form-control>
+        <bit-form-control
+          *ngIf="inlineMenuPositioningImprovementsEnabled && enableInlineMenu"
+          class="tw-ml-5"
+        >
+          <input
+            bitCheckbox
+            id="show-inline-menu-identities"
+            type="checkbox"
+            (change)="updateShowInlineMenuIdentities()"
+            [(ngModel)]="showInlineMenuIdentities"
+          />
+          <bit-label for="show-inline-menu-identities">
+            {{ "showInlineMenuIdentitiesLabel" | i18n }}
+          </bit-label>
+        </bit-form-control>
+        <bit-form-control
+          *ngIf="inlineMenuPositioningImprovementsEnabled && enableInlineMenu"
+          class="tw-ml-5"
+        >
+          <input
+            bitCheckbox
+            id="show-inline-menu-cards"
+            type="checkbox"
+            (change)="updateShowInlineMenuCards()"
+            [(ngModel)]="showInlineMenuCards"
+          />
+          <bit-label for="show-inline-menu-cards">
+            {{ "showInlineMenuCardsLabel" | i18n }}
+          </bit-label>
+        </bit-form-control>
+        <bit-form-control *ngIf="enableInlineMenu" class="tw-ml-5">
+          <input
+            bitCheckbox
+            id="show-autofill-suggestions-on-icon"
+            type="checkbox"
+            (change)="updateInlineMenuVisibility()"
+            [(ngModel)]="enableInlineMenuOnIconSelect"
+          />
+          <bit-label for="show-autofill-suggestions-on-icon">
+            {{ "showInlineMenuOnIconSelectionLabel" | i18n }}
+          </bit-label>
         </bit-form-control>
         <bit-form-control *ngIf="canOverrideBrowserAutofillSetting">
           <input

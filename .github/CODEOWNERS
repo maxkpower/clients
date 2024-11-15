@@ -31,6 +31,7 @@ libs/common/src/tools @bitwarden/team-tools-dev
 libs/importer @bitwarden/team-tools-dev
 libs/tools @bitwarden/team-tools-dev
 bitwarden_license/bit-web/src/app/tools @bitwarden/team-tools-dev
+bitwarden_license/bit-common/src/tools @bitwarden/team-tools-dev
 
 ## Localization/Crowdin (Tools team)
 apps/browser/src/_locales @bitwarden/team-tools-dev
@@ -70,6 +71,7 @@ bitwarden_license/bit-web/src/app/billing @bitwarden/team-billing-dev
 ## Platform team files ##
 apps/browser/src/platform @bitwarden/team-platform-dev
 apps/cli/src/platform @bitwarden/team-platform-dev
+apps/desktop/macos @bitwarden/team-platform-dev
 apps/desktop/src/platform @bitwarden/team-platform-dev
 apps/web/src/app/platform @bitwarden/team-platform-dev
 libs/angular/src/platform @bitwarden/team-platform-dev
@@ -90,6 +92,7 @@ apps/web/src/translation-constants.ts @bitwarden/team-platform-dev
 apps/browser/src/autofill @bitwarden/team-autofill-dev
 apps/desktop/src/autofill @bitwarden/team-autofill-dev
 libs/common/src/autofill @bitwarden/team-autofill-dev
+apps/desktop/macos/autofill-extension @bitwarden/team-autofill-dev
 # DuckDuckGo integration
 apps/desktop/native-messaging-test-runner @bitwarden/team-autofill-dev
 apps/desktop/src/services/native-message-handler.service.ts @bitwarden/team-autofill-dev
@@ -105,7 +108,7 @@ apps/desktop/desktop_native @bitwarden/team-platform-dev
 
 ## Key management team files ##
 apps/desktop/src/key-management @bitwarden/team-key-management-dev
-apps/web/src/key-management @bitwarden/team-key-management-dev
+apps/web/src/app/key-management @bitwarden/team-key-management-dev
 apps/browser/src/key-management @bitwarden/team-key-management-dev
 apps/cli/src/key-management @bitwarden/team-key-management-dev
 libs/key-management @bitwarden/team-key-management-dev
@@ -114,18 +117,36 @@ apps/desktop/destkop_native/core/src/biometric/ @bitwarden/team-key-management-d
 apps/desktop/src/services/native-messaging.service.ts @bitwarden/team-key-management-dev
 apps/browser/src/background/nativeMessaging.background.ts @bitwarden/team-key-management-dev
 
-## DevOps team files ##
-/.github/workflows @bitwarden/dept-devops
-
-# DevOps for Docker changes.
-**/Dockerfile @bitwarden/dept-devops
-**/*.Dockerfile @bitwarden/dept-devops
-**/.dockerignore @bitwarden/dept-devops
-**/entrypoint.sh @bitwarden/dept-devops
-
 ## Locales ##
 apps/browser/src/_locales/en/messages.json
 apps/browser/store/locales/en
 apps/cli/src/locales/en/messages.json
 apps/desktop/src/locales/en/messages.json
 apps/web/src/locales/en/messages.json
+
+## Ssh agent temporary co-codeowner
+apps/desktop/desktop_native/core/src/ssh_agent @bitwarden/team-platform-dev @bitwarden/wg-ssh-keys
+
+## BRE team owns these workflows ##
+.github/workflows/brew-bump-desktop.yml @bitwarden/dept-bre
+.github/workflows/deploy-web.yml @bitwarden/dept-bre
+.github/workflows/publish-cli.yml @bitwarden/dept-bre
+.github/workflows/publish-desktop.yml @bitwarden/dept-bre
+.github/workflows/publish-web.yml @bitwarden/dept-bre
+.github/workflows/retrieve-current-desktop-rollout.yml @bitwarden/dept-bre
+.github/workflows/staged-rollout-desktop.yml @bitwarden/dept-bre
+
+## Shared ownership workflows ##
+.github/workflows/release-browser.yml
+.github/workflows/release-cli.yml
+.github/workflows/release-desktop-beta.yml
+.github/workflows/release-desktop.yml
+.github/workflows/release-web.yml
+.github/workflows/version-auto-bump.yml
+.github/workflows/version-bump.yml
+
+## Docker files have shared ownership ##
+**/Dockerfile
+**/*.Dockerfile
+**/.dockerignore
+**/entrypoint.sh

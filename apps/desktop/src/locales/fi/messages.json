@@ -60,6 +60,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Tervetuloa takaisin"
+  },
   "moveToOrgDesc": {
     "message": "Valitse organisaatio, jolle haluat siirtää kohteen. Tämä siirtää kohteen organisaation omistukseen, etkä tämän jälkeen ole enää sen suora omistaja."
   },
@@ -145,7 +148,7 @@
     "message": "Merkki"
   },
   "expiration": {
-    "message": "Erääntymisaika"
+    "message": "Voimassaolo päättyy"
   },
   "securityCode": {
     "message": "Turvakoodi (CVC/CVV)"
@@ -258,6 +261,9 @@
   },
   "generatePassword": {
     "message": "Luo salasana"
+  },
+  "generatePassphrase": {
+    "message": "Luo salalause"
   },
   "type": {
     "message": "Tyyppi"
@@ -394,6 +400,10 @@
   "copyPassword": {
     "message": "Kopioi salasana"
   },
+  "copyPassphrase": {
+    "message": "Kopioi salalause",
+    "description": "Copy passphrase to clipboard"
+  },
   "copyUri": {
     "message": "Kopioi URI"
   },
@@ -407,16 +417,55 @@
     "message": "Salasanan vähimmäispituus"
   },
   "uppercase": {
-    "message": "Isot kirjaimet (A-Z)"
+    "message": "Isot kirjaimet (A-Z)",
+    "description": "deprecated. Use uppercaseLabel instead."
   },
   "lowercase": {
-    "message": "Pienet kirjaimet (a-z)"
+    "message": "Pienet kirjaimet (a-z)",
+    "description": "deprecated. Use lowercaseLabel instead."
   },
   "numbers": {
-    "message": "Numerot (0-9)"
+    "message": "Numerot (0-9)",
+    "description": "deprecated. Use numbersLabel instead."
   },
   "specialCharacters": {
     "message": "Erikoismerkit (!@#$%^&*)"
+  },
+  "include": {
+    "message": "Sisällytys",
+    "description": "Card header for password generator include block"
+  },
+  "uppercaseDescription": {
+    "message": "Sisällytä isoja kirjaimia",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Ö",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "Sisällytä pieniä kirjaimia",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-ö",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "Sisällytä numeroita",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "Sisällytä erikoismerkkejä",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
   },
   "numWords": {
     "message": "Sanojen määrä"
@@ -442,7 +491,12 @@
     "description": "Minimum Special Characters"
   },
   "ambiguous": {
-    "message": "Vältä epäselviä merkkejä"
+    "message": "Vältä epäselviä merkkejä",
+    "description": "deprecated. Use avoidAmbiguous instead."
+  },
+  "avoidAmbiguous": {
+    "message": "Vältä epäselviä merkkejä",
+    "description": "Label for the avoid ambiguous characters checkbox."
   },
   "generatorPolicyInEffect": {
     "message": "Yrityskäytännön säännöt vaikuttavat generaattoriasetuksiisi.",
@@ -503,6 +557,9 @@
   "createAccount": {
     "message": "Luo tili"
   },
+  "newToBitwarden": {
+    "message": "Oletko uusi Bitwardenissa?"
+  },
   "setAStrongPassword": {
     "message": "Aseta vahva salasana"
   },
@@ -511,6 +568,18 @@
   },
   "logIn": {
     "message": "Kirjaudu"
+  },
+  "logInToBitwarden": {
+    "message": "Kirjaudu Bitwardeniin"
+  },
+  "logInWithPasskey": {
+    "message": "Kirjaudu pääsyavaimella"
+  },
+  "loginWithDevice": {
+    "message": "Kirjaudu laitteella"
+  },
+  "useSingleSignOn": {
+    "message": "Käytä kertakirjautumista"
   },
   "submit": {
     "message": "Jatka"
@@ -557,6 +626,15 @@
   },
   "joinOrganization": {
     "message": "Liity organisaatioon"
+  },
+  "joinOrganizationName": {
+    "message": "Liity organisaatioon $ORGANIZATIONNAME$",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
     "message": "Viimeistele organisaatioon liittyminen asettamalla pääsalasana."
@@ -775,6 +853,10 @@
   "baseUrl": {
     "message": "Palvelimen URL"
   },
+  "selfHostBaseUrl": {
+    "message": "Itse ylläpidetyn palvelimen URL-osoite",
+    "description": "Label for field requesting a self-hosted integration service URL"
+  },
   "apiUrl": {
     "message": "API-palvelimen URL"
   },
@@ -919,16 +1001,16 @@
     "message": "Holvisi on lukittu. Jatka vahvistamalla henkilöllisyytesi."
   },
   "yourAccountIsLocked": {
-    "message": "Your account is locked"
+    "message": "Tilisi on lukittu"
   },
   "or": {
-    "message": "or"
+    "message": "tai"
   },
   "unlockWithBiometrics": {
-    "message": "Unlock with biometrics"
+    "message": "Avaa biometrialla"
   },
   "unlockWithMasterPassword": {
-    "message": "Unlock with master password"
+    "message": "Avaa pääsalasanalla"
   },
   "unlock": {
     "message": "Avaa"
@@ -1164,6 +1246,9 @@
   "copyNumber": {
     "message": "Kopioi numero",
     "description": "Copy credit card number"
+  },
+  "copyEmail": {
+    "message": "Kopioi sähköpostiosoite"
   },
   "copySecurityCode": {
     "message": "Kopioi turvakoodi",
@@ -1598,6 +1683,12 @@
   "deleteAccountWarning": {
     "message": "Tilin poisto on pysyvä toimenpide, eikä sen peruminen ole mahdollista."
   },
+  "cannotDeleteAccount": {
+    "message": "Tiliä ei voi poistaa"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "Tätä toimintoa ei voida suorittaa, koska tilisi on organisaation omistama. Ota yhteyttä organisaation ylläpitäjään saadaksesi lisätietoja."
+  },
   "accountDeleted": {
     "message": "Tili poistettiin"
   },
@@ -1707,6 +1798,15 @@
   "orgRequiresYouToSetPassword": {
     "message": "Organisaatiosi edellyttää, että asetat pääsalasanan.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
+  },
+  "cardMetrics": {
+    "message": "/$TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "verificationRequired": {
     "message": "Vahvistus vaaditaan",
@@ -2269,13 +2369,14 @@
     "message": "Lukittu"
   },
   "yourVaultIsLockedV2": {
-    "message": "Your vault is locked"
+    "message": "Holvisi on lukittu"
   },
   "unlocked": {
     "message": "Avattu"
   },
   "generator": {
-    "message": "Generaattori"
+    "message": "Generaattori",
+    "description": "Short for 'credential generator'."
   },
   "whatWouldYouLikeToGenerate": {
     "message": "Mitä haluat luoda?"
@@ -2288,6 +2389,23 @@
   },
   "generateUsername": {
     "message": "Luo käyttäjätunnus"
+  },
+  "generateEmail": {
+    "message": "Luo sähköpostiosoite"
+  },
+  "generatorBoundariesHint": {
+    "message": "Arvon tulee olla väliltä $MIN$ - $MAX$",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
   },
   "usernameType": {
     "message": "Käyttäjätunnuksen tyyppi"
@@ -2331,6 +2449,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Luo sähköpostialias ulkoisella ohjauspalvelulla."
+  },
+  "forwarderDomainName": {
+    "message": "Sähköpostin verkkotunnus",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Valitse verkkotunnus, jota valittu palvelu tukee",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ -virhe: $ERRORMESSAGE$",
@@ -2624,7 +2750,7 @@
     "message": "Tärkeää:"
   },
   "accessing": {
-    "message": "Accessing"
+    "message": "Avataan"
   },
   "accessTokenUnableToBeDecrypted": {
     "message": "Sinut on kirjattu ulos, koska käyttötunnisteesi salausta ei voitu purkaa. Ratkaise ongelma kirjautumalla sisään uudelleen."
@@ -2677,9 +2803,6 @@
   "eu": {
     "message": "EU",
     "description": "European Union"
-  },
-  "loggingInOn": {
-    "message": "Kirjaudutaan sijaintiin"
   },
   "selfHostedServer": {
     "message": "itse ylläpidetty"
@@ -3098,12 +3221,6 @@
   },
   "textSends": {
     "message": "Teksti-Sendit"
-  },
-  "allowScreenshots": {
-    "message": "Salli kuvankaappaus"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Salli kuvankaappaus Bitwardenin työpöytäsovelluksesta."
   },
   "ssoError": {
     "message": "Kertakirjautumiselle ei löytynyt vapaita portteja."

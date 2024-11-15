@@ -14,7 +14,8 @@ import { OrganizationUserStatusType, PolicyType } from "@bitwarden/common/admin-
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { normalizeExpiryYearFormat } from "@bitwarden/common/autofill/utils";
-import { EventType } from "@bitwarden/common/enums";
+import { ClientType, EventType } from "@bitwarden/common/enums";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { UriMatchStrategy } from "@bitwarden/common/models/domain/domain-service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -23,7 +24,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
-import { UserId } from "@bitwarden/common/types/guid";
+import { CollectionId, UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherType, SecureNoteType } from "@bitwarden/common/vault/enums";
@@ -36,6 +37,8 @@ import { IdentityView } from "@bitwarden/common/vault/models/view/identity.view"
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import { SecureNoteView } from "@bitwarden/common/vault/models/view/secure-note.view";
+import { SshKeyView } from "@bitwarden/common/vault/models/view/ssh-key.view";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService } from "@bitwarden/components";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
@@ -47,6 +50,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
   @Input() type: CipherType;
   @Input() collectionIds: string[];
   @Input() organizationId: string = null;
+  @Input() collectionId: string = null;
   @Output() onSavedCipher = new EventEmitter<CipherView>();
   @Output() onDeletedCipher = new EventEmitter<CipherView>();
   @Output() onRestoredCipher = new EventEmitter<CipherView>();
@@ -56,6 +60,8 @@ export class AddEditComponent implements OnInit, OnDestroy {
   @Output() onEditCollections = new EventEmitter<CipherView>();
   @Output() onGeneratePassword = new EventEmitter();
   @Output() onGenerateUsername = new EventEmitter();
+
+  canDeleteCipher$: Observable<boolean>;
 
   editMode = false;
   cipher: CipherView;
@@ -67,6 +73,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
   restorePromise: Promise<any>;
   checkPasswordPromise: Promise<number>;
   showPassword = false;
+  showPrivateKey = false;
   showTotpSeed = false;
   showCardNumber = false;
   showCardCode = false;
@@ -83,6 +90,10 @@ export class AddEditComponent implements OnInit, OnDestroy {
   reprompt = false;
   canUseReprompt = true;
   organization: Organization;
+  /**
+   * Flag to determine if the action is being performed from the admin console.
+   */
+  isAdminConsoleAction: boolean = false;
 
   protected componentName = "";
   protected destroy$ = new Subject<void>();
@@ -118,6 +129,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     protected win: Window,
     protected datePipe: DatePipe,
     protected configService: ConfigService,
+    protected cipherAuthorizationService: CipherAuthorizationService,
   ) {
     this.typeOptions = [
       { name: i18nService.t("typeLogin"), value: CipherType.Login },
@@ -125,6 +137,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       { name: i18nService.t("typeIdentity"), value: CipherType.Identity },
       { name: i18nService.t("typeSecureNote"), value: CipherType.SecureNote },
     ];
+
     this.cardBrandOptions = [
       { name: "-- " + i18nService.t("select") + " --", value: null },
       { name: "Visa", value: "Visa" },
@@ -191,6 +204,11 @@ export class AddEditComponent implements OnInit, OnDestroy {
 
     this.writeableCollections = await this.loadCollections();
     this.canUseReprompt = await this.passwordRepromptService.enabled();
+
+    const sshKeysEnabled = await this.configService.getFeatureFlag(FeatureFlag.SSHKeyVaultItem);
+    if (this.platformUtilsService.getClientType() == ClientType.Desktop && sshKeysEnabled) {
+      this.typeOptions.push({ name: this.i18nService.t("typeSshKey"), value: CipherType.SshKey });
+    }
   }
 
   ngOnDestroy() {
@@ -270,6 +288,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
         this.cipher.identity = new IdentityView();
         this.cipher.secureNote = new SecureNoteView();
         this.cipher.secureNote.type = SecureNoteType.Generic;
+        this.cipher.sshKey = new SshKeyView();
         this.cipher.reprompt = CipherRepromptType.None;
       }
     }
@@ -314,6 +333,12 @@ export class AddEditComponent implements OnInit, OnDestroy {
     if (this.reprompt) {
       this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[2].value;
     }
+
+    this.canDeleteCipher$ = this.cipherAuthorizationService.canDeleteCipher$(
+      this.cipher,
+      [this.collectionId as CollectionId],
+      this.isAdminConsoleAction,
+    );
   }
 
   async submit(): Promise<boolean> {
@@ -586,6 +611,10 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
   }
 
+  togglePrivateKey() {
+    this.showPrivateKey = !this.showPrivateKey;
+  }
+
   toggleUriOptions(uri: LoginUriView) {
     const u = uri as any;
     u.showOptions = u.showOptions == null && uri.match != null ? false : !u.showOptions;
@@ -684,15 +713,26 @@ export class AddEditComponent implements OnInit, OnDestroy {
   }
 
   protected deleteCipher() {
-    const asAdmin = this.organization?.canEditAllCiphers;
     return this.cipher.isDeleted
-      ? this.cipherService.deleteWithServer(this.cipher.id, asAdmin)
-      : this.cipherService.softDeleteWithServer(this.cipher.id, asAdmin);
+      ? this.cipherService.deleteWithServer(this.cipher.id, this.asAdmin)
+      : this.cipherService.softDeleteWithServer(this.cipher.id, this.asAdmin);
   }
 
   protected restoreCipher() {
-    const asAdmin = this.organization?.canEditAllCiphers;
-    return this.cipherService.restoreWithServer(this.cipher.id, asAdmin);
+    return this.cipherService.restoreWithServer(this.cipher.id, this.asAdmin);
+  }
+
+  /**
+   * Determines if a cipher must be deleted as an admin by belonging to an organization and being unassigned to a collection.
+   */
+  get asAdmin(): boolean {
+    return (
+      this.cipher.organizationId !== null &&
+      this.cipher.organizationId.length > 0 &&
+      (this.organization?.canEditAllCiphers ||
+        !this.cipher.collectionIds ||
+        this.cipher.collectionIds.length === 0)
+    );
   }
 
   get defaultOwnerId(): string | null {

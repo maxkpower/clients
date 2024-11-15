@@ -149,6 +149,7 @@ export class MenuTriggerForDirective implements OnDestroy {
 
     this.isOpen = false;
     this.disposeAll();
+    this.menu.closed.emit();
   }
 
   private setupClosingActions() {

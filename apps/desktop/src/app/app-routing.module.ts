@@ -1,7 +1,10 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
-import { EnvironmentSelectorComponent } from "@bitwarden/angular/auth/components/environment-selector.component";
+import {
+  DesktopDefaultOverlayPosition,
+  EnvironmentSelectorComponent,
+} from "@bitwarden/angular/auth/components/environment-selector.component";
 import { unauthUiRefreshSwap } from "@bitwarden/angular/auth/functions/unauth-ui-refresh-route-swap";
 import {
   authGuard,
@@ -15,15 +18,20 @@ import { extensionRefreshRedirect } from "@bitwarden/angular/utils/extension-ref
 import {
   AnonLayoutWrapperComponent,
   AnonLayoutWrapperData,
+  LoginComponent,
+  LoginSecondaryContentComponent,
   LockIcon,
   LockV2Component,
   PasswordHintComponent,
   RegistrationFinishComponent,
+  RegistrationLockAltIcon,
   RegistrationStartComponent,
   RegistrationStartSecondaryComponent,
   RegistrationStartSecondaryComponentData,
+  RegistrationUserAddIcon,
   SetPasswordJitComponent,
   UserLockIcon,
+  VaultIcon,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -33,8 +41,8 @@ import { maxAccountsGuardFn } from "../auth/guards/max-accounts.guard";
 import { HintComponent } from "../auth/hint.component";
 import { LockComponent } from "../auth/lock.component";
 import { LoginDecryptionOptionsComponent } from "../auth/login/login-decryption-options/login-decryption-options.component";
+import { LoginComponentV1 } from "../auth/login/login-v1.component";
 import { LoginViaAuthRequestComponent } from "../auth/login/login-via-auth-request.component";
-import { LoginComponent } from "../auth/login/login.component";
 import { RegisterComponent } from "../auth/register.component";
 import { RemovePasswordComponent } from "../auth/remove-password.component";
 import { SetPasswordComponent } from "../auth/set-password.component";
@@ -66,11 +74,6 @@ const routes: Routes = [
     component: LockComponent,
     canActivate: [lockGuard()],
     canMatch: [extensionRefreshRedirect("/lockV2")],
-  },
-  {
-    path: "login",
-    component: LoginComponent,
-    canActivate: [maxAccountsGuardFn()],
   },
   {
     path: "login-with-device",
@@ -141,8 +144,12 @@ const routes: Routes = [
           path: "hint",
           canActivate: [unauthGuardFn()],
           data: {
-            pageTitle: "requestPasswordHint",
-            pageSubtitle: "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou",
+            pageTitle: {
+              key: "requestPasswordHint",
+            },
+            pageSubtitle: {
+              key: "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou",
+            },
             pageIcon: UserLockIcon,
           } satisfies AnonLayoutWrapperData,
           children: [
@@ -157,6 +164,42 @@ const routes: Routes = [
       ],
     },
   ),
+  ...unauthUiRefreshSwap(
+    LoginComponentV1,
+    AnonLayoutWrapperComponent,
+    {
+      path: "login",
+      component: LoginComponentV1,
+      canActivate: [maxAccountsGuardFn()],
+    },
+    {
+      path: "",
+      children: [
+        {
+          path: "login",
+          canActivate: [maxAccountsGuardFn()],
+          data: {
+            pageTitle: {
+              key: "logInToBitwarden",
+            },
+            pageIcon: VaultIcon,
+          },
+          children: [
+            { path: "", component: LoginComponent },
+            { path: "", component: LoginSecondaryContentComponent, outlet: "secondary" },
+            {
+              path: "",
+              component: EnvironmentSelectorComponent,
+              outlet: "environment-selector",
+              data: {
+                overlayPosition: DesktopDefaultOverlayPosition,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ),
   {
     path: "",
     component: AnonLayoutWrapperComponent,
@@ -164,7 +207,12 @@ const routes: Routes = [
       {
         path: "signup",
         canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
-        data: { pageTitle: "createAccount" } satisfies AnonLayoutWrapperData,
+        data: {
+          pageIcon: RegistrationUserAddIcon,
+          pageTitle: {
+            key: "createAccount",
+          },
+        } satisfies AnonLayoutWrapperData,
         children: [
           {
             path: "",
@@ -184,8 +232,7 @@ const routes: Routes = [
         path: "finish-signup",
         canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
         data: {
-          pageTitle: "setAStrongPassword",
-          pageSubtitle: "finishCreatingYourAccountBySettingAPassword",
+          pageIcon: RegistrationLockAltIcon,
         } satisfies AnonLayoutWrapperData,
         children: [
           {
@@ -199,7 +246,9 @@ const routes: Routes = [
         canActivate: [canAccessFeature(FeatureFlag.ExtensionRefresh), lockGuard()],
         data: {
           pageIcon: LockIcon,
-          pageTitle: "yourVaultIsLockedV2",
+          pageTitle: {
+            key: "yourVaultIsLockedV2",
+          },
           showReadonlyHostname: true,
         } satisfies AnonLayoutWrapperData,
         children: [
@@ -214,8 +263,12 @@ const routes: Routes = [
         canActivate: [canAccessFeature(FeatureFlag.EmailVerification)],
         component: SetPasswordJitComponent,
         data: {
-          pageTitle: "joinOrganization",
-          pageSubtitle: "finishJoiningThisOrganizationBySettingAMasterPassword",
+          pageTitle: {
+            key: "joinOrganization",
+          },
+          pageSubtitle: {
+            key: "finishJoiningThisOrganizationBySettingAMasterPassword",
+          },
         } satisfies AnonLayoutWrapperData,
       },
     ],
