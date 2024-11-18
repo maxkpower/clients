@@ -7,7 +7,6 @@ export enum FeatureFlag {
   BrowserFilelessImport = "browser-fileless-import",
   ItemShare = "item-share",
   GeneratorToolsModernization = "generator-tools-modernization",
-  EnableConsolidatedBilling = "enable-consolidated-billing",
   AC1795_UpdatedSubscriptionStatusSection = "AC-1795_updated-subscription-status-section",
   ExtensionRefresh = "extension-refresh",
   PersistPopupView = "persist-popup-view",
@@ -22,7 +21,6 @@ export enum FeatureFlag {
   VaultBulkManagementAction = "vault-bulk-management-action",
   IdpAutoSubmitLogin = "idp-auto-submit-login",
   UnauthenticatedExtensionUIRefresh = "unauth-ui-refresh",
-  EnableUpgradePasswordManagerSub = "AC-2708-upgrade-password-manager-sub",
   GenerateIdentityFillScriptRefactor = "generate-identity-fill-script-refactor",
   EnableNewCardCombinedExpiryAutofill = "enable-new-card-combined-expiry-autofill",
   DelayFido2PageScriptInitWithinMv2 = "delay-fido2-page-script-init-within-mv2",
@@ -40,6 +38,8 @@ export enum FeatureFlag {
   CriticalApps = "pm-14466-risk-insights-critical-application",
   TrialPaymentOptional = "PM-8163-trial-payment",
   SecurityTasks = "security-tasks",
+  NewDeviceVerificationTemporaryDismiss = "new-device-temporary-dismiss",
+  NewDeviceVerificationPermanentDismiss = "new-device-permanent-dismiss",
 }
 
 export type AllowedFeatureFlagTypes = boolean | number | string;
@@ -57,7 +57,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.BrowserFilelessImport]: FALSE,
   [FeatureFlag.ItemShare]: FALSE,
   [FeatureFlag.GeneratorToolsModernization]: FALSE,
-  [FeatureFlag.EnableConsolidatedBilling]: FALSE,
   [FeatureFlag.AC1795_UpdatedSubscriptionStatusSection]: FALSE,
   [FeatureFlag.ExtensionRefresh]: FALSE,
   [FeatureFlag.PersistPopupView]: FALSE,
@@ -72,7 +71,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.VaultBulkManagementAction]: FALSE,
   [FeatureFlag.IdpAutoSubmitLogin]: FALSE,
   [FeatureFlag.UnauthenticatedExtensionUIRefresh]: FALSE,
-  [FeatureFlag.EnableUpgradePasswordManagerSub]: FALSE,
   [FeatureFlag.GenerateIdentityFillScriptRefactor]: FALSE,
   [FeatureFlag.EnableNewCardCombinedExpiryAutofill]: FALSE,
   [FeatureFlag.DelayFido2PageScriptInitWithinMv2]: FALSE,
@@ -90,6 +88,8 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.CriticalApps]: FALSE,
   [FeatureFlag.TrialPaymentOptional]: FALSE,
   [FeatureFlag.SecurityTasks]: FALSE,
+  [FeatureFlag.NewDeviceVerificationTemporaryDismiss]: FALSE,
+  [FeatureFlag.NewDeviceVerificationPermanentDismiss]: FALSE,
 } satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>;
 
 export type DefaultFeatureFlagValueType = typeof DefaultFeatureFlagValue;

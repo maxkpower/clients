@@ -60,14 +60,6 @@ export class OrganizationSubscriptionCloudComponent implements OnInit, OnDestroy
   protected readonly subscriptionHiddenIcon = SubscriptionHiddenIcon;
   protected readonly teamsStarter = ProductTierType.TeamsStarter;
 
-  protected enableConsolidatedBilling$ = this.configService.getFeatureFlag$(
-    FeatureFlag.EnableConsolidatedBilling,
-  );
-
-  protected enableUpgradePasswordManagerSub$ = this.configService.getFeatureFlag$(
-    FeatureFlag.EnableUpgradePasswordManagerSub,
-  );
-
   protected deprecateStripeSourcesAPI$ = this.configService.getFeatureFlag$(
     FeatureFlag.AC2476_DeprecateStripeSourcesAPI,
   );
@@ -124,8 +116,6 @@ export class OrganizationSubscriptionCloudComponent implements OnInit, OnDestroy
     this.locale = await firstValueFrom(this.i18nService.locale$);
     this.userOrg = await this.organizationService.get(this.organizationId);
 
-    const consolidatedBillingEnabled = await firstValueFrom(this.enableConsolidatedBilling$);
-
     const isIndependentOrganizationOwner = !this.userOrg.hasProvider && this.userOrg.isOwner;
     const isResoldOrganizationOwner = this.userOrg.hasReseller && this.userOrg.isOwner;
     const isMSPUser = this.userOrg.hasProvider && this.userOrg.isProviderUser;
@@ -135,7 +125,7 @@ export class OrganizationSubscriptionCloudComponent implements OnInit, OnDestroy
     );
 
     this.organizationIsManagedByConsolidatedBillingMSP =
-      consolidatedBillingEnabled && this.userOrg.hasProvider && metadata.isManaged;
+      this.userOrg.hasProvider && metadata.isManaged;
 
     this.showSubscription =
       isIndependentOrganizationOwner ||
@@ -366,27 +356,20 @@ export class OrganizationSubscriptionCloudComponent implements OnInit, OnDestroy
   };
 
   async changePlan() {
-    const EnableUpgradePasswordManagerSub = await firstValueFrom(
-      this.enableUpgradePasswordManagerSub$,
-    );
-    if (EnableUpgradePasswordManagerSub) {
-      const reference = openChangePlanDialog(this.dialogService, {
-        data: {
-          organizationId: this.organizationId,
-          subscription: this.sub,
-          productTierType: this.userOrg.productTierType,
-        },
-      });
+    const reference = openChangePlanDialog(this.dialogService, {
+      data: {
+        organizationId: this.organizationId,
+        subscription: this.sub,
+        productTierType: this.userOrg.productTierType,
+      },
+    });
 
-      const result = await lastValueFrom(reference.closed);
+    const result = await lastValueFrom(reference.closed);
 
-      if (result === ChangePlanDialogResultType.Closed) {
-        return;
-      }
-      await this.load();
-    } else {
-      this.showChangePlan = !this.showChangePlan;
+    if (result === ChangePlanDialogResultType.Closed) {
+      return;
     }
+    await this.load();
   }
 
   isSecretsManagerTrial(): boolean {
