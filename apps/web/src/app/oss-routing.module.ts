@@ -34,7 +34,6 @@ import {
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
-import { twofactorRefactorSwap } from "../../../../libs/angular/src/utils/two-factor-component-refactor-route-swap";
 import { flagEnabled, Flags } from "../utils/flags";
 
 import { VerifyRecoverDeleteOrgComponent } from "./admin-console/organizations/manage/verify-recover-delete-org.component";
@@ -457,7 +456,7 @@ const routes: Routes = [
         path: "2fa",
         canActivate: [unauthGuardFn()],
         children: [
-          ...twofactorRefactorSwap(TwoFactorComponent, TwoFactorAuthComponent, {
+          ...unauthUiRefreshSwap(TwoFactorComponent, TwoFactorAuthComponent, {
             path: "",
           }),
           {

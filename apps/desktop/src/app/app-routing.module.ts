@@ -35,7 +35,6 @@ import {
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
-import { twofactorRefactorSwap } from "../../../../libs/angular/src/utils/two-factor-component-refactor-route-swap";
 import { AccessibilityCookieComponent } from "../auth/accessibility-cookie.component";
 import { maxAccountsGuardFn } from "../auth/guards/max-accounts.guard";
 import { HintComponent } from "../auth/hint.component";
@@ -83,7 +82,7 @@ const routes: Routes = [
     path: "admin-approval-requested",
     component: LoginViaAuthRequestComponent,
   },
-  ...twofactorRefactorSwap(
+  ...unauthUiRefreshSwap(
     TwoFactorComponent,
     AnonLayoutWrapperComponent,
     {

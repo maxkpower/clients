@@ -38,7 +38,6 @@ import {
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
-import { twofactorRefactorSwap } from "../../../../libs/angular/src/utils/two-factor-component-refactor-route-swap";
 import { fido2AuthGuard } from "../auth/guards/fido2-auth.guard";
 import { AccountSwitcherComponent } from "../auth/popup/account-switching/account-switcher.component";
 import { EnvironmentComponent } from "../auth/popup/environment.component";
@@ -190,7 +189,7 @@ const routes: Routes = [
     canMatch: [extensionRefreshRedirect("/lockV2")],
     data: { state: "lock", doNotSaveUrl: true } satisfies RouteDataProperties,
   },
-  ...twofactorRefactorSwap(
+  ...unauthUiRefreshSwap(
     TwoFactorComponent,
     AnonLayoutWrapperComponent,
     {
