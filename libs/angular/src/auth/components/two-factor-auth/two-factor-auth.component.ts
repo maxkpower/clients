@@ -62,7 +62,7 @@ import {
     AsyncActionsModule,
     RouterLink,
     ButtonModule,
-    TwoFactorOptionsComponent,
+    TwoFactorOptionsComponent, // used as dialog
     TwoFactorAuthAuthenticatorComponent,
     TwoFactorAuthEmailComponent,
     TwoFactorAuthDuoComponent,
