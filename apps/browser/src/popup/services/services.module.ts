@@ -34,7 +34,6 @@ import {
   AccountService as AccountServiceAbstraction,
 } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
-import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { SsoLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/sso-login.service.abstraction";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
@@ -103,9 +102,14 @@ import {
 } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { TotpService as TotpServiceAbstraction } from "@bitwarden/common/vault/abstractions/totp.service";
 import { TotpService } from "@bitwarden/common/vault/services/totp.service";
-import { DialogService, ToastService } from "@bitwarden/components";
+import { CompactModeService, DialogService, ToastService } from "@bitwarden/components";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
-import { BiometricStateService, BiometricsService, KeyService } from "@bitwarden/key-management";
+import {
+  KdfConfigService,
+  KeyService,
+  BiometricStateService,
+  BiometricsService,
+} from "@bitwarden/key-management";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { ForegroundLockService } from "../../auth/popup/accounts/foreground-lock.service";
@@ -123,6 +127,7 @@ import { ChromeMessageSender } from "../../platform/messaging/chrome-message.sen
 /* eslint-enable no-restricted-imports */
 import { OffscreenDocumentService } from "../../platform/offscreen-document/abstractions/offscreen-document";
 import { DefaultOffscreenDocumentService } from "../../platform/offscreen-document/offscreen-document.service";
+import { PopupCompactModeService } from "../../platform/popup/layout/popup-compact-mode.service";
 import { BrowserFileDownloadService } from "../../platform/popup/services/browser-file-download.service";
 import { PopupViewCacheService } from "../../platform/popup/view-cache/popup-view-cache.service";
 import { ScriptInjectorService } from "../../platform/services/abstractions/script-injector.service";
@@ -579,6 +584,11 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: ExtensionAnonLayoutWrapperDataService,
     useClass: ExtensionAnonLayoutWrapperDataService,
+    deps: [],
+  }),
+  safeProvider({
+    provide: CompactModeService,
+    useExisting: PopupCompactModeService,
     deps: [],
   }),
 ];
