@@ -59,7 +59,7 @@ import { AccountSecurityComponent } from "../auth/popup/settings/account-securit
 import { SsoComponent } from "../auth/popup/sso.component";
 import { TwoFactorAuthComponent } from "../auth/popup/two-factor-auth.component";
 import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
-import { TwoFactorComponent } from "../auth/popup/two-factor.component";
+import { TwoFactorComponentV1 } from "../auth/popup/two-factor-v1.component";
 import { UpdateTempPasswordComponent } from "../auth/popup/update-temp-password.component";
 import { Fido2V1Component } from "../autofill/popup/fido2/fido2-v1.component";
 import { Fido2Component } from "../autofill/popup/fido2/fido2.component";
@@ -190,7 +190,7 @@ const routes: Routes = [
     data: { state: "lock", doNotSaveUrl: true } satisfies RouteDataProperties,
   },
   ...unauthUiRefreshSwap(
-    TwoFactorComponent,
+    TwoFactorComponentV1,
     AnonLayoutWrapperComponent,
     {
       path: "2fa",

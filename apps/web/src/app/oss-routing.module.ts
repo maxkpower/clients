@@ -61,7 +61,7 @@ import { CompleteTrialInitiationComponent } from "./auth/trial-initiation/comple
 import { freeTrialTextResolver } from "./auth/trial-initiation/complete-trial-initiation/resolver/free-trial-text.resolver";
 import { TrialInitiationComponent } from "./auth/trial-initiation/trial-initiation.component";
 import { TwoFactorAuthComponent } from "./auth/two-factor-auth.component";
-import { TwoFactorComponent } from "./auth/two-factor.component";
+import { TwoFactorComponentV1 } from "./auth/two-factor-v1.component";
 import { UpdatePasswordComponent } from "./auth/update-password.component";
 import { UpdateTempPasswordComponent } from "./auth/update-temp-password.component";
 import { VerifyEmailTokenComponent } from "./auth/verify-email-token.component";
@@ -456,7 +456,7 @@ const routes: Routes = [
         path: "2fa",
         canActivate: [unauthGuardFn()],
         children: [
-          ...unauthUiRefreshSwap(TwoFactorComponent, TwoFactorAuthComponent, {
+          ...unauthUiRefreshSwap(TwoFactorComponentV1, TwoFactorAuthComponent, {
             path: "",
           }),
           {

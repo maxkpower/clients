@@ -47,7 +47,7 @@ import { RemovePasswordComponent } from "../auth/remove-password.component";
 import { SetPasswordComponent } from "../auth/set-password.component";
 import { SsoComponent } from "../auth/sso.component";
 import { TwoFactorAuthComponent } from "../auth/two-factor-auth.component";
-import { TwoFactorComponent } from "../auth/two-factor.component";
+import { TwoFactorComponentV1 } from "../auth/two-factor-v1.component";
 import { UpdateTempPasswordComponent } from "../auth/update-temp-password.component";
 import { VaultComponent } from "../vault/app/vault/vault.component";
 
@@ -83,7 +83,7 @@ const routes: Routes = [
     component: LoginViaAuthRequestComponent,
   },
   ...unauthUiRefreshSwap(
-    TwoFactorComponent,
+    TwoFactorComponentV1,
     AnonLayoutWrapperComponent,
     {
       path: "2fa",
