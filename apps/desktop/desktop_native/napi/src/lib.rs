@@ -308,6 +308,12 @@ pub mod sshagent {
     }
 
     #[napi]
+    pub fn is_running(agent_state: &mut SshAgentState) -> bool {
+        let bitwarden_agent_state = agent_state.state.clone();
+        bitwarden_agent_state.is_running()
+    }
+
+    #[napi]
     pub fn set_keys(
         agent_state: &mut SshAgentState,
         new_keys: Vec<PrivateKey>,
@@ -485,6 +491,12 @@ pub mod ipc {
             })?;
 
             Ok(IpcServer { server })
+        }
+
+        /// Return the path to the IPC server.
+        #[napi]
+        pub fn get_path(&self) -> String {
+            self.server.path.to_string_lossy().to_string()
         }
 
         /// Stop the IPC server.
