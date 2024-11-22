@@ -25,6 +25,7 @@ import {
   LoginSecondaryContentComponent,
   LockIcon,
   LockV2Component,
+  LoginViaAuthRequestComponent,
   PasswordHintComponent,
   RegistrationFinishComponent,
   RegistrationLockAltIcon,
@@ -35,6 +36,8 @@ import {
   SetPasswordJitComponent,
   UserLockIcon,
   VaultIcon,
+  LoginDecryptionOptionsComponent,
+  DevicesIcon,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -48,9 +51,9 @@ import {
 import { HintComponent } from "../auth/popup/hint.component";
 import { HomeComponent } from "../auth/popup/home.component";
 import { LockComponent } from "../auth/popup/lock.component";
-import { LoginDecryptionOptionsComponent } from "../auth/popup/login-decryption-options/login-decryption-options.component";
+import { LoginDecryptionOptionsComponentV1 } from "../auth/popup/login-decryption-options/login-decryption-options-v1.component";
 import { LoginComponentV1 } from "../auth/popup/login-v1.component";
-import { LoginViaAuthRequestComponent } from "../auth/popup/login-via-auth-request.component";
+import { LoginViaAuthRequestComponentV1 } from "../auth/popup/login-via-auth-request-v1.component";
 import { RegisterComponent } from "../auth/popup/register.component";
 import { RemovePasswordComponent } from "../auth/popup/remove-password.component";
 import { SetPasswordComponent } from "../auth/popup/set-password.component";
@@ -171,18 +174,6 @@ const routes: Routes = [
     data: { state: "fido2" } satisfies RouteDataProperties,
   }),
   {
-    path: "login-with-device",
-    component: LoginViaAuthRequestComponent,
-    canActivate: [],
-    data: { state: "login-with-device" } satisfies RouteDataProperties,
-  },
-  {
-    path: "admin-approval-requested",
-    component: LoginViaAuthRequestComponent,
-    canActivate: [],
-    data: { state: "login-with-device" } satisfies RouteDataProperties,
-  },
-  {
     path: "lock",
     component: LockComponent,
     canActivate: [lockGuard()],
@@ -214,12 +205,6 @@ const routes: Routes = [
     component: TwoFactorOptionsComponent,
     canActivate: [unauthGuardFn(unauthRouteOverrides)],
     data: { state: "2fa-options" } satisfies RouteDataProperties,
-  },
-  {
-    path: "login-initiated",
-    component: LoginDecryptionOptionsComponent,
-    canActivate: [tdeDecryptionRequiredGuard()],
-    data: { state: "login-initiated" } satisfies RouteDataProperties,
   },
   {
     path: "sso",
@@ -409,6 +394,61 @@ const routes: Routes = [
     data: { state: "update-temp-password" } satisfies RouteDataProperties,
   },
   ...unauthUiRefreshSwap(
+    LoginViaAuthRequestComponentV1,
+    ExtensionAnonLayoutWrapperComponent,
+    {
+      path: "login-with-device",
+      data: { state: "login-with-device" } satisfies RouteDataProperties,
+    },
+    {
+      path: "login-with-device",
+      data: {
+        pageIcon: DevicesIcon,
+        pageTitle: {
+          key: "loginInitiated",
+        },
+        pageSubtitle: {
+          key: "aNotificationWasSentToYourDevice",
+        },
+        showLogo: false,
+        showBackButton: true,
+        state: "login-with-device",
+      } satisfies RouteDataProperties & ExtensionAnonLayoutWrapperData,
+      children: [
+        { path: "", component: LoginViaAuthRequestComponent },
+        {
+          path: "",
+          component: EnvironmentSelectorComponent,
+          outlet: "environment-selector",
+        },
+      ],
+    },
+  ),
+  ...unauthUiRefreshSwap(
+    LoginViaAuthRequestComponentV1,
+    ExtensionAnonLayoutWrapperComponent,
+    {
+      path: "admin-approval-requested",
+      data: { state: "admin-approval-requested" } satisfies RouteDataProperties,
+    },
+    {
+      path: "admin-approval-requested",
+      data: {
+        pageIcon: DevicesIcon,
+        pageTitle: {
+          key: "adminApprovalRequested",
+        },
+        pageSubtitle: {
+          key: "adminApprovalRequestSentToAdmins",
+        },
+        showLogo: false,
+        showBackButton: true,
+        state: "admin-approval-requested",
+      } satisfies RouteDataProperties & ExtensionAnonLayoutWrapperData,
+      children: [{ path: "", component: LoginViaAuthRequestComponent }],
+    },
+  ),
+  ...unauthUiRefreshSwap(
     HintComponent,
     ExtensionAnonLayoutWrapperComponent,
     {
@@ -486,6 +526,23 @@ const routes: Routes = [
           ],
         },
       ],
+    },
+  ),
+  ...unauthUiRefreshSwap(
+    LoginDecryptionOptionsComponentV1,
+    ExtensionAnonLayoutWrapperComponent,
+    {
+      path: "login-initiated",
+      canActivate: [tdeDecryptionRequiredGuard()],
+      data: { state: "login-initiated" } satisfies RouteDataProperties,
+    },
+    {
+      path: "login-initiated",
+      canActivate: [tdeDecryptionRequiredGuard()],
+      data: {
+        pageIcon: DevicesIcon,
+      },
+      children: [{ path: "", component: LoginDecryptionOptionsComponent }],
     },
   ),
   {
