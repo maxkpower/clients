@@ -30,8 +30,8 @@ export class ServeCommand {
     );
 
     if (enableDocs) {
-      this.serviceContainer.logService.info(
-        `Starting SwaggerUI on ${hostname}:${port}/docs. Requests from this origin will be allowed regardless of origin protection.`,
+      this.serviceContainer.logService.warning(
+        `Starting SwaggerUI on ${origin}/docs. Requests from this origin will be allowed regardless of origin protection.`,
       );
     }
 
