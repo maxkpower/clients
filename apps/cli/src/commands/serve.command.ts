@@ -71,6 +71,7 @@ export class ServeCommand {
           url: origin,
           description: "bw serve",
         },
+        ...(spec.servers ?? []),
       ];
 
       server.use(
