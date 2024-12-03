@@ -13,7 +13,6 @@ import { SsoLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
-import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -74,7 +73,6 @@ export class TwoFactorAuthComponent extends BaseTwoFactorAuthComponent {
     protected router: Router,
     i18nService: I18nService,
     platformUtilsService: PlatformUtilsService,
-    environmentService: EnvironmentService,
     dialogService: DialogService,
     protected route: ActivatedRoute,
     logService: LogService,
@@ -94,7 +92,6 @@ export class TwoFactorAuthComponent extends BaseTwoFactorAuthComponent {
       router,
       i18nService,
       platformUtilsService,
-      environmentService,
       dialogService,
       route,
       logService,
