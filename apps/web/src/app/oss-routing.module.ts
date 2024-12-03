@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { Route, RouterModule, Routes } from "@angular/router";
 
+import { TwoFactorTimeoutComponent } from "@bitwarden/angular/auth/components/two-factor-auth/two-factor-auth-expired.component";
 import { unauthUiRefreshSwap } from "@bitwarden/angular/auth/functions/unauth-ui-refresh-route-swap";
 import {
   authGuard,
@@ -26,6 +27,7 @@ import {
   LoginSecondaryContentComponent,
   LockV2Component,
   LockIcon,
+  TwoFactorTimeoutIcon,
   UserLockIcon,
   LoginViaAuthRequestComponent,
   DevicesIcon,
@@ -506,7 +508,6 @@ const routes: Routes = [
           } satisfies AnonLayoutWrapperData,
         },
       ),
-
       {
         path: "2fa",
         canActivate: [unauthGuardFn()],
@@ -524,6 +525,28 @@ const routes: Routes = [
           pageTitle: {
             key: "verifyIdentity",
           },
+        } satisfies RouteDataProperties & AnonLayoutWrapperData,
+      },
+      {
+        path: "2fa-timeout",
+        canActivate: [unauthGuardFn()],
+        children: [
+          {
+            path: "",
+            component: TwoFactorTimeoutComponent,
+          },
+          {
+            path: "",
+            component: EnvironmentSelectorComponent,
+            outlet: "environment-selector",
+          },
+        ],
+        data: {
+          pageIcon: TwoFactorTimeoutIcon,
+          pageTitle: {
+            key: "authenticationTimeout",
+          },
+          titleId: "authenticationTimeout",
         } satisfies RouteDataProperties & AnonLayoutWrapperData,
       },
       {
