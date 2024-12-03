@@ -25,7 +25,6 @@ import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/for
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
-import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -36,8 +35,6 @@ import {
   FormFieldModule,
   ToastService,
 } from "@bitwarden/components";
-
-import { CaptchaProtectedComponent } from "../captcha-protected.component";
 
 import { TwoFactorAuthAuthenticatorComponent } from "./two-factor-auth-authenticator.component";
 import { TwoFactorAuthDuoComponent } from "./two-factor-auth-duo.component";
@@ -71,7 +68,7 @@ import {
   ],
   providers: [I18nPipe],
 })
-export class TwoFactorAuthComponent extends CaptchaProtectedComponent implements OnInit {
+export class TwoFactorAuthComponent implements OnInit {
   token = "";
   remember = false;
   orgIdentifier: string = null;
@@ -128,9 +125,8 @@ export class TwoFactorAuthComponent extends CaptchaProtectedComponent implements
   constructor(
     protected loginStrategyService: LoginStrategyServiceAbstraction,
     protected router: Router,
-    i18nService: I18nService,
-    platformUtilsService: PlatformUtilsService,
-    environmentService: EnvironmentService,
+    private i18nService: I18nService,
+    private platformUtilsService: PlatformUtilsService,
     private dialogService: DialogService,
     protected route: ActivatedRoute,
     private logService: LogService,
@@ -144,9 +140,7 @@ export class TwoFactorAuthComponent extends CaptchaProtectedComponent implements
     private formBuilder: FormBuilder,
     @Inject(WINDOW) protected win: Window,
     protected toastService: ToastService,
-  ) {
-    super(environmentService, i18nService, platformUtilsService, toastService);
-  }
+  ) {}
 
   async ngOnInit() {
     if (!(await this.authing()) || (await this.twoFactorService.getProviders()) == null) {
@@ -183,8 +177,6 @@ export class TwoFactorAuthComponent extends CaptchaProtectedComponent implements
   }
 
   async submit() {
-    await this.setupCaptcha();
-
     if (this.token == null || this.token === "") {
       this.toastService.showToast({
         variant: "error",
@@ -197,7 +189,7 @@ export class TwoFactorAuthComponent extends CaptchaProtectedComponent implements
     try {
       this.formPromise = this.loginStrategyService.logInTwoFactor(
         new TokenTwoFactorRequest(this.selectedProviderType, this.token, this.remember),
-        this.captchaToken,
+        null,
       );
       const authResult: AuthResult = await this.formPromise;
       this.logService.info("Successfully submitted two factor token");
@@ -251,9 +243,7 @@ export class TwoFactorAuthComponent extends CaptchaProtectedComponent implements
   }
 
   private async handleLoginResponse(authResult: AuthResult) {
-    if (this.handleCaptchaRequired(authResult)) {
-      return;
-    } else if (this.handleMigrateEncryptionKey(authResult)) {
+    if (this.handleMigrateEncryptionKey(authResult)) {
       return;
     }
 
