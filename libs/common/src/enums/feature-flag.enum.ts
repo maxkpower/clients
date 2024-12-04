@@ -14,7 +14,6 @@ export enum FeatureFlag {
   UseTreeWalkerApiForPageDetailsCollection = "use-tree-walker-api-for-page-details-collection",
   EmailVerification = "email-verification",
   InlineMenuFieldQualification = "inline-menu-field-qualification",
-  MemberAccessReport = "ac-2059-member-access-report",
   TwoFactorComponentRefactor = "two-factor-component-refactor",
   InlineMenuPositioningImprovements = "inline-menu-positioning-improvements",
   ProviderClientVaultPrivacyBanner = "ac-2833-provider-client-vault-privacy-banner",
@@ -33,13 +32,13 @@ export enum FeatureFlag {
   VerifiedSsoDomainEndpoint = "pm-12337-refactor-sso-details-endpoint",
   PM11901_RefactorSelfHostingLicenseUploader = "PM-11901-refactor-self-hosting-license-uploader",
   AccessIntelligence = "pm-13227-access-intelligence",
-  Pm13322AddPolicyDefinitions = "pm-13322-add-policy-definitions",
-  LimitCollectionCreationDeletionSplit = "pm-10863-limit-collection-creation-deletion-split",
   CriticalApps = "pm-14466-risk-insights-critical-application",
   TrialPaymentOptional = "PM-8163-trial-payment",
   SecurityTasks = "security-tasks",
   NewDeviceVerificationTemporaryDismiss = "new-device-temporary-dismiss",
   NewDeviceVerificationPermanentDismiss = "new-device-permanent-dismiss",
+  DisableFreeFamiliesSponsorship = "PM-12274-disable-free-families-sponsorship",
+  PM11360RemoveProviderExportPermission = "pm-11360-remove-provider-export-permission",
 }
 
 export type AllowedFeatureFlagTypes = boolean | number | string;
@@ -64,7 +63,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.UseTreeWalkerApiForPageDetailsCollection]: FALSE,
   [FeatureFlag.EmailVerification]: FALSE,
   [FeatureFlag.InlineMenuFieldQualification]: FALSE,
-  [FeatureFlag.MemberAccessReport]: FALSE,
   [FeatureFlag.TwoFactorComponentRefactor]: FALSE,
   [FeatureFlag.InlineMenuPositioningImprovements]: FALSE,
   [FeatureFlag.ProviderClientVaultPrivacyBanner]: FALSE,
@@ -83,13 +81,13 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.VerifiedSsoDomainEndpoint]: FALSE,
   [FeatureFlag.PM11901_RefactorSelfHostingLicenseUploader]: FALSE,
   [FeatureFlag.AccessIntelligence]: FALSE,
-  [FeatureFlag.Pm13322AddPolicyDefinitions]: FALSE,
-  [FeatureFlag.LimitCollectionCreationDeletionSplit]: FALSE,
   [FeatureFlag.CriticalApps]: FALSE,
   [FeatureFlag.TrialPaymentOptional]: FALSE,
   [FeatureFlag.SecurityTasks]: FALSE,
   [FeatureFlag.NewDeviceVerificationTemporaryDismiss]: FALSE,
   [FeatureFlag.NewDeviceVerificationPermanentDismiss]: FALSE,
+  [FeatureFlag.DisableFreeFamiliesSponsorship]: FALSE,
+  [FeatureFlag.PM11360RemoveProviderExportPermission]: FALSE,
 } satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>;
 
 export type DefaultFeatureFlagValueType = typeof DefaultFeatureFlagValue;

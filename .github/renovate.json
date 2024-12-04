@@ -40,6 +40,10 @@
       "matchPackageNames": ["core-foundation", "security-framework", "security-framework-sys"]
     },
     {
+      "groupName": "zbus",
+      "matchPackageNames": ["zbus", "zbus_polkit"]
+    },
+    {
       "matchPackageNames": [
         "base64-loader",
         "buffer",
@@ -75,11 +79,6 @@
         "concurrently",
         "cross-env",
         "del",
-        "gulp",
-        "gulp-if",
-        "gulp-json-editor",
-        "gulp-replace",
-        "gulp-zip",
         "nord",
         "patch-package",
         "prettier",

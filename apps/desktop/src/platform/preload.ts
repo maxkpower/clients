@@ -56,6 +56,9 @@ const sshAgent = {
   lock: async () => {
     return await ipcRenderer.invoke("sshagent.lock");
   },
+  clearKeys: async () => {
+    return await ipcRenderer.invoke("sshagent.clearkeys");
+  },
   importKey: async (key: string, password: string): Promise<ssh.SshKeyImportResult> => {
     const res = await ipcRenderer.invoke("sshagent.importkey", {
       privateKey: key,
@@ -122,6 +125,13 @@ const localhostCallbackService = {
 export default {
   versions: {
     app: (): Promise<string> => ipcRenderer.invoke("appVersion"),
+    registerSdkVersionProvider: (provide: (resolve: (version: string) => void) => void) => {
+      const resolve = (version: string) => ipcRenderer.send("sdkVersion", version);
+
+      ipcRenderer.on("sdkVersion", () => {
+        provide(resolve);
+      });
+    },
   },
   deviceType: deviceType(),
   isDev: isDev(),

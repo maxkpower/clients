@@ -215,7 +215,6 @@ export class AccountSecurityComponent implements OnInit, OnDestroy {
 
     this.form.controls.vaultTimeoutAction.valueChanges
       .pipe(
-        startWith(initialValues.vaultTimeoutAction), // emit to init pairwise
         map(async (value) => {
           await this.saveVaultTimeoutAction(value);
         }),
@@ -443,6 +442,9 @@ export class AccountSecurityComponent implements OnInit, OnDestroy {
         await this.biometricStateService.setBiometricUnlockEnabled(false);
         await this.biometricStateService.setFingerprintValidated(false);
       }
+    } else {
+      await this.biometricStateService.setBiometricUnlockEnabled(false);
+      await this.biometricStateService.setFingerprintValidated(false);
     }
   }
 

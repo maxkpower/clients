@@ -152,6 +152,15 @@
   "copyLicenseNumber": {
     "message": "Kopier licensnummer"
   },
+  "copyPrivateKey": {
+    "message": "Kopiér privat nøgle"
+  },
+  "copyPublicKey": {
+    "message": "Kopiér offentlig nøgle"
+  },
+  "copyFingerprint": {
+    "message": "Kopiér fingeraftryk"
+  },
   "copyCustomField": {
     "message": "Kopiér $FIELD$",
     "placeholders": {
@@ -1116,6 +1125,10 @@
     "message": "ADVARSEL",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Advarsel",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Bekræft eksport af boks"
   },
@@ -1494,19 +1507,6 @@
   "enableAutoFillOnPageLoadDesc": {
     "message": "Registreres en loginformular, autoudfyld når websiden indlæses."
   },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Advarsel:$CLOSETAG$ Kompromitterede eller ikke-betroede websteder kan misbruge autofyld ved sideindlæsning.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
-  },
   "experimentalFeature": {
     "message": "Kompromitterede eller ikke-betroede websteder kan misbruge autoudfyldning ved sideindlæsning."
   },
@@ -1764,6 +1764,9 @@
   "typeIdentity": {
     "message": "Identitet"
   },
+  "typeSshKey": {
+    "message": "SSH-nøgle"
+  },
   "newItemHeader": {
     "message": "Ny $TYPE$",
     "placeholders": {
@@ -1801,7 +1804,7 @@
     "message": "Ryd generatorhistorik"
   },
   "cleargGeneratorHistoryDescription": {
-    "message": "Fortsættes, slettes alle poster permanent fra generatorens historik. Sikker på, at handlingen skal udføres?"
+    "message": "Fortsætter man, slettes alle poster permanent fra generatorens historik. Sikker på, at handlingen skal udføres?"
   },
   "back": {
     "message": "Tilbage"
@@ -1838,6 +1841,9 @@
   },
   "secureNotes": {
     "message": "Sikre notater"
+  },
+  "sshKeys": {
+    "message": "SSH-nøgler"
   },
   "clear": {
     "message": "Ryd",
@@ -2877,8 +2883,8 @@
   "generateEmail": {
     "message": "Generér e-mail"
   },
-  "generatorBoundariesHint": {
-    "message": "Værdi skal være mellem $MIN$ og $MAX$",
+  "spinboxBoundariesHint": {
+    "message": "Værdi skal være mellem $MIN$ og $MAX$.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
       "min": {
@@ -2888,6 +2894,26 @@
       "max": {
         "content": "$2",
         "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Brug minimum $RECOMMENDED$ tegn for at generere en stærk adgangskode.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Brug minimum $RECOMMENDED$ ord for at generere en stærk adgangssætning.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
       }
     }
   },
@@ -3138,11 +3164,26 @@
   "resendNotification": {
     "message": "Gensend notifikation"
   },
+  "viewAllLogInOptions": {
+    "message": "Vis alle indlogningsmuligheder"
+  },
   "viewAllLoginOptions": {
     "message": "Vis alle indlogningsmuligheder"
   },
   "notificationSentDevice": {
     "message": "En notifikation er sendt til din enhed."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "En notifikation er sendt til enheden"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Sørg for, at boksen er oplåst, samt at fingeraftrykssætningen matcher på den anden enhed"
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "Man vil få besked, når anmodningen er godkendt"
+  },
+  "needAnotherOptionV1": {
+    "message": "Behov for en anden mulighed?"
   },
   "loginInitiated": {
     "message": "Indlogning påbegyndt"
@@ -3237,8 +3278,17 @@
   "opensInANewWindow": {
     "message": "Åbnes i et nyt vindue"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Husk denne enhed for at gøre fremtidige indlogninger gnidningsløse"
+  },
   "deviceApprovalRequired": {
     "message": "Enhedsgodkendelse kræves. Vælg en godkendelsesmulighed nedenfor:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Enhedsgodkendelse kræves"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Vælg en godkendelsesmulighed nedenfor"
   },
   "rememberThisDevice": {
     "message": "Husk denne enhed"
@@ -3312,6 +3362,9 @@
   },
   "userEmailMissing": {
     "message": "Brugers e-mail mangler"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Aktiv bruger e-mail ikke fundet. Man logges ud."
   },
   "deviceTrusted": {
     "message": "Enhed betroet"
@@ -3748,6 +3801,9 @@
   },
   "accessing": {
     "message": "Tilgår"
+  },
+  "loggedInExclamation": {
+    "message": "Logget ind!"
   },
   "passkeyNotCopied": {
     "message": "Adgangsnøglen kopieres ikke"
@@ -4240,6 +4296,21 @@
   "filters": {
     "message": "Filtre"
   },
+  "filterVault": {
+    "message": "Filtrér boks"
+  },
+  "filterApplied": {
+    "message": "Ét filter anvendt"
+  },
+  "filterAppliedPlural": {
+    "message": "$COUNT$ filtre anvendt",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "personalDetails": {
     "message": "Personlige oplysninger"
   },
@@ -4593,6 +4664,30 @@
   "enterprisePolicyRequirementsApplied": {
     "message": "Virksomhedspolitikkrav er anvendt på denne indstilling"
   },
+  "sshPrivateKey": {
+    "message": "Privat nøgle"
+  },
+  "sshPublicKey": {
+    "message": "Offentlig nøgle"
+  },
+  "sshFingerprint": {
+    "message": "Fingeraftryk"
+  },
+  "sshKeyAlgorithm": {
+    "message": "Nøgletype"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
   "retry": {
     "message": "Forsøg igen"
   },
@@ -4787,5 +4882,20 @@
   },
   "generatedPassword": {
     "message": "Genereret adgangskode"
+  },
+  "compactMode": {
+    "message": "Kompakt-tilstand"
+  },
+  "beta": {
+    "message": "Beta"
+  },
+  "extensionWidth": {
+    "message": "Udvidelsesbredde"
+  },
+  "wide": {
+    "message": "Bred"
+  },
+  "extraWide": {
+    "message": "Ekstra bred"
   }
 }

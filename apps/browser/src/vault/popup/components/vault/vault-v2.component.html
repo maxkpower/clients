@@ -23,14 +23,12 @@
   </div>
 
   <!-- Show search & filters outside of the scroll area of the page -->
-  <div
+  <ng-container
     slot="above-scroll-area"
-    class="tw-p-4"
     *ngIf="vaultState !== VaultStateEnum.Empty && !(loading$ | async)"
   >
-    <app-vault-v2-search> </app-vault-v2-search>
-    <app-vault-list-filters></app-vault-list-filters>
-  </div>
+    <app-vault-header-v2></app-vault-header-v2>
+  </ng-container>
 
   <ng-container *ngIf="vaultState !== VaultStateEnum.Empty">
     <div
@@ -61,7 +59,7 @@
     <div
       *ngIf="vaultState === null"
       cdkVirtualScrollingElement
-      class="tw-h-full tw-p-3 tw-styled-scrollbar"
+      class="tw-h-full tw-p-3 bit-compact:tw-p-2 tw-styled-scrollbar"
     >
       <app-autofill-vault-list-items></app-autofill-vault-list-items>
       <app-vault-list-items-container

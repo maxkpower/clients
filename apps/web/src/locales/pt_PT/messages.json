@@ -5,14 +5,17 @@
   "criticalApplications": {
     "message": "Aplicações críticas"
   },
+  "accessIntelligence": {
+    "message": "Aceder à informação"
+  },
   "riskInsights": {
-    "message": "Risk Insights"
+    "message": "Perceções do risco"
   },
   "passwordRisk": {
     "message": "Risco da palavra-passe"
   },
-  "discoverAtRiskPasswords": {
-    "message": "Descubra as palavras-passe em risco e notifique os utilizadores para alterarem essas palavras-passe."
+  "reviewAtRiskPasswords": {
+    "message": "Reveja as palavras-passe em risco (fracas, expostas ou reutilizadas) em todas as aplicações. Selecione as suas aplicações mais críticas para dar prioridade a ações de segurança para os seus utilizadores para resolver as palavras-passe em risco."
   },
   "dataLastUpdated": {
     "message": "Última atualização dos dados: $DATE$",
@@ -36,7 +39,7 @@
     }
   },
   "createNewLoginItem": {
-    "message": "Criar novo item de credencial"
+    "message": "Criar nova credencial"
   },
   "criticalApplicationsWithCount": {
     "message": "Aplicações críticas ($COUNT$)",
@@ -75,10 +78,10 @@
     "message": "Selecione as suas aplicações mais críticas para descobrir palavras-passe em risco e notifique os utilizadores para alterarem essas palavras-passe."
   },
   "markCriticalApps": {
-    "message": "Marcar aplicações críticas"
+    "message": "Marcar apps críticas"
   },
   "markAppAsCritical": {
-    "message": "Marcar a aplicação como crítica"
+    "message": "Marcar a app como crítica"
   },
   "appsMarkedAsCritical": {
     "message": "Apps marcadas como críticas"
@@ -559,6 +562,9 @@
   "typeSecureNote": {
     "message": "Nota segura"
   },
+  "typeSshKey": {
+    "message": "Chave SSH"
+  },
   "typeLoginPlural": {
     "message": "Credenciais"
   },
@@ -978,6 +984,9 @@
   "loginWithDeviceEnabledNote": {
     "message": "O início de sessão com o dispositivo deve ser ativado nas definições da aplicação Bitwarden. Precisa de outra opção?"
   },
+  "needAnotherOptionV1": {
+    "message": "Precisa de outra opção?"
+  },
   "loginWithMasterPassword": {
     "message": "Iniciar sessão com a palavra-passe mestra"
   },
@@ -1295,6 +1304,12 @@
   },
   "notificationSentDevice": {
     "message": "Foi enviada uma notificação para o seu dispositivo."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Foi enviada uma notificação para o seu dispositivo"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Certifique-se de que a sua conta está desbloqueada e que a frase de impressão digital corresponde à do outro dispositivo"
   },
   "versionNumber": {
     "message": "Versão $VERSION_NUMBER$",
@@ -1627,8 +1642,26 @@
   "passwordHistory": {
     "message": "Histórico de palavras-passe"
   },
+  "generatorHistory": {
+    "message": "Histórico do gerador"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Limpar o histórico do gerador"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "Se continuar, todas as entradas serão permanentemente eliminadas do histórico do gerador. Tem a certeza de que pretende continuar?"
+  },
   "noPasswordsInList": {
     "message": "Não existem palavras-passe para listar."
+  },
+  "clearHistory": {
+    "message": "Limpar histórico"
+  },
+  "nothingToShow": {
+    "message": "Nada a mostrar"
+  },
+  "nothingGeneratedRecently": {
+    "message": "Não gerou nada recentemente"
   },
   "clear": {
     "message": "Limpar",
@@ -1752,8 +1785,8 @@
   "sessionsDeauthorized": {
     "message": "Todas as sessões desautorizadas"
   },
-  "accountIsManagedMessage": {
-    "message": "Esta conta é gerida por $ORGANIZATIONNAME$",
+  "accountIsOwnedMessage": {
+    "message": "Esta conta é propriedade de $ORGANIZATIONNAME$",
     "placeholders": {
       "organizationName": {
         "content": "$1",
@@ -3381,6 +3414,9 @@
       }
     }
   },
+  "viewAllLogInOptions": {
+    "message": "Ver todas as opções de início de sessão"
+  },
   "viewAllLoginOptions": {
     "message": "Ver todas as opções de início de sessão"
   },
@@ -3833,6 +3869,55 @@
   },
   "updateBrowserDesc": {
     "message": "Está a utilizar um navegador web não suportado. O cofre web pode não funcionar corretamente."
+  },
+  "freeTrialEndPrompt": {
+    "message": "O seu período experimental gratuito termina dentro de $COUNT$ dias. Para manter a sua subscrição,",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "You must set up 2FA on your user account before you can join this organization."
+      }
+    }
+  },
+  "freeTrialEndPromptAboveTwoDays": {
+    "message": "$ORGANIZATION$, o vosso período experimental gratuito termina dentro de $COUNT$ dias. Para manterem a vossa subscrição,",
+    "placeholders": {
+      "count": {
+        "content": "$2",
+        "example": "organization name"
+      },
+      "organization": {
+        "content": "$1",
+        "example": "remaining days"
+      }
+    }
+  },
+  "freeTrialEndPromptForOneDay": {
+    "message": "$ORGANIZATION$, o vosso período experimental gratuito termina amanhã. Para manterem a vossa subscrição,",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndPromptForOneDayNoOrgName": {
+    "message": "O seu período experimental gratuito termina amanhã. Para manter a sua subscrição,"
+  },
+  "freeTrialEndPromptForLessThanADay": {
+    "message": "$ORGANIZATION$, o vosso período experimental gratuito termina hoje. Para manterem a vossa subscrição,",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndingSoonWithoutOrgName": {
+    "message": "O seu período experimental gratuito termina hoje. Para manter a sua subscrição,"
+  },
+  "routeToPaymentMethodTrigger": {
+    "message": "adicione um método de pagamento."
   },
   "joinOrganization": {
     "message": "Aderir à organização"
@@ -4387,6 +4472,9 @@
   "dontAskFingerprintAgain": {
     "message": "Nunca solicitar a verificação de frases de impressões digitais para utilizadores convidados (não recomendado)",
     "description": "A 'fingerprint phrase' is a unique word phrase (similar to a passphrase) that a user can use to authenticate their public key with another user, for the purposes of sharing."
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "Será notificado quando o pedido for aprovado"
   },
   "free": {
     "message": "Gratuito",
@@ -6321,6 +6409,9 @@
   "idpSingleSignOnServiceUrlRequired": {
     "message": "Necessário se o ID da entidade não for um URL."
   },
+  "offerNoLongerValid": {
+    "message": "Esta oferta já não é válida. Contacte os administradores da sua organização para obter mais informações."
+  },
   "openIdOptionalCustomizations": {
     "message": "Personalizações opcionais"
   },
@@ -6413,8 +6504,8 @@
   "generateEmail": {
     "message": "Gerar e-mail"
   },
-  "generatorBoundariesHint": {
-    "message": "O valor deve estar entre $MIN$ e $MAX$",
+  "spinboxBoundariesHint": {
+    "message": "O valor deve estar entre $MIN$ e $MAX$.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
       "min": {
@@ -6424,6 +6515,26 @@
       "max": {
         "content": "$2",
         "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Utilize $RECOMMENDED$ caracteres ou mais para gerar uma palavra-passe forte.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Utilize $RECOMMENDED$ palavras ou mais para gerar uma frase de acesso forte.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
       }
     }
   },
@@ -7958,8 +8069,17 @@
   "loginInitiated": {
     "message": "A preparar o início de sessão"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Memorizar este dispositivo para facilitar futuros inícios de sessão"
+  },
   "deviceApprovalRequired": {
     "message": "É necessária a aprovação do dispositivo. Selecione uma opção de aprovação abaixo:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Aprovação do dispositivo necessária"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Selecione uma opção de aprovação abaixo"
   },
   "rememberThisDevice": {
     "message": "Lembrar este dispositivo"
@@ -8190,6 +8310,9 @@
   "userEmailMissing": {
     "message": "E-mail do utilizador em falta"
   },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "O e-mail do utilizador ativo não foi encontrado. A terminar a sessão."
+  },
   "deviceTrusted": {
     "message": "Dispositivo de confiança"
   },
@@ -8284,9 +8407,6 @@
   },
   "collectionManagementDesc": {
     "message": "Gerir o comportamento da coleção da organização"
-  },
-  "limitCollectionCreationDeletionDesc": {
-    "message": "Limitar a criação e eliminação de coleções aos proprietários e administradores"
   },
   "limitCollectionCreationDesc": {
     "message": "Limitar a criação de coleções aos proprietários e administradores"
@@ -8441,7 +8561,7 @@
   },
   "addAPaymentMethod": {
     "message": "adicione um método de pagamento",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method'"
   },
   "organizationInformation": {
     "message": "Informações sobre a organização"
@@ -9014,6 +9134,12 @@
   "providerPlan": {
     "message": "Fornecedor de serviços geridos"
   },
+  "managedServiceProvider": {
+    "message": "Fornecedor de serviços geridos"
+  },
+  "multiOrganizationEnterprise": {
+    "message": "Empresa multiorganizacional"
+  },
   "orgSeats": {
     "message": "Lugares da organização"
   },
@@ -9416,6 +9542,30 @@
   "additionalStorageGbMessage": {
     "message": "GB de armazenamento adicional"
   },
+  "sshKeyAlgorithm": {
+    "message": "Algoritmo de chaves"
+  },
+  "sshKeyFingerprint": {
+    "message": "Impressão digital"
+  },
+  "sshKeyPrivateKey": {
+    "message": "Chave privada"
+  },
+  "sshKeyPublicKey": {
+    "message": "Chave pública"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
   "premiumAccounts": {
     "message": "6 contas Premium"
   },
@@ -9580,5 +9730,62 @@
   },
   "organizationUserDeletedDesc": {
     "message": "O utilizador foi removido da organização e todos os dados de utilizador associados foram eliminados."
+  },
+  "deletedUserId": {
+    "message": "Utilizador $ID$ eliminado - um proprietário/administrador eliminou a conta de utilizador",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "userLeftOrganization": {
+    "message": "O utilizador $ID$ saiu da organização",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "suspendedOrganizationTitle": {
+    "message": "A $ORGANIZATION$ está suspensa",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "Acme c"
+      }
+    }
+  },
+  "suspendedUserOrgMessage": {
+    "message": "Contacte o proprietário da sua organização para obter assistência."
+  },
+  "suspendedOwnerOrgMessage": {
+    "message": "Para recuperar o acesso à sua organização, adicione um método de pagamento."
+  },
+  "deleteMembers": {
+    "message": "Eliminar membros"
+  },
+  "noSelectedMembersApplicable": {
+    "message": "Esta ação não é aplicável a nenhum dos membros selecionados."
+  },
+  "deletedSuccessfully": {
+    "message": "Eliminados com sucesso"
+  },
+  "freeFamiliesSponsorship": {
+    "message": "Remover o patrocínio do plano Bitwarden Familiar Gratuito"
+  },
+  "freeFamiliesSponsorshipPolicyDesc": {
+    "message": "Não permitir que os membros resgatem um plano Familiar através desta organização."
+  },
+  "verifyBankAccountWithStatementDescriptorWarning": {
+    "message": "O pagamento com uma conta bancária só está disponível para clientes nos Estados Unidos. Ser-lhe-á pedido que verifique a sua conta bancária. Efetuaremos um micro-depósito nos próximos 1-2 dias úteis. Introduza o código descritor do extrato deste depósito na página de faturação da organização para verificar a conta bancária. A não verificação da conta bancária resultará na falta de pagamento e na suspensão da sua subscrição."
+  },
+  "verifyBankAccountWithStatementDescriptorInstructions": {
+    "message": "Efetuámos um micro-depósito na sua conta bancária (pode demorar 1-2 dias úteis). Introduza o código de seis dígitos que começa por \"SM\" e que se encontra na descrição do depósito. Se a conta bancária não for verificada, o pagamento não será efetuado e a sua subscrição será suspensa."
+  },
+  "descriptorCode": {
+    "message": "Código descritor"
   }
 }
