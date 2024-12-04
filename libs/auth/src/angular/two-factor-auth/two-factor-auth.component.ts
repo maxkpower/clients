@@ -42,6 +42,10 @@ import { TwoFactorAuthEmailComponent } from "./child-components/two-factor-auth-
 import { TwoFactorAuthWebAuthnComponent } from "./child-components/two-factor-auth-webauthn.component";
 import { TwoFactorAuthYubikeyComponent } from "./child-components/two-factor-auth-yubikey.component";
 import {
+  LegacyKeyMigrationAction,
+  TwoFactorAuthComponentService,
+} from "./two-factor-auth-component.service";
+import {
   TwoFactorOptionsDialogResult,
   TwoFactorOptionsComponent,
   TwoFactorOptionsDialogResultType,
@@ -140,6 +144,7 @@ export class TwoFactorAuthComponent implements OnInit {
     private formBuilder: FormBuilder,
     @Inject(WINDOW) protected win: Window,
     protected toastService: ToastService,
+    private twoFactorAuthComponentService: TwoFactorAuthComponentService,
   ) {}
 
   async ngOnInit() {
@@ -223,13 +228,26 @@ export class TwoFactorAuthComponent implements OnInit {
     }
   }
 
-  protected handleMigrateEncryptionKey(result: AuthResult): boolean {
+  protected async handleMigrateEncryptionKey(result: AuthResult): Promise<boolean> {
     if (!result.requiresEncryptionKeyMigration) {
       return false;
     }
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.router.navigate(["migrate-legacy-encryption"]);
+    // Migration is forced so prevent login via return
+    const legacyKeyMigrationAction: LegacyKeyMigrationAction =
+      this.twoFactorAuthComponentService.determineLegacyKeyMigrationAction();
+
+    switch (legacyKeyMigrationAction) {
+      case LegacyKeyMigrationAction.NAVIGATE_TO_MIGRATION_COMPONENT:
+        await this.router.navigate(["migrate-legacy-encryption"]);
+        break;
+      case LegacyKeyMigrationAction.PREVENT_LOGIN_AND_SHOW_REQUIRE_MIGRATION_WARNING:
+        this.toastService.showToast({
+          variant: "error",
+          title: this.i18nService.t("errorOccured"),
+          message: this.i18nService.t("encryptionKeyMigrationRequired"),
+        });
+        break;
+    }
     return true;
   }
 
@@ -243,7 +261,7 @@ export class TwoFactorAuthComponent implements OnInit {
   }
 
   private async handleLoginResponse(authResult: AuthResult) {
-    if (this.handleMigrateEncryptionKey(authResult)) {
+    if (await this.handleMigrateEncryptionKey(authResult)) {
       return;
     }
 
