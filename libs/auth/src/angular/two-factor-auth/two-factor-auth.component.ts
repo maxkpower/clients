@@ -108,6 +108,8 @@ export class TwoFactorAuthComponent implements OnInit {
   submitForm = async () => {
     await this.submit();
   };
+
+  // TODO: web used to do this.onSuccessfulLoginNavigate = this.goAfterLogIn;
   goAfterLogIn = async () => {
     this.loginEmailService.clearValues();
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
