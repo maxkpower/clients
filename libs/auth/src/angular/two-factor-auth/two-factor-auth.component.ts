@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, Inject, OnInit, ViewChild } from "@angular/core";
+import { Component, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, NavigationExtras, Router, RouterLink } from "@angular/router";
 import { Subject, takeUntil, lastValueFrom, first, firstValueFrom } from "rxjs";
@@ -27,7 +27,9 @@ import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.s
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { SyncService } from "@bitwarden/common/platform/sync";
 import {
   AsyncActionsModule,
   ButtonModule,
@@ -72,7 +74,7 @@ import {
   ],
   providers: [I18nPipe],
 })
-export class TwoFactorAuthComponent implements OnInit {
+export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   token = "";
   remember = false;
   orgIdentifier: string = null;
@@ -147,6 +149,8 @@ export class TwoFactorAuthComponent implements OnInit {
     @Inject(WINDOW) protected win: Window,
     protected toastService: ToastService,
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
+    private syncService: SyncService,
+    private messagingService: MessagingService,
   ) {}
 
   async ngOnInit() {
@@ -181,6 +185,38 @@ export class TwoFactorAuthComponent implements OnInit {
       this.token = value.token;
       this.remember = value.remember;
     });
+
+    // TODO: this is a temporary on init. Must genericize this and refactor out client specific stuff where possible.
+    await this.extensionOnInit();
+  }
+
+  private async extensionOnInit() {
+    if (this.route.snapshot.paramMap.has("webAuthnResponse")) {
+      // WebAuthn fallback response
+      this.selectedProviderType = TwoFactorProviderType.WebAuthn;
+      this.token = this.route.snapshot.paramMap.get("webAuthnResponse");
+      this.onSuccessfulLogin = async () => {
+        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.syncService.fullSync(true);
+        this.messagingService.send("reloadPopup");
+        window.close();
+      };
+      this.remember = this.route.snapshot.paramMap.get("remember") === "true";
+      await this.submit();
+      return;
+    }
+
+    // TODO: refactor into service
+    // if (await BrowserPopupUtils.inPopout(this.win)) {
+    //   this.selectedProviderType = TwoFactorProviderType.Email;
+    // }
+
+    // WebAuthn prompt appears inside the popup on linux, and requires a larger popup width
+    // than usual to avoid cutting off the dialog.
+    if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
+      document.body.classList.add("linux-webauthn");
+    }
   }
 
   async submit() {
@@ -340,6 +376,10 @@ export class TwoFactorAuthComponent implements OnInit {
       this.onSuccessfulLoginTde();
     }
 
+    // TODO: extension has this.onSuccessfulLoginTdeNavigate = async () => {
+    //   this.win.close();
+    // };
+
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.navigateViaCallbackOrRoute(
@@ -395,6 +435,9 @@ export class TwoFactorAuthComponent implements OnInit {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.onSuccessfulLogin();
     }
+
+    // TODO: extension has this.onSuccessfulLoginNavigate = this.goAfterLogIn;
+
     await this.navigateViaCallbackOrRoute(this.onSuccessfulLoginNavigate, [this.successRoute]);
   }
 
@@ -417,5 +460,17 @@ export class TwoFactorAuthComponent implements OnInit {
   private async needsLock(): Promise<boolean> {
     const authType = await firstValueFrom(this.loginStrategyService.currentAuthType$);
     return authType == AuthenticationType.Sso || authType == AuthenticationType.UserApiKey;
+  }
+
+  async isLinux() {
+    // TODO: this was extension logic and must be moved to service if platform utils service doesn't have support for this
+    // return (await BrowserApi.getPlatformInfo()).os === "linux";
+    return false;
+  }
+
+  async ngOnDestroy() {
+    if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
+      document.body.classList.remove("linux-webauthn");
+    }
   }
 }
