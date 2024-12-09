@@ -126,7 +126,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   };
 
   private loginRoute = "login";
-
   private trustedDeviceEncRoute = "login-initiated";
   private changePasswordRoute = "set-password";
   private forcePasswordResetRoute = "update-temp-password";
@@ -158,7 +157,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     // TODO: should this be in a guard instead of here?
-    if (!(await this.authing()) || (await this.twoFactorService.getProviders()) == null) {
+    const authing = await this.authing();
+    const twoFactorProviders = await this.twoFactorService.getProviders();
+    if (!authing || twoFactorProviders == null) {
       await this.router.navigate([this.loginRoute]);
       return;
     }
