@@ -36,6 +36,7 @@ import {
   RegistrationExpiredLinkIcon,
   VaultIcon,
   LoginDecryptionOptionsComponent,
+  TwoFactorAuthComponent,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -65,7 +66,6 @@ import { SsoComponent } from "./auth/sso.component";
 import { CompleteTrialInitiationComponent } from "./auth/trial-initiation/complete-trial-initiation/complete-trial-initiation.component";
 import { freeTrialTextResolver } from "./auth/trial-initiation/complete-trial-initiation/resolver/free-trial-text.resolver";
 import { TrialInitiationComponent } from "./auth/trial-initiation/trial-initiation.component";
-import { TwoFactorAuthComponent } from "./auth/two-factor-auth.component";
 import { TwoFactorComponentV1 } from "./auth/two-factor-v1.component";
 import { UpdatePasswordComponent } from "./auth/update-password.component";
 import { UpdateTempPasswordComponent } from "./auth/update-temp-password.component";

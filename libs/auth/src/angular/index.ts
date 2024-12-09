@@ -74,3 +74,4 @@ export * from "./login-approval/default-login-approval-component.service";
 // two factor auth
 export * from "./two-factor-auth/two-factor-auth-component.service";
 export * from "./two-factor-auth/default-two-factor-auth-component.service";
+export * from "./two-factor-auth/two-factor-auth.component";
