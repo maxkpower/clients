@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Injectable, OnDestroy } from "@angular/core";
 import {
   catchError,
@@ -198,7 +200,10 @@ export class SshAgentService implements OnDestroy {
             }
 
             const sshCiphers = ciphers.filter(
-              (cipher) => cipher.type === CipherType.SshKey && !cipher.isDeleted,
+              (cipher) =>
+                cipher.type === CipherType.SshKey &&
+                !cipher.isDeleted &&
+                cipher.organizationId === null,
             );
             const keys = sshCiphers.map((cipher) => {
               return {

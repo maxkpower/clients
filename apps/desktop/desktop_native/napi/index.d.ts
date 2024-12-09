@@ -6,8 +6,6 @@
 export declare namespace passwords {
   /** Fetch the stored password from the keychain. */
   export function getPassword(service: string, account: string): Promise<string>
-  /** Fetch the stored password from the keychain that was stored with Keytar. */
-  export function getPasswordKeytar(service: string, account: string): Promise<string>
   /** Save the password to the keychain. Adds an entry if none exists otherwise updates the existing entry. */
   export function setPassword(service: string, account: string, password: string): Promise<void>
   /** Delete the stored password from the keychain. */
@@ -123,4 +121,10 @@ export declare namespace ipc {
      */
     send(message: string): number
   }
+}
+export declare namespace autofill {
+  export function runCommand(value: string): Promise<string>
+}
+export declare namespace crypto {
+  export function argon2(secret: Buffer, salt: Buffer, iterations: number, memory: number, parallelism: number): Promise<Buffer>
 }
