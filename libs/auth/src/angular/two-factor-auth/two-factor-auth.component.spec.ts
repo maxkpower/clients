@@ -27,12 +27,15 @@ import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.ser
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { SyncService } from "@bitwarden/common/platform/sync";
 import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 import { DialogService, ToastService } from "@bitwarden/components";
 
+import { TwoFactorAuthComponentService } from "./two-factor-auth-component.service";
 import { TwoFactorAuthComponent } from "./two-factor-auth.component";
 
 // test component that extends the TwoFactorAuthComponent
@@ -72,6 +75,9 @@ describe("TwoFactorComponent", () => {
   let mockAccountService: FakeAccountService;
   let mockDialogService: MockProxy<DialogService>;
   let mockToastService: MockProxy<ToastService>;
+  let mockTwoFactorAuthCompService: MockProxy<TwoFactorAuthComponentService>;
+  let mockSyncService: MockProxy<SyncService>;
+  let mockMessagingService: MockProxy<MessagingService>;
 
   let mockUserDecryptionOpts: {
     noMasterPassword: UserDecryptionOptions;
@@ -106,6 +112,9 @@ describe("TwoFactorComponent", () => {
     mockMasterPasswordService = new FakeMasterPasswordService();
     mockDialogService = mock<DialogService>();
     mockToastService = mock<ToastService>();
+    mockTwoFactorAuthCompService = mock<TwoFactorAuthComponentService>();
+    mockSyncService = mock<SyncService>();
+    mockMessagingService = mock<MessagingService>();
 
     mockUserDecryptionOpts = {
       noMasterPassword: new UserDecryptionOptions({
@@ -186,6 +195,9 @@ describe("TwoFactorComponent", () => {
         { provide: AccountService, useValue: mockAccountService },
         { provide: DialogService, useValue: mockDialogService },
         { provide: ToastService, useValue: mockToastService },
+        { provide: TwoFactorAuthComponentService, useValue: mockTwoFactorAuthCompService },
+        { provide: SyncService, useValue: mockSyncService },
+        { provide: MessagingService, useValue: mockMessagingService },
       ],
     });
 
