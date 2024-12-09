@@ -157,9 +157,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     // TODO: should this be in a guard instead of here?
-    const authing = await this.authing();
+    const authenticating = await this.authenticating();
     const twoFactorProviders = await this.twoFactorService.getProviders();
-    if (!authing || twoFactorProviders == null) {
+    if (!authenticating || twoFactorProviders == null) {
       await this.router.navigate([this.loginRoute]);
       return;
     }
@@ -470,7 +470,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async authing(): Promise<boolean> {
+  private async authenticating(): Promise<boolean> {
     return (await firstValueFrom(this.loginStrategyService.currentAuthType$)) !== null;
   }
 
