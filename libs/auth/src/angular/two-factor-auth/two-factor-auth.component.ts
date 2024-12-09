@@ -125,42 +125,41 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     });
   };
 
-  protected loginRoute = "login";
+  private loginRoute = "login";
 
-  protected trustedDeviceEncRoute = "login-initiated";
-  protected changePasswordRoute = "set-password";
-  protected forcePasswordResetRoute = "update-temp-password";
-  protected successRoute = "vault";
-  protected twoFactorSessionTimeoutRoute = "2fa-timeout";
+  private trustedDeviceEncRoute = "login-initiated";
+  private changePasswordRoute = "set-password";
+  private forcePasswordResetRoute = "update-temp-password";
+  private successRoute = "vault";
+  private twoFactorSessionTimeoutRoute = "2fa-timeout";
 
   constructor(
-    protected loginStrategyService: LoginStrategyServiceAbstraction,
-    protected router: Router,
+    private loginStrategyService: LoginStrategyServiceAbstraction,
+    private router: Router,
     private i18nService: I18nService,
     private platformUtilsService: PlatformUtilsService,
     private dialogService: DialogService,
-    protected route: ActivatedRoute,
+    private route: ActivatedRoute,
     private logService: LogService,
-    protected twoFactorService: TwoFactorService,
+    private twoFactorService: TwoFactorService,
     private loginEmailService: LoginEmailServiceAbstraction,
     private userDecryptionOptionsService: UserDecryptionOptionsServiceAbstraction,
-    protected ssoLoginService: SsoLoginServiceAbstraction,
-    protected configService: ConfigService,
+    private ssoLoginService: SsoLoginServiceAbstraction,
+    private configService: ConfigService,
     private masterPasswordService: InternalMasterPasswordServiceAbstraction,
     private accountService: AccountService,
     private formBuilder: FormBuilder,
     @Inject(WINDOW) protected win: Window,
-    protected toastService: ToastService,
+    private toastService: ToastService,
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
     private syncService: SyncService,
     private messagingService: MessagingService,
   ) {}
 
   async ngOnInit() {
+    // TODO: should this be in a guard instead of here?
     if (!(await this.authing()) || (await this.twoFactorService.getProviders()) == null) {
-      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.router.navigate([this.loginRoute]);
+      await this.router.navigate([this.loginRoute]);
       return;
     }
 
