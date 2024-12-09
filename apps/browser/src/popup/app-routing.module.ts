@@ -6,7 +6,6 @@ import {
   EnvironmentSelectorRouteData,
   ExtensionDefaultOverlayPosition,
 } from "@bitwarden/angular/auth/components/environment-selector.component";
-import { TwoFactorTimeoutComponent } from "@bitwarden/angular/auth/components/two-factor-auth/two-factor-auth-expired.component";
 import { unauthUiRefreshRedirect } from "@bitwarden/angular/auth/functions/unauth-ui-refresh-redirect";
 import { unauthUiRefreshSwap } from "@bitwarden/angular/auth/functions/unauth-ui-refresh-route-swap";
 import {
@@ -40,6 +39,8 @@ import {
   LoginDecryptionOptionsComponent,
   DevicesIcon,
   TwoFactorTimeoutIcon,
+  TwoFactorAuthComponent,
+  TwoFactorTimeoutComponent,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -62,7 +63,6 @@ import { SetPasswordComponent } from "../auth/popup/set-password.component";
 import { AccountSecurityComponent as AccountSecurityV1Component } from "../auth/popup/settings/account-security-v1.component";
 import { AccountSecurityComponent } from "../auth/popup/settings/account-security.component";
 import { SsoComponent } from "../auth/popup/sso.component";
-import { TwoFactorAuthComponent } from "../auth/popup/two-factor-auth.component";
 import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
 import { TwoFactorComponentV1 } from "../auth/popup/two-factor-v1.component";
 import { UpdateTempPasswordComponent } from "../auth/popup/update-temp-password.component";
