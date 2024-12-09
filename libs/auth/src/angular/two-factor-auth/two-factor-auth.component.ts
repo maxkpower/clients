@@ -2,6 +2,7 @@
 // @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, NavigationExtras, Router, RouterLink } from "@angular/router";
 import { Subject, takeUntil, lastValueFrom, first, firstValueFrom } from "rxjs";
@@ -131,6 +132,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   protected changePasswordRoute = "set-password";
   protected forcePasswordResetRoute = "update-temp-password";
   protected successRoute = "vault";
+  protected twoFactorSessionTimeoutRoute = "2fa-timeout";
 
   constructor(
     protected loginStrategyService: LoginStrategyServiceAbstraction,
@@ -188,6 +190,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       this.remember = value.remember;
     });
 
+    this.listenFor2faSessionTimeout();
+
     // TODO: this is a temporary on init. Must genericize this and refactor out client specific stuff where possible.
     await this.extensionOnInit();
   }
@@ -219,6 +223,25 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
       document.body.classList.add("linux-webauthn");
     }
+  }
+
+  private listenFor2faSessionTimeout() {
+    this.loginStrategyService.twoFactorTimeout$
+      .pipe(takeUntilDestroyed())
+      .subscribe(async (expired) => {
+        if (!expired) {
+          return;
+        }
+
+        try {
+          await this.router.navigate([this.twoFactorSessionTimeoutRoute]);
+        } catch (err) {
+          this.logService.error(
+            `Failed to navigate to ${this.twoFactorSessionTimeoutRoute} route`,
+            err,
+          );
+        }
+      });
   }
 
   async submit() {
