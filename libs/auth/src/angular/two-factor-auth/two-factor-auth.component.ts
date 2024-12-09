@@ -104,7 +104,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  onSuccessfulLogin: () => Promise<void>;
   onSuccessfulLoginNavigate: () => Promise<void>;
 
   onSuccessfulLoginTde: () => Promise<void>;
@@ -201,13 +200,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       // WebAuthn fallback response
       this.selectedProviderType = TwoFactorProviderType.WebAuthn;
       this.token = this.route.snapshot.paramMap.get("webAuthnResponse");
-      this.onSuccessfulLogin = async () => {
-        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.syncService.fullSync(true);
-        this.messagingService.send("reloadPopup");
-        window.close();
-      };
+      // TODO: move this to service.
+      // this.onSuccessfulLogin = async () => {
+      //   this.messagingService.send("reloadPopup");
+      //   window.close();
+      // };
       this.remember = this.route.snapshot.paramMap.get("remember") === "true";
       await this.submit();
       return;
@@ -261,7 +258,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       );
       const authResult: AuthResult = await this.formPromise;
       this.logService.info("Successfully submitted two factor token");
-      await this.handleLoginResponse(authResult);
+      await this.handleAuthResult(authResult);
     } catch {
       this.logService.error("Error submitting two factor token");
       this.toastService.showToast({
@@ -323,10 +320,13 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.title = (TwoFactorProviders as any)[this.selectedProviderType].name;
   }
 
-  private async handleLoginResponse(authResult: AuthResult) {
+  private async handleAuthResult(authResult: AuthResult) {
     if (await this.handleMigrateEncryptionKey(authResult)) {
-      return;
+      return; // stop login process
     }
+
+    // User is fully logged in so we should sync before executing navigation
+    await this.syncService.fullSync(true);
 
     // Save off the OrgSsoIdentifier for use in the TDE flows
     // - TDE login decryption options component
@@ -453,14 +453,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async handleSuccessfulLogin() {
-    if (this.onSuccessfulLogin != null) {
-      // Note: awaiting this will currently cause a hang on desktop & browser as they will wait for a full sync to complete
-      // before navigating to the success route.
-      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.onSuccessfulLogin();
-    }
-
     // TODO: extension has this.onSuccessfulLoginNavigate = this.goAfterLogIn;
 
     await this.navigateViaCallbackOrRoute(this.onSuccessfulLoginNavigate, [this.successRoute]);
