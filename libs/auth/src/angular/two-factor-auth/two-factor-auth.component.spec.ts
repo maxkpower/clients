@@ -225,7 +225,7 @@ describe("TwoFactorComponent", () => {
       expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
       expect(mockRouter.navigate).toHaveBeenCalledWith([_component.changePasswordRoute], {
         queryParams: {
-          identifier: component.orgIdentifier,
+          identifier: component.orgSsoIdentifier,
         },
       });
     });
@@ -239,7 +239,7 @@ describe("TwoFactorComponent", () => {
       // expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
       expect(mockRouter.navigate).toHaveBeenCalledWith([_component.forcePasswordResetRoute], {
         queryParams: {
-          identifier: component.orgIdentifier,
+          identifier: component.orgSsoIdentifier,
         },
       });
     });
@@ -320,7 +320,7 @@ describe("TwoFactorComponent", () => {
 
           expect(mockRouter.navigate).not.toHaveBeenCalledWith([_component.changePasswordRoute], {
             queryParams: {
-              identifier: component.orgIdentifier,
+              identifier: component.orgSsoIdentifier,
             },
           });
         });

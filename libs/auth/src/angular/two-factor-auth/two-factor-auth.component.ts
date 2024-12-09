@@ -5,7 +5,7 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, NavigationExtras, Router, RouterLink } from "@angular/router";
-import { Subject, takeUntil, lastValueFrom, first, firstValueFrom } from "rxjs";
+import { Subject, takeUntil, lastValueFrom, firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
@@ -80,7 +80,7 @@ import {
 export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   token = "";
   remember = false;
-  orgIdentifier: string = null;
+  orgSsoIdentifier: string = null;
 
   providers = TwoFactorProviders;
   providerType = TwoFactorProviderType;
@@ -104,25 +104,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  onSuccessfulLoginNavigate: () => Promise<void>;
-
   onSuccessfulLoginTde: () => Promise<void>;
   onSuccessfulLoginTdeNavigate: () => Promise<void>;
 
   submitForm = async () => {
     await this.submit();
-  };
-
-  // TODO: web used to do this.onSuccessfulLoginNavigate = this.goAfterLogIn;
-  goAfterLogIn = async () => {
-    this.loginEmailService.clearValues();
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.router.navigate([this.successRoute], {
-      queryParams: {
-        identifier: this.orgIdentifier,
-      },
-    });
   };
 
   private loginRoute = "login";
@@ -138,7 +124,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private i18nService: I18nService,
     private platformUtilsService: PlatformUtilsService,
     private dialogService: DialogService,
-    private route: ActivatedRoute,
+    private activatedRoute: ActivatedRoute,
     private logService: LogService,
     private twoFactorService: TwoFactorService,
     private loginEmailService: LoginEmailServiceAbstraction,
@@ -164,16 +150,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // eslint-disable-next-line rxjs-angular/prefer-takeuntil
-    this.route.queryParams.pipe(first()).subscribe((qParams) => {
-      if (qParams.identifier != null) {
-        this.orgIdentifier = qParams.identifier;
-      }
-    });
-
-    if (await this.needsLock()) {
-      this.successRoute = "lock";
-    }
+    this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
 
     const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
     this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
@@ -196,16 +173,16 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async extensionOnInit() {
-    if (this.route.snapshot.paramMap.has("webAuthnResponse")) {
+    if (this.activatedRoute.snapshot.paramMap.has("webAuthnResponse")) {
       // WebAuthn fallback response
       this.selectedProviderType = TwoFactorProviderType.WebAuthn;
-      this.token = this.route.snapshot.paramMap.get("webAuthnResponse");
+      this.token = this.activatedRoute.snapshot.paramMap.get("webAuthnResponse");
       // TODO: move this to service.
       // this.onSuccessfulLogin = async () => {
       //   this.messagingService.send("reloadPopup");
       //   window.close();
       // };
-      this.remember = this.route.snapshot.paramMap.get("remember") === "true";
+      this.remember = this.activatedRoute.snapshot.paramMap.get("remember") === "true";
       await this.submit();
       return;
     }
@@ -327,16 +304,16 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
     // User is fully logged in so we should sync before executing navigation
     await this.syncService.fullSync(true);
+    this.loginEmailService.clearValues();
 
     // Save off the OrgSsoIdentifier for use in the TDE flows
     // - TDE login decryption options component
     // - Browser SSO on extension open
-    await this.ssoLoginService.setActiveUserOrganizationSsoIdentifier(this.orgIdentifier);
-    this.loginEmailService.clearValues();
+    await this.ssoLoginService.setActiveUserOrganizationSsoIdentifier(this.orgSsoIdentifier);
 
     // note: this flow affects both TDE & standard users
     if (this.isForcePasswordResetRequired(authResult)) {
-      return await this.handleForcePasswordReset(this.orgIdentifier);
+      return await this.handleForcePasswordReset(this.orgSsoIdentifier);
     }
 
     const userDecryptionOpts = await firstValueFrom(
@@ -348,7 +325,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     if (tdeEnabled) {
       return await this.handleTrustedDeviceEncryptionEnabled(
         authResult,
-        this.orgIdentifier,
+        this.orgSsoIdentifier,
         userDecryptionOpts,
       );
     }
@@ -359,7 +336,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
     if (requireSetPassword || authResult.resetMasterPassword) {
       // Change implies going no password -> password in this case
-      return await this.handleChangePasswordRequired(this.orgIdentifier);
+      return await this.handleChangePasswordRequired(this.orgSsoIdentifier);
     }
 
     return await this.handleSuccessfulLogin();
@@ -368,7 +345,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   private async isTrustedDeviceEncEnabled(
     trustedDeviceOption: TrustedDeviceUserDecryptionOption,
   ): Promise<boolean> {
-    const ssoTo2faFlowActive = this.route.snapshot.queryParamMap.get("sso") === "true";
+    const ssoTo2faFlowActive = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
 
     return ssoTo2faFlowActive && trustedDeviceOption !== undefined;
   }
@@ -453,9 +430,15 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async handleSuccessfulLogin() {
-    // TODO: extension has this.onSuccessfulLoginNavigate = this.goAfterLogIn;
+    if (await this.needsLock()) {
+      this.successRoute = "lock";
+    }
 
-    await this.navigateViaCallbackOrRoute(this.onSuccessfulLoginNavigate, [this.successRoute]);
+    await this.router.navigate([this.successRoute], {
+      queryParams: {
+        identifier: this.orgSsoIdentifier,
+      },
+    });
   }
 
   private async navigateViaCallbackOrRoute(
