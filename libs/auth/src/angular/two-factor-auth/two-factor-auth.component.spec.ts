@@ -19,6 +19,7 @@ import { AccountService } from "@bitwarden/common/auth/abstractions/account.serv
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { SsoLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/sso-login.service.abstraction";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
+import { AuthenticationType } from "@bitwarden/common/auth/enums/authentication-type";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
@@ -249,12 +250,17 @@ describe("TwoFactorComponent", () => {
     describe("submit", () => {
       const token = "testToken";
       const remember = false;
+      const currentAuthTypeSubject = new BehaviorSubject<AuthenticationType>(
+        AuthenticationType.Password,
+      );
 
       beforeEach(() => {
         component.token = token;
         component.remember = remember;
 
         selectedUserDecryptionOptions.next(mockUserDecryptionOpts.withMasterPassword);
+
+        mockLoginStrategyService.currentAuthType$ = currentAuthTypeSubject.asObservable();
       });
 
       it("calls authService.logInTwoFactor with correct parameters when form is submitted", async () => {
@@ -269,18 +275,6 @@ describe("TwoFactorComponent", () => {
           new TokenTwoFactorRequest(component.selectedProviderType, token, remember),
           null, // captcha token not supported
         );
-      });
-
-      it("calls onSuccessfulLogin when defined", async () => {
-        // Arrange
-        component.onSuccessfulLogin = jest.fn().mockResolvedValue(undefined);
-        mockLoginStrategyService.logInTwoFactor.mockResolvedValue(new AuthResult());
-
-        // Act
-        await component.submit();
-
-        // Assert
-        expect(component.onSuccessfulLogin).toHaveBeenCalled();
       });
 
       it("calls loginEmailService.clearValues() when login is successful", async () => {
@@ -346,30 +340,44 @@ describe("TwoFactorComponent", () => {
         });
       });
 
-      it("calls onSuccessfulLoginNavigate when the callback is defined", async () => {
-        // Arrange
-        component.onSuccessfulLoginNavigate = jest.fn().mockResolvedValue(undefined);
+      it("navigates to the component's defined success route (vault is default) when the login is successful", async () => {
         mockLoginStrategyService.logInTwoFactor.mockResolvedValue(new AuthResult());
 
         // Act
         await component.submit();
 
         // Assert
-        expect(component.onSuccessfulLoginNavigate).toHaveBeenCalled();
-      });
-
-      it("navigates to the component's defined success route when the login is successful and onSuccessfulLoginNavigate is undefined", async () => {
-        mockLoginStrategyService.logInTwoFactor.mockResolvedValue(new AuthResult());
-
-        // Act
-        await component.submit();
-
-        // Assert
-        expect(component.onSuccessfulLoginNavigate).not.toBeDefined();
-
         expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-        expect(mockRouter.navigate).toHaveBeenCalledWith([_component.successRoute], undefined);
+        expect(_component.successRoute).toEqual("vault");
+        expect(mockRouter.navigate).toHaveBeenCalledWith([_component.successRoute], {
+          queryParams: {
+            identifier: component.orgSsoIdentifier,
+          },
+        });
       });
+
+      it.each([
+        [AuthenticationType.Sso, "lock"],
+        [AuthenticationType.UserApiKey, "lock"],
+      ])(
+        "navigates to the lock component when the authentication type is %s",
+        async (authType, expectedRoute) => {
+          mockLoginStrategyService.logInTwoFactor.mockResolvedValue(new AuthResult());
+          currentAuthTypeSubject.next(authType);
+
+          // Act
+          await component.submit();
+
+          // Assert
+          expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
+          expect(_component.successRoute).toEqual(expectedRoute);
+          expect(mockRouter.navigate).toHaveBeenCalledWith([_component.successRoute], {
+            queryParams: {
+              identifier: component.orgSsoIdentifier,
+            },
+          });
+        },
+      );
     });
   });
 
