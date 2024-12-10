@@ -25,7 +25,6 @@ import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/for
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/master-password/fake-master-password.service";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
-import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -70,7 +69,6 @@ describe("TwoFactorComponent", () => {
   let mockLoginEmailService: MockProxy<LoginEmailServiceAbstraction>;
   let mockUserDecryptionOptionsService: MockProxy<UserDecryptionOptionsServiceAbstraction>;
   let mockSsoLoginService: MockProxy<SsoLoginServiceAbstraction>;
-  let mockConfigService: MockProxy<ConfigService>;
   let mockMasterPasswordService: FakeMasterPasswordService;
   let mockAccountService: FakeAccountService;
   let mockDialogService: MockProxy<DialogService>;
@@ -107,7 +105,6 @@ describe("TwoFactorComponent", () => {
     mockLoginEmailService = mock<LoginEmailServiceAbstraction>();
     mockUserDecryptionOptionsService = mock<UserDecryptionOptionsServiceAbstraction>();
     mockSsoLoginService = mock<SsoLoginServiceAbstraction>();
-    mockConfigService = mock<ConfigService>();
     mockAccountService = mockAccountServiceWith(userId);
     mockMasterPasswordService = new FakeMasterPasswordService();
     mockDialogService = mock<DialogService>();
@@ -190,7 +187,6 @@ describe("TwoFactorComponent", () => {
           useValue: mockUserDecryptionOptionsService,
         },
         { provide: SsoLoginServiceAbstraction, useValue: mockSsoLoginService },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: InternalMasterPasswordServiceAbstraction, useValue: mockMasterPasswordService },
         { provide: AccountService, useValue: mockAccountService },
         { provide: DialogService, useValue: mockDialogService },
@@ -394,9 +390,7 @@ describe("TwoFactorComponent", () => {
       });
 
       describe("Trusted Device Encryption scenarios", () => {
-        beforeEach(() => {
-          mockConfigService.getFeatureFlag.mockResolvedValue(true);
-        });
+        beforeEach(() => {});
 
         describe("Given Trusted Device Encryption is enabled and user needs to set a master password", () => {
           beforeEach(() => {

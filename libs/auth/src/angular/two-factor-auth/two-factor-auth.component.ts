@@ -27,7 +27,6 @@ import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.service";
-import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -130,7 +129,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private loginEmailService: LoginEmailServiceAbstraction,
     private userDecryptionOptionsService: UserDecryptionOptionsServiceAbstraction,
     private ssoLoginService: SsoLoginServiceAbstraction,
-    private configService: ConfigService,
     private masterPasswordService: InternalMasterPasswordServiceAbstraction,
     private accountService: AccountService,
     private formBuilder: FormBuilder,
