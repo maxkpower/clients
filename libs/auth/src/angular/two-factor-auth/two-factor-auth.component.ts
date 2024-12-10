@@ -5,7 +5,7 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, NavigationExtras, Router, RouterLink } from "@angular/router";
-import { Subject, takeUntil, lastValueFrom, firstValueFrom } from "rxjs";
+import { lastValueFrom, firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
@@ -88,7 +88,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   providerData: any;
 
   @ViewChild("duoComponent") duoComponent!: TwoFactorAuthDuoComponent;
-  formGroup = this.formBuilder.group({
+
+  form = this.formBuilder.group({
     token: [
       "",
       {
@@ -100,9 +101,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   });
   actionButtonText = "";
   title = "";
-  formPromise: Promise<any>;
 
-  private destroy$ = new Subject<void>();
+  formPromise: Promise<any>;
 
   onSuccessfulLoginTde: () => Promise<void>;
   onSuccessfulLoginTdeNavigate: () => Promise<void>;
@@ -142,9 +142,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     // TODO: should this be in a guard instead of here?
-    const authenticating = await this.authenticating();
+    const userIsAuthenticating = await this.userIsAuthenticating();
     const twoFactorProviders = await this.twoFactorService.getProviders();
-    if (!authenticating || twoFactorProviders == null) {
+    if (!userIsAuthenticating || twoFactorProviders == null) {
       await this.router.navigate([this.loginRoute]);
       return;
     }
@@ -157,10 +157,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return providers.get(this.selectedProviderType);
     });
     this.providerData = providerData;
-    await this.updateUIToProviderData();
+    await this.setTitleByTwoFactorProvider();
 
     this.actionButtonText = this.i18nService.t("continue");
-    this.formGroup.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.token = value.token;
       this.remember = value.remember;
     });
@@ -254,7 +255,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       });
       this.providerData = providerData;
       this.selectedProviderType = response.type;
-      await this.updateUIToProviderData();
+      await this.setTitleByTwoFactorProvider();
     }
   }
 
@@ -287,7 +288,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  async updateUIToProviderData() {
+  async setTitleByTwoFactorProvider() {
     if (this.selectedProviderType == null) {
       this.title = this.i18nService.t("loginUnavailable");
       return;
@@ -455,13 +456,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async authenticating(): Promise<boolean> {
+  private async userIsAuthenticating(): Promise<boolean> {
     return (await firstValueFrom(this.loginStrategyService.currentAuthType$)) !== null;
-  }
-
-  private async needsLock(): Promise<boolean> {
-    const authType = await firstValueFrom(this.loginStrategyService.currentAuthType$);
-    return authType == AuthenticationType.Sso || authType == AuthenticationType.UserApiKey;
   }
 
   async isLinux() {
