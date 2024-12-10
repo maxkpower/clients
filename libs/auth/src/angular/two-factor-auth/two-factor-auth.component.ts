@@ -99,6 +99,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     ],
     remember: [false],
   });
+
   actionButtonText = "";
   title = "";
 

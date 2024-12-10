@@ -47,7 +47,6 @@ interface TwoFactorComponentProtected {
   trustedDeviceEncRoute: string;
   changePasswordRoute: string;
   forcePasswordResetRoute: string;
-  successRoute: string;
 }
 
 describe("TwoFactorComponent", () => {
@@ -348,8 +347,7 @@ describe("TwoFactorComponent", () => {
 
         // Assert
         expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-        expect(_component.successRoute).toEqual("vault");
-        expect(mockRouter.navigate).toHaveBeenCalledWith([_component.successRoute], {
+        expect(mockRouter.navigate).toHaveBeenCalledWith(["vault"], {
           queryParams: {
             identifier: component.orgSsoIdentifier,
           },
@@ -370,8 +368,7 @@ describe("TwoFactorComponent", () => {
 
           // Assert
           expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-          expect(_component.successRoute).toEqual(expectedRoute);
-          expect(mockRouter.navigate).toHaveBeenCalledWith([_component.successRoute], {
+          expect(mockRouter.navigate).toHaveBeenCalledWith(["lock"], {
             queryParams: {
               identifier: component.orgSsoIdentifier,
             },
