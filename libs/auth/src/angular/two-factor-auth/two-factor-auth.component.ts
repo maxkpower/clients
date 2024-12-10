@@ -115,7 +115,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   private trustedDeviceEncRoute = "login-initiated";
   private changePasswordRoute = "set-password";
   private forcePasswordResetRoute = "update-temp-password";
-  private successRoute = "vault";
   private twoFactorSessionTimeoutRoute = "2fa-timeout";
 
   constructor(
@@ -339,7 +338,22 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return await this.handleChangePasswordRequired(this.orgSsoIdentifier);
     }
 
-    return await this.handleSuccessfulLogin();
+    const defaultSuccessRoute = await this.determineDefaultSuccessRoute();
+
+    await this.router.navigate([defaultSuccessRoute], {
+      queryParams: {
+        identifier: this.orgSsoIdentifier,
+      },
+    });
+  }
+
+  private async determineDefaultSuccessRoute(): Promise<string> {
+    const authType = await firstValueFrom(this.loginStrategyService.currentAuthType$);
+    if (authType == AuthenticationType.Sso || authType == AuthenticationType.UserApiKey) {
+      return "lock";
+    }
+
+    return "vault";
   }
 
   private async isTrustedDeviceEncEnabled(
@@ -425,18 +439,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.router.navigate([this.forcePasswordResetRoute], {
       queryParams: {
         identifier: orgIdentifier,
-      },
-    });
-  }
-
-  private async handleSuccessfulLogin() {
-    if (await this.needsLock()) {
-      this.successRoute = "lock";
-    }
-
-    await this.router.navigate([this.successRoute], {
-      queryParams: {
-        identifier: this.orgSsoIdentifier,
       },
     });
   }
