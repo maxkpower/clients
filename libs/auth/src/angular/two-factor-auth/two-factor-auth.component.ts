@@ -99,7 +99,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     remember: [false],
   });
 
-  actionButtonText = "";
   title = "";
 
   formPromise: Promise<any>;
@@ -157,8 +156,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     });
     this.providerData = providerData;
     await this.setTitleByTwoFactorProvider();
-
-    this.actionButtonText = this.i18nService.t("continue");
 
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.token = value.token;
@@ -453,6 +450,15 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     } else {
       await this.router.navigate(commands, extras);
     }
+  }
+
+  showContinueButton() {
+    return (
+      this.selectedProviderType != null &&
+      this.selectedProviderType !== TwoFactorProviderType.WebAuthn &&
+      this.selectedProviderType !== TwoFactorProviderType.Duo &&
+      this.selectedProviderType !== TwoFactorProviderType.OrganizationDuo
+    );
   }
 
   private async userIsAuthenticating(): Promise<boolean> {

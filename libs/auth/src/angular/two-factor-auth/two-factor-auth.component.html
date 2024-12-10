@@ -34,19 +34,8 @@
   </ng-container>
   <!-- Buttons -->
   <div class="tw-flex tw-flex-col tw-space-y-2.5 tw-mb-3">
-    <button
-      type="submit"
-      buttonType="primary"
-      bitButton
-      bitFormButton
-      *ngIf="
-        selectedProviderType != null &&
-        selectedProviderType !== providerType.WebAuthn &&
-        selectedProviderType !== providerType.Duo &&
-        selectedProviderType !== providerType.OrganizationDuo
-      "
-    >
-      <span> <i class="bwi bwi-sign-in" aria-hidden="true"></i> {{ actionButtonText }} </span>
+    <button type="submit" buttonType="primary" bitButton bitFormButton *ngIf="showContinueButton()">
+      <span> <i class="bwi bwi-sign-in" aria-hidden="true"></i> {{ "continue" | i18n }} </span>
     </button>
     <button
       type="button"
