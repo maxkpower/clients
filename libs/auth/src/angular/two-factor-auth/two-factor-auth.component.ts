@@ -84,7 +84,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   providers = TwoFactorProviders;
   providerType = TwoFactorProviderType;
   selectedProviderType: TwoFactorProviderType = TwoFactorProviderType.Authenticator;
-  providerData: any;
+  providerData: { [key: string]: string }; // TODO: build more specific type
 
   @ViewChild("duoComponent") duoComponent!: TwoFactorAuthDuoComponent;
 
@@ -155,6 +155,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return providers.get(this.selectedProviderType);
     });
     this.providerData = providerData;
+
     await this.setTitleByTwoFactorProvider();
 
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
