@@ -194,6 +194,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
       document.body.classList.add("linux-webauthn");
     }
+
+    // TODO: there is significantly more logic in the on init of the browser extension to bring over.
   }
 
   private listenFor2faSessionTimeout() {
