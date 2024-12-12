@@ -81,6 +81,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   token = "";
   remember = false;
   orgSsoIdentifier: string = null;
+  inSsoFlow = false;
 
   providers = TwoFactorProviders;
   providerType = TwoFactorProviderType;
@@ -153,6 +154,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     }
 
     this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
+    this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
 
     const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
     this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
@@ -202,7 +204,21 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       document.body.classList.add("linux-webauthn");
     }
 
-    // TODO: there is significantly more logic in the on init of the browser extension to bring over.
+    // if (
+    //   this.selectedProviderType === TwoFactorProviderType.Email &&
+    //   BrowserPopupUtils.inPopup(window)
+    // ) {
+    //   const confirmed = await this.dialogService.openSimpleDialog({
+    //     title: { key: "warning" },
+    //     content: { key: "popup2faCloseMessage" },
+    //     type: "warning",
+    //   });
+    //   if (confirmed) {
+    //     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
+    //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    //     BrowserPopupUtils.openCurrentPagePopout(window);
+    //   }
+    // }
   }
 
   private listenFor2faSessionTimeout() {
@@ -308,7 +324,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return; // stop login process
     }
 
-    // User is fully logged in so we should sync before executing navigation
+    // User is fully logged in so handle any post login logic before executing navigation
     await this.syncService.fullSync(true);
     this.loginEmailService.clearValues();
 
@@ -343,6 +359,15 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     if (requireSetPassword || authResult.resetMasterPassword) {
       // Change implies going no password -> password in this case
       return await this.handleChangePasswordRequired(this.orgSsoIdentifier);
+    }
+
+    // if we are in the SSO flow and we have a custom success handler, call it
+    if (
+      this.inSsoFlow &&
+      this.twoFactorAuthComponentService.handleSso2faFlowSuccess !== undefined
+    ) {
+      await this.twoFactorAuthComponentService.handleSso2faFlowSuccess();
+      return;
     }
 
     const defaultSuccessRoute = await this.determineDefaultSuccessRoute();
