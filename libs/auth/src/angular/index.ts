@@ -76,3 +76,4 @@ export * from "./two-factor-auth/two-factor-auth-component.service";
 export * from "./two-factor-auth/default-two-factor-auth-component.service";
 export * from "./two-factor-auth/two-factor-auth.component";
 export * from "./two-factor-auth/two-factor-auth-expired.component";
+export * from "./two-factor-auth/two-factor-auth.guard";

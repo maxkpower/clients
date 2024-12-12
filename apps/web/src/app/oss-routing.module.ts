@@ -37,6 +37,7 @@ import {
   LoginDecryptionOptionsComponent,
   TwoFactorAuthComponent,
   TwoFactorTimeoutComponent,
+  TwoFactorAuthGuard,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -508,25 +509,51 @@ const routes: Routes = [
           } satisfies AnonLayoutWrapperData,
         },
       ),
-      {
-        path: "2fa",
-        canActivate: [unauthGuardFn()],
-        children: [
-          ...unauthUiRefreshSwap(TwoFactorComponentV1, TwoFactorAuthComponent, {
-            path: "",
-          }),
-          {
-            path: "",
-            component: EnvironmentSelectorComponent,
-            outlet: "environment-selector",
-          },
-        ],
-        data: {
-          pageTitle: {
-            key: "verifyIdentity",
-          },
-        } satisfies RouteDataProperties & AnonLayoutWrapperData,
-      },
+      ...extensionRefreshSwap(
+        TwoFactorComponentV1,
+        TwoFactorAuthComponent,
+        {
+          path: "2fa",
+          canActivate: [unauthGuardFn()],
+          children: [
+            {
+              path: "",
+              component: TwoFactorComponentV1,
+            },
+            {
+              path: "",
+              component: EnvironmentSelectorComponent,
+              outlet: "environment-selector",
+            },
+          ],
+          data: {
+            pageTitle: {
+              key: "verifyIdentity",
+            },
+          } satisfies RouteDataProperties & AnonLayoutWrapperData,
+        },
+        {
+          path: "2fa",
+          canActivate: [unauthGuardFn(), TwoFactorAuthGuard],
+          children: [
+            {
+              path: "",
+              component: TwoFactorAuthComponent,
+            },
+            {
+              path: "",
+              component: EnvironmentSelectorComponent,
+              outlet: "environment-selector",
+            },
+          ],
+          data: {
+            pageTitle: {
+              key: "verifyIdentity",
+            },
+          } satisfies RouteDataProperties & AnonLayoutWrapperData,
+        },
+      ),
+
       {
         path: "2fa-timeout",
         canActivate: [unauthGuardFn()],

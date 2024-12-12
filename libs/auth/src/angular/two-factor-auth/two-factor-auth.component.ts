@@ -145,14 +145,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // TODO: should this be in a guard instead of here?
-    const userIsAuthenticating = await this.userIsAuthenticating();
-    const twoFactorProviders = await this.twoFactorService.getProviders();
-    if (!userIsAuthenticating || twoFactorProviders == null) {
-      await this.router.navigate([this.loginRoute]);
-      return;
-    }
-
     this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
     this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
 
@@ -192,11 +184,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       await this.submit();
       return;
     }
-
-    // TODO: refactor into service
-    // if (await BrowserPopupUtils.inPopout(this.win)) {
-    //   this.selectedProviderType = TwoFactorProviderType.Email;
-    // }
 
     // WebAuthn prompt appears inside the popup on linux, and requires a larger popup width
     // than usual to avoid cutting off the dialog.
@@ -494,10 +481,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       this.selectedProviderType !== TwoFactorProviderType.Duo &&
       this.selectedProviderType !== TwoFactorProviderType.OrganizationDuo
     );
-  }
-
-  private async userIsAuthenticating(): Promise<boolean> {
-    return (await firstValueFrom(this.loginStrategyService.currentAuthType$)) !== null;
   }
 
   async isLinux() {

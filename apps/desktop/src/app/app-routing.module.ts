@@ -38,6 +38,7 @@ import {
   TwoFactorTimeoutIcon,
   TwoFactorAuthComponent,
   TwoFactorTimeoutComponent,
+  TwoFactorAuthGuard,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
@@ -96,11 +97,11 @@ const routes: Routes = [
     {
       path: "2fa",
       component: AnonLayoutWrapperComponent,
+      canActivate: [unauthGuardFn(), TwoFactorAuthGuard],
       children: [
         {
           path: "",
           component: TwoFactorAuthComponent,
-          canActivate: [unauthGuardFn()],
         },
       ],
     },
