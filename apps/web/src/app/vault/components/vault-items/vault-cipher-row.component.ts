@@ -191,7 +191,7 @@ export class VaultCipherRowComponent implements OnInit {
   }
 
   protected get hasVisibleSecureNoteOptions(): boolean {
-    return this.isIdentityCipher && !!this.cipher.notes;
+    return this.isSecureNoteCipher && !!this.cipher.notes;
   }
 
   protected get showMenuDivider() {
