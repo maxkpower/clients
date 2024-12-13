@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
 import { GENERATOR_DISK } from "@bitwarden/common/platform/state";
@@ -71,6 +73,7 @@ const PASSPHRASE: CredentialGeneratorConfiguration<
       numWords: {
         min: DefaultPassphraseBoundaries.numWords.min,
         max: DefaultPassphraseBoundaries.numWords.max,
+        recommendation: DefaultPassphraseGenerationOptions.numWords,
       },
       wordSeparator: { maxLength: 1 },
     },
@@ -101,7 +104,8 @@ const PASSPHRASE: CredentialGeneratorConfiguration<
     }),
     combine: passphraseLeastPrivilege,
     createEvaluator: (policy) => new PassphraseGeneratorOptionsEvaluator(policy),
-    toConstraints: (policy) => new PassphrasePolicyConstraints(policy),
+    toConstraints: (policy) =>
+      new PassphrasePolicyConstraints(policy, PASSPHRASE.settings.constraints),
   },
 });
 
@@ -130,6 +134,7 @@ const PASSWORD: CredentialGeneratorConfiguration<
       length: {
         min: DefaultPasswordBoundaries.length.min,
         max: DefaultPasswordBoundaries.length.max,
+        recommendation: DefaultPasswordGenerationOptions.length,
       },
       minNumber: {
         min: DefaultPasswordBoundaries.minDigits.min,
@@ -177,7 +182,8 @@ const PASSWORD: CredentialGeneratorConfiguration<
     }),
     combine: passwordLeastPrivilege,
     createEvaluator: (policy) => new PasswordGeneratorOptionsEvaluator(policy),
-    toConstraints: (policy) => new DynamicPasswordPolicyConstraints(policy),
+    toConstraints: (policy) =>
+      new DynamicPasswordPolicyConstraints(policy, PASSWORD.settings.constraints),
   },
 });
 
@@ -365,7 +371,7 @@ export function toCredentialGeneratorConfiguration<Settings extends ApiSettings 
     settings: {
       initial: configuration.forwarder.defaultSettings,
       constraints: configuration.forwarder.settingsConstraints,
-      account: configuration.forwarder.settings,
+      account: configuration.forwarder.local.settings,
     },
     policy: {
       type: PolicyType.PasswordGenerator,

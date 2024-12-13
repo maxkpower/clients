@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Component } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl } from "@angular/forms";
@@ -59,6 +61,7 @@ type GroupDetailsRow = {
  * with members' names (who are assigned to the group) or collection names (which the group has access to).
  */
 const groupsFilter = (filter: string) => {
+  filter ??= "";
   const transformedFilter = filter.trim().toLowerCase();
   return (data: GroupDetailsRow) => {
     const group = data.details;

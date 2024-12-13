@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Directive, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { firstValueFrom, Subject } from "rxjs";
@@ -13,7 +15,6 @@ import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/mod
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
-import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { VerificationType } from "@bitwarden/common/auth/enums/verification-type";
@@ -22,6 +23,7 @@ import {
   MasterPasswordVerification,
   MasterPasswordVerificationResponse,
 } from "@bitwarden/common/auth/types/verification";
+import { ClientType } from "@bitwarden/common/enums";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -34,7 +36,12 @@ import { UserId } from "@bitwarden/common/types/guid";
 import { UserKey } from "@bitwarden/common/types/key";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { DialogService, ToastService } from "@bitwarden/components";
-import { KeyService, BiometricStateService, BiometricsService } from "@bitwarden/key-management";
+import {
+  KdfConfigService,
+  KeyService,
+  BiometricStateService,
+  BiometricsService,
+} from "@bitwarden/key-management";
 
 @Directive()
 export class LockComponent implements OnInit, OnDestroy {
@@ -318,7 +325,24 @@ export class LockComponent implements OnInit, OnDestroy {
     }
 
     // Vault can be de-synced since notifications get ignored while locked. Need to check whether sync is required using the sync service.
-    await this.syncService.fullSync(false);
+    const clientType = this.platformUtilsService.getClientType();
+    if (clientType === ClientType.Browser || clientType === ClientType.Desktop) {
+      // Desktop and Browser have better offline support and to facilitate this we don't make the user wait for what
+      // could be an HTTP Timeout because their server is unreachable.
+      await Promise.race([
+        this.syncService
+          .fullSync(false)
+          .catch((err) => this.logService.error("Error during unlock sync", err)),
+        new Promise<void>((resolve) =>
+          setTimeout(() => {
+            this.logService.warning("Skipping sync wait, continuing to unlock.");
+            resolve();
+          }, 5_000),
+        ),
+      ]);
+    } else {
+      await this.syncService.fullSync(false);
+    }
 
     if (this.onSuccessfulSubmit != null) {
       await this.onSuccessfulSubmit();

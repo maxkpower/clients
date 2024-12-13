@@ -120,7 +120,7 @@
     "message": "Parolayı kopyala"
   },
   "copyPassphrase": {
-    "message": "Copy passphrase"
+    "message": "Parolayı kopyala"
   },
   "copyNote": {
     "message": "Notu kopyala"
@@ -151,6 +151,15 @@
   },
   "copyLicenseNumber": {
     "message": "Ruhsat numarasını kopyala"
+  },
+  "copyPrivateKey": {
+    "message": "Özel anahtarı kopyala"
+  },
+  "copyPublicKey": {
+    "message": "Ortak anahtarı kopyala"
+  },
+  "copyFingerprint": {
+    "message": "Parmak izini kopyala"
   },
   "copyCustomField": {
     "message": "$FIELD$ alanını kopyala",
@@ -318,7 +327,7 @@
     "message": "Bitwarden Authenticator"
   },
   "continueToAuthenticatorPageDesc": {
-    "message": "Bitwarden Authenticator allows you to store authenticator keys and generate TOTP codes for 2-step verification flows. Learn more on the bitwarden.com website"
+    "message": "Bitwarden Authenticator, kimlik doğrulama anahtarlarınızı saklama ve 2 aşamalı doğrulama akışları için TOTP anahtarı üretme imkânı sağlar. Bilgi almak için bitwarden.com sitesini ziyaret edin"
   },
   "bitwardenSecretsManager": {
     "message": "Bitwarden Secrets Manager"
@@ -427,7 +436,7 @@
     "message": "Parola oluştur"
   },
   "generatePassphrase": {
-    "message": "Generate passphrase"
+    "message": "Parola üret"
   },
   "regeneratePassword": {
     "message": "Yeni parola oluştur"
@@ -591,7 +600,7 @@
     "message": "Web sitesini aç"
   },
   "launchWebsiteName": {
-    "message": "$ITEMNAME$ web sitesini aç",
+    "message": "$ITEMNAME$ sitesini aç",
     "placeholders": {
       "itemname": {
         "content": "$1",
@@ -1116,6 +1125,10 @@
     "message": "UYARI",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Uyarı",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Kasayı dışa aktarmayı onaylayın"
   },
@@ -1256,7 +1269,7 @@
     "message": "Premium üyeliği bitwarden.com web kasası üzerinden satın alabilirsiniz. Şimdi siteye gitmek ister misiniz?"
   },
   "premiumPurchaseAlertV2": {
-    "message": "You can purchase Premium from your account settings on the Bitwarden web app."
+    "message": "Bitwarden web uygulamasındaki hesap ayarlarınızdan Premium abonelik satın alabilirsiniz."
   },
   "premiumCurrentMember": {
     "message": "Premium üyesiniz!"
@@ -1265,7 +1278,7 @@
     "message": "Bitwarden'ı desteklediğiniz için teşekkür ederiz."
   },
   "premiumFeatures": {
-    "message": "Upgrade to Premium and receive:"
+    "message": "Premium'a yükseltin ve şunları alın:"
   },
   "premiumPrice": {
     "message": "Bunların hepsi sadece yılda $PRICE$!",
@@ -1305,6 +1318,12 @@
   },
   "enterVerificationCodeApp": {
     "message": "Kimlik doğrulama uygulamanızdaki 6 haneli doğrulama kodunu girin."
+  },
+  "authenticationTimeout": {
+    "message": "Authentication timeout"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "The authentication session timed out. Please restart the login process."
   },
   "enterVerificationCodeEmail": {
     "message": "$EMAIL$ adresine e-postayla gönderdiğimiz 6 haneli doğrulama kodunu girin.",
@@ -1493,19 +1512,6 @@
   },
   "enableAutoFillOnPageLoadDesc": {
     "message": "Sayfa yüklendiğinde giriş formu tespit edilirse otomatik olarak formu doldur."
-  },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Uyarı:$CLOSETAG$ Ele geçirilmiş veya güvenilmeyen web siteleri sayfa yüklenirken otomatik doldurmayı suistimal edebilir.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
   },
   "experimentalFeature": {
     "message": "Ele geçirilmiş veya güvenilmeyen web siteleri sayfa yüklenirken otomatik doldurmayı suistimal edebilir."
@@ -1764,6 +1770,9 @@
   "typeIdentity": {
     "message": "Kimlik"
   },
+  "typeSshKey": {
+    "message": "SSH anahtarı"
+  },
   "newItemHeader": {
     "message": "Yeni $TYPE$",
     "placeholders": {
@@ -1838,6 +1847,9 @@
   },
   "secureNotes": {
     "message": "Güvenli notlar"
+  },
+  "sshKeys": {
+    "message": "SSH anahtarları"
   },
   "clear": {
     "message": "Temizle",
@@ -2216,10 +2228,10 @@
     "message": "Tamam"
   },
   "errorRefreshingAccessToken": {
-    "message": "Access Token Refresh Error"
+    "message": "Erişim Anahtarı Yenileme Hatası"
   },
   "errorRefreshingAccessTokenDesc": {
-    "message": "No refresh token or API keys found. Please try logging out and logging back in."
+    "message": "Yenileme veya API anahtarı bulunamadı. Lütfen çıkış yapıp tekrar giriş yapmayı deneyin."
   },
   "desktopSyncVerificationTitle": {
     "message": "Masaüstü eşitleme doğrulaması"
@@ -2875,10 +2887,10 @@
     "message": "Kullanıcı adı oluştur"
   },
   "generateEmail": {
-    "message": "E-posta oluştur"
+    "message": "E-posta üret"
   },
-  "generatorBoundariesHint": {
-    "message": "Değer $MIN$ ile $MAX$ arasında olmalıdır",
+  "spinboxBoundariesHint": {
+    "message": "Değer $MIN$ ile $MAX$ arasında olmalıdır.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
       "min": {
@@ -2888,6 +2900,26 @@
       "max": {
         "content": "$2",
         "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Use $RECOMMENDED$ characters or more to generate a strong password.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Use $RECOMMENDED$ words or more to generate a strong passphrase.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
       }
     }
   },
@@ -3138,11 +3170,26 @@
   "resendNotification": {
     "message": "Bildirimi yeniden gönder"
   },
-  "viewAllLoginOptions": {
+  "viewAllLogInOptions": {
     "message": "Tüm giriş seçeneklerini gör"
+  },
+  "viewAllLoginOptionsV1": {
+    "message": "View all log in options"
   },
   "notificationSentDevice": {
     "message": "Cihazınıza bir bildirim gönderildi."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Cihazınıza bir bildirim gönderildi"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Lütfen hesabınızın kilidinin açık olduğundan ve parmak izi ifadesinin diğer cihazla eşleştiğinden emin olun"
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "İsteğiniz onaylanınca size haber vereceğiz"
+  },
+  "needAnotherOptionV1": {
+    "message": "Başka bir seçeneğe mi ihtiyacınız var?"
   },
   "loginInitiated": {
     "message": "Giriş başlatıldı"
@@ -3237,8 +3284,17 @@
   "opensInANewWindow": {
     "message": "Yeni pencerede açılır"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Sonraki girişleri kolaylaştırmak için bu cihazı hatırla"
+  },
   "deviceApprovalRequired": {
     "message": "Cihaz onayı gerekiyor. Lütfen onay yönteminizi seçin:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Cihazı onaylamanız gerekiyor"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Aşağıdan bir onay yöntemi seçin"
   },
   "rememberThisDevice": {
     "message": "Bu cihazı hatırla"
@@ -3312,6 +3368,9 @@
   },
   "userEmailMissing": {
     "message": "Kullanıcının e-postası eksik"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Aktif kullanıcı e-postası bulunamadı. Çıkış yapılıyor."
   },
   "deviceTrusted": {
     "message": "Cihaza güvenildi"
@@ -3747,7 +3806,10 @@
     "message": "Geçiş anahtarı"
   },
   "accessing": {
-    "message": "Accessing"
+    "message": "Erişim"
+  },
+  "loggedInExclamation": {
+    "message": "Giriş yapıldı!"
   },
   "passkeyNotCopied": {
     "message": "Geçiş anahtarı kopyalanmayacak"
@@ -3774,7 +3836,7 @@
     "message": "Bu siteyle eşleşen hesap bulunamadı"
   },
   "searchSavePasskeyNewLogin": {
-    "message": "Search or save passkey as new login"
+    "message": "Geçiş anahtarı ara veya yeni hesap olarak kaydet"
   },
   "confirm": {
     "message": "Onayla"
@@ -4240,6 +4302,21 @@
   "filters": {
     "message": "Filtreler"
   },
+  "filterVault": {
+    "message": "Filter vault"
+  },
+  "filterApplied": {
+    "message": "One filter applied"
+  },
+  "filterAppliedPlural": {
+    "message": "$COUNT$ filters applied",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "personalDetails": {
     "message": "Kişisel bilgiler"
   },
@@ -4514,7 +4591,7 @@
     "message": "Successfully assigned collections"
   },
   "nothingSelected": {
-    "message": "You have not selected anything."
+    "message": "Hiçbir şey seçmediniz."
   },
   "movedItemsToOrg": {
     "message": "Selected items moved to $ORGNAME$",
@@ -4526,7 +4603,7 @@
     }
   },
   "itemsMovedToOrg": {
-    "message": "Items moved to $ORGNAME$",
+    "message": "Kayıtlar $ORGNAME$ kuruluşuna taşındı",
     "placeholders": {
       "orgname": {
         "content": "$1",
@@ -4535,7 +4612,7 @@
     }
   },
   "itemMovedToOrg": {
-    "message": "Item moved to $ORGNAME$",
+    "message": "Kayıt $ORGNAME$ kuruluşuna taşındı",
     "placeholders": {
       "orgname": {
         "content": "$1",
@@ -4592,6 +4669,30 @@
   },
   "enterprisePolicyRequirementsApplied": {
     "message": "Bu ayara kurumsal ilke gereksinimleri uygulandı"
+  },
+  "sshPrivateKey": {
+    "message": "Özel anahtar"
+  },
+  "sshPublicKey": {
+    "message": "Ortak anahtar"
+  },
+  "sshFingerprint": {
+    "message": "Parmak izi"
+  },
+  "sshKeyAlgorithm": {
+    "message": "Anahtar türü"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048 bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072 bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096 bit"
   },
   "retry": {
     "message": "Yeniden dene"
@@ -4787,5 +4888,20 @@
   },
   "generatedPassword": {
     "message": "Üretilen parola"
+  },
+  "compactMode": {
+    "message": "Kompakt mod"
+  },
+  "beta": {
+    "message": "Beta"
+  },
+  "extensionWidth": {
+    "message": "Uzantı genişliği"
+  },
+  "wide": {
+    "message": "Geniş"
+  },
+  "extraWide": {
+    "message": "Ekstra geniş"
   }
 }

@@ -152,6 +152,15 @@
   "copyLicenseNumber": {
     "message": "Kopírovať číslo licencie"
   },
+  "copyPrivateKey": {
+    "message": "Kopírovať súkromný kľúč"
+  },
+  "copyPublicKey": {
+    "message": "Kopírovať verejný kľúč"
+  },
+  "copyFingerprint": {
+    "message": "Kopírovať odtlačok"
+  },
   "copyCustomField": {
     "message": "Kopírovať $FIELD$",
     "placeholders": {
@@ -846,7 +855,7 @@
     "message": "Prihlásiť sa"
   },
   "logInToBitwarden": {
-    "message": "Prihlásiť sa do Bitwardenu"
+    "message": "Prihlásenie do Bitwardenu"
   },
   "restartRegistration": {
     "message": "Zopakovať registráciu"
@@ -1116,6 +1125,10 @@
     "message": "UPOZORNENIE",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Upozornenie",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Potvrdiť export trezoru"
   },
@@ -1306,6 +1319,12 @@
   "enterVerificationCodeApp": {
     "message": "Zadajte 6-miestny verifikačný kód z vašej overovacej aplikácie."
   },
+  "authenticationTimeout": {
+    "message": "Časový limit overenia"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Relácia overovania skončila. Znovu spustite proces prihlásenia."
+  },
   "enterVerificationCodeEmail": {
     "message": "Zadajte 6-miestny verifikačný kód, ktorý vám bol zaslaný emailom",
     "placeholders": {
@@ -1493,19 +1512,6 @@
   },
   "enableAutoFillOnPageLoadDesc": {
     "message": "Ak je detekovaný prihlasovací formulár, automaticky vykonať vypĺňanie pri načítaní stránky."
-  },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Upozornenie:$CLOSETAG$ Kompromitované alebo nedôveryhodné webové stránky môžu využívať automatické vypĺňanie pri načítaní stránky.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
   },
   "experimentalFeature": {
     "message": "Skompromitované alebo nedôveryhodné stránky môžu pri svojom načítaní zneužiť automatické dopĺňanie."
@@ -1764,6 +1770,9 @@
   "typeIdentity": {
     "message": "Identita"
   },
+  "typeSshKey": {
+    "message": "Kľúč SSH"
+  },
   "newItemHeader": {
     "message": "Nové $TYPE$",
     "placeholders": {
@@ -1838,6 +1847,9 @@
   },
   "secureNotes": {
     "message": "Zabezpečené poznámky"
+  },
+  "sshKeys": {
+    "message": "Kľúče SSH"
   },
   "clear": {
     "message": "Vyčistiť",
@@ -1920,7 +1932,7 @@
     "message": "Vymazať históriu"
   },
   "nothingToShow": {
-    "message": "Nič na zobrazenie"
+    "message": "Nie je čo zobraziť"
   },
   "nothingGeneratedRecently": {
     "message": "V poslednej dobe ste nič negenerovali"
@@ -2877,8 +2889,8 @@
   "generateEmail": {
     "message": "Generovať e-mail"
   },
-  "generatorBoundariesHint": {
-    "message": "Hodnota musí byť medzi $MIN$ a $MAX$",
+  "spinboxBoundariesHint": {
+    "message": "Hodnota musí byť medzi $MIN$ a $MAX$.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
       "min": {
@@ -2888,6 +2900,26 @@
       "max": {
         "content": "$2",
         "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Na vytvorenie silného hesla použite $RECOMMENDED$ znakov alebo viac.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Na vytvorenie silnej prístupovej frázy použite $RECOMMENDED$ slov alebo viac.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
       }
     }
   },
@@ -3138,11 +3170,26 @@
   "resendNotification": {
     "message": "Znova odoslať upozornenie"
   },
-  "viewAllLoginOptions": {
+  "viewAllLogInOptions": {
     "message": "Zobraziť všetky možnosti prihlásenia"
+  },
+  "viewAllLoginOptionsV1": {
+    "message": "View all log in options"
   },
   "notificationSentDevice": {
     "message": "Do vášho zariadenia bolo odoslané upozornenie."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Do vášho zariadenia bolo odoslané upozornenie"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Uistite sa, že je váš účet odomknutý a fráza odtlačku prsta sa zhoduje s frázou na druhom zariadení"
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "Po schválení žiadosti budete informovaní"
+  },
+  "needAnotherOptionV1": {
+    "message": "Potrebujete inú možnosť?"
   },
   "loginInitiated": {
     "message": "Iniciované prihlásenie"
@@ -3237,8 +3284,17 @@
   "opensInANewWindow": {
     "message": "Otvárať v novom okne"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Zapamätať si toto zariadenie, pre budúce bezproblémové prihlásenie"
+  },
   "deviceApprovalRequired": {
     "message": "Vyžaduje sa schválenie zariadenia. Vyberte možnosť schválenia nižšie:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Vyžaduje sa schválenie zariadenia"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Vyberte možnosť schválenia nižšie"
   },
   "rememberThisDevice": {
     "message": "Zapamätať si toto zariadenie"
@@ -3312,6 +3368,9 @@
   },
   "userEmailMissing": {
     "message": "Chýba e-mail používateľa"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "E-mail aktívneho používateľa sa nenašiel. Odhlasuje sa."
   },
   "deviceTrusted": {
     "message": "Dôveryhodné zariadenie"
@@ -3747,7 +3806,10 @@
     "message": "Prístupový kľúč"
   },
   "accessing": {
-    "message": "Accessing"
+    "message": "Pristupovanie"
+  },
+  "loggedInExclamation": {
+    "message": "Prihlásený!"
   },
   "passkeyNotCopied": {
     "message": "Prístupový kód sa neskopíruje"
@@ -4240,6 +4302,21 @@
   "filters": {
     "message": "Filtre"
   },
+  "filterVault": {
+    "message": "Filtrovať trezor"
+  },
+  "filterApplied": {
+    "message": "Bol použitý jeden filter"
+  },
+  "filterAppliedPlural": {
+    "message": "Použitých filtrov ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "personalDetails": {
     "message": "Osobné údaje"
   },
@@ -4593,6 +4670,30 @@
   "enterprisePolicyRequirementsApplied": {
     "message": "Na toto nastavenie boli uplatnené požiadavky pravidiel spoločnosti"
   },
+  "sshPrivateKey": {
+    "message": "Súkromný kľúč"
+  },
+  "sshPublicKey": {
+    "message": "Verejný kľúč"
+  },
+  "sshFingerprint": {
+    "message": "Odtlačok"
+  },
+  "sshKeyAlgorithm": {
+    "message": "Typ kľúča"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
   "retry": {
     "message": "Znova"
   },
@@ -4652,11 +4753,11 @@
     "description": "Represents the space key in screen reader content as a readable word"
   },
   "tildeCharacterDescriptor": {
-    "message": "Tilda",
+    "message": "Vlnovka",
     "description": "Represents the ~ key in screen reader content as a readable word"
   },
   "backtickCharacterDescriptor": {
-    "message": "Opačný dĺžeň",
+    "message": "Obrátená čiarka",
     "description": "Represents the ` key in screen reader content as a readable word"
   },
   "exclamationCharacterDescriptor": {
@@ -4680,7 +4781,7 @@
     "description": "Represents the % key in screen reader content as a readable word"
   },
   "caretCharacterDescriptor": {
-    "message": "Striežka",
+    "message": "Strieška",
     "description": "Represents the ^ key in screen reader content as a readable word"
   },
   "ampersandCharacterDescriptor": {
@@ -4732,7 +4833,7 @@
     "description": "Represents the ] key in screen reader content as a readable word"
   },
   "pipeCharacterDescriptor": {
-    "message": "Rúra",
+    "message": "Zvislá čiara",
     "description": "Represents the | key in screen reader content as a readable word"
   },
   "backSlashCharacterDescriptor": {
@@ -4787,5 +4888,20 @@
   },
   "generatedPassword": {
     "message": "Vygenerované heslo"
+  },
+  "compactMode": {
+    "message": "Kompaktný režim"
+  },
+  "beta": {
+    "message": "Beta"
+  },
+  "extensionWidth": {
+    "message": "Šírka rozšírenia"
+  },
+  "wide": {
+    "message": "Široké"
+  },
+  "extraWide": {
+    "message": "Extra široké"
   }
 }

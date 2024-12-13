@@ -5,14 +5,17 @@
   "criticalApplications": {
     "message": "Kritické aplikace"
   },
+  "accessIntelligence": {
+    "message": "Přístup k inteligenci"
+  },
   "riskInsights": {
-    "message": "Risk Insights"
+    "message": "Poznatky o rizicích"
   },
   "passwordRisk": {
     "message": "Rizikové heslo"
   },
-  "discoverAtRiskPasswords": {
-    "message": "Objevte riziková hesla a upozorněte uživatele na změnu těchto hesel."
+  "reviewAtRiskPasswords": {
+    "message": "Zkontrolujte riziková hesla (slabá, odhalená nebo opakovaně používaná) ve všech aplikacích. Vyberte nejkritičtější aplikace a stanovte priority bezpečnostních opatření pro uživatele, abyste se vypořádali s rizikovými hesly."
   },
   "dataLastUpdated": {
     "message": "Data naposledy aktualizována: $DATE$",
@@ -559,6 +562,9 @@
   "typeSecureNote": {
     "message": "Zabezpečená poznámka"
   },
+  "typeSshKey": {
+    "message": "SSH klíč"
+  },
   "typeLoginPlural": {
     "message": "Přihlašovací údaje"
   },
@@ -978,6 +984,9 @@
   "loginWithDeviceEnabledNote": {
     "message": "Přihlášení zařízením musí být nastaveno v aplikaci Bitwarden. Potřebujete další volby?"
   },
+  "needAnotherOptionV1": {
+    "message": "Potřebujete další volby?"
+  },
   "loginWithMasterPassword": {
     "message": "Přihlásit se pomocí hlavního hesla"
   },
@@ -1295,6 +1304,12 @@
   },
   "notificationSentDevice": {
     "message": "Na Vaše zařízení bylo odesláno oznámení."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Na Vaše zařízení bylo odesláno oznámení"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Ujistěte se, že je Váš trezor odemčen a fráze otisku prstu se shodují s druhým zařízením"
   },
   "versionNumber": {
     "message": "Verze $VERSION_NUMBER$",
@@ -1627,8 +1642,26 @@
   "passwordHistory": {
     "message": "Historie hesel"
   },
+  "generatorHistory": {
+    "message": "Historie generátoru"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Vymazat historii generátoru"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "Pokud budete pokračovat, všechny položky budou trvale smazány z historie generátoru. Jste si jisti, že chcete pokračovat?"
+  },
   "noPasswordsInList": {
     "message": "Nejsou k dispozici žádná hesla."
+  },
+  "clearHistory": {
+    "message": "Vymazat historii"
+  },
+  "nothingToShow": {
+    "message": "Nic k zobrazení"
+  },
+  "nothingGeneratedRecently": {
+    "message": "Nedávno jste nic nevygenerovali"
   },
   "clear": {
     "message": "Vymazat",
@@ -1752,8 +1785,8 @@
   "sessionsDeauthorized": {
     "message": "Všechny relace byly zrušeny"
   },
-  "accountIsManagedMessage": {
-    "message": "Tento účet je spravován: $ORGANIZATIONNAME$",
+  "accountIsOwnedMessage": {
+    "message": "Tento účet je vlastněn: $ORGANIZATIONNAME$",
     "placeholders": {
       "organizationName": {
         "content": "$1",
@@ -3381,6 +3414,9 @@
       }
     }
   },
+  "viewAllLogInOptions": {
+    "message": "Zobrazit všechny volby přihlášení"
+  },
   "viewAllLoginOptions": {
     "message": "Zobrazit všechny volby přihlášení"
   },
@@ -3833,6 +3869,55 @@
   },
   "updateBrowserDesc": {
     "message": "Používáte nepodporovaný webový prohlížeč. Webový trezor nemusí pracovat správně."
+  },
+  "freeTrialEndPrompt": {
+    "message": "Vaše zkušební verze končí za $COUNT$ dnů. Chcete-li si zachovat předplatné,",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "You must set up 2FA on your user account before you can join this organization."
+      }
+    }
+  },
+  "freeTrialEndPromptAboveTwoDays": {
+    "message": "$ORGANIZATION$, Vaše zkušební verze končí za $COUNT$ dnů. Chcete-li si zachovat předplatné,",
+    "placeholders": {
+      "count": {
+        "content": "$2",
+        "example": "organization name"
+      },
+      "organization": {
+        "content": "$1",
+        "example": "remaining days"
+      }
+    }
+  },
+  "freeTrialEndPromptForOneDay": {
+    "message": "$ORGANIZATION$, Vaše zkušební verze končí zítra. Chcete-li si zachovat předplatné,",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndPromptForOneDayNoOrgName": {
+    "message": "Vaše zkušební verze končí zítra. Chcete-li si zachovat předplatné,"
+  },
+  "freeTrialEndPromptForLessThanADay": {
+    "message": "$ORGANIZATION$, Vaše zkušební verze končí dnes. Chcete-li si zachovat předplatné,",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndingSoonWithoutOrgName": {
+    "message": "Vaše zkušební verze končí dnes. Chcete-li si zachovat předplatné,"
+  },
+  "routeToPaymentMethodTrigger": {
+    "message": "přidejte platební metodu."
   },
   "joinOrganization": {
     "message": "Přidat se k organizaci"
@@ -4387,6 +4472,9 @@
   "dontAskFingerprintAgain": {
     "message": "Nikdy se neptat na ověření frází otisků prstů pro pozvané uživatele (nedoporučeno)",
     "description": "A 'fingerprint phrase' is a unique word phrase (similar to a passphrase) that a user can use to authenticate their public key with another user, for the purposes of sharing."
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "Budete upozorněni, jakmile bude žádost schválena"
   },
   "free": {
     "message": "Zdarma",
@@ -6321,6 +6409,9 @@
   "idpSingleSignOnServiceUrlRequired": {
     "message": "Vyžadováno, pokud ID entity není URL."
   },
+  "offerNoLongerValid": {
+    "message": "Tato nabídka již není platná. Pro více informací kontaktujte správce organizace."
+  },
   "openIdOptionalCustomizations": {
     "message": "Volitelné úpravy"
   },
@@ -6413,8 +6504,8 @@
   "generateEmail": {
     "message": "Vygenerovat e-mail"
   },
-  "generatorBoundariesHint": {
-    "message": "Hodnota musí být mezi $MIN$ a $MAX$",
+  "spinboxBoundariesHint": {
+    "message": "Hodnota musí být mezi $MIN$ a $MAX$.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
       "min": {
@@ -6424,6 +6515,26 @@
       "max": {
         "content": "$2",
         "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Použijte $RECOMMENDED$ nebo více znaků k vytvoření silného hesla.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Použijte $RECOMMENDED$ slov nebo více slov k vytvoření silné heslové fráze.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
       }
     }
   },
@@ -7958,8 +8069,17 @@
   "loginInitiated": {
     "message": "Bylo zahájeno přihlášení"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Zapamatovat si toto zařízení pro bezproblémové budoucí přihlášení"
+  },
   "deviceApprovalRequired": {
     "message": "Vyžaduje se schválení zařízení. Vyberte možnost schválení níže:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Vyžaduje se schválení zařízení"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Vyberte volbu schválení níže"
   },
   "rememberThisDevice": {
     "message": "Zapamatovat toto zařízení"
@@ -8190,6 +8310,9 @@
   "userEmailMissing": {
     "message": "Chybí e-mail uživatele"
   },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Aktivní uživatelský e-mail nebyl nalezen. Budete odhlášeni."
+  },
   "deviceTrusted": {
     "message": "Zařízení zařazeno mezi důvěryhodné"
   },
@@ -8284,9 +8407,6 @@
   },
   "collectionManagementDesc": {
     "message": "Spravuje chování kolekce pro organizaci"
-  },
-  "limitCollectionCreationDeletionDesc": {
-    "message": "Omezí vytváření a mazání kolekce na vlastníky a správce"
   },
   "limitCollectionCreationDesc": {
     "message": "Omezí vytváření kolekce na vlastníky a správce"
@@ -8441,7 +8561,7 @@
   },
   "addAPaymentMethod": {
     "message": "přidejte platební metodu",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method'"
   },
   "organizationInformation": {
     "message": "Informace o organizaci"
@@ -9014,6 +9134,12 @@
   "providerPlan": {
     "message": "Spravovaný poskytovatel služby"
   },
+  "managedServiceProvider": {
+    "message": "Spravovaný poskytovatel služby"
+  },
+  "multiOrganizationEnterprise": {
+    "message": "Podniky s více organizacemi"
+  },
   "orgSeats": {
     "message": "Počet uživatelů v organizaci"
   },
@@ -9416,6 +9542,30 @@
   "additionalStorageGbMessage": {
     "message": "GB dodatečného úložiště"
   },
+  "sshKeyAlgorithm": {
+    "message": "Algoritmus klíče"
+  },
+  "sshKeyFingerprint": {
+    "message": "Otisk prstu"
+  },
+  "sshKeyPrivateKey": {
+    "message": "Soukromý klíč"
+  },
+  "sshKeyPublicKey": {
+    "message": "Veřejný klíč"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048 bitový"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072 bitový"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096 bitový"
+  },
   "premiumAccounts": {
     "message": "6 účtů Premium"
   },
@@ -9580,5 +9730,62 @@
   },
   "organizationUserDeletedDesc": {
     "message": "Uživatel byl odebrán z organizace a všechna přidružená uživatelská data byla smazána."
+  },
+  "deletedUserId": {
+    "message": "Smazaný uživatel $ID$ - vlastník / správce smazal uživatelský účet",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "userLeftOrganization": {
+    "message": "Uživatel $ID$ opustil organizaci",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "suspendedOrganizationTitle": {
+    "message": "$ORGANIZATION$ je pozastaven",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "Acme c"
+      }
+    }
+  },
+  "suspendedUserOrgMessage": {
+    "message": "Pro pomoc kontaktujte svého vlastníka organizace."
+  },
+  "suspendedOwnerOrgMessage": {
+    "message": "Chcete-li získat přístup k Vaší organizaci, přidejte platební metodu."
+  },
+  "deleteMembers": {
+    "message": "Smazat členy"
+  },
+  "noSelectedMembersApplicable": {
+    "message": "Tuto akci nelze použít na žádného z vybraných členů."
+  },
+  "deletedSuccessfully": {
+    "message": "Úspěšně smazáno"
+  },
+  "freeFamiliesSponsorship": {
+    "message": "Odebrat sponzorství Free Bitwarden Families"
+  },
+  "freeFamiliesSponsorshipPolicyDesc": {
+    "message": "Nedovolí, aby členové mohli prostřednictvím této organizace uplatnit Free Bitwarden Families."
+  },
+  "verifyBankAccountWithStatementDescriptorWarning": {
+    "message": "Platba bankovním účtem je dostupná jen pro zákazníky ve Spojených státech. Budete požádáni o ověření Vašeho bankovního účtu. Mikrovklad provedeme během následujících 1-2 pracovních dnů. Pro ověření bankovního účtu zadejte kód popisu výpisu z této zálohy na fakturační stránce organizace. Pokud bankovní účet neověříte, bude to mít za následek neprovedení platby a pozastavení předplatného."
+  },
+  "verifyBankAccountWithStatementDescriptorInstructions": {
+    "message": "Na Váš bankovní účet jsme provedli mikrovklad (může to trvat 1-2 pracovní dny). Zadejte šestimístný kód začínající písmenem \"SM\", který najdete v popisu vkladu. Pokud bankovní účet neověříte, bude to mít za následek neprovedení platby a pozastavení předplatného."
+  },
+  "descriptorCode": {
+    "message": "Kód z popisu"
   }
 }

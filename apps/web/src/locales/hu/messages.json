@@ -5,14 +5,17 @@
   "criticalApplications": {
     "message": "Kritikus alkalmazások"
   },
+  "accessIntelligence": {
+    "message": "Elérés intelligencia"
+  },
   "riskInsights": {
-    "message": "Risk Insights"
+    "message": "Kockázati betekintés"
   },
   "passwordRisk": {
     "message": "Jelszó kockázat"
   },
-  "discoverAtRiskPasswords": {
-    "message": "Discover at-risk passwords and notify users to change those passwords."
+  "reviewAtRiskPasswords": {
+    "message": "Tekintsük meg a veszélyeztetett jelszavakat (gyenge, nyilvános vagy újrafelhasznált) az alkalmazásokban. Válasszuk ki a legkritikusabb alkalmazásokat, hogy előnyben részesítsük a biztonsági műveleteket a felhasználók számára a veszélyeztetett jelszavak kezeléséhez."
   },
   "dataLastUpdated": {
     "message": "Az adatok utolsó frissítése: $DATE$",
@@ -559,6 +562,9 @@
   "typeSecureNote": {
     "message": "Biztonságos jegyzet"
   },
+  "typeSshKey": {
+    "message": "SSH kulcs"
+  },
   "typeLoginPlural": {
     "message": "Bejelentkezések"
   },
@@ -978,6 +984,9 @@
   "loginWithDeviceEnabledNote": {
     "message": "Az eszközzel történő bejelentkezést be kell állítani a Bitwarden alkalmazás beállításaiban. Más opcióra van szükség?"
   },
+  "needAnotherOptionV1": {
+    "message": "Másik opció szükséges?"
+  },
   "loginWithMasterPassword": {
     "message": "Bejelentkezés mesterjelszóval"
   },
@@ -1295,6 +1304,12 @@
   },
   "notificationSentDevice": {
     "message": "A rendszer értesítést küldött az eszközre."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Egy értesítés lett elküldve az eszközre."
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Ellenőrizzük, hogy a széf feloldásra került és az ujjlenyomat kifejezés egyezik a másik eszközön levővel."
   },
   "versionNumber": {
     "message": "Verzió: $VERSION_NUMBER$",
@@ -1627,8 +1642,26 @@
   "passwordHistory": {
     "message": "Jelszóelőzmények"
   },
+  "generatorHistory": {
+    "message": "Generátor előzmények"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Generátor előzmények kiürítése"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "Ha folytatjuk, az összes bejegyzés véglegesen törlődik a generátor előzményeiből. Biztosan folytatjuk?"
+  },
   "noPasswordsInList": {
     "message": "Nincsenek listázható jelszavak."
+  },
+  "clearHistory": {
+    "message": "Előzmények törlése"
+  },
+  "nothingToShow": {
+    "message": "Nincs megjeleníthető elem"
+  },
+  "nothingGeneratedRecently": {
+    "message": "Mostanában nem lett semmi generálva."
   },
   "clear": {
     "message": "Kiürítés",
@@ -1752,7 +1785,7 @@
   "sessionsDeauthorized": {
     "message": "Az összes munkamenet hitelesítése eldobásra került."
   },
-  "accountIsManagedMessage": {
+  "accountIsOwnedMessage": {
     "message": "Ezt a fiókot $ORGANIZATIONNAME$ kezeli.",
     "placeholders": {
       "organizationName": {
@@ -3381,6 +3414,9 @@
       }
     }
   },
+  "viewAllLogInOptions": {
+    "message": "Összes bejelentkezési opció megtekintése"
+  },
   "viewAllLoginOptions": {
     "message": "Összes bejelentkezési opció megtekintése"
   },
@@ -3833,6 +3869,55 @@
   },
   "updateBrowserDesc": {
     "message": "Nem támogatott böngészőt használunk. Előfordulhat, hogy a webes széf nem működik megfelelően."
+  },
+  "freeTrialEndPrompt": {
+    "message": "Az ingyenes próbaidőszak $COUNT$ nap múlva ér véget. Az előfizetés fenntartásához",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "You must set up 2FA on your user account before you can join this organization."
+      }
+    }
+  },
+  "freeTrialEndPromptAboveTwoDays": {
+    "message": "$ORGANIZATION$, az ingyenes próbaidőszak $COUNT$ nap múlva lejár. Az előfizetés fenntartásához",
+    "placeholders": {
+      "count": {
+        "content": "$2",
+        "example": "organization name"
+      },
+      "organization": {
+        "content": "$1",
+        "example": "remaining days"
+      }
+    }
+  },
+  "freeTrialEndPromptForOneDay": {
+    "message": "$ORGANIZATION$, az ingyenes próbaidőszak holnap véget ér. Az előfizetés fenntartásához",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndPromptForOneDayNoOrgName": {
+    "message": "Az ingyenes próbaidőszak holnap véget ér. Az előfizetés fenntartásához"
+  },
+  "freeTrialEndPromptForLessThanADay": {
+    "message": "$ORGANIZATION$, az ingyenes próbaidőszak holnap véget ér. Az előfizetés fenntartásához",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndingSoonWithoutOrgName": {
+    "message": "Az ingyenes próbaidőszak ma véget ér. Az előfizetés fenntartásához"
+  },
+  "routeToPaymentMethodTrigger": {
+    "message": "adjunk hozzá egy fizetési módot."
   },
   "joinOrganization": {
     "message": "Csatlakozás szervezethez"
@@ -4387,6 +4472,9 @@
   "dontAskFingerprintAgain": {
     "message": "Soha ne kérjük a meghívottak ujjlenyomat kifejezésének ellenőrzését (nem ajánlott)",
     "description": "A 'fingerprint phrase' is a unique word phrase (similar to a passphrase) that a user can use to authenticate their public key with another user, for the purposes of sharing."
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "A kérelem jóváhagyása után értesítés érkezik."
   },
   "free": {
     "message": "Ingyenes",
@@ -6321,6 +6409,9 @@
   "idpSingleSignOnServiceUrlRequired": {
     "message": "Szükséges ha az entitás azonosító nem webcím."
   },
+  "offerNoLongerValid": {
+    "message": "Ez az ajánlat már nem érvényes. További információkért vegyük fel a kapcsolatot a szervezeti adminisztrátorokkal."
+  },
   "openIdOptionalCustomizations": {
     "message": "Opcionális testreszabások"
   },
@@ -6413,7 +6504,7 @@
   "generateEmail": {
     "message": "Email generálása"
   },
-  "generatorBoundariesHint": {
+  "spinboxBoundariesHint": {
     "message": "Az érték legyen $MIN$ és $MAX$ között.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
@@ -6424,6 +6515,26 @@
       "max": {
         "content": "$2",
         "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Használjunk $RECOMMENDED$ vagy több karaktert egy erős jelszó előállításához.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": "Használjunk $RECOMMENDED$ vagy több szót erős jelmondat generálásához.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
       }
     }
   },
@@ -7958,8 +8069,17 @@
   "loginInitiated": {
     "message": "A bejelentkezés elindításra került."
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Emlékezés az eszközre, hogy zökkenőmentes legyen a jövőbeni bejelentkezés"
+  },
   "deviceApprovalRequired": {
     "message": "Az eszköz jóváhagyása szükséges. Válasszunk egy jóváhagyási lehetőséget lentebb:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Eszköz jóváhagyás szükséges"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Válasszunk lentebb egy jóváhagyási lehetőséget."
   },
   "rememberThisDevice": {
     "message": "Eszköz megjegyzése"
@@ -8190,6 +8310,9 @@
   "userEmailMissing": {
     "message": "A felhasználói email cím hiányzik."
   },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": ""
+  },
   "deviceTrusted": {
     "message": "Az eszköz megbízható."
   },
@@ -8284,9 +8407,6 @@
   },
   "collectionManagementDesc": {
     "message": "Gyűjtési viselkedést kezelhet a szervezetnek"
-  },
-  "limitCollectionCreationDeletionDesc": {
-    "message": "A gyűjtemény létrehozásának és törlésének korlátozása tulajdonosokra és adminisztrátorokra"
   },
   "limitCollectionCreationDesc": {
     "message": "A gyűjtemény létrehozásának korlátozása tulajdonosokra és adminisztrátorokra"
@@ -8441,7 +8561,7 @@
   },
   "addAPaymentMethod": {
     "message": "fitetési metódus hozzáadása",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method'"
   },
   "organizationInformation": {
     "message": "Szervezeti információ"
@@ -9014,6 +9134,12 @@
   "providerPlan": {
     "message": "Menedzselt szolgáltató"
   },
+  "managedServiceProvider": {
+    "message": "Menedzselt szolgáltató"
+  },
+  "multiOrganizationEnterprise": {
+    "message": "Több-szervezetű vállalkozás"
+  },
   "orgSeats": {
     "message": "Szervezeti helyek"
   },
@@ -9416,6 +9542,30 @@
   "additionalStorageGbMessage": {
     "message": "GB kiegészítő tároló"
   },
+  "sshKeyAlgorithm": {
+    "message": "Kulcs algoritmus"
+  },
+  "sshKeyFingerprint": {
+    "message": "Ujjlenyomat"
+  },
+  "sshKeyPrivateKey": {
+    "message": "Személyes kulcs"
+  },
+  "sshKeyPublicKey": {
+    "message": "Nyilvános kulcs"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
   "premiumAccounts": {
     "message": "6 prémium fiók"
   },
@@ -9547,7 +9697,7 @@
     "message": "Ha a Bitwarden szolgáltatást saját szerveren szeretnénk tárolni, fel kell tölteni a licenszfájlt. A Free Families csomagok és a speciális számlázási lehetőségek támogatásához a saját üzemeltetésű szervezet számára be kell állítani az automatikus szinkronizálást a saját üzemeltetésű szervezetben."
   },
   "selfHostingTitleProper": {
-    "message": "Sahát üzemeltetés"
+    "message": "Saját üzemeltetés"
   },
   "verified-domain-single-org-warning": {
     "message": "A tartomány ellenőrzése bekapcsolja az önálló szervezet házirendjét."
@@ -9580,5 +9730,62 @@
   },
   "organizationUserDeletedDesc": {
     "message": "A felhasználó eltávolításra került a szervezetből és az összes kapcsolódó felhasználói adat törlésre került."
+  },
+  "deletedUserId": {
+    "message": "$ID$ felhasználó törlésre került – egy tulajdonos/adminisztrátor törölte a felhasználói fiókot.",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "userLeftOrganization": {
+    "message": "$ID$ felhasználó elhagyta a szervezetet.",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "suspendedOrganizationTitle": {
+    "message": "$ORGANIZATION$ felfüggesztésre került.",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "Acme c"
+      }
+    }
+  },
+  "suspendedUserOrgMessage": {
+    "message": "Segítségért forduljunk a szervezet tulajdonosához."
+  },
+  "suspendedOwnerOrgMessage": {
+    "message": "A szervezethez hozzáférés visszaszerzéséhez adjunk hozzá egy fizetési módot."
+  },
+  "deleteMembers": {
+    "message": "Tagok törlése"
+  },
+  "noSelectedMembersApplicable": {
+    "message": "Ez a művelet egyik kiválasztott tagra sem alkalmazható."
+  },
+  "deletedSuccessfully": {
+    "message": "A törlés sikeres volt."
+  },
+  "freeFamiliesSponsorship": {
+    "message": "Az ingyenes Bitwarden Családok szponzorálásának eltávolítása"
+  },
+  "freeFamiliesSponsorshipPolicyDesc": {
+    "message": "Ne engedjük meg a tagoknak, hogy beváltsák a Családi csomagot ezen a szervezeten keresztül."
+  },
+  "verifyBankAccountWithStatementDescriptorWarning": {
+    "message": "A bankszámlával történő fizetés csak az Egyesült Államokban élő ügyfelek számára érhető el. A bankszámlát igazolni kell. A fejlesztők a következő 1-2 munkanapon belül mikrobetétet teljesítenek. A bankszámla ellenőrzéséhez írjuk be az utalás leíró kódját a szervezet számlázási oldalán. Ha elmulasztjuk a bankszámla igazolását, az a fizetés elmaradását és az előfizetés felfüggesztését vonja maga után."
+  },
+  "verifyBankAccountWithStatementDescriptorInstructions": {
+    "message": "A fejlesztők mikrobetétet utaltak bankszámlánkra (ez 1-2 munkanapot is igénybe vehet). Adjuk meg a befizetés leírásában található, 'SM' kezdetű hatjegyű kódot. Ha elmulasztjuk a bankszámla igazolását, az a fizetés elmaradását és az előfizetés felfüggesztését vonja maga után."
+  },
+  "descriptorCode": {
+    "message": "Leíró kód"
   }
 }
