@@ -145,16 +145,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
     this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
+    this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
 
-    const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
-    this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
-    const providerData = await this.twoFactorService.getProviders().then((providers) => {
-      return providers.get(this.selectedProviderType);
-    });
-    this.providerData = providerData;
-
+    await this.determine2faProvider();
     await this.setTitleByTwoFactorProvider();
 
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
@@ -168,6 +162,23 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     if (this.clientType === ClientType.Browser) {
       await this.extensionOnInit();
     }
+  }
+
+  private async determine2faProvider() {
+    const webAuthn2faResponse = this.activatedRoute.snapshot.queryParamMap.get("webAuthnResponse");
+    if (webAuthn2faResponse) {
+      this.selectedProviderType = TwoFactorProviderType.WebAuthn;
+      this.token = webAuthn2faResponse;
+      this.remember = this.activatedRoute.snapshot.queryParamMap.get("remember") === "true";
+    } else {
+      const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
+      this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
+    }
+
+    const providerData = await this.twoFactorService.getProviders().then((providers) => {
+      return providers.get(this.selectedProviderType);
+    });
+    this.providerData = providerData;
   }
 
   private async extensionOnInit() {
