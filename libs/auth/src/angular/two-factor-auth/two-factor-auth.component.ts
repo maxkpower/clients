@@ -147,16 +147,20 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
     this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
+    this.listenFor2faSessionTimeout();
 
-    await this.determine2faProvider();
-    await this.setTitleByTwoFactorProvider();
+    if (this.twoFactorAuthComponentService.shouldCheckForWebauthnResponseOnInit()) {
+      await this.processWebAuthnResponseIfExists();
+    }
+
+    await this.setSelected2faProviderType();
+    await this.set2faProviderData();
+    await this.setTitleByTwoFactorProviderType();
 
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.token = value.token;
       this.remember = value.remember;
     });
-
-    this.listenFor2faSessionTimeout();
 
     // TODO: this is a temporary on init. Must genericize this and refactor out client specific stuff where possible.
     if (this.clientType === ClientType.Browser) {
@@ -164,17 +168,23 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async determine2faProvider() {
+  private async processWebAuthnResponseIfExists() {
     const webAuthn2faResponse = this.activatedRoute.snapshot.queryParamMap.get("webAuthnResponse");
     if (webAuthn2faResponse) {
       this.selectedProviderType = TwoFactorProviderType.WebAuthn;
+      await this.set2faProviderData();
       this.token = webAuthn2faResponse;
       this.remember = this.activatedRoute.snapshot.queryParamMap.get("remember") === "true";
-    } else {
-      const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
-      this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
+      await this.submit();
     }
+  }
 
+  private async setSelected2faProviderType() {
+    const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
+    this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
+  }
+
+  private async set2faProviderData() {
     const providerData = await this.twoFactorService.getProviders().then((providers) => {
       return providers.get(this.selectedProviderType);
     });
@@ -182,20 +192,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async extensionOnInit() {
-    if (this.activatedRoute.snapshot.paramMap.has("webAuthnResponse")) {
-      // WebAuthn fallback response
-      this.selectedProviderType = TwoFactorProviderType.WebAuthn;
-      this.token = this.activatedRoute.snapshot.paramMap.get("webAuthnResponse");
-      // TODO: move this to service.
-      // this.onSuccessfulLogin = async () => {
-      //   this.messagingService.send("reloadPopup");
-      //   window.close();
-      // };
-      this.remember = this.activatedRoute.snapshot.paramMap.get("remember") === "true";
-      await this.submit();
-      return;
-    }
-
     // WebAuthn prompt appears inside the popup on linux, and requires a larger popup width
     // than usual to avoid cutting off the dialog.
     if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
@@ -275,7 +271,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       });
       this.providerData = providerData;
       this.selectedProviderType = response.type;
-      await this.setTitleByTwoFactorProvider();
+      await this.setTitleByTwoFactorProviderType();
     }
   }
 
@@ -308,7 +304,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  async setTitleByTwoFactorProvider() {
+  async setTitleByTwoFactorProviderType() {
     if (this.selectedProviderType == null) {
       this.title = this.i18nService.t("loginUnavailable");
       return;
@@ -367,6 +363,12 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       await this.twoFactorAuthComponentService.handleSso2faFlowSuccess();
       return;
     }
+
+    // TODO: test extension + webauthn 2fa to ensure these calls are no longer necessary:
+    // this.onSuccessfulLogin = async () => {
+    //   this.messagingService.send("reloadPopup"); // this is just a navigate to "/"
+    //   window.close();
+    // };
 
     const defaultSuccessRoute = await this.determineDefaultSuccessRoute();
 

@@ -9,6 +9,11 @@ export enum LegacyKeyMigrationAction {
  */
 export abstract class TwoFactorAuthComponentService {
   /**
+   * Determines if the client should check for a webauthn response on init.
+   * Currently, only the extension should check on init.
+   */
+  abstract shouldCheckForWebauthnResponseOnInit(): boolean;
+  /**
    * We used to use the user's master key to encrypt their data. We deprecated that approach
    * and now use a user key. This method should be called if we detect that the user
    * is still using the old master key encryption scheme (server sends down a flag to

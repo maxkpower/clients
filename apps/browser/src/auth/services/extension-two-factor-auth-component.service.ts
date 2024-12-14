@@ -10,6 +10,10 @@ export class ExtensionTwoFactorAuthComponentService
   extends DefaultTwoFactorAuthComponentService
   implements TwoFactorAuthComponentService
 {
+  shouldCheckForWebauthnResponseOnInit(): boolean {
+    return true;
+  }
+
   async handleSso2faFlowSuccess(): Promise<void> {
     // Force sidebars (FF && Opera) to reload while exempting current window
     // because we are just going to close the current window.
