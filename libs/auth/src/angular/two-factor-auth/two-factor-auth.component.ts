@@ -162,6 +162,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       this.remember = value.remember;
     });
 
+    await this.twoFactorAuthComponentService.extendPopupWidthIfRequired?.(
+      this.selectedProviderType,
+    );
+
     // TODO: this is a temporary on init. Must genericize this and refactor out client specific stuff where possible.
     if (this.clientType === ClientType.Browser) {
       await this.extensionOnInit();
@@ -192,12 +196,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async extensionOnInit() {
-    // WebAuthn prompt appears inside the popup on linux, and requires a larger popup width
-    // than usual to avoid cutting off the dialog.
-    if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
-      document.body.classList.add("linux-webauthn");
-    }
-
     // if (
     //   this.selectedProviderType === TwoFactorProviderType.Email &&
     //   BrowserPopupUtils.inPopup(window)
@@ -503,8 +501,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async ngOnDestroy() {
-    if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && (await this.isLinux())) {
-      document.body.classList.remove("linux-webauthn");
-    }
+    this.twoFactorAuthComponentService.removePopupWidthExtension?.();
   }
 }

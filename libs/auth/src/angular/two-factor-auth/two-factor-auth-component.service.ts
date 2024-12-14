@@ -1,3 +1,5 @@
+import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
+
 export enum LegacyKeyMigrationAction {
   PREVENT_LOGIN_AND_SHOW_REQUIRE_MIGRATION_WARNING,
   NAVIGATE_TO_MIGRATION_COMPONENT,
@@ -13,6 +15,20 @@ export abstract class TwoFactorAuthComponentService {
    * Currently, only the extension should check on init.
    */
   abstract shouldCheckForWebauthnResponseOnInit(): boolean;
+
+  /**
+   * Extends the popup width if required.
+   * Some client specific situations require the popup to be wider than the default width.
+   */
+  abstract extendPopupWidthIfRequired?(
+    selected2faProviderType: TwoFactorProviderType,
+  ): Promise<void>;
+
+  /**
+   * Removes the popup width extension.
+   */
+  abstract removePopupWidthExtension?(): void;
+
   /**
    * We used to use the user's master key to encrypt their data. We deprecated that approach
    * and now use a user key. This method should be called if we detect that the user
