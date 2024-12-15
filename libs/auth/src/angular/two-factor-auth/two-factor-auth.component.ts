@@ -104,9 +104,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   formPromise: Promise<any>;
 
-  onSuccessfulLoginTde: () => Promise<void>;
-  onSuccessfulLoginTdeNavigate: () => Promise<void>;
-
   submitForm = async () => {
     await this.submit();
   };
@@ -312,11 +309,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     const tdeEnabled = await this.isTrustedDeviceEncEnabled(userDecryptionOpts.trustedDeviceOption);
 
     if (tdeEnabled) {
-      return await this.handleTrustedDeviceEncryptionEnabled(
-        authResult,
-        this.orgSsoIdentifier,
-        userDecryptionOpts,
-      );
+      return await this.handleTrustedDeviceEncryptionEnabled(userDecryptionOpts);
     }
 
     // User must set password if they don't have one and they aren't using either TDE or key connector.
@@ -370,8 +363,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async handleTrustedDeviceEncryptionEnabled(
-    authResult: AuthResult,
-    orgIdentifier: string,
     userDecryptionOpts: UserDecryptionOptions,
   ): Promise<void> {
     // If user doesn't have a MP, but has reset password permission, they must set a MP
@@ -389,24 +380,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       );
     }
 
-    if (this.onSuccessfulLoginTde != null) {
-      // Note: awaiting this will currently cause a hang on desktop & browser as they will wait for a full sync to complete
-      // before navigating to the success route.
-      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.onSuccessfulLoginTde();
-    }
-
     // TODO: extension has this.onSuccessfulLoginTdeNavigate = async () => {
     //   this.win.close();
     // };
 
-    await this.navigateViaCallbackOrRoute(
-      this.onSuccessfulLoginTdeNavigate,
-      // Navigate to TDE page (if user was on trusted device and TDE has decrypted
-      //  their user key, the login-initiated guard will redirect them to the vault)
-      [this.trustedDeviceEncRoute],
-    );
+    await this.router.navigate([this.trustedDeviceEncRoute]);
   }
 
   private async handleChangePasswordRequired(orgIdentifier: string) {
