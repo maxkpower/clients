@@ -166,10 +166,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       this.selectedProviderType,
     );
 
-    // TODO: this is a temporary on init. Must genericize this and refactor out client specific stuff where possible.
-    if (this.clientType === ClientType.Browser) {
-      await this.extensionOnInit();
-    }
+    await this.twoFactorAuthComponentService.openPopoutIfApprovedForEmail2fa?.(
+      this.selectedProviderType,
+    );
   }
 
   private async processWebAuthnResponseIfExists() {
@@ -193,24 +192,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return providers.get(this.selectedProviderType);
     });
     this.providerData = providerData;
-  }
-
-  private async extensionOnInit() {
-    // if (
-    //   this.selectedProviderType === TwoFactorProviderType.Email &&
-    //   BrowserPopupUtils.inPopup(window)
-    // ) {
-    //   const confirmed = await this.dialogService.openSimpleDialog({
-    //     title: { key: "warning" },
-    //     content: { key: "popup2faCloseMessage" },
-    //     type: "warning",
-    //   });
-    //   if (confirmed) {
-    //     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    //     BrowserPopupUtils.openCurrentPagePopout(window);
-    //   }
-    // }
   }
 
   private listenFor2faSessionTimeout() {

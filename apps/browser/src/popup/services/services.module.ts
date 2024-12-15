@@ -19,6 +19,7 @@ import {
   SYSTEM_THEME_OBSERVABLE,
   SafeInjectionToken,
   ENV_ADDITIONAL_REGIONS,
+  WINDOW,
 } from "@bitwarden/angular/services/injection-tokens";
 import { JslibServicesModule } from "@bitwarden/angular/services/jslib-services.module";
 import {
@@ -540,7 +541,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: TwoFactorAuthComponentService,
     useClass: ExtensionTwoFactorAuthComponentService,
-    deps: [],
+    deps: [DialogService, WINDOW],
   }),
   safeProvider({
     provide: Fido2UserVerificationService,

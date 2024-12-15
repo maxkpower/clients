@@ -3,14 +3,23 @@ import {
   TwoFactorAuthComponentService,
 } from "@bitwarden/auth/angular";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
+import { DialogService } from "@bitwarden/components";
 
 import { BrowserApi } from "../../platform/browser/browser-api";
+import BrowserPopupUtils from "../../platform/popup/browser-popup-utils";
 import { closeTwoFactorAuthPopout } from "../popup/utils/auth-popout-window";
 
 export class ExtensionTwoFactorAuthComponentService
   extends DefaultTwoFactorAuthComponentService
   implements TwoFactorAuthComponentService
 {
+  constructor(
+    private dialogService: DialogService,
+    private window: Window,
+  ) {
+    super();
+  }
+
   shouldCheckForWebauthnResponseOnInit(): boolean {
     return true;
   }
@@ -26,6 +35,24 @@ export class ExtensionTwoFactorAuthComponentService
 
   removePopupWidthExtension(): void {
     document.body.classList.remove("linux-webauthn");
+  }
+
+  async openPopoutIfApprovedForEmail2fa(
+    selected2faProviderType: TwoFactorProviderType,
+  ): Promise<void> {
+    if (
+      selected2faProviderType === TwoFactorProviderType.Email &&
+      BrowserPopupUtils.inPopup(this.window)
+    ) {
+      const confirmed = await this.dialogService.openSimpleDialog({
+        title: { key: "warning" },
+        content: { key: "popup2faCloseMessage" },
+        type: "warning",
+      });
+      if (confirmed) {
+        await BrowserPopupUtils.openCurrentPagePopout(this.window);
+      }
+    }
   }
 
   async handleSso2faFlowSuccess(): Promise<void> {

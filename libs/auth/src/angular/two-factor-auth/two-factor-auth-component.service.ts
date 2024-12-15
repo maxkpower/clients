@@ -30,6 +30,14 @@ export abstract class TwoFactorAuthComponentService {
   abstract removePopupWidthExtension?(): void;
 
   /**
+   * Optionally shows a warning to the user that they might need to popout the
+   * window to complete email 2FA.
+   */
+  abstract openPopoutIfApprovedForEmail2fa?(
+    selected2faProviderType: TwoFactorProviderType,
+  ): Promise<void>;
+
+  /**
    * We used to use the user's master key to encrypt their data. We deprecated that approach
    * and now use a user key. This method should be called if we detect that the user
    * is still using the old master key encryption scheme (server sends down a flag to
