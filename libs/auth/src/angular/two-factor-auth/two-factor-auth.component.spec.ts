@@ -42,15 +42,8 @@ import { TwoFactorAuthComponent } from "./two-factor-auth.component";
 @Component({})
 class TestTwoFactorComponent extends TwoFactorAuthComponent {}
 
-interface TwoFactorComponentProtected {
-  trustedDeviceEncRoute: string;
-  changePasswordRoute: string;
-  forcePasswordResetRoute: string;
-}
-
 describe("TwoFactorComponent", () => {
   let component: TestTwoFactorComponent;
-  let _component: TwoFactorComponentProtected;
 
   let fixture: ComponentFixture<TestTwoFactorComponent>;
   const userId = "userId" as UserId;
@@ -199,7 +192,6 @@ describe("TwoFactorComponent", () => {
 
     fixture = TestBed.createComponent(TestTwoFactorComponent);
     component = fixture.componentInstance;
-    _component = component as any;
   });
 
   afterEach(() => {
@@ -219,7 +211,7 @@ describe("TwoFactorComponent", () => {
 
       // Assert
       expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-      expect(mockRouter.navigate).toHaveBeenCalledWith([_component.changePasswordRoute], {
+      expect(mockRouter.navigate).toHaveBeenCalledWith(["set-password"], {
         queryParams: {
           identifier: component.orgSsoIdentifier,
         },
@@ -233,7 +225,7 @@ describe("TwoFactorComponent", () => {
       await component.submit();
 
       // expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-      expect(mockRouter.navigate).toHaveBeenCalledWith([_component.forcePasswordResetRoute], {
+      expect(mockRouter.navigate).toHaveBeenCalledWith(["update-temp-password"], {
         queryParams: {
           identifier: component.orgSsoIdentifier,
         },
@@ -307,7 +299,7 @@ describe("TwoFactorComponent", () => {
 
           await component.submit();
 
-          expect(mockRouter.navigate).not.toHaveBeenCalledWith([_component.changePasswordRoute], {
+          expect(mockRouter.navigate).not.toHaveBeenCalledWith(["set-password"], {
             queryParams: {
               identifier: component.orgSsoIdentifier,
             },
@@ -390,7 +382,9 @@ describe("TwoFactorComponent", () => {
       });
 
       describe("Trusted Device Encryption scenarios", () => {
-        beforeEach(() => {});
+        beforeEach(() => {
+          mockTwoFactorAuthCompService.closeWindow = undefined;
+        });
 
         describe("Given Trusted Device Encryption is enabled and user needs to set a master password", () => {
           beforeEach(() => {
@@ -402,7 +396,7 @@ describe("TwoFactorComponent", () => {
             mockLoginStrategyService.logInTwoFactor.mockResolvedValue(authResult);
           });
 
-          it("navigates to the component's defined trusted device encryption route and sets correct flag when user doesn't have a MP and key connector isn't enabled", async () => {
+          it("navigates to the login-initiated route and sets correct flag when user doesn't have a MP and key connector isn't enabled", async () => {
             // Act
             await component.submit();
 
@@ -413,10 +407,7 @@ describe("TwoFactorComponent", () => {
             );
 
             expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-            expect(mockRouter.navigate).toHaveBeenCalledWith(
-              [_component.trustedDeviceEncRoute],
-              undefined,
-            );
+            expect(mockRouter.navigate).toHaveBeenCalledWith(["login-initiated"]);
           });
         });
 
@@ -454,23 +445,11 @@ describe("TwoFactorComponent", () => {
             mockLoginStrategyService.logInTwoFactor.mockResolvedValue(authResult);
           });
 
-          it("navigates to the component's defined trusted device encryption route when login is successful and onSuccessfulLoginTdeNavigate is undefined", async () => {
+          it("navigates to the login-initiated route when login is successful", async () => {
             await component.submit();
 
             expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
-            expect(mockRouter.navigate).toHaveBeenCalledWith(
-              [_component.trustedDeviceEncRoute],
-              undefined,
-            );
-          });
-
-          it("calls onSuccessfulLoginTdeNavigate instead of router.navigate when the callback is defined", async () => {
-            component.onSuccessfulLoginTdeNavigate = jest.fn().mockResolvedValue(undefined);
-
-            await component.submit();
-
-            expect(mockRouter.navigate).not.toHaveBeenCalled();
-            expect(component.onSuccessfulLoginTdeNavigate).toHaveBeenCalled();
+            expect(mockRouter.navigate).toHaveBeenCalledWith(["login-initiated"]);
           });
         });
       });
