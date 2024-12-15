@@ -8,7 +8,7 @@ export class WebTwoFactorAuthComponentService
   extends DefaultTwoFactorAuthComponentService
   implements TwoFactorAuthComponentService
 {
-  determineLegacyKeyMigrationAction(): LegacyKeyMigrationAction {
+  override determineLegacyKeyMigrationAction(): LegacyKeyMigrationAction {
     return LegacyKeyMigrationAction.NAVIGATE_TO_MIGRATION_COMPONENT;
   }
 }
