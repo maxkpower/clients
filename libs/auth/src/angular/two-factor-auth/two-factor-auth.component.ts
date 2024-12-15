@@ -407,9 +407,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     //   this.win.close();
     // };
 
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.navigateViaCallbackOrRoute(
+    await this.navigateViaCallbackOrRoute(
       this.onSuccessfulLoginTdeNavigate,
       // Navigate to TDE page (if user was on trusted device and TDE has decrypted
       //  their user key, the login-initiated guard will redirect them to the vault)
@@ -445,9 +443,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async handleForcePasswordReset(orgIdentifier: string) {
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.router.navigate([this.forcePasswordResetRoute], {
+    await this.router.navigate([this.forcePasswordResetRoute], {
       queryParams: {
         identifier: orgIdentifier,
       },
@@ -473,12 +469,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       this.selectedProviderType !== TwoFactorProviderType.Duo &&
       this.selectedProviderType !== TwoFactorProviderType.OrganizationDuo
     );
-  }
-
-  async isLinux() {
-    // TODO: this was extension logic and must be moved to service if platform utils service doesn't have support for this
-    // return (await BrowserApi.getPlatformInfo()).os === "linux";
-    return false;
   }
 
   async ngOnDestroy() {
