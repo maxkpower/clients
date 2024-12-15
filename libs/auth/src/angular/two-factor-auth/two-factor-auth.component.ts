@@ -27,7 +27,6 @@ import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.service";
-import { ClientType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -112,13 +111,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.submit();
   };
 
-  private loginRoute = "login";
   private trustedDeviceEncRoute = "login-initiated";
   private changePasswordRoute = "set-password";
   private forcePasswordResetRoute = "update-temp-password";
   private twoFactorSessionTimeoutRoute = "2fa-timeout";
-
-  private clientType: ClientType;
 
   constructor(
     private loginStrategyService: LoginStrategyServiceAbstraction,
@@ -140,9 +136,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
     private syncService: SyncService,
     private messagingService: MessagingService,
-  ) {
-    this.clientType = this.platformUtilsService.getClientType();
-  }
+  ) {}
 
   async ngOnInit() {
     this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
