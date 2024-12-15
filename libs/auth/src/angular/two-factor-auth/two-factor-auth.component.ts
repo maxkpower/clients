@@ -4,7 +4,7 @@ import { CommonModule } from "@angular/common";
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { ActivatedRoute, NavigationExtras, Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { lastValueFrom, firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
@@ -421,18 +421,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
         identifier: orgIdentifier,
       },
     });
-  }
-
-  private async navigateViaCallbackOrRoute(
-    callback: () => Promise<unknown>,
-    commands: unknown[],
-    extras?: NavigationExtras,
-  ): Promise<void> {
-    if (callback) {
-      await callback();
-    } else {
-      await this.router.navigate(commands, extras);
-    }
   }
 
   showContinueButton() {
