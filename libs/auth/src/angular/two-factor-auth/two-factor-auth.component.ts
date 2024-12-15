@@ -108,9 +108,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.submit();
   };
 
-  private trustedDeviceEncRoute = "login-initiated";
-  private changePasswordRoute = "set-password";
-  private forcePasswordResetRoute = "update-temp-password";
   private twoFactorSessionTimeoutRoute = "2fa-timeout";
 
   constructor(
@@ -385,11 +382,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return;
     }
 
-    await this.router.navigate([this.trustedDeviceEncRoute]);
+    await this.router.navigate(["login-initiated"]);
   }
 
   private async handleChangePasswordRequired(orgIdentifier: string) {
-    await this.router.navigate([this.changePasswordRoute], {
+    await this.router.navigate(["set-password"], {
       queryParams: {
         identifier: orgIdentifier,
       },
@@ -416,7 +413,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async handleForcePasswordReset(orgIdentifier: string) {
-    await this.router.navigate([this.forcePasswordResetRoute], {
+    await this.router.navigate(["update-temp-password"], {
       queryParams: {
         identifier: orgIdentifier,
       },
