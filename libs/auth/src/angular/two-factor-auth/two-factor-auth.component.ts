@@ -378,7 +378,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       );
     }
 
-    if (this.twoFactorAuthComponentService.closeWindow) {
+    // TODO: determine why this is necessary?
+    if (this.twoFactorAuthComponentService.closeWindow !== undefined) {
       this.twoFactorAuthComponentService.closeWindow();
       return;
     }
