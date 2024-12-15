@@ -55,6 +55,10 @@ export class ExtensionTwoFactorAuthComponentService
     }
   }
 
+  closeWindow(): void {
+    this.window.close();
+  }
+
   async handleSso2faFlowSuccess(): Promise<void> {
     // Force sidebars (FF && Opera) to reload while exempting current window
     // because we are just going to close the current window.

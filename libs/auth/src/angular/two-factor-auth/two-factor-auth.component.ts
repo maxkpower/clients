@@ -380,9 +380,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       );
     }
 
-    // TODO: extension has this.onSuccessfulLoginTdeNavigate = async () => {
-    //   this.win.close();
-    // };
+    if (this.twoFactorAuthComponentService.closeWindow) {
+      this.twoFactorAuthComponentService.closeWindow();
+      return;
+    }
 
     await this.router.navigate([this.trustedDeviceEncRoute]);
   }
