@@ -28,6 +28,7 @@ import {
   LockComponentService,
   LoginDecryptionOptionsService,
   TwoFactorAuthComponentService,
+  TwoFactorAuthEmailComponentService,
 } from "@bitwarden/auth/angular";
 import { LockService, LoginEmailService, PinServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -123,6 +124,7 @@ import { ExtensionAnonLayoutWrapperDataService } from "../../auth/popup/extensio
 import { ExtensionLoginComponentService } from "../../auth/popup/login/extension-login-component.service";
 import { ExtensionLoginDecryptionOptionsService } from "../../auth/popup/login-decryption-options/extension-login-decryption-options.service";
 import { ExtensionTwoFactorAuthComponentService } from "../../auth/services/extension-two-factor-auth-component.service";
+import { ExtensionTwoFactorAuthEmailComponentService } from "../../auth/services/extension-two-factor-auth-email-component.service";
 import { AutofillService as AutofillServiceAbstraction } from "../../autofill/services/abstractions/autofill.service";
 import AutofillService from "../../autofill/services/autofill.service";
 import { InlineMenuFieldQualificationService } from "../../autofill/services/inline-menu-field-qualification.service";
@@ -541,6 +543,11 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: TwoFactorAuthComponentService,
     useClass: ExtensionTwoFactorAuthComponentService,
+    deps: [WINDOW],
+  }),
+  safeProvider({
+    provide: TwoFactorAuthEmailComponentService,
+    useClass: ExtensionTwoFactorAuthEmailComponentService,
     deps: [DialogService, WINDOW],
   }),
   safeProvider({

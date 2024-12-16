@@ -154,10 +154,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.twoFactorAuthComponentService.extendPopupWidthIfRequired?.(
       this.selectedProviderType,
     );
-
-    await this.twoFactorAuthComponentService.openPopoutIfApprovedForEmail2fa?.(
-      this.selectedProviderType,
-    );
   }
 
   private async processWebAuthnResponseIfExists() {

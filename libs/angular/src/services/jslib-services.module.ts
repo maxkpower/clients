@@ -22,6 +22,8 @@ import {
   DefaultLoginDecryptionOptionsService,
   TwoFactorAuthComponentService,
   DefaultTwoFactorAuthComponentService,
+  DefaultTwoFactorAuthEmailComponentService,
+  TwoFactorAuthEmailComponentService,
 } from "@bitwarden/auth/angular";
 import {
   AuthRequestServiceAbstraction,
@@ -1356,6 +1358,11 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: TwoFactorAuthComponentService,
     useClass: DefaultTwoFactorAuthComponentService,
+    deps: [],
+  }),
+  safeProvider({
+    provide: TwoFactorAuthEmailComponentService,
+    useClass: DefaultTwoFactorAuthEmailComponentService,
     deps: [],
   }),
   safeProvider({

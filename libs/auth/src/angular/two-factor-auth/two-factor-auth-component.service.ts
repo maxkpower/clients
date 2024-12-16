@@ -30,14 +30,6 @@ export abstract class TwoFactorAuthComponentService {
   abstract removePopupWidthExtension?(): void;
 
   /**
-   * Optionally shows a warning to the user that they might need to popout the
-   * window to complete email 2FA.
-   */
-  abstract openPopoutIfApprovedForEmail2fa?(
-    selected2faProviderType: TwoFactorProviderType,
-  ): Promise<void>;
-
-  /**
    * Optionally closes the window if the client requires it
    */
   abstract closeWindow?(): void;
