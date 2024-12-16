@@ -42,7 +42,7 @@ import {
 } from "@bitwarden/components";
 
 import { TwoFactorAuthAuthenticatorComponent } from "./child-components/two-factor-auth-authenticator.component";
-import { TwoFactorAuthDuoComponent } from "./child-components/two-factor-auth-duo.component";
+import { TwoFactorAuthDuoComponent } from "./child-components/two-factor-auth-duo/two-factor-auth-duo.component";
 import { TwoFactorAuthEmailComponent } from "./child-components/two-factor-auth-email/two-factor-auth-email.component";
 import { TwoFactorAuthWebAuthnComponent } from "./child-components/two-factor-auth-webauthn.component";
 import { TwoFactorAuthYubikeyComponent } from "./child-components/two-factor-auth-yubikey.component";
