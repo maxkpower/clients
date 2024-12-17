@@ -1,3 +1,19 @@
 import { IpcService } from "@bitwarden/platform";
 
-export class IpcForegroundService extends IpcService {}
+import { BrowserApi } from "../browser/browser-api";
+
+import { isIpcMessage } from "./content/bitwarden-ipc-web-api";
+
+export class IpcBackgroundService extends IpcService {
+  override async init() {
+    await super.init();
+
+    BrowserApi.messageListener("platform.ipc", (message) => {
+      if (!isIpcMessage(message)) {
+        return;
+      }
+
+      console.log("Received IPC message", message);
+    });
+  }
+}

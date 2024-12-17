@@ -209,6 +209,7 @@ import {
   KdfConfigService,
   KeyService as KeyServiceAbstraction,
 } from "@bitwarden/key-management";
+import { IpcService } from "@bitwarden/platform";
 import {
   IndividualVaultExportService,
   IndividualVaultExportServiceAbstraction,
@@ -244,6 +245,7 @@ import { SafariApp } from "../browser/safariApp";
 import { BackgroundBrowserBiometricsService } from "../key-management/biometrics/background-browser-biometrics.service";
 import { BrowserApi } from "../platform/browser/browser-api";
 import { flagEnabled } from "../platform/flags";
+import { IpcBackgroundService } from "../platform/ipc/ipc-background.service";
 import { UpdateBadge } from "../platform/listeners/update-badge";
 /* eslint-disable no-restricted-imports */
 import { ChromeMessageSender } from "../platform/messaging/chrome-message.sender";
@@ -382,6 +384,8 @@ export default class MainBackground {
   sdkService: SdkService;
   cipherAuthorizationService: CipherAuthorizationService;
   inlineMenuFieldQualificationService: InlineMenuFieldQualificationService;
+
+  ipcService: IpcService;
 
   onUpdatedRan: boolean;
   onReplacedRan: boolean;
@@ -1260,6 +1264,8 @@ export default class MainBackground {
     );
 
     this.inlineMenuFieldQualificationService = new InlineMenuFieldQualificationService();
+
+    this.ipcService = new IpcBackgroundService();
   }
 
   async bootstrap() {
@@ -1323,6 +1329,7 @@ export default class MainBackground {
     }
 
     await this.initOverlayAndTabsBackground();
+    await this.ipcService.init();
 
     return new Promise<void>((resolve) => {
       setTimeout(async () => {
