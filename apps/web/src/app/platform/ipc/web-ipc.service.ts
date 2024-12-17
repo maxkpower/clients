@@ -1,6 +1,12 @@
 import { Observable } from "rxjs";
 
-import { IpcLink, IpcService, isIpcMessage } from "@bitwarden/common/platform/ipc";
+import {
+  IpcLink,
+  IpcService,
+  isIpcMessage,
+  PingMessagePayload,
+  PongMessagePayload,
+} from "@bitwarden/common/platform/ipc";
 
 export class WebIpcService extends IpcService {
   private static LinkToExtensionBackground = new IpcLink(
@@ -25,5 +31,17 @@ export class WebIpcService extends IpcService {
     await super.init();
 
     this.manager.register_link(WebIpcService.LinkToExtensionBackground);
+
+    void this.ping();
+  }
+
+  async ping() {
+    await this.manager.send("BrowserBackground", PingMessagePayload);
+    const message = await this.manager.receive("BrowserBackground");
+
+    if (message[0] === PongMessagePayload[0]) {
+      // eslint-disable-next-line no-console
+      console.log("Connected to extension background");
+    }
   }
 }
