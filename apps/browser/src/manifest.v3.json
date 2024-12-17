@@ -40,7 +40,7 @@
     {
       "all_frames": false,
       "js": ["content/ipc-content-script.js"],
-      "matches": ["https://vault.bitwarden.com/*", "https://localhost:4200/*"],
+      "matches": ["https://vault.bitwarden.com/*", "https://localhost:8080/*"],
       "run_at": "document_start"
     }
   ],
