@@ -1,17 +1,10 @@
-import { Injectable, OnDestroy } from "@angular/core";
-import { Observable, Subject, switchMap, takeUntil } from "rxjs";
+import { Observable } from "rxjs";
 
-import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
-import { Destination } from "@bitwarden/sdk-internal";
+import { IpcLink, IpcMessage, IpcService } from "@bitwarden/platform";
+import { Destination, Manager } from "@bitwarden/sdk-internal";
 
-import { IpcLink } from "./ipc-link";
-import { IpcMessage } from "./ipc-message";
-
-@Injectable()
-export class IpcForegroundService implements OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  private linkToBackground = new IpcLink(
+export class IpcForegroundService extends IpcService {
+  private static LinkToBackground = new IpcLink(
     async (data) => {
       await chrome.runtime.sendMessage({ payload: data } as IpcMessage);
     },
@@ -26,22 +19,7 @@ export class IpcForegroundService implements OnDestroy {
     [Destination.BrowserBackground],
   );
 
-  constructor(private sdkService: SdkService) {}
-
-  init() {
-    this.sdkService.client$
-      .pipe(
-        switchMap(async (client) => {
-          const manager = client.ipc().create_manager();
-          await manager.register_link(this.linkToBackground);
-        }),
-        takeUntil(this.destroy$),
-      )
-      .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  protected override async registerLinks(manager: Manager): Promise<void> {
+    await manager.register_link(IpcForegroundService.LinkToBackground);
   }
 }
