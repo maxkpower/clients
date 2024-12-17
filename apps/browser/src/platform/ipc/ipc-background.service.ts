@@ -1,8 +1,6 @@
-import { IpcService } from "@bitwarden/platform";
+import { IpcService, isIpcMessage } from "@bitwarden/common/platform/ipc";
 
 import { BrowserApi } from "../browser/browser-api";
-
-import { isIpcMessage } from "./content/bitwarden-ipc-web-api";
 
 export class IpcBackgroundService extends IpcService {
   override async init() {

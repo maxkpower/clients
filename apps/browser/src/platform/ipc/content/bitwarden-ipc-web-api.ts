@@ -10,16 +10,3 @@ export interface BitwardenIpcWebApi {
    */
   onMessage?: (payload: Uint8Array) => void;
 }
-
-export interface IpcMessage {
-  type: "bitwarden-ipc-message";
-  payload: Uint8Array;
-}
-
-export function getBitwardenIpcWebApi(): BitwardenIpcWebApi | undefined {
-  return (window as any).Bitwarden;
-}
-
-export function isIpcMessage(message: any): message is IpcMessage {
-  return message.type === "bitwarden-ipc-message";
-}

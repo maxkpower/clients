@@ -1,7 +1,7 @@
-import { isIpcMessage } from "./bitwarden-ipc-web-api";
-
 // TODO: This content script should be dynamically reloaded when the extension is updated,
 // to avoid "Extension context invalidated." errors.
+
+import { isIpcMessage } from "@bitwarden/common/platform/ipc/ipc-message";
 
 export function sendExtensionMessage(message: unknown) {
   if (

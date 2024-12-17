@@ -100,6 +100,7 @@ import {
 } from "@bitwarden/common/platform/abstractions/storage.service";
 import { SystemService as SystemServiceAbstraction } from "@bitwarden/common/platform/abstractions/system.service";
 import { StateFactory } from "@bitwarden/common/platform/factories/state-factory";
+import { IpcService } from "@bitwarden/common/platform/ipc";
 import { Message, MessageListener, MessageSender } from "@bitwarden/common/platform/messaging";
 // eslint-disable-next-line no-restricted-imports -- Used for dependency creation
 import { SubjectMessageSender } from "@bitwarden/common/platform/messaging/internal";
@@ -209,7 +210,6 @@ import {
   KdfConfigService,
   KeyService as KeyServiceAbstraction,
 } from "@bitwarden/key-management";
-import { IpcService } from "@bitwarden/platform";
 import {
   IndividualVaultExportService,
   IndividualVaultExportServiceAbstraction,
