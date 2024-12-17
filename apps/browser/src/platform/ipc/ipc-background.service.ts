@@ -16,6 +16,8 @@ export class IpcBackgroundService extends IpcService {
       }
 
       if (!this.links.has(sender.documentId)) {
+        // eslint-disable-next-line no-console
+        console.log("New link", message, sender);
         this.links.set(
           sender.documentId,
           new IpcLink(
