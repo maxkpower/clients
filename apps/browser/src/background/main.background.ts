@@ -1265,7 +1265,7 @@ export default class MainBackground {
 
     this.inlineMenuFieldQualificationService = new InlineMenuFieldQualificationService();
 
-    this.ipcService = new IpcBackgroundService();
+    this.ipcService = new IpcBackgroundService(this.sdkService);
   }
 
   async bootstrap() {
