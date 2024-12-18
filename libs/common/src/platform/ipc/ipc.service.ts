@@ -10,7 +10,7 @@ export abstract class IpcService {
   constructor(private sdkService: SdkService) {}
 
   async init() {
-    await firstValueFrom(
+    this.manager = await firstValueFrom(
       this.sdkService.client$.pipe(map((client) => client.ipc().create_manager())),
     );
   }

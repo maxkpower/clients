@@ -2,6 +2,7 @@ import { Observable } from "rxjs";
 
 import {
   IpcLink,
+  IpcMessage,
   IpcService,
   isIpcMessage,
   PingMessagePayload,
@@ -10,7 +11,12 @@ import {
 
 export class WebIpcService extends IpcService {
   private static LinkToExtensionBackground = new IpcLink(
-    async (data) => window.postMessage(data, window.location.origin),
+    async (data) => {
+      window.postMessage(
+        { type: "bitwarden-ipc-message", payload: data } satisfies IpcMessage,
+        window.location.origin,
+      );
+    },
     new Observable((subscriber) => {
       const listener = (event: MessageEvent<unknown>) => {
         const message = event.data;
@@ -36,12 +42,21 @@ export class WebIpcService extends IpcService {
   }
 
   async ping() {
-    await this.manager.send("BrowserBackground", PingMessagePayload);
-    const message = await this.manager.receive("BrowserBackground");
-
-    if (message[0] === PongMessagePayload[0]) {
+    try {
       // eslint-disable-next-line no-console
-      console.log("Connected to extension background");
+      console.log("[IPC] Pinging");
+      await this.manager.send("BrowserBackground", PingMessagePayload);
+      // eslint-disable-next-line no-console
+      console.log("[IPC] Sent ping");
+      const message = await this.manager.receive("BrowserBackground");
+
+      if (message[0] === PongMessagePayload[0]) {
+        // eslint-disable-next-line no-console
+        console.log("[IPC] Received pong");
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[IPC] Ping failed", error);
     }
   }
 }
