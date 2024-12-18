@@ -13,6 +13,7 @@ pub(crate) enum SshAgentSignRequest {
 }
 
 pub(crate) fn parse_request(data: &[u8]) -> Result<SshAgentSignRequest, anyhow::Error> {
+    let magic_header = "SSHSIG";
     let mut data_iter = data.to_vec().into_iter();
     let header = data_iter
         .by_ref()
@@ -20,7 +21,7 @@ pub(crate) fn parse_request(data: &[u8]) -> Result<SshAgentSignRequest, anyhow::
         .collect::<Vec<u8>>();
 
     // sshsig; based on https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.sshsig
-    if header == "SSHSIG".as_bytes() {
+    if header == magic_header.as_bytes() {
         let version = data_iter.by_ref().take(4).collect::<Vec<u8>>();
         let _version = u32::from_be_bytes(
             version
@@ -38,7 +39,7 @@ pub(crate) fn parse_request(data: &[u8]) -> Result<SshAgentSignRequest, anyhow::
 
         Ok(SshAgentSignRequest::SshSigRequest(SshSigRequest {
             namespace,
-        }));
+        }))
     } else {
         // regular sign request
         Ok(SshAgentSignRequest::SignRequest(SignRequest {}))
