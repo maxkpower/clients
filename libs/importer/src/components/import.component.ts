@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import {
   AfterViewInit,
@@ -51,6 +53,7 @@ import {
   SectionHeaderComponent,
   SelectModule,
   ToastService,
+  LinkModule,
 } from "@bitwarden/components";
 import { KeyService } from "@bitwarden/key-management";
 
@@ -113,6 +116,7 @@ const safeProviders: SafeProvider[] = [
     ContainerComponent,
     SectionHeaderComponent,
     SectionComponent,
+    LinkModule,
   ],
   providers: safeProviders,
 })

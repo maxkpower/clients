@@ -39,6 +39,7 @@ import {
   VaultIcon,
   LoginDecryptionOptionsComponent,
   DevicesIcon,
+  SsoComponent,
   TwoFactorTimeoutIcon,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -62,7 +63,7 @@ import { RemovePasswordComponent } from "../auth/popup/remove-password.component
 import { SetPasswordComponent } from "../auth/popup/set-password.component";
 import { AccountSecurityComponent as AccountSecurityV1Component } from "../auth/popup/settings/account-security-v1.component";
 import { AccountSecurityComponent } from "../auth/popup/settings/account-security.component";
-import { SsoComponent } from "../auth/popup/sso.component";
+import { SsoComponentV1 } from "../auth/popup/sso-v1.component";
 import { TwoFactorAuthComponent } from "../auth/popup/two-factor-auth.component";
 import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
 import { TwoFactorComponent } from "../auth/popup/two-factor.component";
@@ -90,15 +91,10 @@ import { SendAddEditComponent as SendAddEditV2Component } from "../tools/popup/s
 import { SendCreatedComponent } from "../tools/popup/send-v2/send-created/send-created.component";
 import { SendV2Component } from "../tools/popup/send-v2/send-v2.component";
 import { AboutPageV2Component } from "../tools/popup/settings/about-page/about-page-v2.component";
-import { AboutPageComponent } from "../tools/popup/settings/about-page/about-page.component";
 import { MoreFromBitwardenPageV2Component } from "../tools/popup/settings/about-page/more-from-bitwarden-page-v2.component";
-import { MoreFromBitwardenPageComponent } from "../tools/popup/settings/about-page/more-from-bitwarden-page.component";
 import { ExportBrowserV2Component } from "../tools/popup/settings/export/export-browser-v2.component";
-import { ExportBrowserComponent } from "../tools/popup/settings/export/export-browser.component";
 import { ImportBrowserV2Component } from "../tools/popup/settings/import/import-browser-v2.component";
-import { ImportBrowserComponent } from "../tools/popup/settings/import/import-browser.component";
 import { SettingsV2Component } from "../tools/popup/settings/settings-v2.component";
-import { SettingsComponent } from "../tools/popup/settings/settings.component";
 import { clearVaultStateGuard } from "../vault/guards/clear-vault-state.guard";
 import { AddEditComponent } from "../vault/popup/components/vault/add-edit.component";
 import { AttachmentsComponent } from "../vault/popup/components/vault/attachments.component";
@@ -230,12 +226,40 @@ const routes: Routes = [
     canActivate: [unauthGuardFn(unauthRouteOverrides)],
     data: { elevation: 1 } satisfies RouteDataProperties,
   },
-  {
-    path: "sso",
-    component: SsoComponent,
-    canActivate: [unauthGuardFn(unauthRouteOverrides)],
-    data: { elevation: 1 } satisfies RouteDataProperties,
-  },
+  ...unauthUiRefreshSwap(
+    SsoComponentV1,
+    ExtensionAnonLayoutWrapperComponent,
+    {
+      path: "sso",
+      canActivate: [unauthGuardFn(unauthRouteOverrides)],
+      data: { elevation: 1 } satisfies RouteDataProperties,
+    },
+    {
+      path: "sso",
+      canActivate: [unauthGuardFn(unauthRouteOverrides)],
+      data: {
+        pageIcon: VaultIcon,
+        pageTitle: {
+          key: "enterpriseSingleSignOn",
+        },
+        pageSubtitle: {
+          key: "singleSignOnEnterOrgIdentifierText",
+        },
+        elevation: 1,
+      } satisfies RouteDataProperties & ExtensionAnonLayoutWrapperData,
+      children: [
+        { path: "", component: SsoComponent },
+        {
+          path: "",
+          component: EnvironmentSelectorComponent,
+          outlet: "environment-selector",
+          data: {
+            overlayPosition: ExtensionDefaultOverlayPosition,
+          } satisfies EnvironmentSelectorRouteData,
+        },
+      ],
+    },
+  ),
   {
     path: "set-password",
     component: SetPasswordComponent,
@@ -321,16 +345,18 @@ const routes: Routes = [
     canActivate: [authGuard],
     data: { elevation: 1 } satisfies RouteDataProperties,
   }),
-  ...extensionRefreshSwap(ImportBrowserComponent, ImportBrowserV2Component, {
+  {
     path: "import",
+    component: ImportBrowserV2Component,
     canActivate: [authGuard],
     data: { elevation: 1 } satisfies RouteDataProperties,
-  }),
-  ...extensionRefreshSwap(ExportBrowserComponent, ExportBrowserV2Component, {
+  },
+  {
     path: "export",
+    component: ExportBrowserV2Component,
     canActivate: [authGuard],
     data: { elevation: 2 } satisfies RouteDataProperties,
-  }),
+  },
   ...extensionRefreshSwap(AutofillV1Component, AutofillComponent, {
     path: "autofill",
     canActivate: [authGuard],
@@ -630,7 +656,18 @@ const routes: Routes = [
           },
           showReadonlyHostname: true,
           showAcctSwitcher: true,
-        } satisfies ExtensionAnonLayoutWrapperData,
+          elevation: 1,
+          /**
+           * This ensures that in a passkey flow the `/fido2?<queryParams>` URL does not get
+           * overwritten in the `BrowserRouterService` by the `/lockV2` route. This way, after
+           * unlocking, the user can be redirected back to the `/fido2?<queryParams>` URL.
+           *
+           * Also, this prevents a routing loop when using biometrics to unlock the vault in MV2 (Firefox),
+           * locking up the browser (https://bitwarden.atlassian.net/browse/PM-16116). This involves the
+           * `popup-router-cache.service` pushing the `lockV2` route to the history.
+           */
+          doNotSaveUrl: true,
+        } satisfies ExtensionAnonLayoutWrapperData & RouteDataProperties,
         children: [
           {
             path: "",
@@ -666,16 +703,18 @@ const routes: Routes = [
     canActivate: [canAccessFeature(FeatureFlag.ExtensionRefresh, true, "/")],
     data: { elevation: 1 } satisfies RouteDataProperties,
   },
-  ...extensionRefreshSwap(AboutPageComponent, AboutPageV2Component, {
+  {
     path: "about",
+    component: AboutPageV2Component,
     canActivate: [authGuard],
     data: { elevation: 1 } satisfies RouteDataProperties,
-  }),
-  ...extensionRefreshSwap(MoreFromBitwardenPageComponent, MoreFromBitwardenPageV2Component, {
+  },
+  {
     path: "more-from-bitwarden",
+    component: MoreFromBitwardenPageV2Component,
     canActivate: [authGuard],
     data: { elevation: 2 } satisfies RouteDataProperties,
-  }),
+  },
   ...extensionRefreshSwap(TabsComponent, TabsV2Component, {
     path: "tabs",
     data: { elevation: 0 } satisfies RouteDataProperties,
@@ -704,11 +743,12 @@ const routes: Routes = [
         canActivate: [authGuard],
         data: { elevation: 0 } satisfies RouteDataProperties,
       }),
-      ...extensionRefreshSwap(SettingsComponent, SettingsV2Component, {
+      {
         path: "settings",
+        component: SettingsV2Component,
         canActivate: [authGuard],
         data: { elevation: 0 } satisfies RouteDataProperties,
-      }),
+      },
       ...extensionRefreshSwap(SendGroupingsComponent, SendV2Component, {
         path: "send",
         canActivate: [authGuard],

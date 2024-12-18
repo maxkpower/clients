@@ -67,7 +67,7 @@ export declare namespace sshagent {
     status: SshKeyImportStatus
     sshKey?: SshKey
   }
-  export function serve(callback: (err: Error | null, arg0: string, arg1: boolean) => any): Promise<SshAgentState>
+  export function serve(callback: (err: Error | null, arg0: string | undefined | null, arg1: boolean, arg2: string) => any): Promise<SshAgentState>
   export function stop(agentState: SshAgentState): void
   export function isRunning(agentState: SshAgentState): boolean
   export function setKeys(agentState: SshAgentState, newKeys: Array<PrivateKey>): void
@@ -121,6 +121,9 @@ export declare namespace ipc {
      */
     send(message: string): number
   }
+}
+export declare namespace autofill {
+  export function runCommand(value: string): Promise<string>
 }
 export declare namespace crypto {
   export function argon2(secret: Buffer, salt: Buffer, iterations: number, memory: number, parallelism: number): Promise<Buffer>

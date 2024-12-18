@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Directive, ElementRef, HostBinding, Input } from "@angular/core";
 
 import { FocusableElement } from "../shared/focusable-element";
@@ -29,6 +31,7 @@ const hoverStyles: Record<BadgeVariant, string[]> = {
 @Directive({
   selector: "span[bitBadge], a[bitBadge], button[bitBadge]",
   providers: [{ provide: FocusableElement, useExisting: BadgeDirective }],
+  standalone: true,
 })
 export class BadgeDirective implements FocusableElement {
   @HostBinding("class") get classList() {

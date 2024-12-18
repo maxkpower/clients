@@ -4,7 +4,7 @@
     <org-switcher [filter]="orgFilter" [hideNewButton]="hideNewOrgButton$ | async"></org-switcher>
     <bit-nav-group
       icon="bwi-filter"
-      *ngIf="isAccessIntelligenceFeatureEnabled"
+      *ngIf="organization.useRiskInsights"
       [text]="'accessIntelligence' | i18n"
     >
       <bit-nav-item
@@ -98,7 +98,7 @@
         *ngIf="canAccessExport$ | async"
       ></bit-nav-item>
       <bit-nav-item
-        [text]="'domainVerification' | i18n"
+        [text]="domainVerificationNavigationTextKey | i18n"
         route="settings/domain-verification"
         *ngIf="organization?.canManageDomainVerification"
       ></bit-nav-item>

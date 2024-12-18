@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, RouterModule } from "@angular/router";
@@ -18,7 +20,6 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { PolicyType, ProviderStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
-import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -47,6 +48,7 @@ export class OrganizationLayoutComponent implements OnInit {
   protected readonly logo = AdminConsoleLogo;
 
   protected orgFilter = (org: Organization) => canAccessOrgAdmin(org);
+  protected domainVerificationNavigationTextKey: string;
 
   protected integrationPageEnabled$: Observable<boolean>;
 
@@ -55,7 +57,6 @@ export class OrganizationLayoutComponent implements OnInit {
   showPaymentAndHistory$: Observable<boolean>;
   hideNewOrgButton$: Observable<boolean>;
   organizationIsUnmanaged$: Observable<boolean>;
-  isAccessIntelligenceFeatureEnabled = false;
   enterpriseOrganization$: Observable<boolean>;
 
   constructor(
@@ -69,10 +70,6 @@ export class OrganizationLayoutComponent implements OnInit {
 
   async ngOnInit() {
     document.body.classList.remove("layout_frontend");
-
-    this.isAccessIntelligenceFeatureEnabled = await this.configService.getFeatureFlag(
-      FeatureFlag.AccessIntelligence,
-    );
 
     this.organization$ = this.route.params.pipe(
       map((p) => p.organizationId),
@@ -112,12 +109,13 @@ export class OrganizationLayoutComponent implements OnInit {
     this.integrationPageEnabled$ = combineLatest(
       this.organization$,
       this.configService.getFeatureFlag$(FeatureFlag.PM14505AdminConsoleIntegrationPage),
-    ).pipe(
-      map(
-        ([org, featureFlagEnabled]) =>
-          org.productTierType === ProductTierType.Enterprise && featureFlagEnabled,
-      ),
-    );
+    ).pipe(map(([org, featureFlagEnabled]) => featureFlagEnabled && org.canAccessIntegrations));
+
+    this.domainVerificationNavigationTextKey = (await this.configService.getFeatureFlag(
+      FeatureFlag.AccountDeprovisioning,
+    ))
+      ? "claimedDomains"
+      : "domainVerification";
   }
 
   canShowVaultTab(organization: Organization): boolean {
