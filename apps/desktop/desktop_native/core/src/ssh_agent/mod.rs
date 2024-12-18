@@ -129,6 +129,7 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
             is_forwarding: bool,
             connection_info: &peerinfo::models::PeerInfo,
         ) -> () {
+        // is_forwarding can only be added but never removed from a connection
         if (is_forwarding) {
             connection_info.set_forwarding(is_forwarding);
         }
