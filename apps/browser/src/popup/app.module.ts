@@ -33,7 +33,7 @@ import { SetPasswordComponent } from "../auth/popup/set-password.component";
 import { AccountSecurityComponent as AccountSecurityComponentV1 } from "../auth/popup/settings/account-security-v1.component";
 import { AccountSecurityComponent } from "../auth/popup/settings/account-security.component";
 import { VaultTimeoutInputComponent } from "../auth/popup/settings/vault-timeout-input.component";
-import { SsoComponent } from "../auth/popup/sso.component";
+import { SsoComponentV1 } from "../auth/popup/sso-v1.component";
 import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
 import { TwoFactorComponent } from "../auth/popup/two-factor.component";
 import { UpdateTempPasswordComponent } from "../auth/popup/update-temp-password.component";
@@ -63,7 +63,6 @@ import { SendListComponent } from "../tools/popup/send/components/send-list.comp
 import { SendAddEditComponent } from "../tools/popup/send/send-add-edit.component";
 import { SendGroupingsComponent } from "../tools/popup/send/send-groupings.component";
 import { SendTypeComponent } from "../tools/popup/send/send-type.component";
-import { SettingsComponent } from "../tools/popup/settings/settings.component";
 import { ActionButtonsComponent } from "../vault/popup/components/action-buttons.component";
 import { CipherRowComponent } from "../vault/popup/components/cipher-row.component";
 import { AddEditCustomFieldsComponent } from "../vault/popup/components/vault/add-edit-custom-fields.component";
@@ -174,10 +173,9 @@ import "../platform/popup/locales";
     SendListComponent,
     SendTypeComponent,
     SetPasswordComponent,
-    SettingsComponent,
     VaultSettingsComponent,
     ShareComponent,
-    SsoComponent,
+    SsoComponentV1,
     SyncComponent,
     TabsComponent,
     TabsV2Component,
