@@ -44,10 +44,12 @@ impl PeerInfo {
     }
 
     pub fn is_forwarding(&self) -> bool {
-        self.is_forwarding.load(std::sync::atomic::Ordering::Relaxed)
+        self.is_forwarding
+            .load(std::sync::atomic::Ordering::Relaxed)
     }
 
     pub fn set_forwarding(&self, value: bool) {
-        self.is_forwarding.store(value, std::sync::atomic::Ordering::Relaxed);
+        self.is_forwarding
+            .store(value, std::sync::atomic::Ordering::Relaxed);
     }
 }

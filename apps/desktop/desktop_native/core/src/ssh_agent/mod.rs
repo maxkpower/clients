@@ -61,10 +61,13 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
             request_parser::SshAgentSignRequest::SshSigRequest(_) => true,
             request_parser::SshAgentSignRequest::SignRequest(_) => false,
         };
-        let is_git = is_sig && match request_data {
-            request_parser::SshAgentSignRequest::SshSigRequest(ref req) => req.namespace == "git",
-            _ => false,
-        };
+        let is_git = is_sig
+            && match request_data {
+                request_parser::SshAgentSignRequest::SshSigRequest(ref req) => {
+                    req.namespace == "git"
+                }
+                _ => false,
+            };
 
         println!(
             "[SSH Agent] Confirming request from application: {}, is_forwarding: {}, is_sshsig: {}, is_git: {}",
@@ -125,10 +128,10 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
     }
 
     async fn set_is_forwarding(
-            &self,
-            is_forwarding: bool,
-            connection_info: &peerinfo::models::PeerInfo,
-        ) -> () {
+        &self,
+        is_forwarding: bool,
+        connection_info: &peerinfo::models::PeerInfo,
+    ) -> () {
         // is_forwarding can only be added but never removed from a connection
         if (is_forwarding) {
             connection_info.set_forwarding(is_forwarding);

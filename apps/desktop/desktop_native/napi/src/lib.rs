@@ -247,7 +247,10 @@ pub mod sshagent {
 
     #[napi]
     pub async fn serve(
-        callback: ThreadsafeFunction<(Option<String>, bool, String, bool, bool, bool), CalleeHandled>,
+        callback: ThreadsafeFunction<
+            (Option<String>, bool, String, bool, bool, bool),
+            CalleeHandled,
+        >,
     ) -> napi::Result<SshAgentState> {
         let (auth_request_tx, mut auth_request_rx) =
             tokio::sync::mpsc::channel::<desktop_core::ssh_agent::SshAgentUIRequest>(32);
@@ -270,7 +273,7 @@ pub mod sshagent {
                             request.process_name,
                             request.is_forwarding,
                             request.is_sig,
-                            request.is_git
+                            request.is_git,
                         )))
                         .await;
                     match promise_result {
