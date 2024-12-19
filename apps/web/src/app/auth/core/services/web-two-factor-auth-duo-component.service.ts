@@ -1,11 +1,12 @@
 import { fromEvent, map, Observable, share } from "rxjs";
 
 import { TwoFactorAuthDuoComponentService, Duo2faResult } from "@bitwarden/auth/angular";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 export class WebTwoFactorAuthDuoComponentService implements TwoFactorAuthDuoComponentService {
   private duo2faResult$: Observable<Duo2faResult>;
 
-  constructor() {
+  constructor(private platformUtilsService: PlatformUtilsService) {
     const duoResultChannel: BroadcastChannel = new BroadcastChannel("duoResult");
 
     this.duo2faResult$ = fromEvent(duoResultChannel, "message").pipe(
@@ -22,5 +23,9 @@ export class WebTwoFactorAuthDuoComponentService implements TwoFactorAuthDuoComp
   }
   listenForDuo2faResult$(): Observable<Duo2faResult> {
     return this.duo2faResult$;
+  }
+
+  async launchDuoFrameless(duoFramelessUrl: string): Promise<void> {
+    this.platformUtilsService.launchUri(duoFramelessUrl);
   }
 }

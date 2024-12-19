@@ -18,4 +18,9 @@ export abstract class TwoFactorAuthDuoComponentService {
    * @returns {Observable<Duo2faResult>} An observable that emits the result of the duo two-factor authentication process.
    */
   abstract listenForDuo2faResult$(): Observable<Duo2faResult>;
+
+  /**
+   * Launches the client specific duo frameless 2FA flow.
+   */
+  abstract launchDuoFrameless(duoFramelessUrl: string): Promise<void>;
 }
