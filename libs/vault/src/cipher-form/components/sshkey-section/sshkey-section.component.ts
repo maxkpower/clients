@@ -26,7 +26,6 @@ import { SshKeyImportError, import_ssh_key } from "@bitwarden/sdk-internal";
 
 import { CipherFormContainer } from "../../cipher-form-container";
 
-
 @Component({
   selector: "vault-sshkey-section",
   templateUrl: "./sshkey-section.component.html",

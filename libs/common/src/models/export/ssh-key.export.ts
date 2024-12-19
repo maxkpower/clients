@@ -8,7 +8,6 @@ import { SshKey as SshKeyDomain } from "../../vault/models/domain/ssh-key";
 
 import { safeGetString } from "./utils";
 
-
 export class SshKeyExport {
   static template(): SshKeyExport {
     const req = new SshKeyExport();
