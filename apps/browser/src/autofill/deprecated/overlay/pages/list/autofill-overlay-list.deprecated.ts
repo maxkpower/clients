@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import "@webcomponents/custom-elements";
 import "lit/polyfill-support.js";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
@@ -157,7 +155,7 @@ class AutofillOverlayList extends AutofillOverlayPageElement {
       `${this.getTranslation("addNewVaultItem")}, ${this.getTranslation("opensInANewWindow")}`,
     );
     newItemButton.prepend(buildSvgDomElement(plusIcon));
-    newItemButton.addEventListener(EVENTS.CLICK, this.handeNewItemButtonClick);
+    newItemButton.addEventListener(EVENTS.CLICK, this.handleNewItemButtonClick);
 
     const overlayListButtonContainer = globalThis.document.createElement("div");
     overlayListButtonContainer.classList.add("overlay-list-button-container");
@@ -170,7 +168,7 @@ class AutofillOverlayList extends AutofillOverlayPageElement {
    * Handles the click event for the new item button.
    * Sends a message to the parent window to add a new vault item.
    */
-  private handeNewItemButtonClick = () => {
+  private handleNewItemButtonClick = () => {
     this.postMessageToParent({ command: "addNewVaultItem" });
   };
 

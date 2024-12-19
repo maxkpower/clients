@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { OverlayNotificationsContentService } from "../overlay/notifications/content/overlay-notifications-content.service";
 import { AutofillOverlayContentService } from "../services/autofill-overlay-content.service";
 import DomElementVisibilityService from "../services/dom-element-visibility.service";

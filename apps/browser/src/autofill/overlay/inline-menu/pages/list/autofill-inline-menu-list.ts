@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import "@webcomponents/custom-elements";
 import "lit/polyfill-support.js";
 
@@ -498,7 +496,7 @@ export class AutofillInlineMenuList extends AutofillInlineMenuPageElement {
     this.newItemButtonElement.textContent = this.getNewItemButtonText(showLogin);
     this.newItemButtonElement.setAttribute("aria-label", this.getNewItemAriaLabel(showLogin));
     this.newItemButtonElement.prepend(buildSvgDomElement(plusIcon));
-    this.newItemButtonElement.addEventListener(EVENTS.CLICK, this.handeNewItemButtonClick);
+    this.newItemButtonElement.addEventListener(EVENTS.CLICK, this.handleNewItemButtonClick);
 
     return this.buildButtonContainer(this.newItemButtonElement);
   }
@@ -558,7 +556,7 @@ export class AutofillInlineMenuList extends AutofillInlineMenuPageElement {
    * Handles the click event for the new item button.
    * Sends a message to the parent window to add a new vault item.
    */
-  private handeNewItemButtonClick = () => {
+  private handleNewItemButtonClick = () => {
     let addNewCipherType = this.inlineMenuFillType;
 
     if (this.showInlineMenuAccountCreation) {
@@ -1052,8 +1050,8 @@ export class AutofillInlineMenuList extends AutofillInlineMenuPageElement {
 
       const svgElement = buildSvgDomElement(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29">
-          <circle fill="none" cx="14.5" cy="14.5" r="12.5" 
-                  stroke-width="3" stroke-dasharray="78.5" 
+          <circle fill="none" cx="14.5" cy="14.5" r="12.5"
+                  stroke-width="3" stroke-dasharray="78.5"
                   stroke-dashoffset="78.5" transform="rotate(-90 14.5 14.5)"></circle>
           <circle fill="none" cx="14.5" cy="14.5" r="14" stroke-width="1"></circle>
       </svg>

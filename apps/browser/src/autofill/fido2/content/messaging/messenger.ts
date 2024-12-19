@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { FallbackRequestedError } from "@bitwarden/common/platform/abstractions/fido2/fido2-client.service.abstraction";
 
 import { Message, MessageType } from "./message";

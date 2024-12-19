@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import {
   QueryList,
@@ -21,7 +19,6 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import {
   ButtonModule,
-  CardComponent,
   FormFieldModule,
   IconButtonModule,
   ItemModule,
@@ -43,7 +40,6 @@ import { PopupPageComponent } from "../../../platform/popup/layout/popup-page.co
   standalone: true,
   imports: [
     ButtonModule,
-    CardComponent,
     CommonModule,
     FormFieldModule,
     FormsModule,

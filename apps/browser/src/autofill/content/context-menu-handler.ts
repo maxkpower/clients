@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 const inputTags = ["input", "textarea", "select"];
 const labelTags = ["label", "span"];
 const attributes = ["id", "name", "label-aria", "placeholder"];

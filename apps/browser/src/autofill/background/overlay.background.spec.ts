@@ -2592,7 +2592,7 @@ describe("OverlayBackground", () => {
     });
 
     describe("getAutofillInlineMenuPosition", () => {
-      it("returns the current inline menu positio", async () => {
+      it("returns the current inline menu position", async () => {
         const inlineMenuPosition: InlineMenuPosition = mock<InlineMenuPosition>();
         overlayBackground["inlineMenuPosition"] = inlineMenuPosition;
 

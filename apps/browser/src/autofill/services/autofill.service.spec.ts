@@ -3875,7 +3875,7 @@ describe("AutofillService", () => {
     });
 
     describe("given a autofill field value that indicates the field is a `select` input", () => {
-      it("will not add an autofil action to the fill script if the dataValue cannot be found in the select options", () => {
+      it("will not add an autofill action to the fill script if the dataValue cannot be found in the select options", () => {
         const dataValue = "username";
         const selectField = createAutofillFieldMock({
           opid: "username-field",
