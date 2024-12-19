@@ -15,6 +15,7 @@ import {
 } from "@bitwarden/angular/auth/guards";
 import { canAccessFeature } from "@bitwarden/angular/platform/guard/feature-flag.guard";
 import { extensionRefreshRedirect } from "@bitwarden/angular/utils/extension-refresh-redirect";
+import { NewDeviceVerificationNoticeGuard } from "@bitwarden/angular/vault/guards";
 import {
   AnonLayoutWrapperComponent,
   AnonLayoutWrapperData,
@@ -35,12 +36,18 @@ import {
   VaultIcon,
   LoginDecryptionOptionsComponent,
   DevicesIcon,
+  SsoComponent,
   TwoFactorTimeoutIcon,
   TwoFactorAuthComponent,
   TwoFactorTimeoutComponent,
   TwoFactorAuthGuard,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import {
+  NewDeviceVerificationNoticePageOneComponent,
+  NewDeviceVerificationNoticePageTwoComponent,
+  VaultIcons,
+} from "@bitwarden/vault";
 
 import { AccessibilityCookieComponent } from "../auth/accessibility-cookie.component";
 import { maxAccountsGuardFn } from "../auth/guards/max-accounts.guard";
@@ -52,7 +59,7 @@ import { LoginViaAuthRequestComponentV1 } from "../auth/login/login-via-auth-req
 import { RegisterComponent } from "../auth/register.component";
 import { RemovePasswordComponent } from "../auth/remove-password.component";
 import { SetPasswordComponent } from "../auth/set-password.component";
-import { SsoComponent } from "../auth/sso.component";
+import { SsoComponentV1 } from "../auth/sso-v1.component";
 import { TwoFactorComponentV1 } from "../auth/two-factor-v1.component";
 import { UpdateTempPasswordComponent } from "../auth/update-temp-password.component";
 import { VaultComponent } from "../vault/app/vault/vault.component";
@@ -124,13 +131,66 @@ const routes: Routes = [
   },
   { path: "register", component: RegisterComponent },
   {
+    path: "new-device-notice",
+    component: AnonLayoutWrapperComponent,
+    canActivate: [],
+    children: [
+      {
+        path: "",
+        component: NewDeviceVerificationNoticePageOneComponent,
+        data: {
+          pageIcon: VaultIcons.ExclamationTriangle,
+          pageTitle: {
+            key: "importantNotice",
+          },
+        },
+      },
+      {
+        path: "setup",
+        component: NewDeviceVerificationNoticePageTwoComponent,
+        data: {
+          pageIcon: VaultIcons.UserLock,
+          pageTitle: {
+            key: "setupTwoStepLogin",
+          },
+        },
+      },
+    ],
+  },
+  {
     path: "vault",
     component: VaultComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, NewDeviceVerificationNoticeGuard],
   },
   { path: "accessibility-cookie", component: AccessibilityCookieComponent },
   { path: "set-password", component: SetPasswordComponent },
-  { path: "sso", component: SsoComponent },
+  ...unauthUiRefreshSwap(
+    SsoComponentV1,
+    AnonLayoutWrapperComponent,
+    {
+      path: "sso",
+    },
+    {
+      path: "sso",
+      data: {
+        pageIcon: VaultIcon,
+        pageTitle: {
+          key: "enterpriseSingleSignOn",
+        },
+        pageSubtitle: {
+          key: "singleSignOnEnterOrgIdentifierText",
+        },
+      } satisfies AnonLayoutWrapperData,
+      children: [
+        { path: "", component: SsoComponent },
+        {
+          path: "",
+          component: EnvironmentSelectorComponent,
+          outlet: "environment-selector",
+        },
+      ],
+    },
+  ),
   {
     path: "send",
     component: SendComponent,

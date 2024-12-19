@@ -18,7 +18,7 @@ import { LoginModule } from "../auth/login/login.module";
 import { RegisterComponent } from "../auth/register.component";
 import { RemovePasswordComponent } from "../auth/remove-password.component";
 import { SetPasswordComponent } from "../auth/set-password.component";
-import { SsoComponent } from "../auth/sso.component";
+import { SsoComponentV1 } from "../auth/sso-v1.component";
 import { TwoFactorOptionsComponent } from "../auth/two-factor-options.component";
 import { TwoFactorComponentV1 } from "../auth/two-factor-v1.component";
 import { UpdateTempPasswordComponent } from "../auth/update-temp-password.component";
@@ -92,8 +92,8 @@ import { SendComponent } from "./tools/send/send.component";
     SetPasswordComponent,
     SettingsComponent,
     ShareComponent,
-    SsoComponent,
     TwoFactorComponentV1,
+    SsoComponentV1,
     TwoFactorOptionsComponent,
     UpdateTempPasswordComponent,
     VaultComponent,

@@ -26,6 +26,7 @@ import {
   AnonLayoutWrapperDataService,
   LoginComponentService,
   LockComponentService,
+  SsoComponentService,
   LoginDecryptionOptionsService,
   TwoFactorAuthComponentService,
   TwoFactorAuthEmailComponentService,
@@ -122,6 +123,7 @@ import { PasswordRepromptService } from "@bitwarden/vault";
 import { ForegroundLockService } from "../../auth/popup/accounts/foreground-lock.service";
 import { ExtensionAnonLayoutWrapperDataService } from "../../auth/popup/extension-anon-layout-wrapper/extension-anon-layout-wrapper-data.service";
 import { ExtensionLoginComponentService } from "../../auth/popup/login/extension-login-component.service";
+import { ExtensionSsoComponentService } from "../../auth/popup/login/extension-sso-component.service";
 import { ExtensionLoginDecryptionOptionsService } from "../../auth/popup/login-decryption-options/extension-login-decryption-options.service";
 import { ExtensionTwoFactorAuthComponentService } from "../../auth/services/extension-two-factor-auth-component.service";
 import { ExtensionTwoFactorAuthEmailComponentService } from "../../auth/services/extension-two-factor-auth-email-component.service";
@@ -611,6 +613,11 @@ const safeProviders: SafeProvider[] = [
     provide: CompactModeService,
     useExisting: PopupCompactModeService,
     deps: [],
+  }),
+  safeProvider({
+    provide: SsoComponentService,
+    useClass: ExtensionSsoComponentService,
+    deps: [SyncService, AuthService, EnvironmentService, I18nServiceAbstraction, LogService],
   }),
   safeProvider({
     provide: LoginDecryptionOptionsService,

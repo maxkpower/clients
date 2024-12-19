@@ -201,11 +201,11 @@ import {
   ImportServiceAbstraction,
 } from "@bitwarden/importer/core";
 import {
-  DefaultKdfConfigService,
-  KdfConfigService,
   BiometricStateService,
   BiometricsService,
   DefaultBiometricStateService,
+  DefaultKdfConfigService,
+  KdfConfigService,
   KeyService as KeyServiceAbstraction,
 } from "@bitwarden/key-management";
 import {
@@ -232,7 +232,10 @@ import { MainContextMenuHandler } from "../autofill/browser/main-context-menu-ha
 import LegacyOverlayBackground from "../autofill/deprecated/background/overlay.background.deprecated";
 import { Fido2Background as Fido2BackgroundAbstraction } from "../autofill/fido2/background/abstractions/fido2.background";
 import { Fido2Background } from "../autofill/fido2/background/fido2.background";
-import { BrowserFido2UserInterfaceService } from "../autofill/fido2/services/browser-fido2-user-interface.service";
+import {
+  BrowserFido2ParentWindowReference,
+  BrowserFido2UserInterfaceService,
+} from "../autofill/fido2/services/browser-fido2-user-interface.service";
 import { AutofillService as AutofillServiceAbstraction } from "../autofill/services/abstractions/autofill.service";
 import AutofillService from "../autofill/services/autofill.service";
 import { InlineMenuFieldQualificationService } from "../autofill/services/inline-menu-field-qualification.service";
@@ -337,10 +340,10 @@ export default class MainBackground {
   policyApiService: PolicyApiServiceAbstraction;
   sendApiService: SendApiServiceAbstraction;
   userVerificationApiService: UserVerificationApiServiceAbstraction;
-  fido2UserInterfaceService: Fido2UserInterfaceServiceAbstraction;
-  fido2AuthenticatorService: Fido2AuthenticatorServiceAbstraction;
+  fido2UserInterfaceService: Fido2UserInterfaceServiceAbstraction<BrowserFido2ParentWindowReference>;
+  fido2AuthenticatorService: Fido2AuthenticatorServiceAbstraction<BrowserFido2ParentWindowReference>;
   fido2ActiveRequestManager: Fido2ActiveRequestManagerAbstraction;
-  fido2ClientService: Fido2ClientServiceAbstraction;
+  fido2ClientService: Fido2ClientServiceAbstraction<BrowserFido2ParentWindowReference>;
   avatarService: AvatarServiceAbstraction;
   mainContextMenuHandler: MainContextMenuHandler;
   cipherContextMenuHandler: CipherContextMenuHandler;
@@ -693,7 +696,7 @@ export default class MainBackground {
     );
 
     this.domainSettingsService = new DefaultDomainSettingsService(this.stateProvider);
-    this.fileUploadService = new FileUploadService(this.logService);
+    this.fileUploadService = new FileUploadService(this.logService, this.apiService);
     this.cipherFileUploadService = new CipherFileUploadService(
       this.apiService,
       this.fileUploadService,
@@ -1053,14 +1056,6 @@ export default class MainBackground {
 
     const systemUtilsServiceReloadCallback = async () => {
       await this.taskSchedulerService.clearAllScheduledTasks();
-      if (this.platformUtilsService.isSafari()) {
-        // If we do `chrome.runtime.reload` on safari they will send an onInstalled reason of install
-        // and that prompts us to show a new tab, this apparently doesn't happen on sideloaded
-        // extensions and only shows itself production scenarios. See: https://bitwarden.atlassian.net/browse/PM-12298
-        self.location.reload();
-        return;
-      }
-
       BrowserApi.reloadExtension();
     };
 
@@ -1338,7 +1333,7 @@ export default class MainBackground {
     return new Promise<void>((resolve) => {
       setTimeout(async () => {
         await this.refreshBadge();
-        await this.fullSync(true);
+        await this.fullSync(false);
         this.taskSchedulerService.setInterval(
           ScheduledTaskNames.scheduleNextSyncInterval,
           5 * 60 * 1000, // check every 5 minutes
