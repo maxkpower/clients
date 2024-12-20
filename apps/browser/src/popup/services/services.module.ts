@@ -30,6 +30,7 @@ import {
   LoginDecryptionOptionsService,
   TwoFactorAuthComponentService,
   TwoFactorAuthEmailComponentService,
+  TwoFactorAuthDuoComponentService,
 } from "@bitwarden/auth/angular";
 import { LockService, LoginEmailService, PinServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -126,6 +127,7 @@ import { ExtensionLoginComponentService } from "../../auth/popup/login/extension
 import { ExtensionSsoComponentService } from "../../auth/popup/login/extension-sso-component.service";
 import { ExtensionLoginDecryptionOptionsService } from "../../auth/popup/login-decryption-options/extension-login-decryption-options.service";
 import { ExtensionTwoFactorAuthComponentService } from "../../auth/services/extension-two-factor-auth-component.service";
+import { ExtensionTwoFactorAuthDuoComponentService } from "../../auth/services/extension-two-factor-auth-duo-component.service";
 import { ExtensionTwoFactorAuthEmailComponentService } from "../../auth/services/extension-two-factor-auth-email-component.service";
 import { AutofillService as AutofillServiceAbstraction } from "../../autofill/services/abstractions/autofill.service";
 import AutofillService from "../../autofill/services/autofill.service";
@@ -135,6 +137,7 @@ import { BrowserKeyService } from "../../key-management/browser-key.service";
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { runInsideAngular } from "../../platform/browser/run-inside-angular.operator";
 /* eslint-disable no-restricted-imports */
+import { ZonedMessageListenerService } from "../../platform/browser/zoned-message-listener.service";
 import { ChromeMessageSender } from "../../platform/messaging/chrome-message.sender";
 /* eslint-enable no-restricted-imports */
 import { OffscreenDocumentService } from "../../platform/offscreen-document/abstractions/offscreen-document";
@@ -551,6 +554,16 @@ const safeProviders: SafeProvider[] = [
     provide: TwoFactorAuthEmailComponentService,
     useClass: ExtensionTwoFactorAuthEmailComponentService,
     deps: [DialogService, WINDOW],
+  }),
+  safeProvider({
+    provide: TwoFactorAuthDuoComponentService,
+    useClass: ExtensionTwoFactorAuthDuoComponentService,
+    deps: [
+      ZonedMessageListenerService,
+      EnvironmentService,
+      I18nServiceAbstraction,
+      PlatformUtilsService,
+    ],
   }),
   safeProvider({
     provide: Fido2UserVerificationService,
