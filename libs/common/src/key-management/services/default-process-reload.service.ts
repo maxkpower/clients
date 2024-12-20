@@ -9,11 +9,11 @@ import { BiometricStateService } from "@bitwarden/key-management";
 // FIXME: remove `src` and fix import
 // eslint-disable-next-line no-restricted-imports
 import { PinServiceAbstraction } from "../../../../auth/src/common/abstractions";
-import { VaultTimeoutSettingsService } from "../../abstractions/vault-timeout/vault-timeout-settings.service";
+import { VaultTimeoutSettingsService } from "../../../../key-management/src/vault-timeout/abstractions/vault-timeout-settings.service";
+import { VaultTimeoutAction } from "../../../../key-management/src/vault-timeout/enums/vault-timeout-action.enum";
 import { AccountService } from "../../auth/abstractions/account.service";
 import { AuthService } from "../../auth/abstractions/auth.service";
 import { AuthenticationStatus } from "../../auth/enums/authentication-status";
-import { VaultTimeoutAction } from "../../enums/vault-timeout-action.enum";
 import { UserId } from "../../types/guid";
 import { ProcessReloadServiceAbstraction } from "../abstractions/process-reload.service";
 

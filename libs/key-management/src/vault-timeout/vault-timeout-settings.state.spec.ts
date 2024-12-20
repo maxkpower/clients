@@ -1,7 +1,7 @@
-import { VaultTimeoutAction } from "../../enums/vault-timeout-action.enum";
-import { UserKeyDefinition } from "../../platform/state";
-import { VaultTimeout } from "../../types/vault-timeout.type";
+import { UserKeyDefinition } from "@bitwarden/common/src/platform/state";
+import { VaultTimeout } from "@bitwarden/common/src/types/vault-timeout.type";
 
+import { VaultTimeoutAction } from "./enums/vault-timeout-action.enum";
 import { VAULT_TIMEOUT, VAULT_TIMEOUT_ACTION } from "./vault-timeout-settings.state";
 
 describe.each([
