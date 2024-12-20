@@ -2,7 +2,7 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { CommonModule } from "@angular/common";
-import { Component, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, DestroyRef, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
@@ -131,6 +131,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
     private syncService: SyncService,
     private messagingService: MessagingService,
+    private destroyRef: DestroyRef,
   ) {}
 
   async ngOnInit() {
@@ -146,7 +147,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.set2faProviderData();
     await this.setTitleByTwoFactorProviderType();
 
-    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
       this.token = value.token;
       this.remember = value.remember;
     });
@@ -181,7 +182,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   private listenFor2faSessionTimeout() {
     this.loginStrategyService.twoFactorTimeout$
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(async (expired) => {
         if (!expired) {
           return;
