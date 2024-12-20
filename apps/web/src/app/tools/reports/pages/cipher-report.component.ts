@@ -138,6 +138,10 @@ export class CipherReportComponent implements OnDestroy {
     this.hasLoaded = true;
   }
   async selectCipher(cipher: CipherView) {
+    if (!(await this.repromptCipher(cipher))) {
+      return;
+    }
+
     const cipherFormConfig = await this.cipherFormConfigService.buildConfig(
       "edit",
       cipher.id as CipherId,
