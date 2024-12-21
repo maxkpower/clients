@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 
-import { DefaultCipherFormConfigService } from "@bitwarden/vault";
+import { CipherFormConfigService, DefaultCipherFormConfigService } from "@bitwarden/vault";
 
 import { HeaderModule } from "../../layouts/header/header.module";
 import { SharedModule } from "../../shared";
@@ -39,6 +39,11 @@ import { ReportsSharedModule } from "./shared";
     UnsecuredWebsitesReportComponent,
     WeakPasswordsReportComponent,
   ],
-  providers: [DefaultCipherFormConfigService],
+  providers: [
+    {
+      provide: CipherFormConfigService,
+      useClass: DefaultCipherFormConfigService,
+    },
+  ],
 })
 export class ReportsModule {}

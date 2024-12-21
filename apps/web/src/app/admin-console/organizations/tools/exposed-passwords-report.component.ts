@@ -11,7 +11,7 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
-import { PasswordRepromptService, DefaultCipherFormConfigService } from "@bitwarden/vault";
+import { PasswordRepromptService, CipherFormConfigService } from "@bitwarden/vault";
 
 // eslint-disable-next-line no-restricted-imports
 import { ExposedPasswordsReportComponent as BaseExposedPasswordsReportComponent } from "../../../tools/reports/pages/exposed-passwords-report.component";
@@ -36,7 +36,7 @@ export class ExposedPasswordsReportComponent
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
     syncService: SyncService,
-    cipherFormService: DefaultCipherFormConfigService,
+    cipherFormService: CipherFormConfigService,
   ) {
     super(
       cipherService,

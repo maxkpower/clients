@@ -10,7 +10,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { DialogService } from "@bitwarden/components";
-import { DefaultCipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
+import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 import { cipherData } from "./reports-ciphers.mock";
 import { UnsecuredWebsitesReportComponent } from "./unsecured-websites-report.component";
@@ -23,6 +23,7 @@ describe("UnsecuredWebsitesReportComponent", () => {
   let collectionService: MockProxy<CollectionService>;
 
   beforeEach(() => {
+    let cipherFormConfigServiceMock: MockProxy<CipherFormConfigService>;
     organizationService = mock<OrganizationService>();
     organizationService.organizations$ = of([]);
     syncServiceMock = mock<SyncService>();
@@ -61,8 +62,8 @@ describe("UnsecuredWebsitesReportComponent", () => {
           useValue: collectionService,
         },
         {
-          provide: DefaultCipherFormConfigService,
-          useValue: mock<DefaultCipherFormConfigService>(),
+          provide: CipherFormConfigService,
+          useValue: cipherFormConfigServiceMock,
         },
       ],
       schemas: [],

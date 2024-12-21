@@ -8,7 +8,7 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
-import { DefaultCipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
+import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 import { CipherReportComponent } from "./cipher-report.component";
 
@@ -27,7 +27,7 @@ export class UnsecuredWebsitesReportComponent extends CipherReportComponent impl
     i18nService: I18nService,
     syncService: SyncService,
     private collectionService: CollectionService,
-    cipherFormConfigService: DefaultCipherFormConfigService,
+    cipherFormConfigService: CipherFormConfigService,
   ) {
     super(
       cipherService,

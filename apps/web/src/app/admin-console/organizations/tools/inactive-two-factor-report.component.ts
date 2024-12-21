@@ -10,7 +10,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
-import { DefaultCipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
+import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 // eslint-disable-next-line no-restricted-imports
 import { InactiveTwoFactorReportComponent as BaseInactiveTwoFactorReportComponent } from "../../../tools/reports/pages/inactive-two-factor-report.component";
@@ -33,7 +33,7 @@ export class InactiveTwoFactorReportComponent
     organizationService: OrganizationService,
     i18nService: I18nService,
     syncService: SyncService,
-    cipherFormConfigService: DefaultCipherFormConfigService,
+    cipherFormConfigService: CipherFormConfigService,
   ) {
     super(
       cipherService,

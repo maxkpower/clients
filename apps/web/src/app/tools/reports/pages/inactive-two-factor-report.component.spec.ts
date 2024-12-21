@@ -10,7 +10,7 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { DialogService } from "@bitwarden/components";
-import { DefaultCipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
+import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 import { CipherReportComponent } from "./cipher-report.component";
 import { InactiveTwoFactorReportComponent } from "./inactive-two-factor-report.component";
@@ -23,6 +23,7 @@ describe("InactiveTwoFactorReportComponent", () => {
   let syncServiceMock: MockProxy<SyncService>;
 
   beforeEach(() => {
+    let cipherFormConfigServiceMock: MockProxy<CipherFormConfigService>;
     organizationService = mock<OrganizationService>();
     organizationService.organizations$ = of([]);
     syncServiceMock = mock<SyncService>();
@@ -60,8 +61,8 @@ describe("InactiveTwoFactorReportComponent", () => {
           useValue: mock<I18nService>(),
         },
         {
-          provide: DefaultCipherFormConfigService,
-          useValue: mock<DefaultCipherFormConfigService>(),
+          provide: CipherFormConfigService,
+          useValue: cipherFormConfigServiceMock,
         },
         {
           provide: CipherReportComponent,

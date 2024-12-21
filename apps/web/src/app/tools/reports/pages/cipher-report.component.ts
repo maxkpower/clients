@@ -16,7 +16,7 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService, TableDataSource } from "@bitwarden/components";
 import {
   CipherFormConfig,
-  DefaultCipherFormConfigService,
+  CipherFormConfigService,
   PasswordRepromptService,
 } from "@bitwarden/vault";
 
@@ -56,7 +56,7 @@ export class CipherReportComponent implements OnDestroy {
     protected organizationService: OrganizationService,
     protected i18nService: I18nService,
     private syncService: SyncService,
-    private cipherFormConfigService: DefaultCipherFormConfigService,
+    private cipherFormConfigService: CipherFormConfigService,
   ) {
     this.organizations$ = this.organizationService.organizations$;
     this.organizations$.pipe(takeUntil(this.destroyed$)).subscribe((orgs) => {

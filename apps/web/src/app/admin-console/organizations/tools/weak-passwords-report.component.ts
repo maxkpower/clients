@@ -11,7 +11,7 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
-import { DefaultCipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
+import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 // eslint-disable-next-line no-restricted-imports
 import { WeakPasswordsReportComponent as BaseWeakPasswordsReportComponent } from "../../../tools/reports/pages/weak-passwords-report.component";
@@ -36,7 +36,7 @@ export class WeakPasswordsReportComponent
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
     syncService: SyncService,
-    cipherFormConfigService: DefaultCipherFormConfigService,
+    cipherFormConfigService: CipherFormConfigService,
   ) {
     super(
       cipherService,

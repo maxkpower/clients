@@ -10,7 +10,7 @@ import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/pass
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { DialogService } from "@bitwarden/components";
-import { DefaultCipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
+import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 import { cipherData } from "./reports-ciphers.mock";
 import { WeakPasswordsReportComponent } from "./weak-passwords-report.component";
@@ -23,6 +23,7 @@ describe("WeakPasswordsReportComponent", () => {
   let syncServiceMock: MockProxy<SyncService>;
 
   beforeEach(() => {
+    let cipherFormConfigServiceMock: MockProxy<CipherFormConfigService>;
     syncServiceMock = mock<SyncService>();
     passwordStrengthService = mock<PasswordStrengthServiceAbstraction>();
     organizationService = mock<OrganizationService>();
@@ -61,8 +62,8 @@ describe("WeakPasswordsReportComponent", () => {
           useValue: mock<I18nService>(),
         },
         {
-          provide: DefaultCipherFormConfigService,
-          useValue: mock<DefaultCipherFormConfigService>(),
+          provide: CipherFormConfigService,
+          useValue: cipherFormConfigServiceMock,
         },
       ],
       schemas: [],
