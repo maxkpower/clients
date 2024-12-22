@@ -36,10 +36,10 @@ import {
   PBKDF2KdfConfig,
   KdfConfigService,
   KdfType,
+  VaultTimeoutSettingsService,
+  VaultTimeoutAction,
 } from "@bitwarden/key-management";
 
-import { VaultTimeoutSettingsService } from "../../../../key-management/src/vault-timeout/abstractions/vault-timeout-settings.service";
-import { VaultTimeoutAction } from "../../../../key-management/src/vault-timeout/enums/vault-timeout-action.enum";
 import { InternalUserDecryptionOptionsServiceAbstraction } from "../abstractions/user-decryption-options.service.abstraction";
 import {
   UserApiLoginCredentials,

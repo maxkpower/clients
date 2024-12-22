@@ -2,8 +2,8 @@
 // @ts-strict-ignore
 import { Observable } from "rxjs";
 
-import { VaultTimeoutAction } from "../../../../key-management/src/vault-timeout/enums/vault-timeout-action.enum";
-import { VaultTimeout } from "../../../../key-management/src/vault-timeout/types/vault-timeout.type";
+import { VaultTimeout, VaultTimeoutAction } from "@bitwarden/key-management";
+
 import { UserId } from "../../types/guid";
 import { SetTokensResult } from "../models/domain/set-tokens-result";
 import { DecodedAccessToken } from "../services/token.service";

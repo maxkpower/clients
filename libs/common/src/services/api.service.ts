@@ -9,9 +9,8 @@ import {
   CollectionResponse,
 } from "@bitwarden/admin-console/common";
 import { LogoutReason } from "@bitwarden/auth/common";
+import { VaultTimeoutAction, VaultTimeoutSettingsService } from "@bitwarden/key-management";
 
-import { VaultTimeoutSettingsService } from "../../../key-management/src/vault-timeout/abstractions/vault-timeout-settings.service";
-import { VaultTimeoutAction } from "../../../key-management/src/vault-timeout/enums/vault-timeout-action.enum";
 import { ApiService as ApiServiceAbstraction } from "../abstractions/api.service";
 import { OrganizationConnectionType } from "../admin-console/enums";
 import { OrganizationSponsorshipCreateRequest } from "../admin-console/models/request/organization/organization-sponsorship-create.request";

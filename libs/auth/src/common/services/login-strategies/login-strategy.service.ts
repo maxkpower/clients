@@ -46,9 +46,9 @@ import {
   KdfConfig,
   PBKDF2KdfConfig,
   KdfConfigService,
+  VaultTimeoutSettingsService,
 } from "@bitwarden/key-management";
 
-import { VaultTimeoutSettingsService } from "../../../../../key-management/src/vault-timeout/abstractions/vault-timeout-settings.service";
 import { AuthRequestServiceAbstraction, LoginStrategyServiceAbstraction } from "../../abstractions";
 import { InternalUserDecryptionOptionsServiceAbstraction } from "../../abstractions/user-decryption-options.service.abstraction";
 import { AuthRequestLoginStrategy } from "../../login-strategies/auth-request-login.strategy";

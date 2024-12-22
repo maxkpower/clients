@@ -4,12 +4,12 @@ import { Observable, combineLatest, firstValueFrom, map } from "rxjs";
 import { Opaque } from "type-fest";
 
 import { LogoutReason, decodeJwtTokenToJson } from "@bitwarden/auth/common";
-
-import { VaultTimeoutAction } from "../../../../key-management/src/vault-timeout/enums/vault-timeout-action.enum";
 import {
   VaultTimeout,
+  VaultTimeoutAction,
   VaultTimeoutStringType,
-} from "../../../../key-management/src/vault-timeout/types/vault-timeout.type";
+} from "@bitwarden/key-management";
+
 import { EncryptService } from "../../platform/abstractions/encrypt.service";
 import { KeyGenerationService } from "../../platform/abstractions/key-generation.service";
 import { LogService } from "../../platform/abstractions/log.service";

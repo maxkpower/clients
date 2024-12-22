@@ -2,8 +2,7 @@ import { combineLatest, firstValueFrom, map } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { UserId } from "@bitwarden/common/types/guid";
-
-import { VaultTimeoutService } from "../../../../../key-management/src/vault-timeout/abstractions/vault-timeout.service";
+import { VaultTimeoutService } from "@bitwarden/key-management";
 
 export abstract class LockService {
   /**

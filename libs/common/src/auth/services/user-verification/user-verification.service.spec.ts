@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { mock } from "jest-mock-extended";
 import { of } from "rxjs";
 
@@ -11,13 +13,13 @@ import {
   BiometricsService,
   BiometricsStatus,
   KdfConfig,
+  KdfConfigService,
   KeyService,
+  VaultTimeoutSettingsService,
 } from "@bitwarden/key-management";
 
 // FIXME: remove `src` and fix import
 // eslint-disable-next-line no-restricted-imports
-import { KdfConfigService } from "../../../../../key-management/src/abstractions/kdf-config.service";
-import { VaultTimeoutSettingsService } from "../../../../../key-management/src/vault-timeout/abstractions/vault-timeout-settings.service";
 import { FakeAccountService, mockAccountServiceWith } from "../../../../spec";
 import { I18nService } from "../../../platform/abstractions/i18n.service";
 import { HashPurpose } from "../../../platform/enums";

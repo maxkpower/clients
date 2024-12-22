@@ -1,13 +1,15 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { MockProxy, mock } from "jest-mock-extended";
 import { firstValueFrom } from "rxjs";
 
 import { LogoutReason } from "@bitwarden/auth/common";
-
-import { VaultTimeoutAction } from "../../../../key-management/src/vault-timeout/enums/vault-timeout-action.enum";
 import {
   VaultTimeout,
+  VaultTimeoutAction,
   VaultTimeoutStringType,
-} from "../../../../key-management/src/vault-timeout/types/vault-timeout.type";
+} from "@bitwarden/key-management";
+
 import { FakeSingleUserStateProvider, FakeGlobalStateProvider } from "../../../spec";
 import { EncryptService } from "../../platform/abstractions/encrypt.service";
 import { KeyGenerationService } from "../../platform/abstractions/key-generation.service";
