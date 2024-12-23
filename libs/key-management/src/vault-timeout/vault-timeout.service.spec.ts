@@ -5,6 +5,7 @@ import { BehaviorSubject, from, of } from "rxjs";
 
 import { CollectionService } from "@bitwarden/admin-console/common";
 import { LogoutReason } from "@bitwarden/auth/common";
+import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { AccountInfo } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
@@ -16,7 +17,6 @@ import { StateService } from "@bitwarden/common/platform/abstractions/state.serv
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { TaskSchedulerService } from "@bitwarden/common/platform/scheduling";
 import { StateEventRunnerService } from "@bitwarden/common/platform/state";
-import { SearchService } from "@bitwarden/common/services/search.service";
 import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
