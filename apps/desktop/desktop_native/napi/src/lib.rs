@@ -89,11 +89,9 @@ pub mod biometrics {
         account: String,
         key_material: Option<KeyMaterial>,
     ) -> napi::Result<String> {
-        let result =
-            Biometric::get_biometric_secret(&service, &account, key_material.map(|m| m.into()))
-                .await
-                .map_err(|e| napi::Error::from_reason(e.to_string()));
-        result
+        Biometric::get_biometric_secret(&service, &account, key_material.map(|m| m.into()))
+            .await
+            .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
 
     /// Derives key material from biometric data. Returns a string encoded with a
@@ -351,8 +349,8 @@ pub mod powermonitors {
             .await
             .map_err(|e| napi::Error::from_reason(e.to_string()))?;
         tokio::spawn(async move {
-            while let Some(message) = rx.recv().await {
-                callback.call(Ok(message.into()), ThreadsafeFunctionCallMode::NonBlocking);
+            while let Some(()) = rx.recv().await {
+                callback.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
             }
         });
         Ok(())
@@ -754,6 +752,6 @@ pub mod crypto {
         desktop_core::crypto::argon2(&secret, &salt, iterations, memory, parallelism)
             .map_err(|e| napi::Error::from_reason(e.to_string()))
             .map(|v| v.to_vec())
-            .map(|v| Buffer::from(v))
+            .map(Buffer::from)
     }
 }
