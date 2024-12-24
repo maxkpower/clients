@@ -3435,6 +3435,6 @@
     "message": "Allow screen capture"
   },
   "allowScreenshotsDesc": {
-    "message": "Allow screen capture of the Bitwarden desktop application."
+    "message": "Allow the Bitwarden desktop application to be captured in screenshots and viewed in remote desktop sessions. Disabling this will prevent access on some external displays."
   }
 }
