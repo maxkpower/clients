@@ -76,11 +76,11 @@ export class WindowMain {
       }
     });
 
-    this.desktopSettingsService.allowScreenshots$.subscribe((allowed) => {
+    this.desktopSettingsService.preventScreenshots$.subscribe((prevent) => {
       if (this.win == null) {
         return;
       }
-      this.win.setContentProtection(!allowed);
+      this.win.setContentProtection(prevent);
     });
 
     return new Promise<void>((resolve, reject) => {
@@ -284,9 +284,9 @@ export class WindowMain {
       });
     });
 
-    firstValueFrom(this.desktopSettingsService.allowScreenshots$)
-      .then((allowScreenshots) => {
-        this.win.setContentProtection(!allowScreenshots);
+    firstValueFrom(this.desktopSettingsService.preventScreenshots$)
+      .then((preventScreenshots) => {
+        this.win.setContentProtection(preventScreenshots);
       })
       .catch((e) => {
         this.logService.error(e);

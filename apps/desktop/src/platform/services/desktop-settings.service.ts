@@ -75,7 +75,7 @@ const MINIMIZE_ON_COPY = new UserKeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "
   clearOn: [], // User setting, no need to clear
 });
 
-const ALLOW_SCREENSHOTS = new KeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "allowAppScreenshots", {
+const PEVENT_SCREENSHOTS = new KeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "preventScreenshots", {
   deserializer: (b) => b,
 });
 
@@ -151,12 +151,12 @@ export class DesktopSettingsService {
 
   sshAgentEnabled$ = this.sshAgentEnabledState.state$.pipe(map(Boolean));
 
-  private readonly allowScreenshotState = this.stateProvider.getGlobal(ALLOW_SCREENSHOTS);
+  private readonly preventScreenshotState = this.stateProvider.getGlobal(PEVENT_SCREENSHOTS);
 
   /**
    * The application setting for whether or not to allow screenshots of the app.
    */
-  allowScreenshots$ = this.allowScreenshotState.state$.pipe(map(Boolean));
+  preventScreenshots$ = this.preventScreenshotState.state$.pipe(map(Boolean));
 
   private readonly minimizeOnCopyState = this.stateProvider.getActive(MINIMIZE_ON_COPY);
 
@@ -286,7 +286,7 @@ export class DesktopSettingsService {
    * Sets the setting for whether or not the screenshot protection is enabled.
    * @param value `true` if the screenshot protection is enabled, `false` if it is not.
    */
-  async setAllowScreenshots(value: boolean) {
-    await this.allowScreenshotState.update(() => value);
+  async setPreventScreenshots(value: boolean) {
+    await this.preventScreenshotState.update(() => value);
   }
 }
