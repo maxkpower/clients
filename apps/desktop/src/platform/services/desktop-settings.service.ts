@@ -75,7 +75,7 @@ const MINIMIZE_ON_COPY = new UserKeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "
   clearOn: [], // User setting, no need to clear
 });
 
-const ALLOW_SCREENSHOTS = new KeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "allowScreenshots", {
+const ALLOW_SCREENSHOTS = new KeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "allowAppScreenshots", {
   deserializer: (b) => b,
 });
 
