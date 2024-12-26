@@ -192,6 +192,13 @@
   "autoFillIdentity": {
     "message": "Automaticky vyplnit identitu"
   },
+  "fillVerificationCode": {
+    "message": "Vyplnit ověřovací kód"
+  },
+  "fillVerificationCodeAria": {
+    "message": "Vyplnit ověřovací kód",
+    "description": "Aria label for the heading displayed the inline menu for totp code autofill"
+  },
   "generatePasswordCopied": {
     "message": "Vygenerovat heslo a zkopírovat do schránky"
   },
@@ -640,9 +647,6 @@
   },
   "rateExtension": {
     "message": "Ohodnotit rozšíření"
-  },
-  "rateExtensionDesc": {
-    "message": "Pomozte nám napsáním dobré recenze!"
   },
   "browserNotSupportClipboard": {
     "message": "Váš webový prohlížeč nepodporuje automatické kopírování do schránky. Musíte ho zkopírovat ručně."
@@ -1125,6 +1129,10 @@
     "message": "VAROVÁNÍ",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Varování",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Potvrdit export trezoru"
   },
@@ -1315,6 +1323,12 @@
   "enterVerificationCodeApp": {
     "message": "Zadejte 6místný kód z ověřovací aplikace."
   },
+  "authenticationTimeout": {
+    "message": "Časový limit ověření"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Vypršel časový limit relace ověřování. Restartujte proces přihlášení."
+  },
   "enterVerificationCodeEmail": {
     "message": "Zadejte 6místný kód z e-mailu, který byl zaslán na $EMAIL$.",
     "placeholders": {
@@ -1502,19 +1516,6 @@
   },
   "enableAutoFillOnPageLoadDesc": {
     "message": "Pokud je zjištěn přihlašovací formulář, automaticky se při načítání webové stránky vyplní přihlašovací údaje."
-  },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Varování:$CLOSETAG$ Kompromitované nebo nedůvěryhodné webové stránky mohou využívat automatické vyplňování při načítání stránky.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
   },
   "experimentalFeature": {
     "message": "Kompromitované nebo nedůvěryhodné webové stránky mohou zneužívat automatické vyplňování při načítání stránky."
@@ -3176,7 +3177,7 @@
   "viewAllLogInOptions": {
     "message": "Zobrazit všechny volby přihlášení"
   },
-  "viewAllLoginOptions": {
+  "viewAllLoginOptionsV1": {
     "message": "Zobrazit všechny volby přihlášení"
   },
   "notificationSentDevice": {
@@ -3288,16 +3289,16 @@
     "message": "Otevře se v novém okně"
   },
   "rememberThisDeviceToMakeFutureLoginsSeamless": {
-    "message": "Remember this device to make future logins seamless"
+    "message": "Zapamatovat si toto zařízení pro bezproblémové budoucí přihlášení"
   },
   "deviceApprovalRequired": {
     "message": "Vyžaduje se schválení zařízení. Vyberte možnost schválení níže:"
   },
   "deviceApprovalRequiredV2": {
-    "message": "Device approval required"
+    "message": "Vyžaduje se schválení zařízení"
   },
   "selectAnApprovalOptionBelow": {
-    "message": "Select an approval option below"
+    "message": "Vyberte volbu schválení níže"
   },
   "rememberThisDevice": {
     "message": "Zapamatovat toto zařízení"
@@ -3373,7 +3374,7 @@
     "message": "Chybí e-mail uživatele"
   },
   "activeUserEmailNotFoundLoggingYouOut": {
-    "message": "Active user email not found. Logging you out."
+    "message": "Aktivní uživatelský e-mail nebyl nalezen. Budete odhlášeni."
   },
   "deviceTrusted": {
     "message": "Zařízení zařazeno mezi důvěryhodné"
@@ -3582,6 +3583,14 @@
   "unlockAccountAria": {
     "message": "Odemknout účet, otevře se v novém okně",
     "description": "Screen reader text (aria-label) for unlock account button in overlay"
+  },
+  "totpCodeAria": {
+    "message": "Ověřovací kód TOTP",
+    "description": "Aria label for the totp code displayed in the inline menu for autofill"
+  },
+  "totpSecondsSpanAria": {
+    "message": "Zbývající čas před vypršením aktuálního TOTP",
+    "description": "Aria label for the totp seconds displayed in the inline menu for autofill"
   },
   "fillCredentialsFor": {
     "message": "Vyplnit přihlašovací údaje pro",
@@ -3812,7 +3821,7 @@
     "message": "Přistupování"
   },
   "loggedInExclamation": {
-    "message": "Logged in!"
+    "message": "Přihlášeno!"
   },
   "passkeyNotCopied": {
     "message": "Přístupový klíč nebude zkopírován"
@@ -4667,6 +4676,9 @@
   "showNumberOfAutofillSuggestions": {
     "message": "Zobrazit počet návrhů automatického vyplňování přihlášení na ikoně rozšíření"
   },
+  "showQuickCopyActions": {
+    "message": "Zobrazit akce rychlé kopie v trezoru"
+  },
   "systemDefault": {
     "message": "Systémový výchozí"
   },
@@ -4897,5 +4909,50 @@
   },
   "beta": {
     "message": "Beta"
+  },
+  "importantNotice": {
+    "message": "Důležité upozornění"
+  },
+  "setupTwoStepLogin": {
+    "message": "Nastavit dvoufázové přihlášení"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Bitwarden odešle kód na e-mail Vašeho účtu pro ověření přihlášení z nových zařízení počínaje únorem 2025."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "Dvoufázové přihlášení můžete nastavit jako alternativní způsob ochrany Vašeho účtu nebo změnit svůj e-mail na ten, k němuž můžete přistupovat."
+  },
+  "remindMeLater": {
+    "message": "Připomenout později"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Máte spolehlivý přístup ke svému e-mailu $EMAIL$?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "Ne, nemám"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Ano, ke svému e-mailu mám přístup"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "Zapnout dvoufázové přihlášení"
+  },
+  "changeAcctEmail": {
+    "message": "Změnit e-mail účtu"
+  },
+  "extensionWidth": {
+    "message": "Šířka rozšíření"
+  },
+  "wide": {
+    "message": "Šířka"
+  },
+  "extraWide": {
+    "message": "Extra široký"
   }
 }

@@ -207,6 +207,21 @@
   "sshKeyGenerated": {
     "message": "A new SSH key was generated"
   },
+  "sshKeyWrongPassword": {
+    "message": "Girdiğiniz parola yanlış."
+  },
+  "importSshKey": {
+    "message": "İçe aktar"
+  },
+  "confirmSshKeyPassword": {
+    "message": "Parolayı onaylayın"
+  },
+  "enterSshKeyPasswordDesc": {
+    "message": "SSH anahtarının parolasını girin."
+  },
+  "enterSshKeyPassword": {
+    "message": "Parolayı girin"
+  },
   "sshAgentUnlockRequired": {
     "message": "Please unlock your vault to approve the SSH key request."
   },
@@ -904,6 +919,12 @@
   "baseUrl": {
     "message": "Sunucu URL'si"
   },
+  "authenticationTimeout": {
+    "message": "Kimlik doğrulama zaman aşımı"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Kimlik doğrulama oturumu zaman aşımına uğradı. Lütfen giriş sürecini yeniden başlatın."
+  },
   "selfHostBaseUrl": {
     "message": "Kendi kendine barındırılan sunucu URL'si",
     "description": "Label for field requesting a self-hosted integration service URL"
@@ -1371,12 +1392,30 @@
   "passwordHistory": {
     "message": "Parola geçmişi"
   },
+  "generatorHistory": {
+    "message": "Üreteç geçmişi"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Üreteç geçmişini temizle"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "Devam ederseniz üreteç geçmişindeki tüm kayıtlar kalıcı olarak silinecektir. Devam etmek istediğinizden emin misiniz?"
+  },
   "clear": {
     "message": "Temizle",
     "description": "To clear something out. example: To clear browser history."
   },
   "noPasswordsInList": {
     "message": "Listelenecek şifre yok."
+  },
+  "clearHistory": {
+    "message": "Geçmişi temizle"
+  },
+  "nothingToShow": {
+    "message": "Gösterilecek bir şey yok"
+  },
+  "nothingGeneratedRecently": {
+    "message": "Yakın zamanda herhangi bir şey üretmediniz"
   },
   "undo": {
     "message": "Geri al"
@@ -1694,9 +1733,6 @@
   },
   "windowsHelloConsentMessage": {
     "message": "Bitwarden için doğrulayın."
-  },
-  "polkitConsentMessage": {
-    "message": "Authenticate to unlock Bitwarden."
   },
   "unlockWithTouchId": {
     "message": "Kilidi Touch ID ile aç"
@@ -2689,14 +2725,29 @@
   "notificationSentDevice": {
     "message": "Cihazınıza bir bildirim gönderildi."
   },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Cihazınıza bir bildirim gönderildi"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Lütfen hesabınızın kilidinin açık olduğundan ve parmak izi ifadesinin diğer cihazla eşleştiğinden emin olun"
+  },
+  "needAnotherOptionV1": {
+    "message": "Başka bir seçeneğe mi ihtiyacınız var?"
+  },
   "fingerprintMatchInfo": {
     "message": "Lütfen kasanızın kilidinin açık olduğundan ve parmak izi ifadesinin diğer cihazla eşleştiğinden emin olun."
   },
   "fingerprintPhraseHeader": {
     "message": "Parmak izi ifadesi"
   },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "İsteğiniz onaylanınca size haber vereceğiz"
+  },
   "needAnotherOption": {
     "message": "Cihazla girişi Bitwarden mobil uygulamasının ayarlarından etkinleştirmelisiniz. Başka bir seçeneğe mi ihtiyacınız var?"
+  },
+  "viewAllLogInOptions": {
+    "message": "Tüm giriş seçeneklerini gör"
   },
   "viewAllLoginOptions": {
     "message": "Tüm giriş seçeneklerini gör"
@@ -2817,6 +2868,9 @@
   "checkForBreaches": {
     "message": "Bilinen veri ihlallerinde bu parolayı kontrol et"
   },
+  "loggedInExclamation": {
+    "message": "Giriş yapıldı!"
+  },
   "important": {
     "message": "Önemli:"
   },
@@ -2847,8 +2901,17 @@
   "windowsBiometricUpdateWarningTitle": {
     "message": "Önerilen Ayarlar Güncellemesi"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Sonraki girişleri kolaylaştırmak için bu cihazı hatırla"
+  },
   "deviceApprovalRequired": {
     "message": "Cihaz onayı gerekiyor. Lütfen onay yönteminizi seçin:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Cihazı onaylamanız gerekiyor"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Aşağıdan bir onay yöntemi seçin"
   },
   "rememberThisDevice": {
     "message": "Bu cihazı hatırla"
@@ -2901,6 +2964,9 @@
   },
   "userEmailMissing": {
     "message": "Kullanıcının e-postası eksik"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Aktif kullanıcı e-postası bulunamadı. Çıkış yapılıyor."
   },
   "deviceTrusted": {
     "message": "Cihaza güvenildi"

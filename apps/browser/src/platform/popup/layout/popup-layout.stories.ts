@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, importProvidersFrom } from "@angular/core";
 import { RouterModule } from "@angular/router";
@@ -9,6 +11,7 @@ import { SendService } from "@bitwarden/common/tools/send/services/send.service.
 import {
   AvatarModule,
   BadgeModule,
+  BannerModule,
   ButtonModule,
   I18nMockService,
   IconButtonModule,
@@ -122,6 +125,18 @@ class MockCurrentAccountComponent {}
   imports: [SearchModule],
 })
 class MockSearchComponent {}
+
+@Component({
+  selector: "mock-banner",
+  template: `
+    <bit-banner bannerType="info" [showClose]="false">
+      This is an important note about these ciphers
+    </bit-banner>
+  `,
+  standalone: true,
+  imports: [BannerModule],
+})
+class MockBannerComponent {}
 
 @Component({
   selector: "mock-vault-page",
@@ -296,6 +311,8 @@ export default {
         CommonModule,
         RouterModule,
         ExtensionContainerComponent,
+        MockBannerComponent,
+        MockSearchComponent,
         MockVaultSubpageComponent,
         MockVaultPageComponent,
         MockSendPageComponent,
@@ -511,6 +528,44 @@ export const TransparentHeader: Story = {
           <vault-placeholder></vault-placeholder>
         </popup-page>
       </extension-container>
+    `,
+  }),
+};
+
+export const Notice: Story = {
+  render: (args) => ({
+    props: args,
+    template: /* HTML */ `
+      <extension-container>
+        <popup-page>
+          <popup-header slot="header" pageTitle="Page Header"></popup-header>
+          <mock-banner slot="full-width-notice"></mock-banner>
+          <mock-search slot="above-scroll-area"></mock-search>
+          <vault-placeholder></vault-placeholder>
+        </popup-page>
+      </extension-container>
+    `,
+  }),
+};
+
+export const WidthOptions: Story = {
+  render: (args) => ({
+    props: args,
+    template: /* HTML */ `
+      <div class="tw-flex tw-flex-col tw-gap-4 tw-text-main">
+        <div>Default:</div>
+        <div class="tw-h-[640px] tw-w-[380px] tw-border tw-border-solid tw-border-secondary-300">
+          <mock-vault-page></mock-vault-page>
+        </div>
+        <div>Wide:</div>
+        <div class="tw-h-[640px] tw-w-[480px] tw-border tw-border-solid tw-border-secondary-300">
+          <mock-vault-page></mock-vault-page>
+        </div>
+        <div>Extra wide:</div>
+        <div class="tw-h-[640px] tw-w-[600px] tw-border tw-border-solid tw-border-secondary-300">
+          <mock-vault-page></mock-vault-page>
+        </div>
+      </div>
     `,
   }),
 };

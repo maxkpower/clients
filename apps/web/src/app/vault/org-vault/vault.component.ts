@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { DialogRef } from "@angular/cdk/dialog";
 import {
   ChangeDetectorRef,
@@ -48,6 +50,7 @@ import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { OrganizationBillingServiceAbstraction } from "@bitwarden/common/billing/abstractions";
 import { BillingApiServiceAbstraction } from "@bitwarden/common/billing/abstractions/billing-api.service.abstraction";
 import { EventType } from "@bitwarden/common/enums";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -102,6 +105,10 @@ import {
 import { VaultItemEvent } from "../components/vault-items/vault-item-event";
 import { VaultItemsModule } from "../components/vault-items/vault-items.module";
 import {
+  AttachmentDialogResult,
+  AttachmentsV2Component,
+} from "../individual-vault/attachments-v2.component";
+import {
   BulkDeleteDialogResult,
   openBulkDeleteDialog,
 } from "../individual-vault/bulk-action-dialogs/bulk-delete-dialog/bulk-delete-dialog.component";
@@ -116,7 +123,6 @@ import { VaultHeaderComponent } from "../org-vault/vault-header/vault-header.com
 import { getNestedCollectionTree } from "../utils/collection-utils";
 
 import { AddEditComponent } from "./add-edit.component";
-import { AttachmentsComponent } from "./attachments.component";
 import {
   BulkCollectionsDialogComponent,
   BulkCollectionsDialogResult,
@@ -252,6 +258,7 @@ export class VaultComponent implements OnInit, OnDestroy {
     private organizationApiService: OrganizationApiServiceAbstraction,
     private trialFlowService: TrialFlowService,
     protected billingApiService: BillingApiServiceAbstraction,
+    private organizationBillingService: OrganizationBillingServiceAbstraction,
   ) {}
 
   async ngOnInit() {
@@ -590,20 +597,18 @@ export class VaultComponent implements OnInit, OnDestroy {
       organization$,
       this.hasSubscription$.pipe(filter((hasSubscription) => hasSubscription !== null)),
     ]).pipe(
-      filter(([org, hasSubscription]) => org.isOwner && hasSubscription),
+      filter(
+        ([org, hasSubscription]) => org.isOwner && hasSubscription && org.canViewBillingHistory,
+      ),
       switchMap(([org]) =>
         combineLatest([
           of(org),
           this.organizationApiService.getSubscription(org.id),
-          this.organizationApiService.getBilling(org.id),
+          this.organizationBillingService.getPaymentSource(org.id),
         ]),
       ),
-      map(([org, sub, billing]) => {
-        return this.trialFlowService.checkForOrgsWithUpcomingPaymentIssues(
-          org,
-          sub,
-          billing?.paymentSource,
-        );
+      map(([org, sub, paymentSource]) => {
+        return this.trialFlowService.checkForOrgsWithUpcomingPaymentIssues(org, sub, paymentSource);
       }),
     );
 
@@ -759,29 +764,18 @@ export class VaultComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let madeAttachmentChanges = false;
-
-    const [modal] = await this.modalService.openViewRef(
-      AttachmentsComponent,
-      this.attachmentsModalRef,
-      (comp) => {
-        comp.organization = this.organization;
-        comp.cipherId = cipher.id;
-        comp.onUploadedAttachment
-          .pipe(takeUntil(this.destroy$))
-          .subscribe(() => (madeAttachmentChanges = true));
-        comp.onDeletedAttachment
-          .pipe(takeUntil(this.destroy$))
-          .subscribe(() => (madeAttachmentChanges = true));
-      },
-    );
-
-    modal.onClosed.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      if (madeAttachmentChanges) {
-        this.refresh();
-      }
-      madeAttachmentChanges = false;
+    const dialogRef = AttachmentsV2Component.open(this.dialogService, {
+      cipherId: cipher.id as CipherId,
     });
+
+    const result = await firstValueFrom(dialogRef.closed);
+
+    if (
+      result.action === AttachmentDialogResult.Removed ||
+      result.action === AttachmentDialogResult.Uploaded
+    ) {
+      this.refresh();
+    }
   }
 
   async addCipher(cipherType?: CipherType) {

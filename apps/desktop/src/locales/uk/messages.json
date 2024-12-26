@@ -207,6 +207,21 @@
   "sshKeyGenerated": {
     "message": "Згенеровано новий ключ SSH"
   },
+  "sshKeyWrongPassword": {
+    "message": "Ви ввели неправильний пароль."
+  },
+  "importSshKey": {
+    "message": "Імпорт"
+  },
+  "confirmSshKeyPassword": {
+    "message": "Підтвердити пароль"
+  },
+  "enterSshKeyPasswordDesc": {
+    "message": "Введіть пароль для ключа SSH."
+  },
+  "enterSshKeyPassword": {
+    "message": "Введіть пароль"
+  },
   "sshAgentUnlockRequired": {
     "message": "Розблокуйте своє сховище, щоб затвердити запит ключа SSH."
   },
@@ -904,6 +919,12 @@
   "baseUrl": {
     "message": "URL-адреса сервера"
   },
+  "authenticationTimeout": {
+    "message": "Час очікування автентифікації"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Час очікування сеансу автентифікації завершився. Перезапустіть процес входу в систему."
+  },
   "selfHostBaseUrl": {
     "message": "URL-адреса власного сервера",
     "description": "Label for field requesting a self-hosted integration service URL"
@@ -1371,12 +1392,30 @@
   "passwordHistory": {
     "message": "Історія паролів"
   },
+  "generatorHistory": {
+    "message": "Історія генератора"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Очистити історію генератора"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "Якщо ви продовжите, усі записи будуть остаточно видалені з історії генератора. Справді продовжити?"
+  },
   "clear": {
     "message": "Стерти",
     "description": "To clear something out. example: To clear browser history."
   },
   "noPasswordsInList": {
     "message": "Немає паролів."
+  },
+  "clearHistory": {
+    "message": "Очистити історію"
+  },
+  "nothingToShow": {
+    "message": "Немає даних для показу"
+  },
+  "nothingGeneratedRecently": {
+    "message": "Ви нічого не генерували останнім часом"
   },
   "undo": {
     "message": "Повернути"
@@ -1694,9 +1733,6 @@
   },
   "windowsHelloConsentMessage": {
     "message": "Перевірити на Bitwarden."
-  },
-  "polkitConsentMessage": {
-    "message": "Автентифікуйтесь для розблокування Bitwarden."
   },
   "unlockWithTouchId": {
     "message": "Розблокувати з Touch ID"
@@ -2689,14 +2725,29 @@
   "notificationSentDevice": {
     "message": "Сповіщення було надіслано на ваш пристрій."
   },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Сповіщення надіслано на ваш пристрій"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Переконайтеся, що ваш обліковий запис розблоковано і фраза відбитка на іншому пристрої збігається"
+  },
+  "needAnotherOptionV1": {
+    "message": "Потрібен інший варіант?"
+  },
   "fingerprintMatchInfo": {
     "message": "Переконайтеся, що ваше сховище розблоковане, а фраза відбитка збігається з іншим пристроєм."
   },
   "fingerprintPhraseHeader": {
     "message": "Фраза відбитка"
   },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "Після схвалення запиту ви отримаєте сповіщення"
+  },
   "needAnotherOption": {
     "message": "Потрібно увімкнути схвалення запитів на вхід у налаштуваннях програми Bitwarden. Потрібен інший варіант?"
+  },
+  "viewAllLogInOptions": {
+    "message": "Переглянути всі варіанти входу"
   },
   "viewAllLoginOptions": {
     "message": "Переглянути всі варіанти входу"
@@ -2817,6 +2868,9 @@
   "checkForBreaches": {
     "message": "Перевірити відомі витоки даних для цього пароля"
   },
+  "loggedInExclamation": {
+    "message": "Ви увійшли!"
+  },
   "important": {
     "message": "Важливо:"
   },
@@ -2847,8 +2901,17 @@
   "windowsBiometricUpdateWarningTitle": {
     "message": "Оновлення рекомендованих налаштувань"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Запам'ятайте цей пристрій, щоб спростити майбутні входи в систему"
+  },
   "deviceApprovalRequired": {
     "message": "Необхідне підтвердження пристрою. Виберіть варіант підтвердження нижче:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Потрібне підтвердження пристрою"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Виберіть варіант підтвердження нижче"
   },
   "rememberThisDevice": {
     "message": "Запам'ятати цей пристрій"
@@ -2901,6 +2964,9 @@
   },
   "userEmailMissing": {
     "message": "Немає адреси електронної пошти"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Адресу е-пошти активного користувача не знайдено. Виконується вихід із системи."
   },
   "deviceTrusted": {
     "message": "Довірений пристрій"

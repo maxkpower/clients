@@ -192,6 +192,13 @@
   "autoFillIdentity": {
     "message": "Самопопълваща се самоличност"
   },
+  "fillVerificationCode": {
+    "message": "Попълване на кода за потвърждаване"
+  },
+  "fillVerificationCodeAria": {
+    "message": "Попълване на кода за потвърждаване",
+    "description": "Aria label for the heading displayed the inline menu for totp code autofill"
+  },
   "generatePasswordCopied": {
     "message": "Генериране на парола (копирана)"
   },
@@ -640,9 +647,6 @@
   },
   "rateExtension": {
     "message": "Оценяване на разширението"
-  },
-  "rateExtensionDesc": {
-    "message": "Молим да ни помогнете, като оставите положителен отзив!"
   },
   "browserNotSupportClipboard": {
     "message": "Браузърът не поддържа копиране в буфера, затова копирайте на ръка."
@@ -1125,6 +1129,10 @@
     "message": "ВНИМАНИЕ",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Внимание",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Потвърждаване на изнасянето на трезора"
   },
@@ -1315,6 +1323,12 @@
   "enterVerificationCodeApp": {
     "message": "Въведете шестцифрения код за потвърждение от приложението за удостоверяване."
   },
+  "authenticationTimeout": {
+    "message": "Време на давност за удостоверяването"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Сесията за удостоверяване е изтекла. Моля, започнете отначало процеса по вписване."
+  },
   "enterVerificationCodeEmail": {
     "message": "Въведете шестцифрения код за потвърждение, който е бил изпратен на $EMAIL$.",
     "placeholders": {
@@ -1502,19 +1516,6 @@
   },
   "enableAutoFillOnPageLoadDesc": {
     "message": "При засичане на формуляр за вписване при зареждането на уеб страницата автоматично да се попълват данните на съответстващата регистрация."
-  },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Внимание:$CLOSETAG$ Опасните или компроментирани уеб сайтове могат да се възползват от функционалността за автоматично попълване при зареждане на страницата.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
   },
   "experimentalFeature": {
     "message": "Компроментирани и измамни уеб сайтове могат да се възползват от автоматичното попълване при зареждане на страницата."
@@ -3176,7 +3177,7 @@
   "viewAllLogInOptions": {
     "message": "Вижте всички възможности за вписване"
   },
-  "viewAllLoginOptions": {
+  "viewAllLoginOptionsV1": {
     "message": "Вижте всички възможности за вписване"
   },
   "notificationSentDevice": {
@@ -3288,16 +3289,16 @@
     "message": "Отваря се в нов прозорец"
   },
   "rememberThisDeviceToMakeFutureLoginsSeamless": {
-    "message": "Remember this device to make future logins seamless"
+    "message": "Запомняне на това устройство, така че в бъдеще вписването да бъде по-лесно"
   },
   "deviceApprovalRequired": {
     "message": "Изисква се одобрение на устройството. Изберете начин за одобрение по-долу:"
   },
   "deviceApprovalRequiredV2": {
-    "message": "Device approval required"
+    "message": "Необходимо е одобрение на устройството"
   },
   "selectAnApprovalOptionBelow": {
-    "message": "Select an approval option below"
+    "message": "Изберете начин за одобряване по-долу"
   },
   "rememberThisDevice": {
     "message": "Запомняне на това устройство"
@@ -3373,7 +3374,7 @@
     "message": "Липсва е-поща на потребителя"
   },
   "activeUserEmailNotFoundLoggingYouOut": {
-    "message": "Active user email not found. Logging you out."
+    "message": "Не е намерена е-поща на активен потребител. Ще бъдете отписан(а)."
   },
   "deviceTrusted": {
     "message": "Устройството е доверено"
@@ -3582,6 +3583,14 @@
   "unlockAccountAria": {
     "message": "Отклюване на регистрацията, отваря се в нов прозорец",
     "description": "Screen reader text (aria-label) for unlock account button in overlay"
+  },
+  "totpCodeAria": {
+    "message": "Код за потвърждение на еднократната времево-ограничена парола",
+    "description": "Aria label for the totp code displayed in the inline menu for autofill"
+  },
+  "totpSecondsSpanAria": {
+    "message": "Оставащо време преди изтичането на текущия код",
+    "description": "Aria label for the totp seconds displayed in the inline menu for autofill"
   },
   "fillCredentialsFor": {
     "message": "Попълване на данните за",
@@ -3812,7 +3821,7 @@
     "message": "Използване на"
   },
   "loggedInExclamation": {
-    "message": "Logged in!"
+    "message": "Вписахте се!"
   },
   "passkeyNotCopied": {
     "message": "Секретният ключ няма да бъде копиран"
@@ -4667,6 +4676,9 @@
   "showNumberOfAutofillSuggestions": {
     "message": "Показване на броя предложения за автоматично попълване на данни за вписване върху иконката на добавката"
   },
+  "showQuickCopyActions": {
+    "message": "Показване на действията за бързо копиране в трезора"
+  },
   "systemDefault": {
     "message": "По подразбиране за системата"
   },
@@ -4893,9 +4905,54 @@
     "message": "Генерирана парола"
   },
   "compactMode": {
-    "message": "Compact mode"
+    "message": "Компактен режим"
   },
   "beta": {
-    "message": "Beta"
+    "message": "Бета"
+  },
+  "importantNotice": {
+    "message": "Важно съобщение"
+  },
+  "setupTwoStepLogin": {
+    "message": "Настройте двустепенно удостоверяване"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Битуорден ще изпрати код до е-пощата Ви, за потвърждаване на вписването от нови устройства. Това ще започне от февруари 2025."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "Можете да настроите двустепенно удостоверяване, като различен метод на защита, или ако е необходимо да промените е-пощата си с такава, до която имате достъп."
+  },
+  "remindMeLater": {
+    "message": "Напомнете ми по-късно"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Имате ли сигурен достъп до е-пощата си – $EMAIL$?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "Не, нямам"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Да, имам достъп до е-пощата си"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "Включване на двустепенното удостоверяване"
+  },
+  "changeAcctEmail": {
+    "message": "Промяна на е-пощата"
+  },
+  "extensionWidth": {
+    "message": "Ширина на разширението"
+  },
+  "wide": {
+    "message": "Широко"
+  },
+  "extraWide": {
+    "message": "Много широко"
   }
 }

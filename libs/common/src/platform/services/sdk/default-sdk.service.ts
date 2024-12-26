@@ -1,7 +1,8 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import {
   combineLatest,
   concatMap,
-  firstValueFrom,
   Observable,
   shareReplay,
   map,
@@ -19,7 +20,6 @@ import {
   DeviceType as SdkDeviceType,
 } from "@bitwarden/sdk-internal";
 
-import { ApiService } from "../../../abstractions/api.service";
 import { EncryptedOrganizationKeyData } from "../../../admin-console/models/data/encrypted-organization-key.data";
 import { AccountInfo, AccountService } from "../../../auth/abstractions/account.service";
 import { DeviceType } from "../../../enums/device-type.enum";
@@ -43,12 +43,6 @@ export class DefaultSdkService implements SdkService {
     shareReplay({ refCount: true, bufferSize: 1 }),
   );
 
-  supported$ = this.client$.pipe(
-    concatMap(async (client) => {
-      return client.echo("bitwarden wasm!") === "bitwarden wasm!";
-    }),
-  );
-
   version$ = this.client$.pipe(
     map((client) => client.version()),
     catchError(() => "Unsupported"),
@@ -61,7 +55,6 @@ export class DefaultSdkService implements SdkService {
     private accountService: AccountService,
     private kdfConfigService: KdfConfigService,
     private keyService: KeyService,
-    private apiService: ApiService, // Yes we shouldn't import ApiService, but it's temporary
     private userAgent: string = null,
   ) {}
 
@@ -85,7 +78,7 @@ export class DefaultSdkService implements SdkService {
     );
 
     const client$ = combineLatest([
-      this.environmentService.environment$,
+      this.environmentService.getEnvironment$(userId),
       account$,
       kdfParams$,
       privateKey$,
@@ -131,31 +124,6 @@ export class DefaultSdkService implements SdkService {
 
     this.sdkClientCache.set(userId, client$);
     return client$;
-  }
-
-  async failedToInitialize(category: string, error?: Error): Promise<void> {
-    // Only log on cloud instances
-    if (
-      this.platformUtilsService.isDev() ||
-      !(await firstValueFrom(this.environmentService.environment$)).isCloud
-    ) {
-      return;
-    }
-
-    return this.apiService.send(
-      "POST",
-      "/wasm-debug",
-      {
-        category: category,
-        error: error?.message,
-      },
-      false,
-      false,
-      null,
-      (headers) => {
-        headers.append("SDK-Version", "1.0.0");
-      },
-    );
   }
 
   private async initializeClient(

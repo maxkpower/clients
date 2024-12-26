@@ -192,6 +192,13 @@
   "autoFillIdentity": {
     "message": "Identität automatisch ausfüllen"
   },
+  "fillVerificationCode": {
+    "message": "Verifizierungscode eingeben"
+  },
+  "fillVerificationCodeAria": {
+    "message": "Verifizierungscode eingeben",
+    "description": "Aria label for the heading displayed the inline menu for totp code autofill"
+  },
   "generatePasswordCopied": {
     "message": "Passwort generieren (kopiert)"
   },
@@ -640,9 +647,6 @@
   },
   "rateExtension": {
     "message": "Erweiterung bewerten"
-  },
-  "rateExtensionDesc": {
-    "message": "Wir würden uns freuen, wenn du uns mit einer positiven Bewertung helfen könntest!"
   },
   "browserNotSupportClipboard": {
     "message": "Den Browser unterstützt das einfache Kopieren nicht. Bitte kopiere es manuell."
@@ -1125,6 +1129,10 @@
     "message": "ACHTUNG",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Warnung",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Tresor-Export bestätigen"
   },
@@ -1315,6 +1323,12 @@
   "enterVerificationCodeApp": {
     "message": "Gib den 6-stelligen Verifizierungscode aus deiner Authenticator App ein."
   },
+  "authenticationTimeout": {
+    "message": "Authentifizierungs-Timeout"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Die Authentifizierungssitzung ist abgelaufen. Bitte starte den Anmeldeprozess neu."
+  },
   "enterVerificationCodeEmail": {
     "message": "Gib den 6-stelligen Bestätigungscode ein, der an $EMAIL$ gesendet wurde.",
     "placeholders": {
@@ -1502,19 +1516,6 @@
   },
   "enableAutoFillOnPageLoadDesc": {
     "message": "Wenn eine Anmeldemaske erkannt wird, die Zugangsdaten automatisch ausfüllen während die Webseite lädt."
-  },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Warnung:$CLOSETAG$ Kompromittierte oder nicht vertrauenswürdige Websites können Auto-Ausfüllen beim Laden einer Seite missbrauchen.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
   },
   "experimentalFeature": {
     "message": "Kompromittierte oder nicht vertrauenswürdige Websites können Auto-Ausfüllen beim Laden der Seite ausnutzen."
@@ -1852,7 +1853,7 @@
     "message": "Sichere Notizen"
   },
   "sshKeys": {
-    "message": "SSH Keys"
+    "message": "SSH-Schlüssel"
   },
   "clear": {
     "message": "Löschen",
@@ -2893,7 +2894,7 @@
     "message": "E-Mail generieren"
   },
   "spinboxBoundariesHint": {
-    "message": "Value must be between $MIN$ and $MAX$.",
+    "message": "Wert muss zwischen $MIN$ und $MAX$ liegen.",
     "description": "Explains spin box minimum and maximum values to the user",
     "placeholders": {
       "min": {
@@ -2907,7 +2908,7 @@
     }
   },
   "passwordLengthRecommendationHint": {
-    "message": " Use $RECOMMENDED$ characters or more to generate a strong password.",
+    "message": " Verwende $RECOMMENDED$ oder mehr Zeichen, um ein starkes Passwort zu generieren.",
     "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
     "placeholders": {
       "recommended": {
@@ -2917,7 +2918,7 @@
     }
   },
   "passphraseNumWordsRecommendationHint": {
-    "message": " Use $RECOMMENDED$ words or more to generate a strong passphrase.",
+    "message": " Verwende $RECOMMENDED$ oder mehr Wörter, um eine starke Passphrase zu generieren.",
     "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
     "placeholders": {
       "recommended": {
@@ -3174,25 +3175,25 @@
     "message": "Benachrichtigung erneut senden"
   },
   "viewAllLogInOptions": {
-    "message": "View all log in options"
+    "message": "Alle Anmeldeoptionen anzeigen"
   },
-  "viewAllLoginOptions": {
+  "viewAllLoginOptionsV1": {
     "message": "Alle Anmeldeoptionen anzeigen"
   },
   "notificationSentDevice": {
     "message": "Eine Benachrichtigung wurde an dein Gerät gesendet."
   },
   "aNotificationWasSentToYourDevice": {
-    "message": "A notification was sent to your device"
+    "message": "Eine Benachrichtigung wurde an dein Gerät gesendet"
   },
   "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
-    "message": "Make sure your account is unlocked and the fingerprint phrase matches on the other device"
+    "message": "Stelle sicher, dass dein Konto entsperrt ist und die Fingerabdruck-Phrase mit der vom anderen Gerät übereinstimmt"
   },
   "youWillBeNotifiedOnceTheRequestIsApproved": {
-    "message": "You will be notified once the request is approved"
+    "message": "Du wirst benachrichtigt, sobald die Anfrage genehmigt wurde"
   },
   "needAnotherOptionV1": {
-    "message": "Need another option?"
+    "message": "Brauchst du eine andere Option?"
   },
   "loginInitiated": {
     "message": "Anmeldung eingeleitet"
@@ -3288,16 +3289,16 @@
     "message": "Wird in einem neuen Fenster geöffnet"
   },
   "rememberThisDeviceToMakeFutureLoginsSeamless": {
-    "message": "Remember this device to make future logins seamless"
+    "message": "Dieses Gerät merken, um zukünftige Anmeldungen reibungslos zu gestalten"
   },
   "deviceApprovalRequired": {
     "message": "Geräte-Genehmigung erforderlich. Wähle unten eine Genehmigungsoption aus:"
   },
   "deviceApprovalRequiredV2": {
-    "message": "Device approval required"
+    "message": "Geräte-Genehmigung erforderlich"
   },
   "selectAnApprovalOptionBelow": {
-    "message": "Select an approval option below"
+    "message": "Wähle unten eine Genehmigungsoption aus"
   },
   "rememberThisDevice": {
     "message": "Dieses Gerät merken"
@@ -3373,7 +3374,7 @@
     "message": "E-Mail-Adresse des Benutzers fehlt"
   },
   "activeUserEmailNotFoundLoggingYouOut": {
-    "message": "Active user email not found. Logging you out."
+    "message": "Aktive Benutzer-E-Mail-Adresse nicht gefunden. Du wirst abgemeldet."
   },
   "deviceTrusted": {
     "message": "Gerät wird vertraut"
@@ -3582,6 +3583,14 @@
   "unlockAccountAria": {
     "message": "Dein Konto entsperren, öffnet sich in einem neuen Fenster",
     "description": "Screen reader text (aria-label) for unlock account button in overlay"
+  },
+  "totpCodeAria": {
+    "message": "Zeitbasierter einmaliger Passwort-Verifizierungscode",
+    "description": "Aria label for the totp code displayed in the inline menu for autofill"
+  },
+  "totpSecondsSpanAria": {
+    "message": "Verbleibende Zeit bis zum Ablauf des aktuellen TOTP",
+    "description": "Aria label for the totp seconds displayed in the inline menu for autofill"
   },
   "fillCredentialsFor": {
     "message": "Zugangsdaten ausfüllen für",
@@ -3812,7 +3821,7 @@
     "message": "Zugriff auf"
   },
   "loggedInExclamation": {
-    "message": "Logged in!"
+    "message": "Angemeldet!"
   },
   "passkeyNotCopied": {
     "message": "Passkey wird nicht kopiert"
@@ -4306,13 +4315,13 @@
     "message": "Filter"
   },
   "filterVault": {
-    "message": "Filter vault"
+    "message": "Tresor filtern"
   },
   "filterApplied": {
-    "message": "One filter applied"
+    "message": "Ein Filter angewendet"
   },
   "filterAppliedPlural": {
-    "message": "$COUNT$ filters applied",
+    "message": "$COUNT$ Filter angewendet",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -4667,6 +4676,9 @@
   "showNumberOfAutofillSuggestions": {
     "message": "Anzahl der Vorschläge zum Auto-Ausfüllen von Zugangsdaten auf dem Erweiterungssymbol anzeigen"
   },
+  "showQuickCopyActions": {
+    "message": "Schnellkopier-Aktionen im Tresor anzeigen"
+  },
   "systemDefault": {
     "message": "Systemstandard"
   },
@@ -4893,9 +4905,54 @@
     "message": "Generiertes Passwort"
   },
   "compactMode": {
-    "message": "Compact mode"
+    "message": "Kompaktmodus"
   },
   "beta": {
     "message": "Beta"
+  },
+  "importantNotice": {
+    "message": "Wichtiger Hinweis"
+  },
+  "setupTwoStepLogin": {
+    "message": "Richte die zweistufige Anmeldung ein"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Bitwarden wird einen Code an deine Konto-E-Mail-Adresse senden, um Anmeldungen von neuen Geräten ab Februar 2025 zu überprüfen."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "Du kannst die zweistufige Anmeldung als eine alternative Methode einrichten, um deinen Account zu schützen, oder ändere deine E-Mail-Adresse zu einer, auf die du zugreifen kannst."
+  },
+  "remindMeLater": {
+    "message": "Erinnere mich später"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Hast du zuverlässigen Zugriff auf deine E-Mail-Adresse $EMAIL$?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "Nein, habe ich nicht"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Ja, ich kann zuverlässig auf meine E-Mails zugreifen"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "Aktiviere die zweistufige Anmeldung"
+  },
+  "changeAcctEmail": {
+    "message": "Ändere die E-Mail-Adresse des Kontos"
+  },
+  "extensionWidth": {
+    "message": "Breite der Erweiterung"
+  },
+  "wide": {
+    "message": "Breit"
+  },
+  "extraWide": {
+    "message": "Extra breit"
   }
 }

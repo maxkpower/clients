@@ -121,6 +121,10 @@ export const TRANSLATION_DISK = new StateDefinition("translation", "disk", { web
 export const ANIMATION_DISK = new StateDefinition("animation", "disk");
 export const TASK_SCHEDULER_DISK = new StateDefinition("taskScheduler", "disk");
 
+// Design System
+
+export const POPUP_STYLE_DISK = new StateDefinition("popupStyle", "disk");
+
 // Secrets Manager
 
 export const SM_ONBOARDING_DISK = new StateDefinition("smOnboarding", "disk", {
@@ -177,3 +181,4 @@ export const NEW_DEVICE_VERIFICATION_NOTICE = new StateDefinition(
   "newDeviceVerificationNotice",
   "disk",
 );
+export const VAULT_APPEARANCE = new StateDefinition("vaultAppearance", "disk");
