@@ -3,7 +3,7 @@ import { html } from "lit";
 
 import { Theme } from "@bitwarden/common/platform/enums";
 
-import { border, themes, typography, spacing } from "../../constants/styles";
+import { border, themes, typography, spacing } from "../constants/styles";
 
 export function BadgeButton({
   buttonAction,
@@ -52,8 +52,7 @@ const badgeButtonStyles = ({ disabled, theme }: { disabled: boolean; theme: Them
     border: 0.5px solid ${themes[theme].secondary["300"]};
     background-color: ${themes[theme].secondary["300"]};
     color: ${themes[theme].text.muted};
-  `
-      : `
+  ` : `
     border: 0.5px solid ${themes[theme].primary["700"]};
     background-color: ${themes[theme].primary["100"]};
     cursor: pointer;
@@ -63,7 +62,7 @@ const badgeButtonStyles = ({ disabled, theme }: { disabled: boolean; theme: Them
       border-color: ${themes[theme].primary["600"]};
       background-color: ${themes[theme].primary["600"]};
       color: ${themes[theme].text.contrast};
+    }
   `
-  }
   }
 `;
