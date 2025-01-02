@@ -1,3 +1,4 @@
+import { ContextProvider, ContextRoot } from "@lit/context";
 import { render } from "lit";
 
 // FIXME: Update this file to be type safe and remove this and next line
@@ -8,6 +9,7 @@ import type { FolderView } from "@bitwarden/common/vault/models/view/folder.view
 
 import { FilelessImportPort, FilelessImportType } from "../../tools/enums/fileless-import.enums";
 import { AdjustNotificationBarMessageData } from "../background/abstractions/notification.background";
+import { NotificationContainer } from "../content/components/notification/container";
 import { buildSvgDomElement } from "../utils";
 import { circleCheckIcon } from "../utils/svg-icons";
 
@@ -16,7 +18,9 @@ import {
   NotificationBarWindowMessage,
   NotificationBarIframeInitData,
 } from "./abstractions/notification-bar";
-import { NotificationContainer } from "./components/container";
+import "../content/components/registry";
+import { themeContext } from "../content/components/contexts/theme";
+// import { HostContainer } from "./components/host-container";
 
 const useComponentBar = true;
 
@@ -46,6 +50,7 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
 
   notificationBarIframeInitData = initData;
   const { isVaultLocked, theme } = notificationBarIframeInitData;
+  console.log("notificationBarIframeInitData:", notificationBarIframeInitData);
 
   const i18n = {
     appName: chrome.i18n.getMessage("appName"),
@@ -89,6 +94,19 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
     // There are other possible passed theme values, but for now, resolve to dark or light
     const resolvedTheme = themeType === ThemeTypes.Dark ? ThemeTypes.Dark : ThemeTypes.Light;
 
+    // const HostElement = NotificationContainer({
+    //     ...notificationBarIframeInitData,
+    //     theme: resolvedTheme,
+    //     handleCloseNotification,
+    //     i18n,
+    //   });
+    // const root = new ContextRoot();
+    // root.attach(document.body);
+    // document.body.addController = () => {};
+    const themeProvider = new ContextProvider(document.body, {context: themeContext, initialValue: {type: 'light'}});
+    // themeProvider.hostConnected();
+    // themeProvider.setValue({type: 'test2'});
+
     // @TODO use context to avoid prop drilling
     return render(
       NotificationContainer({
@@ -97,6 +115,12 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
         handleCloseNotification,
         i18n,
       }),
+      // HostContainer({
+      //   ...notificationBarIframeInitData,
+      //   theme: resolvedTheme,
+      //   handleCloseNotification,
+      //   i18n,
+      // }),
       document.body,
     );
   }
