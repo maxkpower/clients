@@ -34,6 +34,7 @@ export class ChangePasswordComponent
   extends BaseChangePasswordComponent
   implements OnInit, OnDestroy
 {
+  loading = false;
   rotateUserKey = false;
   currentMasterPassword: string;
   masterPasswordHint: string;
@@ -140,6 +141,7 @@ export class ChangePasswordComponent
   }
 
   async submit() {
+    this.loading = true;
     if (
       this.masterPasswordHint != null &&
       this.masterPasswordHint.toLowerCase() === this.masterPassword.toLowerCase()
@@ -149,6 +151,7 @@ export class ChangePasswordComponent
         title: this.i18nService.t("errorOccurred"),
         message: this.i18nService.t("hintEqualsPassword"),
       });
+      this.loading = false;
       return;
     }
 
@@ -158,20 +161,30 @@ export class ChangePasswordComponent
     }
 
     if (!(await this.strongPassword())) {
+      this.loading = false;
       return;
     }
 
-    if (this.rotateUserKey) {
-      await this.syncService.fullSync(true);
-      const user = await firstValueFrom(this.accountService.activeAccount$);
-      await this.keyRotationService.rotateUserKeyMasterPasswordAndEncryptedData(
-        this.currentMasterPassword,
-        this.masterPassword,
-        user,
-      );
-    } else {
-      await this.updatePassword(this.masterPassword);
+    try {
+      if (this.rotateUserKey) {
+        await this.syncService.fullSync(true);
+        const user = await firstValueFrom(this.accountService.activeAccount$);
+        await this.keyRotationService.rotateUserKeyMasterPasswordAndEncryptedData(
+          this.currentMasterPassword,
+          this.masterPassword,
+          user,
+        );
+      } else {
+        await this.updatePassword(this.masterPassword);
+      }
+    } catch (e) {
+      this.toastService.showToast({
+        variant: "error",
+        title: this.i18nService.t("errorOccurred"),
+        message: e.message,
+      });
     }
+    this.loading = false;
   }
 
   // todo: move this to a service
