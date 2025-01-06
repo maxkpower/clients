@@ -13,7 +13,7 @@ export abstract class EncryptService {
    * @param encString - The EncString to decrypt
    * @param key - The key to decrypt the EncString with
    * @param decryptTrace - A string to identify the context of the object being decrypted. This can include: field name, encryption type, cipher id, key type, but should not include
-   * sensitive information like encryption keys or data
+   * sensitive information like encryption keys or data. This is used for logging when decryption errors occur in order to identify what failed to decrypt
    * @returns The decrypted string
    */
   abstract decryptToUtf8(
@@ -26,7 +26,7 @@ export abstract class EncryptService {
    * @param encThing - The Encrypted object to decrypt
    * @param key - The key to decrypt the Encrypted object with
    * @param decryptTrace - A string to identify the context of the object being decrypted. This can include: field name, encryption type, cipher id, key type, but should not include
-   * sensitive information like encryption keys or data
+   * sensitive information like encryption keys or data. This is used for logging when decryption errors occur in order to identify what failed to decrypt
    * @returns The decrypted Uint8Array
    */
   abstract decryptToBytes(
