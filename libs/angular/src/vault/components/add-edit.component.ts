@@ -32,6 +32,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { CollectionId, UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -50,7 +51,7 @@ import { SshKeyView } from "@bitwarden/common/vault/models/view/ssh-key.view";
 import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService, ToastService } from "@bitwarden/components";
 import { SshKeyPasswordPromptComponent } from "@bitwarden/importer/ui";
-import { SshKeyImportError, import_ssh_key } from "@bitwarden/sdk-internal";
+import { SshKey, SshKeyImportError, import_ssh_key } from "@bitwarden/sdk-internal";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 @Directive()
@@ -143,6 +144,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     protected configService: ConfigService,
     protected cipherAuthorizationService: CipherAuthorizationService,
     protected toastService: ToastService,
+    protected sdkService: SdkService,
   ) {
     this.typeOptions = [
       { name: i18nService.t("typeLogin"), value: CipherType.Login },
@@ -798,59 +800,58 @@ export class AddEditComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  async importSshKeyFromClipboard(password: string = "") {
-    const key = await this.platformUtilsService.readFromClipboard();
-    try {
-      const parsedKey = import_ssh_key(key, password);
-      if (parsedKey == null) {
-        this.toastService.showToast({
-          variant: "error",
-          title: "",
-          message: this.i18nService.t("invalidSshKey"),
-        });
-        return;
-      }
-      this.cipher.sshKey.privateKey = parsedKey.private_key;
-      this.cipher.sshKey.publicKey = parsedKey.public_key;
-      this.cipher.sshKey.keyFingerprint = parsedKey.key_fingerprint;
-      this.toastService.showToast({
-        variant: "success",
-        title: "",
-        message: this.i18nService.t("sshKeyPasted"),
-      });
-    } catch (e) {
-      const error = e as SshKeyImportError;
-      switch (error.variant) {
-        case "ParsingError":
-          this.toastService.showToast({
-            variant: "error",
-            title: "",
-            message: this.i18nService.t("invalidSshKey"),
-          });
-          break;
-        case "UnsupportedKeyType":
-          this.toastService.showToast({
-            variant: "error",
-            title: "",
-            message: this.i18nService.t("sshKeyTypeUnsupported"),
-          });
-          break;
-        case "PasswordRequired":
-        case "WrongPassword":
-          if (password !== "") {
-            this.toastService.showToast({
-              variant: "error",
-              title: "",
-              message: this.i18nService.t("sshKeyWrongPassword"),
-            });
-          } else {
-            password = await this.getSshKeyPassword();
-            await this.importSshKeyFromClipboard(password);
-          }
-          break;
-      }
+  private async importUsingSdk(key: string, password: string): Promise<SshKey> {
+    await firstValueFrom(this.sdkService.client$);
+    return import_ssh_key(key, password);
+  }
 
-      this.logService.info("Failed to import SSH key from clipboard", e);
+  async importSshKeyFromClipboard(password: string = "") {
+    const ATTEMPTS = 5;
+    const key = await this.platformUtilsService.readFromClipboard();
+
+    let parsedKey: SshKey = null;
+    for (let attempt = 0; attempt <= ATTEMPTS; attempt++) {
+      try {
+        parsedKey = await this.importUsingSdk(key, password);
+      } catch (e) {
+        const error = e as SshKeyImportError;
+        if (
+          error.variant === "WrongPassword" &&
+          ((password === "" && attempt === 0) || (password !== "" && attempt < ATTEMPTS))
+        ) {
+          password = await this.getSshKeyPassword();
+        } else {
+          this.toastService.showToast({
+            variant: "error",
+            title: "",
+            message: this.i18nService.t(this.sshImportErrorVariantToI18nKey(error.variant)),
+          });
+          return;
+        }
+      }
+    }
+
+    this.cipher.sshKey.privateKey = parsedKey.private_key;
+    this.cipher.sshKey.publicKey = parsedKey.public_key;
+    this.cipher.sshKey.keyFingerprint = parsedKey.key_fingerprint;
+    this.toastService.showToast({
+      variant: "success",
+      title: "",
+      message: this.i18nService.t("sshKeyPasted"),
+    });
+  }
+
+  private sshImportErrorVariantToI18nKey(variant: string): string {
+    switch (variant) {
+      case "ParsingError":
+        return "invalidSshKey";
+      case "UnsupportedKeyType":
+        return "sshKeyTypeUnsupported";
+      case "PasswordRequired":
+      case "WrongPassword":
+        return "sshKeyWrongPassword";
+      default:
+        return "errorOccurred";
     }
   }
 
