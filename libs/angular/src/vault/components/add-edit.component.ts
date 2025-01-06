@@ -828,7 +828,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
           });
           return;
         }
+        continue;
       }
+      break;
     }
 
     this.cipher.sshKey.privateKey = parsedKey.private_key;

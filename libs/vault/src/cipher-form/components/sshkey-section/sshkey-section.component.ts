@@ -121,7 +121,9 @@ export class SshKeySectionComponent implements OnInit {
           });
           return;
         }
+        continue;
       }
+      break;
     }
 
     this.sshKeyForm.setValue({
