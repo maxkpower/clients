@@ -3,12 +3,13 @@
 import { CommonModule } from "@angular/common";
 import { Component, Input, OnInit } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
-import { lastValueFrom } from "rxjs";
+import { firstValueFrom, lastValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import {
   CardComponent,
@@ -22,7 +23,7 @@ import {
   TypographyModule,
 } from "@bitwarden/components";
 import { SshKeyPasswordPromptComponent } from "@bitwarden/importer/ui";
-import { SshKeyImportError, import_ssh_key } from "@bitwarden/sdk-internal";
+import { SshKey, SshKeyImportError, import_ssh_key } from "@bitwarden/sdk-internal";
 
 import { CipherFormContainer } from "../../cipher-form-container";
 
@@ -70,6 +71,7 @@ export class SshKeySectionComponent implements OnInit {
     private platformUtilsService: PlatformUtilsService,
     private logService: LogService,
     private dialogService: DialogService,
+    private sdkService: SdkService,
   ) {}
 
   ngOnInit() {
@@ -91,62 +93,61 @@ export class SshKeySectionComponent implements OnInit {
     });
   }
 
+  private async importUsingSdk(key: string, password: string): Promise<SshKey> {
+    await firstValueFrom(this.sdkService.client$);
+    return import_ssh_key(key, password);
+  }
+
   async importSshKeyFromClipboard(password: string = "") {
+    const ATTEMPTS = 5;
     const key = await this.platformUtilsService.readFromClipboard();
-    try {
-      const parsedKey = import_ssh_key(key, password);
-      if (parsedKey == null) {
-        this.toastService.showToast({
-          variant: "error",
-          title: "",
-          message: this.i18nService.t("invalidSshKey"),
-        });
-        return;
-      }
-      this.sshKeyForm.setValue({
-        privateKey: parsedKey.private_key,
-        publicKey: parsedKey.public_key,
-        keyFingerprint: parsedKey.key_fingerprint,
-      });
 
-      this.toastService.showToast({
-        variant: "success",
-        title: "",
-        message: this.i18nService.t("sshKeyPasted"),
-      });
-    } catch (e) {
-      const error = e as SshKeyImportError;
-      switch (error.variant) {
-        case "ParsingError":
+    let parsedKey: SshKey = null;
+    for (let attempt = 0; attempt <= ATTEMPTS; attempt++) {
+      try {
+        parsedKey = await this.importUsingSdk(key, password);
+      } catch (e) {
+        const error = e as SshKeyImportError;
+        if (
+          error.variant === "WrongPassword" &&
+          ((password === "" && attempt === 0) || (password !== "" && attempt < ATTEMPTS))
+        ) {
+          password = await this.getSshKeyPassword();
+        } else {
           this.toastService.showToast({
             variant: "error",
             title: "",
-            message: this.i18nService.t("invalidSshKey"),
+            message: this.i18nService.t(this.sshImportErrorVariantToI18nKey(error.variant)),
           });
-          break;
-        case "UnsupportedKeyType":
-          this.toastService.showToast({
-            variant: "error",
-            title: "",
-            message: this.i18nService.t("sshKeyTypeUnsupported"),
-          });
-          break;
-        case "PasswordRequired":
-        case "WrongPassword":
-          if (password !== "") {
-            this.toastService.showToast({
-              variant: "error",
-              title: "",
-              message: this.i18nService.t("sshKeyWrongPassword"),
-            });
-          } else {
-            password = await this.getSshKeyPassword();
-            await this.importSshKeyFromClipboard(password);
-          }
-          break;
+          return;
+        }
       }
+    }
 
-      this.logService.info("Failed to import SSH key from clipboard", e);
+    this.sshKeyForm.setValue({
+      privateKey: parsedKey.private_key,
+      publicKey: parsedKey.public_key,
+      keyFingerprint: parsedKey.key_fingerprint,
+    });
+
+    this.toastService.showToast({
+      variant: "success",
+      title: "",
+      message: this.i18nService.t("sshKeyPasted"),
+    });
+  }
+
+  private sshImportErrorVariantToI18nKey(variant: string): string {
+    switch (variant) {
+      case "ParsingError":
+        return "invalidSshKey";
+      case "UnsupportedKeyType":
+        return "sshKeyTypeUnsupported";
+      case "PasswordRequired":
+      case "WrongPassword":
+        return "sshKeyWrongPassword";
+      default:
+        return "errorOccurred";
     }
   }
 
