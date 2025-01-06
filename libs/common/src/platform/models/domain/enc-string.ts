@@ -161,16 +161,16 @@ export class EncString implements Encrypted {
       return this.decryptedValue;
     }
 
-    let keyContext = "provided-key";
+    let decryptTrace = "provided-key";
     try {
       if (key == null) {
         key = await this.getKeyForDecryption(orgId);
-        keyContext = orgId == null ? `domain-orgkey-${orgId}` : "domain-userkey|masterkey";
+        decryptTrace = orgId == null ? `domain-orgkey-${orgId}` : "domain-userkey|masterkey";
         if (orgId != null) {
-          keyContext = `domain-orgkey-${orgId}`;
+          decryptTrace = `domain-orgkey-${orgId}`;
         } else {
           const cryptoService = Utils.getContainerService().getKeyService();
-          keyContext =
+          decryptTrace =
             (await cryptoService.getUserKey()) == null
               ? "domain-withlegacysupport-masterkey"
               : "domain-withlegacysupport-userkey";
@@ -184,7 +184,7 @@ export class EncString implements Encrypted {
       this.decryptedValue = await encryptService.decryptToUtf8(
         this,
         key,
-        keyContext == null ? context : `${keyContext}${context || ""}`,
+        decryptTrace == null ? context : `${decryptTrace}${context || ""}`,
       );
     } catch (e) {
       this.decryptedValue = DECRYPT_ERROR;
@@ -195,14 +195,14 @@ export class EncString implements Encrypted {
   async decryptWithKey(
     key: SymmetricCryptoKey,
     encryptService: EncryptService,
-    context: string = "domain-withkey",
+    decryptTrace: string = "domain-withkey",
   ): Promise<string> {
     try {
       if (key == null) {
         throw new Error("No key to decrypt EncString");
       }
 
-      this.decryptedValue = await encryptService.decryptToUtf8(this, key, context);
+      this.decryptedValue = await encryptService.decryptToUtf8(this, key, decryptTrace);
     } catch (e) {
       this.decryptedValue = DECRYPT_ERROR;
     }

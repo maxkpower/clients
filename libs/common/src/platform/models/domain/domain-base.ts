@@ -136,11 +136,11 @@ export default class Domain {
     value: EncString,
     key: SymmetricCryptoKey,
     encryptService: EncryptService,
-    decryptContext: string,
+    decryptTrace: string,
   ) {
     let decrypted: string = null;
     if (value) {
-      decrypted = await value.decryptWithKey(key, encryptService, decryptContext);
+      decrypted = await value.decryptWithKey(key, encryptService, decryptTrace);
     } else {
       decrypted = null;
     }
