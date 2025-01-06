@@ -36,6 +36,7 @@ import { SyncService } from "@bitwarden/common/platform/sync";
 import {
   AsyncActionsModule,
   ButtonModule,
+  CheckboxModule,
   DialogService,
   FormFieldModule,
   ToastService,
@@ -67,6 +68,7 @@ import {
     FormFieldModule,
     AsyncActionsModule,
     RouterLink,
+    CheckboxModule,
     ButtonModule,
     TwoFactorOptionsComponent, // used as dialog
     TwoFactorAuthAuthenticatorComponent,
@@ -78,6 +80,8 @@ import {
   providers: [I18nPipe],
 })
 export class TwoFactorAuthComponent implements OnInit, OnDestroy {
+  loading = true;
+
   token = "";
   remember = false;
   orgSsoIdentifier: string = null;
@@ -155,6 +159,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.twoFactorAuthComponentService.extendPopupWidthIfRequired?.(
       this.selectedProviderType,
     );
+
+    this.loading = false;
   }
 
   private async processWebAuthnResponseIfExists() {
