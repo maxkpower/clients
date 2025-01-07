@@ -12,7 +12,6 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
-import { CipherReportComponent } from "./cipher-report.component";
 import { InactiveTwoFactorReportComponent } from "./inactive-two-factor-report.component";
 import { cipherData } from "./reports-ciphers.mock";
 
@@ -63,10 +62,6 @@ describe("InactiveTwoFactorReportComponent", () => {
         {
           provide: CipherFormConfigService,
           useValue: cipherFormConfigServiceMock,
-        },
-        {
-          provide: CipherReportComponent,
-          useValue: mock<CipherReportComponent>(),
         },
       ],
       schemas: [],
