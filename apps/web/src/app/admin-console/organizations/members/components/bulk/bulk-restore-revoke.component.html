@@ -34,22 +34,18 @@
       <bit-table *ngIf="accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell class="tw-w-1/2">{{ "member" | i18n }}</th>
+            <th bitCell colspan="2" class="tw-w-1/2">{{ "member" | i18n }}</th>
             <th bitCell *ngIf="this.showNoMasterPasswordWarning">{{ "details" | i18n }}</th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
             <td bitCell width="30">
-              <div class="tw-flex tw-items-center">
-                <div class="tw-flex tw-items-center tw-mr-6">
-                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
-                </div>
-                <div>
-                  {{ user.email }}
-                  <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
-                </div>
-              </div>
+              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+            </td>
+            <td bitCell class="tw-w-full tw-max-w-0">
+              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
             </td>
             <td bitCell *ngIf="this.showNoMasterPasswordWarning">
               <span class="tw-block tw-lowercase tw-text-muted">
@@ -76,8 +72,8 @@
             <td bitCell width="30">
               <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
             </td>
-            <td bitCell>
-              {{ user.email }}
+            <td bitCell class="tw-w-full tw-max-w-0">
+              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
               <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
             </td>
             <td bitCell *ngIf="this.showNoMasterPasswordWarning">
@@ -98,22 +94,18 @@
       <bit-table *ngIf="accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell class="tw-w-1/2">{{ "member" | i18n }}</th>
+            <th bitCell colspan="2" class="tw-w-1/2">{{ "member" | i18n }}</th>
             <th bitCell>{{ "status" | i18n }}</th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
             <td bitCell width="30">
-              <div class="tw-flex tw-items-center">
-                <div class="tw-flex tw-items-center tw-mr-6">
-                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
-                </div>
-                <div>
-                  {{ user.email }}
-                  <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
-                </div>
-              </div>
+              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+            </td>
+            <td bitCell class="tw-w-full tw-max-w-0">
+              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
             </td>
             <td bitCell *ngIf="statuses.has(user.id)">
               {{ statuses.get(user.id) }}
@@ -128,22 +120,18 @@
       <bit-table *ngIf="!accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell class="tw-w-1/2">{{ "member" | i18n }}</th>
+            <th bitCell colspan="2" class="tw-w-1/2">{{ "member" | i18n }}</th>
             <th bitCell>{{ "status" | i18n }}</th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
             <td bitCell width="30">
-              <div class="tw-flex tw-items-center">
-                <div class="tw-flex tw-items-center tw-mr-6">
-                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
-                </div>
-                <div>
-                  {{ user.email }}
-                  <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
-                </div>
-              </div>
+              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+            </td>
+            <td bitCell class="tw-w-full tw-max-w-0">
+              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
             </td>
             <td bitCell *ngIf="statuses.has(user.id)">
               {{ statuses.get(user.id) }}
