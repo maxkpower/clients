@@ -2,7 +2,7 @@
 // @ts-strict-ignore
 import { DialogModule } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, DestroyRef, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 
@@ -53,12 +53,13 @@ export class TwoFactorAuthDuoComponent implements OnInit {
     protected platformUtilsService: PlatformUtilsService,
     protected toastService: ToastService,
     private twoFactorAuthDuoComponentService: TwoFactorAuthDuoComponentService,
+    private destroyRef: DestroyRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.twoFactorAuthDuoComponentService
       .listenForDuo2faResult$()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((duo2faResult: Duo2faResult) => {
         this.token.emit(duo2faResult.token);
       });
