@@ -1,8 +1,8 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 
-import { CipherFormConfigService, DefaultCipherFormConfigService } from "@bitwarden/vault";
-
+import { CipherFormConfigService } from "../../../../../../libs/vault/src/cipher-form/abstractions/cipher-form-config.service";
+import { DefaultCipherFormConfigService } from "../../../../../../libs/vault/src/cipher-form/services/default-cipher-form-config.service";
 import { HeaderModule } from "../../layouts/header/header.module";
 import { SharedModule } from "../../shared";
 import { OrganizationBadgeModule } from "../../vault/individual-vault/organization-badge/organization-badge.module";
