@@ -51,12 +51,13 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
         }
 
         let request_id = self.get_request_id().await;
-        let request_data = request_parser::parse_request(data);
-        if let Err(e) = request_data {
-            println!("[SSH Agent] Error while parsing request: {}", e);
-            return false;
-        }
-        let request_data = request_data.unwrap();
+        let request_data = match request_parser::parse_request(data) {
+            Ok(data) => data,
+            Err(e) => {
+                println!("[SSH Agent] Error while parsing request: {}", e);
+                return false;
+            }
+        };
         let is_sig = match request_data {
             request_parser::SshAgentSignRequest::SshSigRequest(_) => true,
             request_parser::SshAgentSignRequest::SignRequest(_) => false,
