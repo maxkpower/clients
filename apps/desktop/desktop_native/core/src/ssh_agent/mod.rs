@@ -78,7 +78,7 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
                 cipher_id: Some(ssh_key.cipher_uuid.clone()),
                 process_name: info.process_name().to_string(),
                 is_list: false,
-                namespace: namespace,
+                namespace,
                 is_forwarding: info.is_forwarding(),
             })
             .await
@@ -123,7 +123,7 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
         &self,
         is_forwarding: bool,
         connection_info: &peerinfo::models::PeerInfo,
-    ) -> () {
+    ) {
         // is_forwarding can only be added but never removed from a connection
         if is_forwarding {
             connection_info.set_forwarding(is_forwarding);
