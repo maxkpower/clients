@@ -1,3 +1,5 @@
+use bytes::{Buf, Bytes};
+
 #[derive(Debug)]
 pub(crate) struct SshSigRequest {
     pub namespace: String,
@@ -13,25 +15,17 @@ pub(crate) enum SshAgentSignRequest {
 }
 
 pub(crate) fn parse_request(data: &[u8]) -> Result<SshAgentSignRequest, anyhow::Error> {
+    let mut data = Bytes::copy_from_slice(data);
     let magic_header = "SSHSIG";
-    let mut data_iter = data.iter().copied();
-    let header = data_iter
-        .by_ref()
-        .take(magic_header.len())
-        .collect::<Vec<u8>>();
+    let header = data.split_to(magic_header.len());
 
     // sshsig; based on https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.sshsig
     if header == magic_header.as_bytes() {
-        let version = data_iter.by_ref().take(4).collect::<Vec<u8>>();
-        let _version = u32::from_be_bytes(
-            version
-                .try_into()
-                .map_err(|_| anyhow::anyhow!("Invalid version"))?,
-        );
+        let _version = data.get_u32();
 
         // read until null byte
-        let namespace = data_iter
-            .by_ref()
+        let namespace = data
+            .into_iter()
             .take_while(|&x| x != 0)
             .collect::<Vec<u8>>();
         let namespace =

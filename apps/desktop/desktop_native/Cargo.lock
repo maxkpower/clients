@@ -767,6 +767,7 @@ dependencies = [
  "base64",
  "bitwarden-russh",
  "byteorder",
+ "bytes",
  "cbc",
  "core-foundation 0.10.0",
  "desktop_objc",
