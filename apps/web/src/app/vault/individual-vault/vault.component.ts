@@ -182,12 +182,13 @@ export class VaultComponent implements OnInit, OnDestroy {
   protected selectedCollection: TreeNode<CollectionView> | undefined;
   protected canCreateCollections = false;
   protected currentSearchText$: Observable<string>;
-  private activeUserId: UserId;
   private searchText$ = new Subject<string>();
   private refresh$ = new BehaviorSubject<void>(null);
   private destroy$ = new Subject<void>();
   private extensionRefreshEnabled: boolean;
   private hasSubscription$ = new BehaviorSubject<boolean>(false);
+
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   private vaultItemDialogRef?: DialogRef<VaultItemDialogResult> | undefined;
   private readonly unpaidSubscriptionDialog$ = this.organizationService.organizations$.pipe(
@@ -287,9 +288,7 @@ export class VaultComponent implements OnInit, OnDestroy {
         : "trashCleanupWarning",
     );
 
-    this.activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(this.activeUserId$);
 
     const firstSetup$ = this.route.queryParams.pipe(
       first(),
@@ -353,7 +352,7 @@ export class VaultComponent implements OnInit, OnDestroy {
     this.currentSearchText$ = this.route.queryParams.pipe(map((queryParams) => queryParams.search));
 
     const ciphers$ = combineLatest([
-      this.cipherService.cipherViews$.pipe(filter((c) => c !== null)),
+      this.cipherService.cipherViews$(activeUserId).pipe(filter((c) => c !== null)),
       filter$,
       this.currentSearchText$,
     ]).pipe(
@@ -429,7 +428,7 @@ export class VaultComponent implements OnInit, OnDestroy {
         switchMap(async (params) => {
           const cipherId = getCipherIdFromParams(params);
           if (cipherId) {
-            if (await this.cipherService.get(cipherId)) {
+            if (await this.cipherService.get(cipherId, activeUserId)) {
               let action = params.action;
               // Default to "view" if extension refresh is enabled
               if (action == null && this.extensionRefreshEnabled) {
@@ -768,7 +767,8 @@ export class VaultComponent implements OnInit, OnDestroy {
   }
 
   async editCipherId(id: string, cloneMode?: boolean) {
-    const cipher = await this.cipherService.get(id);
+    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const cipher = await this.cipherService.get(id, activeUserId);
 
     if (
       cipher &&
@@ -847,7 +847,8 @@ export class VaultComponent implements OnInit, OnDestroy {
    * @returns Promise<void>
    */
   async viewCipherById(id: string) {
-    const cipher = await this.cipherService.get(id);
+    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const cipher = await this.cipherService.get(id, activeUserId);
     // If cipher exists (cipher is null when new) and MP reprompt
     // is on for this cipher, then show password reprompt.
     if (
@@ -1040,7 +1041,8 @@ export class VaultComponent implements OnInit, OnDestroy {
     }
 
     try {
-      await this.cipherService.restoreWithServer(c.id);
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.cipherService.restoreWithServer(c.id, activeUserId);
       this.toastService.showToast({
         variant: "success",
         title: null,
@@ -1124,7 +1126,8 @@ export class VaultComponent implements OnInit, OnDestroy {
     }
 
     try {
-      await this.deleteCipherWithServer(c.id, permanent);
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.deleteCipherWithServer(c.id, activeUserId, permanent);
 
       this.toastService.showToast({
         variant: "success",
@@ -1259,10 +1262,10 @@ export class VaultComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected deleteCipherWithServer(id: string, permanent: boolean) {
+  protected deleteCipherWithServer(id: string, userId: UserId, permanent: boolean) {
     return permanent
-      ? this.cipherService.deleteWithServer(id)
-      : this.cipherService.softDeleteWithServer(id);
+      ? this.cipherService.deleteWithServer(id, userId)
+      : this.cipherService.softDeleteWithServer(id, userId);
   }
 
   protected async repromptCipher(ciphers: CipherView[]) {

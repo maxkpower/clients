@@ -50,6 +50,7 @@ import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { OrganizationBillingServiceAbstraction } from "@bitwarden/common/billing/abstractions";
 import { BillingApiServiceAbstraction } from "@bitwarden/common/billing/abstractions/billing-api.service.abstraction";
 import { EventType } from "@bitwarden/common/enums";
@@ -62,7 +63,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SyncService } from "@bitwarden/common/platform/sync";
-import { CipherId, CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
+import { CipherId, CollectionId, OrganizationId, UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -231,6 +232,8 @@ export class VaultComponent implements OnInit, OnDestroy {
     ),
   );
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
+
   constructor(
     private route: ActivatedRoute,
     private organizationService: OrganizationService,
@@ -266,6 +269,7 @@ export class VaultComponent implements OnInit, OnDestroy {
     protected billingApiService: BillingApiServiceAbstraction,
     private organizationBillingService: OrganizationBillingServiceAbstraction,
     private resellerWarningService: ResellerWarningService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit() {
@@ -1032,8 +1036,9 @@ export class VaultComponent implements OnInit, OnDestroy {
 
     // Allow restore of an Unassigned Item
     try {
+      const activeUserId = await firstValueFrom(this.activeUserId$);
       const asAdmin = this.organization?.canEditAnyCollection || c.isUnassigned;
-      await this.cipherService.restoreWithServer(c.id, asAdmin);
+      await this.cipherService.restoreWithServer(c.id, activeUserId, asAdmin);
       this.toastService.showToast({
         variant: "success",
         title: null,
@@ -1124,7 +1129,8 @@ export class VaultComponent implements OnInit, OnDestroy {
     }
 
     try {
-      await this.deleteCipherWithServer(c.id, permanent, c.isUnassigned);
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.deleteCipherWithServer(c.id, activeUserId, permanent, c.isUnassigned);
       this.toastService.showToast({
         variant: "success",
         title: null,
@@ -1410,11 +1416,16 @@ export class VaultComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected deleteCipherWithServer(id: string, permanent: boolean, isUnassigned: boolean) {
+  protected deleteCipherWithServer(
+    id: string,
+    userId: UserId,
+    permanent: boolean,
+    isUnassigned: boolean,
+  ) {
     const asAdmin = this.organization?.canEditAllCiphers || isUnassigned;
     return permanent
-      ? this.cipherService.deleteWithServer(id, asAdmin)
-      : this.cipherService.softDeleteWithServer(id, asAdmin);
+      ? this.cipherService.deleteWithServer(id, userId, asAdmin)
+      : this.cipherService.softDeleteWithServer(id, userId, asAdmin);
   }
 
   protected async repromptCipher(ciphers: CipherView[]) {
