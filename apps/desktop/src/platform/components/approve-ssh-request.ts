@@ -51,13 +51,12 @@ export class ApproveSshRequestComponent {
     cipherName: string,
     applicationName: string,
     isAgentForwarding: boolean,
-    isSignRequest: boolean,
-    isGitSignRequest: boolean,
+    namespace: string,
   ) {
     let actioni18nKey = "sshActionLogin";
-    if (isGitSignRequest) {
+    if (namespace === "git") {
       actioni18nKey = "sshActionGitSign";
-    } else if (isSignRequest) {
+    } else if (namespace != null && namespace != "") {
       actioni18nKey = "sshActionSign";
     }
 

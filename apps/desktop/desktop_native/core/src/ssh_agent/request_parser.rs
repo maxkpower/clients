@@ -14,7 +14,7 @@ pub(crate) enum SshAgentSignRequest {
 
 pub(crate) fn parse_request(data: &[u8]) -> Result<SshAgentSignRequest, anyhow::Error> {
     let magic_header = "SSHSIG";
-    let mut data_iter = data.to_vec().into_iter();
+    let mut data_iter = data.iter().copied();
     let header = data_iter
         .by_ref()
         .take(magic_header.len())

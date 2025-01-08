@@ -36,8 +36,7 @@ export class MainSshAgentService {
           isListRequest: boolean,
           processName: string,
           isAgentForwarding: boolean,
-          isSignRequest: boolean,
-          isGitSignRequest: boolean,
+          namespace: string,
         ) => {
           // clear all old (> SIGN_TIMEOUT) requests
           this.requestResponses = this.requestResponses.filter(
@@ -52,8 +51,7 @@ export class MainSshAgentService {
             requestId: id_for_this_request,
             processName,
             isAgentForwarding,
-            isSignRequest,
-            isGitSignRequest,
+            namespace,
           });
 
           const result = await firstValueFrom(

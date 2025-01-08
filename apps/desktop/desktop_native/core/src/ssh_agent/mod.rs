@@ -38,8 +38,7 @@ pub struct SshAgentUIRequest {
     pub cipher_id: Option<String>,
     pub process_name: String,
     pub is_list: bool,
-    pub is_sig: bool,
-    pub is_git: bool,
+    pub namespace: Option<String>,
     pub is_forwarding: bool,
 }
 
@@ -58,24 +57,18 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
                 return false;
             }
         };
-        let is_sig = match request_data {
-            request_parser::SshAgentSignRequest::SshSigRequest(_) => true,
-            request_parser::SshAgentSignRequest::SignRequest(_) => false,
+        let namespace = match request_data {
+            request_parser::SshAgentSignRequest::SshSigRequest(ref req) => {
+                Some(req.namespace.clone())
+            }
+            _ => None,
         };
-        let is_git = is_sig
-            && match request_data {
-                request_parser::SshAgentSignRequest::SshSigRequest(ref req) => {
-                    req.namespace == "git"
-                }
-                _ => false,
-            };
 
         println!(
-            "[SSH Agent] Confirming request from application: {}, is_forwarding: {}, is_sshsig: {}, is_git: {}",
+            "[SSH Agent] Confirming request from application: {}, is_forwarding: {}, namespace: {}",
             info.process_name(),
             info.is_forwarding(),
-            is_sig,
-            is_git
+            namespace.clone().unwrap_or_default(),
         );
 
         let mut rx_channel = self.get_ui_response_rx.lock().await.resubscribe();
@@ -85,8 +78,7 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
                 cipher_id: Some(ssh_key.cipher_uuid.clone()),
                 process_name: info.process_name().to_string(),
                 is_list: false,
-                is_sig,
-                is_git,
+                namespace: namespace,
                 is_forwarding: info.is_forwarding(),
             })
             .await
@@ -112,8 +104,7 @@ impl ssh_agent::Agent<peerinfo::models::PeerInfo> for BitwardenDesktopAgent {
             cipher_id: None,
             process_name: info.process_name().to_string(),
             is_list: true,
-            is_sig: false,
-            is_git: false,
+            namespace: None,
             is_forwarding: info.is_forwarding(),
         };
         self.show_ui_request_tx

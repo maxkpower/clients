@@ -248,7 +248,7 @@ pub mod sshagent {
     #[napi]
     pub async fn serve(
         callback: ThreadsafeFunction<
-            (Option<String>, bool, String, bool, bool, bool),
+            (Option<String>, bool, String, bool, Option<String>),
             CalleeHandled,
         >,
     ) -> napi::Result<SshAgentState> {
@@ -272,8 +272,7 @@ pub mod sshagent {
                             request.is_list,
                             request.process_name,
                             request.is_forwarding,
-                            request.is_sig,
-                            request.is_git,
+                            request.namespace,
                         )))
                         .await;
                     match promise_result {
