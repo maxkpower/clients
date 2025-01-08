@@ -1,0 +1,23 @@
+<form [formGroup]="setVerifyDevicesForm" [bitSubmit]="submit">
+  <bit-dialog dialogSize="default" [title]="'newDeviceLoginProtection' | i18n">
+    <ng-container bitDialogContent>
+      <p bitTypography="body1">{{ dialogDesc }}</p>
+      <bit-callout type="warning">{{
+        "turnOffNewDeviceLoginProtectionWarning" | i18n
+      }}</bit-callout>
+      <app-user-verification-form-input
+        formControlName="verification"
+        name="verification"
+        [(invalidSecret)]="invalidSecret"
+      ></app-user-verification-form-input>
+    </ng-container>
+    <ng-container bitDialogFooter>
+      <button bitButton bitFormButton type="submit" buttonType="danger">
+        {{ dialogSubmitButtonDesc }}
+      </button>
+      <button bitButton bitFormButton type="button" buttonType="secondary" bitDialogClose>
+        {{ "close" | i18n }}
+      </button>
+    </ng-container>
+  </bit-dialog>
+</form>
