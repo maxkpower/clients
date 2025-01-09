@@ -34,20 +34,33 @@
       <bit-table *ngIf="accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell colspan="2" class="tw-w-1/2">{{ "member" | i18n }}</th>
-            <th bitCell *ngIf="this.showNoMasterPasswordWarning">{{ "details" | i18n }}</th>
+            <th bitCell>{{ "member" | i18n }}</th>
+            <th bitCell class="tw-w-1/2" *ngIf="this.showNoMasterPasswordWarning">
+              {{ "details" | i18n }}
+            </th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
-            <td bitCell width="30">
-              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+            <td bitCell class="tw-max-w-0">
+              <div class="tw-flex tw-items-center">
+                <div class="tw-mr-6">
+                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+                </div>
+                <ng-container *ngIf="user.name; else emailOnly">
+                  <div class="tw-truncate" [title]="user.name + ' ' + user.email">
+                    {{ user.name }}
+                    <small class="tw-block tw-text-muted tw-truncate">
+                      {{ user.email }}
+                    </small>
+                  </div>
+                </ng-container>
+                <ng-template #emailOnly>
+                  <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+                </ng-template>
+              </div>
             </td>
-            <td bitCell class="tw-w-full tw-max-w-0">
-              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
-              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
-            </td>
-            <td bitCell *ngIf="this.showNoMasterPasswordWarning">
+            <td bitCell class="tw-w-1/2" *ngIf="this.showNoMasterPasswordWarning">
               <span class="tw-block tw-lowercase tw-text-muted">
                 <ng-container *ngIf="user.hasMasterPassword === true"> - </ng-container>
                 <ng-container *ngIf="user.hasMasterPassword === false">
@@ -63,20 +76,33 @@
       <bit-table *ngIf="!accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell colspan="2">{{ "user" | i18n }}</th>
-            <th bitCell *ngIf="this.showNoMasterPasswordWarning">{{ "details" | i18n }}</th>
+            <th bitCell>{{ "user" | i18n }}</th>
+            <th bitCell class="tw-w-1/2" *ngIf="this.showNoMasterPasswordWarning">
+              {{ "details" | i18n }}
+            </th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
-            <td bitCell width="30">
-              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+            <td bitCell class="tw-max-w-0">
+              <div class="tw-flex tw-items-center">
+                <div class="tw-mr-6">
+                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+                </div>
+                <ng-container *ngIf="user.name; else emailOnly">
+                  <div class="tw-truncate" [title]="user.name + ' ' + user.email">
+                    {{ user.name }}
+                    <small class="tw-block tw-text-muted tw-truncate">
+                      {{ user.email }}
+                    </small>
+                  </div>
+                </ng-container>
+                <ng-template #emailOnly>
+                  <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+                </ng-template>
+              </div>
             </td>
-            <td bitCell class="tw-w-full tw-max-w-0">
-              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
-              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
-            </td>
-            <td bitCell *ngIf="this.showNoMasterPasswordWarning">
+            <td bitCell class="tw-w-1/2" *ngIf="this.showNoMasterPasswordWarning">
               <span class="tw-block tw-lowercase tw-text-muted">
                 <ng-container *ngIf="user.hasMasterPassword === true"> - </ng-container>
                 <ng-container *ngIf="user.hasMasterPassword === false">
@@ -94,18 +120,29 @@
       <bit-table *ngIf="accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell colspan="2" class="tw-w-1/2">{{ "member" | i18n }}</th>
-            <th bitCell>{{ "status" | i18n }}</th>
+            <th bitCell class="tw-w-1/2">{{ "member" | i18n }}</th>
+            <th bitCell class="tw-w-1/2">{{ "status" | i18n }}</th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
-            <td bitCell width="30">
-              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
-            </td>
-            <td bitCell class="tw-w-full tw-max-w-0">
-              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
-              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
+            <td bitCell class="tw-w-1/2 tw-max-w-0">
+              <div class="tw-flex tw-items-center">
+                <div class="tw-mr-6">
+                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+                </div>
+                <ng-container *ngIf="user.name; else emailOnly">
+                  <div class="tw-truncate" [title]="user.name + ' ' + user.email">
+                    {{ user.name }}
+                    <small class="tw-block tw-text-muted tw-truncate">
+                      {{ user.email }}
+                    </small>
+                  </div>
+                </ng-container>
+                <ng-template #emailOnly>
+                  <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+                </ng-template>
+              </div>
             </td>
             <td bitCell *ngIf="statuses.has(user.id)">
               {{ statuses.get(user.id) }}
@@ -120,23 +157,34 @@
       <bit-table *ngIf="!accountDeprovisioning.enabled">
         <ng-container header>
           <tr>
-            <th bitCell colspan="2" class="tw-w-1/2">{{ "member" | i18n }}</th>
-            <th bitCell>{{ "status" | i18n }}</th>
+            <th bitCell class="tw-w-1/2">{{ "member" | i18n }}</th>
+            <th bitCell class="tw-w-1/2">{{ "status" | i18n }}</th>
           </tr>
         </ng-container>
         <ng-template body>
           <tr bitRow *ngFor="let user of users">
-            <td bitCell width="30">
-              <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+            <td bitCell class="tw-w-1/2 tw-max-w-0">
+              <div class="tw-flex tw-items-center">
+                <div class="tw-mr-6">
+                  <bit-avatar [text]="user | userName" [id]="user.id" size="small"></bit-avatar>
+                </div>
+                <ng-container *ngIf="user.name; else emailOnly">
+                  <div class="tw-truncate" [title]="user.name + ' ' + user.email">
+                    {{ user.name }}
+                    <small class="tw-block tw-text-muted tw-truncate">
+                      {{ user.email }}
+                    </small>
+                  </div>
+                </ng-container>
+                <ng-template #emailOnly>
+                  <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
+                </ng-template>
+              </div>
             </td>
-            <td bitCell class="tw-w-full tw-max-w-0">
-              <div class="tw-truncate" [title]="user.email">{{ user.email }}</div>
-              <small class="tw-block tw-text-muted" *ngIf="user.name">{{ user.name }}</small>
-            </td>
-            <td bitCell *ngIf="statuses.has(user.id)">
+            <td bitCell class="tw-w-1/2" *ngIf="statuses.has(user.id)">
               {{ statuses.get(user.id) }}
             </td>
-            <td bitCell *ngIf="!statuses.has(user.id)">
+            <td bitCell class="tw-w-1/2" *ngIf="!statuses.has(user.id)">
               {{ "bulkFilteredMessage" | i18n }}
             </td>
           </tr>
