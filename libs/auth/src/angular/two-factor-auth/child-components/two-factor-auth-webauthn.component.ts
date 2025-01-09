@@ -13,7 +13,6 @@ import { WINDOW } from "@bitwarden/angular/services/injection-tokens";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { WebAuthnIFrame } from "@bitwarden/common/auth/webauthn-iframe";
-import { ClientType } from "@bitwarden/common/enums";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -62,11 +61,6 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
   ) {
     this.webAuthnSupported = this.platformUtilsService.supportsWebAuthn(win);
-
-    if (this.platformUtilsService.getClientType() == ClientType.Browser) {
-      // FIXME: Chromium 110 has broken WebAuthn support in extensions via an iframe
-      this.webAuthnNewTab = true;
-    }
   }
 
   async ngOnInit(): Promise<void> {
