@@ -254,10 +254,7 @@ pub mod sshagent {
 
     #[napi]
     pub async fn serve(
-        callback: ThreadsafeFunction<
-            SshUIRequest,
-            CalleeHandled,
-        >,
+        callback: ThreadsafeFunction<SshUIRequest, CalleeHandled>,
     ) -> napi::Result<SshAgentState> {
         let (auth_request_tx, mut auth_request_rx) =
             tokio::sync::mpsc::channel::<desktop_core::ssh_agent::SshAgentUIRequest>(32);
@@ -274,7 +271,7 @@ pub mod sshagent {
                     let auth_response_tx_arc = cloned_response_tx_arc;
                     let callback = cloned_callback;
                     let promise_result: Result<Promise<bool>, napi::Error> = callback
-                        .call_async(Ok(SshUIRequest{
+                        .call_async(Ok(SshUIRequest {
                             cipher_id: request.cipher_id,
                             is_list: request.is_list,
                             process_name: request.process_name,
