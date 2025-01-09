@@ -283,12 +283,13 @@ import {
   ImportServiceAbstraction,
 } from "@bitwarden/importer/core";
 import {
-  KeyService as KeyServiceAbstraction,
-  DefaultKeyService as KeyService,
+  KeyService,
+  DefaultKeyService,
   BiometricStateService,
   DefaultBiometricStateService,
-  KdfConfigService,
+  BiometricsService,
   DefaultKdfConfigService,
+  KdfConfigService,
   UserAsymmetricKeysRegenerationService,
   DefaultUserAsymmetricKeysRegenerationService,
   UserAsymmetricKeysRegenerationApiService,
@@ -420,7 +421,7 @@ const safeProviders: SafeProvider[] = [
     deps: [
       AccountServiceAbstraction,
       MessagingServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       ApiServiceAbstraction,
       StateServiceAbstraction,
       TokenServiceAbstraction,
@@ -432,7 +433,7 @@ const safeProviders: SafeProvider[] = [
     deps: [
       AccountServiceAbstraction,
       InternalMasterPasswordServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       ApiServiceAbstraction,
       TokenServiceAbstraction,
       AppIdServiceAbstraction,
@@ -475,7 +476,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: CipherServiceAbstraction,
     useFactory: (
-      keyService: KeyServiceAbstraction,
+      keyService: KeyService,
       domainSettingsService: DomainSettingsService,
       apiService: ApiServiceAbstraction,
       i18nService: I18nServiceAbstraction,
@@ -505,7 +506,7 @@ const safeProviders: SafeProvider[] = [
         accountService,
       ),
     deps: [
-      KeyServiceAbstraction,
+      KeyService,
       DomainSettingsService,
       ApiServiceAbstraction,
       I18nServiceAbstraction,
@@ -524,7 +525,7 @@ const safeProviders: SafeProvider[] = [
     provide: InternalFolderService,
     useClass: FolderService,
     deps: [
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       I18nServiceAbstraction,
       CipherServiceAbstraction,
@@ -569,7 +570,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: CollectionService,
     useClass: DefaultCollectionService,
-    deps: [KeyServiceAbstraction, EncryptService, I18nServiceAbstraction, StateProvider],
+    deps: [KeyService, EncryptService, I18nServiceAbstraction, StateProvider],
   }),
   safeProvider({
     provide: ENV_ADDITIONAL_REGIONS,
@@ -614,8 +615,8 @@ const safeProviders: SafeProvider[] = [
     deps: [CryptoFunctionServiceAbstraction],
   }),
   safeProvider({
-    provide: KeyServiceAbstraction,
-    useClass: KeyService,
+    provide: KeyService,
+    useClass: DefaultKeyService,
     deps: [
       PinServiceAbstraction,
       InternalMasterPasswordServiceAbstraction,
@@ -640,7 +641,7 @@ const safeProviders: SafeProvider[] = [
     useFactory: legacyPasswordGenerationServiceFactory,
     deps: [
       EncryptService,
-      KeyServiceAbstraction,
+      KeyService,
       PolicyServiceAbstraction,
       AccountServiceAbstraction,
       StateProvider,
@@ -649,7 +650,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: GeneratorHistoryService,
     useClass: LocalGeneratorHistoryService,
-    deps: [EncryptService, KeyServiceAbstraction, StateProvider],
+    deps: [EncryptService, KeyService, StateProvider],
   }),
   safeProvider({
     provide: UsernameGenerationServiceAbstraction,
@@ -657,7 +658,7 @@ const safeProviders: SafeProvider[] = [
     deps: [
       ApiServiceAbstraction,
       I18nServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       PolicyServiceAbstraction,
       AccountServiceAbstraction,
@@ -697,7 +698,7 @@ const safeProviders: SafeProvider[] = [
     provide: InternalSendService,
     useClass: SendService,
     deps: [
-      KeyServiceAbstraction,
+      KeyService,
       I18nServiceAbstraction,
       KeyGenerationServiceAbstraction,
       SendStateProviderAbstraction,
@@ -724,7 +725,7 @@ const safeProviders: SafeProvider[] = [
       DomainSettingsService,
       InternalFolderService,
       CipherServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       CollectionService,
       MessagingServiceAbstraction,
       InternalPolicyService,
@@ -757,7 +758,7 @@ const safeProviders: SafeProvider[] = [
       AccountServiceAbstraction,
       PinServiceAbstraction,
       UserDecryptionOptionsServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       TokenServiceAbstraction,
       PolicyServiceAbstraction,
       BiometricStateService,
@@ -784,6 +785,7 @@ const safeProviders: SafeProvider[] = [
       StateEventRunnerService,
       TaskSchedulerService,
       LogService,
+      BiometricsService,
       LOCKED_CALLBACK,
       LOGOUT_CALLBACK,
     ],
@@ -830,7 +832,7 @@ const safeProviders: SafeProvider[] = [
       ImportApiServiceAbstraction,
       I18nServiceAbstraction,
       CollectionService,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       PinServiceAbstraction,
       AccountServiceAbstraction,
@@ -843,7 +845,7 @@ const safeProviders: SafeProvider[] = [
       FolderServiceAbstraction,
       CipherServiceAbstraction,
       PinServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       CryptoFunctionServiceAbstraction,
       KdfConfigService,
@@ -857,7 +859,7 @@ const safeProviders: SafeProvider[] = [
       CipherServiceAbstraction,
       ApiServiceAbstraction,
       PinServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       CryptoFunctionServiceAbstraction,
       CollectionService,
@@ -964,7 +966,7 @@ const safeProviders: SafeProvider[] = [
     deps: [
       AccountServiceAbstraction,
       InternalMasterPasswordServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       ApiServiceAbstraction,
       TokenServiceAbstraction,
       LogService,
@@ -978,17 +980,15 @@ const safeProviders: SafeProvider[] = [
     provide: UserVerificationServiceAbstraction,
     useClass: UserVerificationService,
     deps: [
-      KeyServiceAbstraction,
+      KeyService,
       AccountServiceAbstraction,
       InternalMasterPasswordServiceAbstraction,
       I18nServiceAbstraction,
       UserVerificationApiServiceAbstraction,
       UserDecryptionOptionsServiceAbstraction,
       PinServiceAbstraction,
-      LogService,
-      VaultTimeoutSettingsServiceAbstraction,
-      PlatformUtilsServiceAbstraction,
       KdfConfigService,
+      BiometricsService,
     ],
   }),
   safeProvider({
@@ -1011,7 +1011,7 @@ const safeProviders: SafeProvider[] = [
     deps: [
       OrganizationApiServiceAbstraction,
       AccountServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       OrganizationUserApiService,
       I18nServiceAbstraction,
@@ -1113,7 +1113,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: DevicesServiceAbstraction,
     useClass: DevicesServiceImplementation,
-    deps: [DevicesApiServiceAbstraction],
+    deps: [DevicesApiServiceAbstraction, AppIdServiceAbstraction],
   }),
   safeProvider({
     provide: DeviceTrustServiceAbstraction,
@@ -1121,7 +1121,7 @@ const safeProviders: SafeProvider[] = [
     deps: [
       KeyGenerationServiceAbstraction,
       CryptoFunctionServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       AppIdServiceAbstraction,
       DevicesApiServiceAbstraction,
@@ -1141,7 +1141,7 @@ const safeProviders: SafeProvider[] = [
       AppIdServiceAbstraction,
       AccountServiceAbstraction,
       InternalMasterPasswordServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       ApiServiceAbstraction,
       StateProvider,
@@ -1235,7 +1235,7 @@ const safeProviders: SafeProvider[] = [
       ApiServiceAbstraction,
       BillingApiServiceAbstraction,
       ConfigService,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       I18nServiceAbstraction,
       OrganizationApiServiceAbstraction,
@@ -1285,7 +1285,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: BillingAccountProfileStateService,
     useClass: DefaultBillingAccountProfileStateService,
-    deps: [StateProvider],
+    deps: [StateProvider, PlatformUtilsServiceAbstraction, ApiServiceAbstraction],
   }),
   safeProvider({
     provide: OrganizationManagementPreferencesService,
@@ -1295,7 +1295,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: UserAutoUnlockKeyService,
     useClass: UserAutoUnlockKeyService,
-    deps: [KeyServiceAbstraction],
+    deps: [KeyService],
   }),
   safeProvider({
     provide: ErrorHandler,
@@ -1339,7 +1339,7 @@ const safeProviders: SafeProvider[] = [
     useClass: DefaultSetPasswordJitService,
     deps: [
       ApiServiceAbstraction,
-      KeyServiceAbstraction,
+      KeyService,
       EncryptService,
       I18nServiceAbstraction,
       KdfConfigService,
@@ -1367,7 +1367,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: RegistrationFinishServiceAbstraction,
     useClass: DefaultRegistrationFinishService,
-    deps: [KeyServiceAbstraction, AccountApiServiceAbstraction],
+    deps: [KeyService, AccountApiServiceAbstraction],
   }),
   safeProvider({
     provide: TwoFactorAuthComponentService,
@@ -1404,7 +1404,7 @@ const safeProviders: SafeProvider[] = [
       PlatformUtilsServiceAbstraction,
       AccountServiceAbstraction,
       KdfConfigService,
-      KeyServiceAbstraction,
+      KeyService,
     ],
   }),
   safeProvider({
@@ -1432,7 +1432,7 @@ const safeProviders: SafeProvider[] = [
     provide: UserAsymmetricKeysRegenerationService,
     useClass: DefaultUserAsymmetricKeysRegenerationService,
     deps: [
-      KeyServiceAbstraction,
+      KeyService,
       CipherServiceAbstraction,
       UserAsymmetricKeysRegenerationApiService,
       LogService,

@@ -24,7 +24,6 @@ import {
   LoginComponent,
   LoginSecondaryContentComponent,
   LockIcon,
-  LockComponent,
   LoginViaAuthRequestComponent,
   PasswordHintComponent,
   RegistrationFinishComponent,
@@ -45,6 +44,7 @@ import {
   TwoFactorAuthGuard,
 } from "@bitwarden/auth/angular";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { LockComponent } from "@bitwarden/key-management/angular";
 import {
   NewDeviceVerificationNoticePageOneComponent,
   NewDeviceVerificationNoticePageTwoComponent,
