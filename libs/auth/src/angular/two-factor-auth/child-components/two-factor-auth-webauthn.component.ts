@@ -49,7 +49,7 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   webAuthnReady = false;
   webAuthnNewTab = false;
   webAuthnSupported = false;
-  webAuthn: WebAuthnIFrame = null;
+  webAuthnIframe: WebAuthnIFrame = null;
 
   constructor(
     protected i18nService: I18nService,
@@ -61,6 +61,8 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
   ) {
     this.webAuthnSupported = this.platformUtilsService.supportsWebAuthn(win);
+
+    // TODO: test webauthNewTab removal on other browsers
   }
 
   async ngOnInit(): Promise<void> {
@@ -68,12 +70,10 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
       this.token.emit(this.route.snapshot.paramMap.get("webAuthnResponse"));
     }
 
-    this.cleanupWebAuthn();
-
     if (this.win != null && this.webAuthnSupported) {
       const env = await firstValueFrom(this.environmentService.environment$);
       const webVaultUrl = env.getWebVaultUrl();
-      this.webAuthn = new WebAuthnIFrame(
+      this.webAuthnIframe = new WebAuthnIFrame(
         this.win,
         webVaultUrl,
         this.webAuthnNewTab,
@@ -105,7 +105,7 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cleanupWebAuthn();
+    this.cleanupWebAuthnIframe();
   }
 
   async authWebAuthn() {
@@ -113,17 +113,17 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
       TwoFactorProviderType.WebAuthn,
     );
 
-    if (!this.webAuthnSupported || this.webAuthn == null) {
+    if (!this.webAuthnSupported || this.webAuthnIframe == null) {
       return;
     }
 
-    this.webAuthn.init(providerData);
+    this.webAuthnIframe.init(providerData);
   }
 
-  private cleanupWebAuthn() {
-    if (this.webAuthn != null) {
-      this.webAuthn.stop();
-      this.webAuthn.cleanup();
+  private cleanupWebAuthnIframe() {
+    if (this.webAuthnIframe != null) {
+      this.webAuthnIframe.stop();
+      this.webAuthnIframe.cleanup();
     }
   }
 }
