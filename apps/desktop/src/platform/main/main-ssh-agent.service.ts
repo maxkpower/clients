@@ -53,60 +53,51 @@ export class MainSshAgentService {
   init() {
     // handle sign request passing to UI
     sshagent
-      .serve(
-        async (
-          err: Error,
-          cipherId: string,
-          isListRequest: boolean,
-          processName: string,
-          isAgentForwarding: boolean,
-          namespace: string,
-        ) => {
-          // clear all old (> SIGN_TIMEOUT) requests
-          this.requestResponses = this.requestResponses.filter(
-            (response) => response.timestamp > new Date(Date.now() - this.SIGN_TIMEOUT),
-          );
+      .serve(async (err: Error, sshUiRequest: sshagent.SshUiRequest) => {
+        // clear all old (> SIGN_TIMEOUT) requests
+        this.requestResponses = this.requestResponses.filter(
+          (response) => response.timestamp > new Date(Date.now() - this.SIGN_TIMEOUT),
+        );
 
-          this.request_id += 1;
-          const id_for_this_request = this.request_id;
-          this.messagingService.send("sshagent.signrequest", {
-            cipherId,
-            isListRequest,
-            requestId: id_for_this_request,
-            processName,
-            isAgentForwarding,
-            namespace,
-          });
+        this.request_id += 1;
+        const id_for_this_request = this.request_id;
+        this.messagingService.send("sshagent.signrequest", {
+          cipherId: sshUiRequest.cipherId,
+          isListRequest: sshUiRequest.isList,
+          requestId: id_for_this_request,
+          processName: sshUiRequest.processName,
+          isAgentForwarding: sshUiRequest.isForwarding,
+          namespace: sshUiRequest.namespace,
+        });
 
-          const result = await firstValueFrom(
-            race(
-              from([false]).pipe(delay(this.SIGN_TIMEOUT)),
+        const result = await firstValueFrom(
+          race(
+            from([false]).pipe(delay(this.SIGN_TIMEOUT)),
 
-              //poll for response
-              timer(0, this.REQUEST_POLL_INTERVAL).pipe(
-                concatMap(() => from(this.requestResponses)),
-                filter((response) => response.requestId == id_for_this_request),
-                take(1),
-                concatMap(() => from([true])),
-              ),
+            //poll for response
+            timer(0, this.REQUEST_POLL_INTERVAL).pipe(
+              concatMap(() => from(this.requestResponses)),
+              filter((response) => response.requestId == id_for_this_request),
+              take(1),
+              concatMap(() => from([true])),
             ),
-          );
+          ),
+        );
 
-          if (!result) {
-            return false;
-          }
+        if (!result) {
+          return false;
+        }
 
-          const response = this.requestResponses.find(
-            (response) => response.requestId == id_for_this_request,
-          );
+        const response = this.requestResponses.find(
+          (response) => response.requestId == id_for_this_request,
+        );
 
-          this.requestResponses = this.requestResponses.filter(
-            (response) => response.requestId != id_for_this_request,
-          );
+        this.requestResponses = this.requestResponses.filter(
+          (response) => response.requestId != id_for_this_request,
+        );
 
-          return response.accepted;
-        },
-      )
+        return response.accepted;
+      })
       .then((agentState: sshagent.SshAgentState) => {
         this.agentState = agentState;
         this.logService.info("SSH agent started");

@@ -67,7 +67,14 @@ export declare namespace sshagent {
     status: SshKeyImportStatus
     sshKey?: SshKey
   }
-  export function serve(callback: (err: Error | null, arg0: string | undefined | null, arg1: boolean, arg2: string, arg3: boolean, arg4?: string | undefined | null) => any): Promise<SshAgentState>
+  export interface SshUiRequest {
+    cipherId?: string
+    isList: boolean
+    processName: string
+    isForwarding: boolean
+    namespace?: string
+  }
+  export function serve(callback: (err: Error | null, arg: SshUiRequest) => any): Promise<SshAgentState>
   export function stop(agentState: SshAgentState): void
   export function isRunning(agentState: SshAgentState): boolean
   export function setKeys(agentState: SshAgentState, newKeys: Array<PrivateKey>): void
