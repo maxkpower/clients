@@ -113,16 +113,16 @@ export class GetCommand extends DownloadCommand {
 
   private async getCipherView(id: string): Promise<CipherView | CipherView[]> {
     let decCipher: CipherView = null;
+    const activeUserId = await firstValueFrom(this.activeUserId$);
     if (Utils.isGuid(id)) {
-      const cipher = await this.cipherService.get(id);
+      const cipher = await this.cipherService.get(id, activeUserId);
       if (cipher != null) {
-        const activeUserId = await firstValueFrom(this.activeUserId$);
         decCipher = await cipher.decrypt(
           await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
         );
       }
     } else if (id.trim() !== "") {
-      let ciphers = await this.cipherService.getAllDecrypted();
+      let ciphers = await this.cipherService.getAllDecrypted(activeUserId);
       ciphers = this.searchService.searchCiphersBasic(ciphers, id);
       if (ciphers.length > 1) {
         return ciphers;
@@ -265,8 +265,10 @@ export class GetCommand extends DownloadCommand {
     const canAccessPremium = await firstValueFrom(
       this.accountProfileService.hasPremiumFromAnySource$,
     );
+
     if (!canAccessPremium) {
-      const originalCipher = await this.cipherService.get(cipher.id);
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const originalCipher = await this.cipherService.get(cipher.id, activeUserId);
       if (
         originalCipher == null ||
         originalCipher.organizationId == null ||
@@ -351,7 +353,8 @@ export class GetCommand extends DownloadCommand {
       this.accountProfileService.hasPremiumFromAnySource$,
     );
     if (!canAccessPremium) {
-      const originalCipher = await this.cipherService.get(cipher.id);
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const originalCipher = await this.cipherService.get(cipher.id, activeUserId);
       if (originalCipher == null || originalCipher.organizationId == null) {
         return Response.error("Premium status is required to use this feature.");
       }
