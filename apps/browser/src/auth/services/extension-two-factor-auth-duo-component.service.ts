@@ -22,7 +22,9 @@ export class ExtensionTwoFactorAuthDuoComponentService implements TwoFactorAuthD
   ) {}
   listenForDuo2faResult$(): Observable<Duo2faResult> {
     return this.browserMessagingApi.messageListener$().pipe(
-      filter((msg: Message) => msg.command === "duoResult"),
+      filter((msg): msg is Message => {
+        return (msg as Message).command === "duoResult";
+      }),
       map((msg: Message) => {
         return {
           code: msg.code,
