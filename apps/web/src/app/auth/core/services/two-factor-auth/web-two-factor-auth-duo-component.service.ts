@@ -9,7 +9,7 @@ export class WebTwoFactorAuthDuoComponentService implements TwoFactorAuthDuoComp
   constructor(private platformUtilsService: PlatformUtilsService) {
     const duoResultChannel: BroadcastChannel = new BroadcastChannel("duoResult");
 
-    this.duo2faResult$ = fromEvent(duoResultChannel, "message").pipe(
+    this.duo2faResult$ = fromEvent<MessageEvent>(duoResultChannel, "message").pipe(
       map((msg: MessageEvent) => {
         return {
           code: msg.data.code,
