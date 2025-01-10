@@ -1,10 +1,11 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { BehaviorSubject, Subject, from, switchMap, takeUntil } from "rxjs";
+import { BehaviorSubject, Subject, firstValueFrom, from, map, switchMap, takeUntil } from "rxjs";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
@@ -40,6 +41,7 @@ export class VaultItemsComponent implements OnInit, OnDestroy {
   constructor(
     protected searchService: SearchService,
     protected cipherService: CipherService,
+    protected accountService: AccountService,
   ) {}
 
   ngOnInit(): void {
@@ -117,7 +119,10 @@ export class VaultItemsComponent implements OnInit, OnDestroy {
   protected deletedFilter: (cipher: CipherView) => boolean = (c) => c.isDeleted === this.deleted;
 
   protected async doSearch(indexedCiphers?: CipherView[]) {
-    indexedCiphers = indexedCiphers ?? (await this.cipherService.getAllDecrypted());
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
+    indexedCiphers = indexedCiphers ?? (await this.cipherService.getAllDecrypted(activeUserId));
     this.ciphers = await this.searchService.searchCiphers(
       this.searchText,
       [this.filter, this.deletedFilter],
