@@ -12,7 +12,7 @@ export class ExtensionTwoFactorAuthWebAuthnComponentService
     super();
   }
 
-  async shouldOpenWebAuthnInNewTab(): Promise<boolean> {
+  shouldOpenWebAuthnInNewTab(): boolean {
     const isChrome = this.platformUtilsService.isChrome();
     if (isChrome) {
       // Chrome now supports WebAuthn in the iframe in the extension now.

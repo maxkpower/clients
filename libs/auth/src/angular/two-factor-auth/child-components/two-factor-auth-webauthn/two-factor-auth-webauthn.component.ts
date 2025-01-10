@@ -25,6 +25,8 @@ import {
   ToastService,
 } from "@bitwarden/components";
 
+import { TwoFactorAuthWebAuthnComponentService } from "./two-factor-auth-webauthn-component.service";
+
 @Component({
   standalone: true,
   selector: "app-two-factor-auth-webauthn",
@@ -59,10 +61,10 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
     protected twoFactorService: TwoFactorService,
     protected route: ActivatedRoute,
     private toastService: ToastService,
+    private twoFactorAuthWebAuthnComponentService: TwoFactorAuthWebAuthnComponentService,
   ) {
     this.webAuthnSupported = this.platformUtilsService.supportsWebAuthn(win);
-
-    // TODO: test webauthNewTab removal on other browsers (works on chrome, but not firefox or)
+    this.webAuthnNewTab = this.twoFactorAuthWebAuthnComponentService.shouldOpenWebAuthnInNewTab();
   }
 
   async ngOnInit(): Promise<void> {

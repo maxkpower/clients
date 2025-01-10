@@ -5,5 +5,5 @@ export abstract class TwoFactorAuthWebAuthnComponentService {
   /**
    * Determines if the WebAuthn 2FA should be opened in a new tab or can be completed in the current tab.
    */
-  abstract shouldOpenWebAuthnInNewTab(): Promise<boolean>;
+  abstract shouldOpenWebAuthnInNewTab(): boolean;
 }

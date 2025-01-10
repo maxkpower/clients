@@ -6,7 +6,7 @@ export class DefaultTwoFactorAuthWebAuthnComponentService
   /**
    * Default implementation is to not open in a new tab.
    */
-  async shouldOpenWebAuthnInNewTab(): Promise<boolean> {
+  shouldOpenWebAuthnInNewTab(): boolean {
     return false;
   }
 }
