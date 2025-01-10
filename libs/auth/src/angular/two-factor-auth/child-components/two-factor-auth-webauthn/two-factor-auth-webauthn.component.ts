@@ -62,7 +62,7 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   ) {
     this.webAuthnSupported = this.platformUtilsService.supportsWebAuthn(win);
 
-    // TODO: test webauthNewTab removal on other browsers
+    // TODO: test webauthNewTab removal on other browsers (works on chrome, but not firefox or)
   }
 
   async ngOnInit(): Promise<void> {
