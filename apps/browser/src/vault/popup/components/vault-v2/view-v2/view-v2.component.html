@@ -3,6 +3,13 @@
     <app-pop-out slot="end" />
   </popup-header>
 
+  <bit-callout
+    *ngIf="canManageCipher$ | async"
+    type="warning"
+    [title]="'changeAtRiskPassword' | i18n"
+  >
+  </bit-callout>
+
   <app-cipher-view *ngIf="cipher" [cipher]="cipher"></app-cipher-view>
 
   <popup-footer slot="footer" *ngIf="showFooter()">

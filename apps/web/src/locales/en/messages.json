@@ -10134,5 +10134,8 @@
         "example": "Acme c"
       }
     }
+  },
+  "changeAtRiskPassword": {
+    "message": "Change at-risk password"
   }
 }

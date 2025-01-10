@@ -34,6 +34,7 @@ import {
   IconButtonModule,
   SearchModule,
   ToastService,
+  CalloutModule,
 } from "@bitwarden/components";
 import { CopyCipherFieldService } from "@bitwarden/vault";
 
@@ -80,6 +81,7 @@ type LoadAction =
     CipherViewComponent,
     AsyncActionsModule,
     PopOutComponent,
+    CalloutModule,
   ],
   providers: [
     { provide: ViewPasswordHistoryService, useClass: BrowserViewPasswordHistoryService },
@@ -94,6 +96,7 @@ export class ViewV2Component {
   collections$: Observable<CollectionView[]>;
   loadAction: LoadAction;
   senderTabId?: number;
+  canManageCipher$: Observable<boolean>;
 
   constructor(
     private route: ActivatedRoute,
@@ -137,6 +140,8 @@ export class ViewV2Component {
             false,
             cipher.organizationId,
           );
+
+          this.canManageCipher$ = this.cipherAuthorizationService.canManageCipher$(this.cipher);
         }),
         takeUntilDestroyed(),
       )

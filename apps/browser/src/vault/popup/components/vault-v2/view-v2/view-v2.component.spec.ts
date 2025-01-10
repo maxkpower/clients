@@ -107,6 +107,7 @@ describe("ViewV2Component", () => {
           provide: CipherAuthorizationService,
           useValue: {
             canDeleteCipher$: jest.fn().mockReturnValue(true),
+            canManageCipher$: jest.fn(),
           },
         },
         {

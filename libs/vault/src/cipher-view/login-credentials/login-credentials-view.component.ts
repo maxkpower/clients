@@ -1,7 +1,7 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { CommonModule, DatePipe } from "@angular/common";
-import { Component, inject, Input } from "@angular/core";
+import { Component, inject, Input, OnInit } from "@angular/core";
 import { Observable, switchMap } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
@@ -11,6 +11,7 @@ import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abs
 import { EventType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import {
   FormFieldModule,
   SectionComponent,
@@ -19,6 +20,7 @@ import {
   IconButtonModule,
   BadgeModule,
   ColorPasswordModule,
+  LinkModule,
 } from "@bitwarden/components";
 
 import { PremiumUpgradePromptService } from "../../../../../libs/common/src/vault/abstractions/premium-upgrade-prompt.service";
@@ -46,9 +48,10 @@ type TotpCodeValues = {
     ColorPasswordModule,
     BitTotpCountdownComponent,
     ReadOnlyCipherCardComponent,
+    LinkModule,
   ],
 })
-export class LoginCredentialsViewComponent {
+export class LoginCredentialsViewComponent implements OnInit {
   @Input() cipher: CipherView;
 
   isPremium$: Observable<boolean> = this.accountService.activeAccount$.pipe(
@@ -59,6 +62,7 @@ export class LoginCredentialsViewComponent {
   showPasswordCount: boolean = false;
   passwordRevealed: boolean = false;
   totpCodeCopyObj: TotpCodeValues;
+  canManageCipher$: Observable<boolean>;
   private datePipe = inject(DatePipe);
 
   constructor(
@@ -67,7 +71,12 @@ export class LoginCredentialsViewComponent {
     private premiumUpgradeService: PremiumUpgradePromptService,
     private eventCollectionService: EventCollectionService,
     private accountService: AccountService,
+    private cipherAuthorizationService: CipherAuthorizationService,
   ) {}
+
+  ngOnInit() {
+    this.canManageCipher$ = this.cipherAuthorizationService.canManageCipher$(this.cipher);
+  }
 
   get fido2CredentialCreationDateValue(): string {
     const dateCreated = this.i18nService.t("dateCreated");

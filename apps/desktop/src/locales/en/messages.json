@@ -3468,5 +3468,8 @@
   },
   "changeAcctEmail": {
     "message": "Change account email"
+  },
+  "changeAtRiskPassword": {
+    "message": "Change at-risk password"
   }
 }

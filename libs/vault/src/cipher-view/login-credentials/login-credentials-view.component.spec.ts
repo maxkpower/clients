@@ -17,6 +17,7 @@ import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { Fido2CredentialView } from "@bitwarden/common/vault/models/view/fido2-credential.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { BitFormFieldComponent, ToastService } from "@bitwarden/components";
 import { ColorPasswordComponent } from "@bitwarden/components/src/color-password/color-password.component";
 import { BitPasswordInputToggleDirective } from "@bitwarden/components/src/form-field/password-input-toggle.directive";
@@ -71,6 +72,12 @@ describe("LoginCredentialsViewComponent", () => {
         { provide: PlatformUtilsService, useValue: mock<PlatformUtilsService>() },
         { provide: ToastService, useValue: mock<ToastService>() },
         { provide: I18nService, useValue: { t: (...keys: string[]) => keys.join(" ") } },
+        {
+          provide: CipherAuthorizationService,
+          useValue: {
+            canManageCipher$: jest.fn(),
+          },
+        },
       ],
     }).compileComponents();
 
