@@ -1,6 +1,3 @@
-// TODO: ensure this file is type safe and remove ts-strict-ignore before PR
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, DestroyRef, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
