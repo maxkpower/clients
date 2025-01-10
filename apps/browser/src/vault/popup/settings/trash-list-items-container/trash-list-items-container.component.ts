@@ -3,8 +3,10 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
 import { Router } from "@angular/router";
+import { firstValueFrom, map } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -55,12 +57,16 @@ export class TrashListItemsContainerComponent {
     private i18nService: I18nService,
     private dialogService: DialogService,
     private passwordRepromptService: PasswordRepromptService,
+    private accountService: AccountService,
     private router: Router,
   ) {}
 
   async restore(cipher: CipherView) {
     try {
-      await this.cipherService.restoreWithServer(cipher.id);
+      const activeUserId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      await this.cipherService.restoreWithServer(cipher.id, activeUserId);
 
       await this.router.navigate(["/trash"]);
       this.toastService.showToast({
@@ -91,7 +97,10 @@ export class TrashListItemsContainerComponent {
     }
 
     try {
-      await this.cipherService.deleteWithServer(cipher.id);
+      const activeUserId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      await this.cipherService.deleteWithServer(cipher.id, activeUserId);
 
       await this.router.navigate(["/trash"]);
       this.toastService.showToast({

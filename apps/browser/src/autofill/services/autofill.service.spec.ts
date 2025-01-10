@@ -760,7 +760,10 @@ describe("AutofillService", () => {
       );
       expect(autofillService["generateLoginFillScript"]).toHaveBeenCalled();
       expect(logService.info).not.toHaveBeenCalled();
-      expect(cipherService.updateLastUsedDate).toHaveBeenCalledWith(autofillOptions.cipher.id);
+      expect(cipherService.updateLastUsedDate).toHaveBeenCalledWith(
+        autofillOptions.cipher.id,
+        mockUserId,
+      );
       expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(
         autofillOptions.pageDetails[0].tab.id,
         {
@@ -1013,8 +1016,8 @@ describe("AutofillService", () => {
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, false);
 
         expect(cipherService.getNextCipherForUrl).not.toHaveBeenCalled();
-        expect(cipherService.getLastLaunchedForUrl).toHaveBeenCalledWith(tab.url, true);
-        expect(cipherService.getLastUsedForUrl).toHaveBeenCalledWith(tab.url, true);
+        expect(cipherService.getLastLaunchedForUrl).toHaveBeenCalledWith(tab.url, mockUserId, true);
+        expect(cipherService.getLastUsedForUrl).toHaveBeenCalledWith(tab.url, mockUserId, true);
         expect(autofillService.doAutoFill).not.toHaveBeenCalled();
         expect(result).toBeNull();
       });
@@ -1027,7 +1030,7 @@ describe("AutofillService", () => {
 
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, true);
 
-        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url);
+        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url, mockUserId);
         expect(cipherService.getLastLaunchedForUrl).not.toHaveBeenCalled();
         expect(cipherService.getLastUsedForUrl).not.toHaveBeenCalled();
         expect(autofillService.doAutoFill).not.toHaveBeenCalled();
@@ -1057,7 +1060,7 @@ describe("AutofillService", () => {
 
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, fromCommand);
 
-        expect(cipherService.getLastLaunchedForUrl).toHaveBeenCalledWith(tab.url, true);
+        expect(cipherService.getLastLaunchedForUrl).toHaveBeenCalledWith(tab.url, mockUserId, true);
         expect(cipherService.getLastUsedForUrl).not.toHaveBeenCalled();
         expect(cipherService.updateLastUsedIndexForUrl).not.toHaveBeenCalled();
         expect(autofillService.doAutoFill).toHaveBeenCalledWith({
@@ -1087,8 +1090,8 @@ describe("AutofillService", () => {
 
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, fromCommand);
 
-        expect(cipherService.getLastLaunchedForUrl).toHaveBeenCalledWith(tab.url, true);
-        expect(cipherService.getLastUsedForUrl).toHaveBeenCalledWith(tab.url, true);
+        expect(cipherService.getLastLaunchedForUrl).toHaveBeenCalledWith(tab.url, mockUserId, true);
+        expect(cipherService.getLastUsedForUrl).toHaveBeenCalledWith(tab.url, mockUserId, true);
         expect(cipherService.updateLastUsedIndexForUrl).not.toHaveBeenCalled();
         expect(autofillService.doAutoFill).toHaveBeenCalledWith({
           tab: tab,
@@ -1115,7 +1118,7 @@ describe("AutofillService", () => {
 
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, fromCommand);
 
-        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url);
+        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url, mockUserId);
         expect(cipherService.updateLastUsedIndexForUrl).toHaveBeenCalledWith(tab.url);
         expect(autofillService.doAutoFill).toHaveBeenCalledWith({
           tab: tab,
@@ -1146,7 +1149,7 @@ describe("AutofillService", () => {
 
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, true);
 
-        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url);
+        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url, mockUserId);
         expect(userVerificationService.hasMasterPasswordAndMasterKeyHash).toHaveBeenCalled();
         expect(autofillService["openVaultItemPasswordRepromptPopout"]).toHaveBeenCalledWith(tab, {
           cipherId: cipher.id,
@@ -1172,7 +1175,7 @@ describe("AutofillService", () => {
 
         const result = await autofillService.doAutoFillOnTab(pageDetails, tab, true);
 
-        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url);
+        expect(cipherService.getNextCipherForUrl).toHaveBeenCalledWith(tab.url, mockUserId);
         expect(autofillService["openVaultItemPasswordRepromptPopout"]).not.toHaveBeenCalled();
         expect(autofillService.doAutoFill).not.toHaveBeenCalled();
         expect(result).toBeNull();

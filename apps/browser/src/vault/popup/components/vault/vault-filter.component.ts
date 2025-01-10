@@ -4,11 +4,12 @@ import { Location } from "@angular/common";
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { BehaviorSubject, Subject, firstValueFrom, from } from "rxjs";
-import { first, switchMap, takeUntil } from "rxjs/operators";
+import { first, map, switchMap, takeUntil } from "rxjs/operators";
 
 import { CollectionView } from "@bitwarden/admin-console/common";
 import { VaultFilter } from "@bitwarden/angular/vault/vault-filter/models/vault-filter.model";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
@@ -80,6 +81,8 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   private _searchText$ = new BehaviorSubject<string>("");
   private isSearchable: boolean = false;
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
+
   get searchText() {
     return this._searchText$.value;
   }
@@ -102,6 +105,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
     private vaultFilterService: VaultFilterService,
     private vaultBrowserStateService: VaultBrowserStateService,
     private configService: ConfigService,
+    private accountService: AccountService,
   ) {
     this.noFolderListSize = 100;
   }
@@ -208,7 +212,8 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   }
 
   async loadCiphers() {
-    this.allCiphers = await this.cipherService.getAllDecrypted();
+    const activeUserId = await firstValueFrom(this.activeUserId$);
+    this.allCiphers = await this.cipherService.getAllDecrypted(activeUserId);
     if (!this.hasLoadedAllCiphers) {
       this.hasLoadedAllCiphers = !(await this.searchService.isSearchable(this.searchText));
     }
@@ -313,7 +318,8 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
       window.clearTimeout(this.selectedTimeout);
     }
     this.preventSelected = true;
-    await this.cipherService.updateLastLaunchedDate(cipher.id);
+    const activeUserId = await firstValueFrom(this.activeUserId$);
+    await this.cipherService.updateLastLaunchedDate(cipher.id, activeUserId);
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     BrowserApi.createNewTab(cipher.login.launchUri);

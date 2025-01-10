@@ -3,13 +3,15 @@
 import { Location } from "@angular/common";
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { first } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
+import { first, map } from "rxjs/operators";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { VaultItemsComponent as BaseVaultItemsComponent } from "@bitwarden/angular/vault/components/vault-items.component";
 import { VaultFilter } from "@bitwarden/angular/vault/vault-filter/models/vault-filter.model";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -66,8 +68,9 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
     private platformUtilsService: PlatformUtilsService,
     cipherService: CipherService,
     private vaultFilterService: VaultFilterService,
+    accountService: AccountService,
   ) {
-    super(searchService, cipherService);
+    super(searchService, cipherService, accountService);
     this.applySavedState =
       (window as any).previousPopupUrl != null &&
       !(window as any).previousPopupUrl.startsWith("/ciphers");
@@ -233,7 +236,12 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
       window.clearTimeout(this.selectedTimeout);
     }
     this.preventSelected = true;
-    await this.cipherService.updateLastLaunchedDate(cipher.id);
+
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
+
+    await this.cipherService.updateLastLaunchedDate(cipher.id, activeUserId);
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     BrowserApi.createNewTab(cipher.login.launchUri);

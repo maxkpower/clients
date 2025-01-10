@@ -22,6 +22,7 @@ import {
 import { EventType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { ViewPasswordHistoryService } from "@bitwarden/common/vault/abstractions/view-password-history.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -95,6 +96,8 @@ export class ViewV2Component {
   loadAction: LoadAction;
   senderTabId?: number;
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -159,10 +162,8 @@ export class ViewV2Component {
   }
 
   async getCipherData(id: string) {
-    const cipher = await this.cipherService.get(id);
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const cipher = await this.cipherService.get(id, activeUserId);
     return await cipher.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
     );
@@ -192,7 +193,8 @@ export class ViewV2Component {
     }
 
     try {
-      await this.deleteCipher();
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.deleteCipher(activeUserId);
     } catch (e) {
       this.logService.error(e);
       return false;
@@ -211,7 +213,8 @@ export class ViewV2Component {
 
   restore = async (): Promise<void> => {
     try {
-      await this.cipherService.restoreWithServer(this.cipher.id);
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.cipherService.restoreWithServer(this.cipher.id, activeUserId);
     } catch (e) {
       this.logService.error(e);
     }
@@ -224,10 +227,10 @@ export class ViewV2Component {
     });
   };
 
-  protected deleteCipher() {
+  protected deleteCipher(userId: UserId) {
     return this.cipher.isDeleted
-      ? this.cipherService.deleteWithServer(this.cipher.id)
-      : this.cipherService.softDeleteWithServer(this.cipher.id);
+      ? this.cipherService.deleteWithServer(this.cipher.id, userId)
+      : this.cipherService.softDeleteWithServer(this.cipher.id, userId);
   }
 
   protected showFooter(): boolean {

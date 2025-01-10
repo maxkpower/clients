@@ -3,10 +3,11 @@
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Subject, firstValueFrom, from, Subscription } from "rxjs";
-import { debounceTime, switchMap, takeUntil } from "rxjs/operators";
+import { debounceTime, map, switchMap, takeUntil } from "rxjs/operators";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AutofillOverlayVisibility } from "@bitwarden/common/autofill/constants";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
@@ -73,6 +74,7 @@ export class CurrentTabComponent implements OnInit, OnDestroy {
     private organizationService: OrganizationService,
     private vaultFilterService: VaultFilterService,
     private vaultSettingsService: VaultSettingsService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit() {
@@ -280,8 +282,12 @@ export class CurrentTabComponent implements OnInit, OnDestroy {
       otherTypes.push(CipherType.Identity);
     }
 
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
     const ciphers = await this.cipherService.getAllDecryptedForUrl(
       this.url,
+      activeUserId,
       otherTypes.length > 0 ? otherTypes : null,
     );
 

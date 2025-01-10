@@ -21,6 +21,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -284,7 +285,8 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit {
   async generateUsername(): Promise<boolean> {
     const confirmed = await super.generateUsername();
     if (confirmed) {
-      await this.saveCipherState();
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.saveCipherState(activeUserId);
       // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.router.navigate(["generator"], { queryParams: { type: "username" } });
@@ -295,7 +297,8 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit {
   async generatePassword(): Promise<boolean> {
     const confirmed = await super.generatePassword();
     if (confirmed) {
-      await this.saveCipherState();
+      const activeUserId = await firstValueFrom(this.activeUserId$);
+      await this.saveCipherState(activeUserId);
       // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.router.navigate(["generator"], { queryParams: { type: "password" } });
@@ -326,14 +329,17 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit {
     );
   }
 
-  private saveCipherState() {
-    return this.cipherService.setAddEditCipherInfo({
-      cipher: this.cipher,
-      collectionIds:
-        this.collections == null
-          ? []
-          : this.collections.filter((c) => (c as any).checked).map((c) => c.id),
-    });
+  private saveCipherState(userId: UserId) {
+    return this.cipherService.setAddEditCipherInfo(
+      {
+        cipher: this.cipher,
+        collectionIds:
+          this.collections == null
+            ? []
+            : this.collections.filter((c) => (c as any).checked).map((c) => c.id),
+      },
+      userId,
+    );
   }
 
   private setFocus() {

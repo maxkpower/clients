@@ -13,9 +13,10 @@ import {
   signal,
 } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
-import { map } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -158,6 +159,7 @@ export class VaultListItemsContainerComponent implements AfterViewInit {
     private cipherService: CipherService,
     private router: Router,
     private platformUtilsService: PlatformUtilsService,
+    private accountService: AccountService,
   ) {}
 
   async ngAfterViewInit() {
@@ -186,7 +188,10 @@ export class VaultListItemsContainerComponent implements AfterViewInit {
       this.viewCipherTimeout = null;
     }
 
-    await this.cipherService.updateLastLaunchedDate(cipher.id);
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+    );
+    await this.cipherService.updateLastLaunchedDate(cipher.id, activeUserId);
 
     await BrowserApi.createNewTab(cipher.login.launchUri);
 

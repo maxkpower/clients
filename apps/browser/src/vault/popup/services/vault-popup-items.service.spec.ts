@@ -6,13 +6,16 @@ import { CollectionService, CollectionView } from "@bitwarden/admin-console/comm
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { SyncService } from "@bitwarden/common/platform/sync";
-import { ObservableTracker } from "@bitwarden/common/spec";
-import { CipherId } from "@bitwarden/common/types/guid";
+import { ObservableTracker, mockAccountServiceWith } from "@bitwarden/common/spec";
+import { CipherId, UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault-settings/vault-settings.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
+import { CipherData } from "@bitwarden/common/vault/models/data/cipher.data";
+import { LocalData } from "@bitwarden/common/vault/models/data/local.data";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
 import { InlineMenuFieldQualificationService } from "../../../../../browser/src/autofill/services/inline-menu-field-qualification.service";
@@ -31,6 +34,9 @@ describe("VaultPopupItemsService", () => {
   let mockOrg: Organization;
   let mockCollections: CollectionView[];
   let activeUserLastSync$: BehaviorSubject<Date>;
+
+  let ciphersSubject: BehaviorSubject<Record<CipherId, CipherData>>;
+  let localDataSubject: BehaviorSubject<Record<CipherId, LocalData>>;
 
   const cipherServiceMock = mock<CipherService>();
   const vaultSettingsServiceMock = mock<VaultSettingsService>();
@@ -56,8 +62,17 @@ describe("VaultPopupItemsService", () => {
     cipherList[3].favorite = true;
 
     cipherServiceMock.getAllDecrypted.mockResolvedValue(cipherList);
-    cipherServiceMock.ciphers$ = new BehaviorSubject(null);
-    cipherServiceMock.localData$ = new BehaviorSubject(null);
+
+    ciphersSubject = new BehaviorSubject<Record<CipherId, CipherData>>({});
+    localDataSubject = new BehaviorSubject<Record<CipherId, LocalData>>({});
+
+    cipherServiceMock.ciphers$.mockImplementation((userId: UserId) =>
+      ciphersSubject.asObservable(),
+    );
+    cipherServiceMock.localData$.mockImplementation((userId: UserId) =>
+      localDataSubject.asObservable(),
+    );
+
     searchService.searchCiphers.mockImplementation(async (_, __, ciphers) => ciphers);
     cipherServiceMock.filterCiphersForUrl.mockImplementation(async (ciphers) =>
       ciphers.filter((c) => ["0", "1"].includes(c.id)),
@@ -112,6 +127,7 @@ describe("VaultPopupItemsService", () => {
         { provide: CollectionService, useValue: collectionService },
         { provide: VaultPopupAutofillService, useValue: vaultAutofillServiceMock },
         { provide: SyncService, useValue: syncServiceMock },
+        { provide: AccountService, useValue: mockAccountServiceWith("UserId" as UserId) },
         {
           provide: InlineMenuFieldQualificationService,
           useValue: inlineMenuFieldQualificationServiceMock,
@@ -149,7 +165,7 @@ describe("VaultPopupItemsService", () => {
 
     await tracker.expectEmission();
 
-    (cipherServiceMock.ciphers$ as BehaviorSubject<any>).next(null);
+    ciphersSubject.next({});
 
     await tracker.expectEmission();
 
@@ -163,7 +179,7 @@ describe("VaultPopupItemsService", () => {
 
     await tracker.expectEmission();
 
-    (cipherServiceMock.localData$ as BehaviorSubject<any>).next(null);
+    localDataSubject.next({});
 
     await tracker.expectEmission();
 
@@ -434,7 +450,7 @@ describe("VaultPopupItemsService", () => {
     it("should cycle when cipherService.ciphers$ emits", async () => {
       // Restart tracking
       tracked = new ObservableTracker(service.loading$);
-      (cipherServiceMock.ciphers$ as BehaviorSubject<any>).next(null);
+      ciphersSubject.next({});
 
       await trackedCiphers.pauseUntilReceived(2);
 
