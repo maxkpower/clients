@@ -1,6 +1,7 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { UserKeyDefinition } from "@bitwarden/common/src/platform/state";
+
+import { UserKeyDefinition } from "@bitwarden/common/platform/state";
 
 import { VaultTimeoutAction } from "./enums/vault-timeout-action.enum";
 import { VaultTimeout } from "./types/vault-timeout.type";
