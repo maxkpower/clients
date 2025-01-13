@@ -152,7 +152,7 @@ export class CipherService implements CipherServiceAbstraction {
    */
   failedToDecryptCiphers$(userId: UserId): Observable<CipherView[]> {
     return this.failedToDecryptCiphersState(userId).state$.pipe(
-      filter(([ciphers]) => ciphers != null),
+      filter((ciphers) => ciphers != null),
       switchMap((ciphers) => merge(this.forceCipherViews$, of(ciphers))),
       shareReplay({ bufferSize: 1, refCount: true }),
     );
