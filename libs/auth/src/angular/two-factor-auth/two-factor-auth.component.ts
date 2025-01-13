@@ -79,9 +79,9 @@ import {
 export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   loading = true;
 
-  token = "";
+  token: string | undefined = undefined;
   remember = false;
-  orgSsoIdentifier: string = null;
+  orgSsoIdentifier: string | undefined = undefined;
   inSsoFlow = false;
 
   providers = TwoFactorProviders;
@@ -104,7 +104,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   title = "";
 
-  formPromise: Promise<any>;
+  formPromise: Promise<any> | undefined;
 
   submitForm = async () => {
     await this.submit();
@@ -137,7 +137,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
-    this.orgSsoIdentifier = this.activatedRoute.snapshot.queryParamMap.get("identifier");
+
+    this.orgSsoIdentifier =
+      this.activatedRoute.snapshot.queryParamMap.get("identifier") ?? undefined;
+
     this.listenFor2faSessionTimeout();
 
     if (this.twoFactorAuthComponentService.shouldCheckForWebauthnResponseOnInit()) {
@@ -149,8 +152,13 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.setTitleByTwoFactorProviderType();
 
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      this.token = value.token;
-      this.remember = value.remember;
+      if (value.token) {
+        this.token = value.token;
+      }
+
+      if (value.remember) {
+        this.remember = value.remember;
+      }
     });
 
     await this.twoFactorAuthComponentService.extendPopupWidthIfRequired?.(
@@ -215,7 +223,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     try {
       this.formPromise = this.loginStrategyService.logInTwoFactor(
         new TokenTwoFactorRequest(this.selectedProviderType, this.token, this.remember),
-        null,
       );
       const authResult: AuthResult = await this.formPromise;
       this.logService.info("Successfully submitted two factor token");
@@ -293,7 +300,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     // Save off the OrgSsoIdentifier for use in the TDE flows
     // - TDE login decryption options component
     // - Browser SSO on extension open
-    await this.ssoLoginService.setActiveUserOrganizationSsoIdentifier(this.orgSsoIdentifier);
+    if (this.orgSsoIdentifier !== undefined) {
+      await this.ssoLoginService.setActiveUserOrganizationSsoIdentifier(this.orgSsoIdentifier);
+    }
 
     // note: this flow affects both TDE & standard users
     if (this.isForcePasswordResetRequired(authResult)) {
@@ -387,7 +396,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.router.navigate(["login-initiated"]);
   }
 
-  private async handleChangePasswordRequired(orgIdentifier: string) {
+  private async handleChangePasswordRequired(orgIdentifier: string | undefined) {
     await this.router.navigate(["set-password"], {
       queryParams: {
         identifier: orgIdentifier,
@@ -414,7 +423,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     return forceResetReasons.includes(authResult.forcePasswordReset);
   }
 
-  private async handleForcePasswordReset(orgIdentifier: string) {
+  private async handleForcePasswordReset(orgIdentifier: string | undefined) {
     await this.router.navigate(["update-temp-password"], {
       queryParams: {
         identifier: orgIdentifier,
