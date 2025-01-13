@@ -92,6 +92,8 @@ export class VaultPopupItemsService {
         tap(() => this._ciphersLoading$.next()),
         waitUntilSync(this.syncService),
         switchMap(() => Utils.asyncToObservable(() => this.cipherService.getAllDecrypted(userId))),
+        withLatestFrom(this.cipherService.failedToDecryptCiphers$(userId)),
+        map(([ciphers, failedToDecryptCiphers]) => [...failedToDecryptCiphers, ...ciphers]),
       ),
     ),
     shareReplay({ refCount: true, bufferSize: 1 }),
@@ -194,11 +196,6 @@ export class VaultPopupItemsService {
         (cipher) => !autoFillCiphers.includes(cipher) && !favoriteCiphers.includes(cipher),
       ),
     ),
-    withLatestFrom(this._hasSearchText$),
-    map(([ciphers, hasSearchText]) =>
-      // Do not sort alphabetically when there is search text, default to the search service scoring
-      hasSearchText ? ciphers : ciphers.sort(this.cipherService.getLocaleSortingFunction()),
-    ),
     shareReplay({ refCount: false, bufferSize: 1 }),
   );
 
@@ -254,8 +251,28 @@ export class VaultPopupItemsService {
   /**
    * Observable that contains the list of ciphers that have been deleted.
    */
-  deletedCiphers$: Observable<CipherView[]> = this._allDecryptedCiphers$.pipe(
-    map((ciphers) => ciphers.filter((c) => c.isDeleted)),
+  deletedCiphers$: Observable<PopupCipherView[]> = this._allDecryptedCiphers$.pipe(
+    switchMap((ciphers) =>
+      combineLatest([
+        this.organizationService.organizations$,
+        this.collectionService.decryptedCollections$,
+      ]).pipe(
+        map(([organizations, collections]) => {
+          const orgMap = Object.fromEntries(organizations.map((org) => [org.id, org]));
+          const collectionMap = Object.fromEntries(collections.map((col) => [col.id, col]));
+          return ciphers
+            .filter((c) => c.isDeleted)
+            .map(
+              (cipher) =>
+                new PopupCipherView(
+                  cipher,
+                  cipher.collectionIds?.map((colId) => collectionMap[colId as CollectionId]),
+                  orgMap[cipher.organizationId as OrganizationId],
+                ),
+            );
+        }),
+      ),
+    ),
     shareReplay({ refCount: false, bufferSize: 1 }),
   );
 

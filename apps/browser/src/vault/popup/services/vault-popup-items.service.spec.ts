@@ -37,6 +37,7 @@ describe("VaultPopupItemsService", () => {
 
   let ciphersSubject: BehaviorSubject<Record<CipherId, CipherData>>;
   let localDataSubject: BehaviorSubject<Record<CipherId, LocalData>>;
+  let failedToDecryptCiphersSubject: BehaviorSubject<CipherView[]>;
 
   const cipherServiceMock = mock<CipherService>();
   const vaultSettingsServiceMock = mock<VaultSettingsService>();
@@ -65,12 +66,16 @@ describe("VaultPopupItemsService", () => {
 
     ciphersSubject = new BehaviorSubject<Record<CipherId, CipherData>>({});
     localDataSubject = new BehaviorSubject<Record<CipherId, LocalData>>({});
+    failedToDecryptCiphersSubject = new BehaviorSubject<CipherView[]>([]);
 
     cipherServiceMock.ciphers$.mockImplementation((userId: UserId) =>
       ciphersSubject.asObservable(),
     );
     cipherServiceMock.localData$.mockImplementation((userId: UserId) =>
       localDataSubject.asObservable(),
+    );
+    cipherServiceMock.failedToDecryptCiphers$.mockImplementation((userId: UserId) =>
+      failedToDecryptCiphersSubject.asObservable(),
     );
 
     searchService.searchCiphers.mockImplementation(async (_, __, ciphers) => ciphers);
@@ -310,21 +315,6 @@ describe("VaultPopupItemsService", () => {
       });
     });
 
-    it("should sort by last used then by name by default", (done) => {
-      service.remainingCiphers$.subscribe(() => {
-        expect(cipherServiceMock.getLocaleSortingFunction).toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it("should NOT sort by last used then by name when search text is applied", (done) => {
-      service.applyFilter("Login");
-      service.remainingCiphers$.subscribe(() => {
-        expect(cipherServiceMock.getLocaleSortingFunction).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
     it("should filter remainingCiphers$ down to search term", (done) => {
       const cipherList = Object.values(allCiphers);
       const searchText = "Login";
@@ -391,20 +381,17 @@ describe("VaultPopupItemsService", () => {
   });
 
   describe("deletedCiphers$", () => {
-    it("should return deleted ciphers", (done) => {
-      const ciphers = [
-        { id: "1", type: CipherType.Login, name: "Login 1", isDeleted: true },
-        { id: "2", type: CipherType.Login, name: "Login 2", isDeleted: true },
-        { id: "3", type: CipherType.Login, name: "Login 3", isDeleted: true },
-        { id: "4", type: CipherType.Login, name: "Login 4", isDeleted: false },
-      ] as CipherView[];
+    it("should return deleted ciphers", async () => {
+      const deletedCipher = new CipherView();
+      deletedCipher.deletedDate = new Date();
+      const ciphers = [new CipherView(), new CipherView(), new CipherView(), deletedCipher];
 
       cipherServiceMock.getAllDecrypted.mockResolvedValue(ciphers);
 
-      service.deletedCiphers$.subscribe((deletedCiphers) => {
-        expect(deletedCiphers.length).toBe(3);
-        done();
-      });
+      ciphersSubject.next({});
+
+      const deletedCiphers = await firstValueFrom(service.deletedCiphers$);
+      expect(deletedCiphers.length).toBe(1);
     });
   });
 

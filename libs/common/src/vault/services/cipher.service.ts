@@ -7,6 +7,7 @@ import {
   map,
   merge,
   Observable,
+  of,
   shareReplay,
   Subject,
   switchMap,
@@ -79,6 +80,7 @@ import {
   ADD_EDIT_CIPHER_INFO_KEY,
   DECRYPTED_CIPHERS,
   ENCRYPTED_CIPHERS,
+  FAILED_DECRYPTED_CIPHERS,
   LOCAL_DATA_KEY,
 } from "./key-state/ciphers.state";
 
@@ -141,6 +143,19 @@ export class CipherService implements CipherServiceAbstraction {
     return this.addEditCipherInfoState(userId).state$;
   }
 
+  /**
+   * Observable that emits an array of cipherViews that failed to decrypt. Does not emit until decryption has completed.
+   *
+   * An empty array indicates that all ciphers were successfully decrypted.
+   */
+  failedToDecryptCiphers$(userId: UserId): Observable<CipherView[]> {
+    return this.failedToDecryptCiphersState(userId).state$.pipe(
+      filter(([ciphers]) => ciphers != null),
+      switchMap((ciphers) => merge(this.forceCipherViews$, of(ciphers))),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
+  }
+
   async setDecryptedCipherCache(value: CipherView[], userId: UserId) {
     // Sometimes we might prematurely decrypt the vault and that will result in no ciphers
     // if we cache it then we may accidentally return it when it's not right, we'd rather try decryption again.
@@ -155,6 +170,10 @@ export class CipherService implements CipherServiceAbstraction {
         await this.searchService.indexCiphers(value);
       }
     }
+  }
+
+  async setFailedDecryptedCiphers(cipherViews: CipherView[], userId: UserId) {
+    await this.stateProvider.setUserState(FAILED_DECRYPTED_CIPHERS, cipherViews, userId);
   }
 
   private async setDecryptedCiphers(value: CipherView[], userId: UserId) {
@@ -373,16 +392,21 @@ export class CipherService implements CipherServiceAbstraction {
    */
   @sequentialize(() => "getAllDecrypted")
   async getAllDecrypted(userId: UserId): Promise<CipherView[]> {
-    let decCiphers = await this.getDecryptedCiphers(userId);
+    const decCiphers = await this.getDecryptedCiphers(userId);
     if (decCiphers != null && decCiphers.length !== 0) {
       await this.reindexCiphers(userId);
       return await this.getDecryptedCiphers(userId);
     }
 
-    decCiphers = await this.decryptCiphers(await this.getAll(userId), userId);
+    const [newDecCiphers, failedCiphers] = await this.decryptCiphers(
+      await this.getAll(userId),
+      userId,
+    );
 
-    await this.setDecryptedCipherCache(decCiphers, userId);
-    return decCiphers;
+    await this.setDecryptedCipherCache(newDecCiphers, userId);
+    await this.setFailedDecryptedCiphers(failedCiphers, userId);
+
+    return newDecCiphers;
   }
 
   private async getDecryptedCiphers(userId: UserId) {
@@ -391,7 +415,17 @@ export class CipherService implements CipherServiceAbstraction {
     );
   }
 
-  private async decryptCiphers(ciphers: Cipher[], userId: UserId) {
+  /**
+   * Decrypts the provided ciphers using the provided user's keys.
+   * @param ciphers
+   * @param userId
+   * @returns Two cipher arrays, the first containing successfully decrypted ciphers and the second containing ciphers that failed to decrypt.
+   * @private
+   */
+  private async decryptCiphers(
+    ciphers: Cipher[],
+    userId: UserId,
+  ): Promise<[CipherView[], CipherView[]]> {
     const keys = await firstValueFrom(this.keyService.cipherDecryptionKeys$(userId, true));
 
     if (keys == null || (keys.userKey == null && Object.keys(keys.orgKeys).length === 0)) {
@@ -409,7 +443,7 @@ export class CipherService implements CipherServiceAbstraction {
       {} as Record<string, Cipher[]>,
     );
 
-    const decCiphers = (
+    const allCipherViews = (
       await Promise.all(
         Object.entries(grouped).map(async ([orgId, groupedCiphers]) => {
           if (await this.configService.getFeatureFlag(FeatureFlag.PM4154_BulkEncryptionService)) {
@@ -429,7 +463,18 @@ export class CipherService implements CipherServiceAbstraction {
       .flat()
       .sort(this.getLocaleSortingFunction());
 
-    return decCiphers;
+    // Split ciphers into two arrays, one for successfully decrypted ciphers and one for ciphers that failed to decrypt
+    return allCipherViews.reduce(
+      (acc, c) => {
+        if (c.decryptionFailure) {
+          acc[1].push(c);
+        } else {
+          acc[0].push(c);
+        }
+        return acc;
+      },
+      [[], []] as [CipherView[], CipherView[]],
+    );
   }
 
   private async reindexCiphers(userId: UserId) {
@@ -1280,8 +1325,13 @@ export class CipherService implements CipherServiceAbstraction {
     let encryptedCiphers: CipherWithIdRequest[] = [];
 
     const ciphers = await firstValueFrom(this.cipherViews$(userId));
+    const failedCiphers = await firstValueFrom(this.failedToDecryptCiphers$(userId));
     if (!ciphers) {
       return encryptedCiphers;
+    }
+
+    if (failedCiphers.length > 0) {
+      throw new Error("Cannot rotate ciphers when decryption failures are present");
     }
 
     const userCiphers = ciphers.filter((c) => c.organizationId == null);
@@ -1324,6 +1374,13 @@ export class CipherService implements CipherServiceAbstraction {
    */
   private addEditCipherInfoState(userId: UserId) {
     return this.stateProvider.getUser(userId, ADD_EDIT_CIPHER_INFO_KEY);
+  }
+
+  /**
+   * @returns a SingleUserState for the failed to decrypt ciphers
+   */
+  private failedToDecryptCiphersState(userId: UserId) {
+    return this.stateProvider.getUser(userId, FAILED_DECRYPTED_CIPHERS);
   }
 
   // Helpers
@@ -1673,6 +1730,7 @@ export class CipherService implements CipherServiceAbstraction {
 
   private async clearDecryptedCiphersState(userId: UserId) {
     await this.setDecryptedCiphers(null, userId);
+    await this.setFailedDecryptedCiphers(null, userId);
     this.clearSortedCiphers();
   }
 

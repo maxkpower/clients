@@ -231,6 +231,11 @@ export class NotificationsService implements NotificationsServiceAbstraction {
           await this.syncService.fullSync(true);
         }
         break;
+      case NotificationType.SyncOrganizationCollectionSettingChanged:
+        if (isAuthenticated) {
+          await this.syncService.fullSync(true);
+        }
+        break;
       default:
         break;
     }
