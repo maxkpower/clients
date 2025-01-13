@@ -13,6 +13,7 @@ import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-p
 import { WebAuthnIFrame } from "@bitwarden/common/auth/webauthn-iframe";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import {
   ButtonModule,
@@ -49,7 +50,7 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   webAuthnReady = false;
   webAuthnNewTab = false;
   webAuthnSupported = false;
-  webAuthnIframe: WebAuthnIFrame = null;
+  webAuthnIframe: WebAuthnIFrame | undefined = undefined;
 
   constructor(
     protected i18nService: I18nService,
@@ -60,6 +61,7 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
     protected route: ActivatedRoute,
     private toastService: ToastService,
     private twoFactorAuthWebAuthnComponentService: TwoFactorAuthWebAuthnComponentService,
+    private logService: LogService,
   ) {
     this.webAuthnSupported = this.platformUtilsService.supportsWebAuthn(win);
     this.webAuthnNewTab = this.twoFactorAuthWebAuthnComponentService.shouldOpenWebAuthnInNewTab();
@@ -67,7 +69,11 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     if (this.route.snapshot.paramMap.has("webAuthnResponse")) {
-      this.token.emit(this.route.snapshot.paramMap.get("webAuthnResponse"));
+      const webAuthnResponse = this.route.snapshot.paramMap.get("webAuthnResponse");
+
+      if (webAuthnResponse != null) {
+        this.token.emit(webAuthnResponse);
+      }
     }
 
     if (this.win != null && this.webAuthnSupported) {
@@ -109,9 +115,14 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   }
 
   async authWebAuthn() {
-    const providerData = (await this.twoFactorService.getProviders()).get(
-      TwoFactorProviderType.WebAuthn,
-    );
+    const providers = await this.twoFactorService.getProviders();
+
+    if (providers == null) {
+      this.logService.error("No 2FA providers found. Unable to authenticate with WebAuthn.");
+      return;
+    }
+
+    const providerData = providers?.get(TwoFactorProviderType.WebAuthn);
 
     if (!this.webAuthnSupported || this.webAuthnIframe == null) {
       return;
