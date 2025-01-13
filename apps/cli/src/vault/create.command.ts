@@ -138,8 +138,6 @@ export class CreateCommand {
       return Response.notFound();
     }
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
-
     const canAccessPremium = await firstValueFrom(
       this.accountProfileService.hasPremiumFromAnySource$(activeUserId),
     );
