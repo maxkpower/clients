@@ -182,16 +182,6 @@ pub mod sshagent {
         pub key_fingerprint: String,
     }
 
-    impl From<desktop_core::ssh_agent::generator::SshKey> for SshKey {
-        fn from(key: desktop_core::ssh_agent::generator::SshKey) -> Self {
-            SshKey {
-                private_key: key.private_key,
-                public_key: key.public_key,
-                key_fingerprint: key.key_fingerprint,
-            }
-        }
-    }
-
     #[napi]
     pub async fn serve(
         callback: ThreadsafeFunction<(Option<String>, bool, String), CalleeHandled>,
@@ -303,14 +293,6 @@ pub mod sshagent {
         bitwarden_agent_state
             .clear_keys()
             .map_err(|e| napi::Error::from_reason(e.to_string()))
-    }
-
-    #[napi]
-    pub async fn generate_keypair(key_algorithm: String) -> napi::Result<SshKey> {
-        desktop_core::ssh_agent::generator::generate_keypair(key_algorithm)
-            .await
-            .map_err(|e| napi::Error::from_reason(e.to_string()))
-            .map(|k| k.into())
     }
 }
 

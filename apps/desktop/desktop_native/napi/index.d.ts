@@ -57,7 +57,6 @@ export declare namespace sshagent {
   export function setKeys(agentState: SshAgentState, newKeys: Array<PrivateKey>): void
   export function lock(agentState: SshAgentState): void
   export function clearKeys(agentState: SshAgentState): void
-  export function generateKeypair(keyAlgorithm: string): Promise<SshKey>
   export class SshAgentState {   }
 }
 export declare namespace processisolations {

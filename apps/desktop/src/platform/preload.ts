@@ -1,4 +1,3 @@
-import { sshagent as ssh } from "desktop_native/napi";
 import { ipcRenderer } from "electron";
 
 import { DeviceType } from "@bitwarden/common/enums";
@@ -58,14 +57,14 @@ const sshAgent = {
   signRequestResponse: async (requestId: number, accepted: boolean) => {
     await ipcRenderer.invoke("sshagent.signrequestresponse", { requestId, accepted });
   },
-  generateKey: async (keyAlgorithm: string): Promise<ssh.SshKey> => {
-    return await ipcRenderer.invoke("sshagent.generatekey", { keyAlgorithm });
-  },
   lock: async () => {
     return await ipcRenderer.invoke("sshagent.lock");
   },
   clearKeys: async () => {
     return await ipcRenderer.invoke("sshagent.clearkeys");
+  },
+  isLoaded(): Promise<boolean> {
+    return ipcRenderer.invoke("sshagent.isloaded");
   },
 };
 
@@ -80,6 +79,7 @@ const nativeMessaging = {
   },
   sendMessage: (message: {
     appId: string;
+    messageId?: number;
     command?: string;
     sharedSecret?: string;
     message?: EncString;
