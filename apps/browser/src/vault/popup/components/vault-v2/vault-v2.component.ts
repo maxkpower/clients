@@ -22,6 +22,7 @@ import { VaultPopupItemsService } from "../../services/vault-popup-items.service
 import { VaultPopupListFiltersService } from "../../services/vault-popup-list-filters.service";
 import { VaultUiOnboardingService } from "../../services/vault-ui-onboarding.service";
 
+import { BlockedInjectionBanner } from "./blocked-injection-banner/blocked-injection-banner.component";
 import {
   NewItemDropdownV2Component,
   NewItemInitialValues,
@@ -41,6 +42,7 @@ enum VaultState {
   templateUrl: "vault-v2.component.html",
   standalone: true,
   imports: [
+    BlockedInjectionBanner,
     PopupPageComponent,
     PopupHeaderComponent,
     PopOutComponent,
