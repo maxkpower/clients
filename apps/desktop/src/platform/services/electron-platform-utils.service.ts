@@ -77,8 +77,7 @@ export class ElectronPlatformUtilsService implements PlatformUtilsService {
     return (await this.getApplicationVersion()).split(/[+|-]/)[0].trim();
   }
 
-  // Temporarily restricted to only Windows until https://github.com/electron/electron/pull/28349
-  // has been merged and an updated electron build is available.
+  // Restricted to Windows and Mac. Mac is missing support for pin entry, and Linux is missing support entirely and has to be implemented in another way.
   supportsWebAuthn(win: Window): boolean {
     return (
       this.getDevice() === DeviceType.WindowsDesktop || this.getDevice() === DeviceType.MacOsDesktop
