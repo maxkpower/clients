@@ -33,11 +33,28 @@ export class BitActionDirective implements OnDestroy {
     @Optional() private logService?: LogService,
   ) {}
 
+  loadingDelay: NodeJS.Timeout | undefined = undefined;
+
   get loading() {
     return this._loading$.value;
   }
 
   set loading(value: boolean) {
+    if (value) {
+      this.loadingDelay = setTimeout(() => {
+        this.updateLoadingState(value);
+      }, 200);
+    } else {
+      if (this.loadingDelay !== undefined) {
+        clearTimeout(this.loadingDelay);
+        this.loadingDelay = undefined;
+      }
+
+      this.updateLoadingState(value);
+    }
+  }
+
+  private updateLoadingState(value: boolean) {
     this._loading$.next(value);
     this.buttonComponent.loading = value;
   }
