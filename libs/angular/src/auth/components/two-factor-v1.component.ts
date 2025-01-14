@@ -157,7 +157,7 @@ export class TwoFactorComponentV1 extends CaptchaProtectedComponent implements O
           this.toastService.showToast({
             variant: "error",
             title: this.i18nService.t("errorOccurred"),
-            message: error,
+            message: this.i18nService.t("webauthnCancelOrTimeout"),
           });
         },
         (info: string) => {
