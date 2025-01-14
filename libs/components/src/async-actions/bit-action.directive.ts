@@ -43,7 +43,7 @@ export class BitActionDirective implements OnDestroy {
     if (value) {
       this.loadingDelay = setTimeout(() => {
         this.updateLoadingState(value);
-      }, 100);
+      }, 75);
     } else {
       if (this.loadingDelay !== undefined) {
         clearTimeout(this.loadingDelay);
