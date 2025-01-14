@@ -45,7 +45,7 @@ class ActionResolvesQuicklyComponent {
       setTimeout(() => {
         resolve();
         this.buttonText = "Done";
-      }, 200);
+      }, 50);
     });
   };
 }
