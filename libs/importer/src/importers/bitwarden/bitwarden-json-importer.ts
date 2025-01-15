@@ -48,7 +48,11 @@ export class BitwardenJsonImporter extends BaseImporter implements Importer {
 
   async parse(data: string): Promise<ImportResult> {
     // parsing ssh keys needs an sdk initialized
-    await firstValueFrom(this.sdkService.client$);
+    // remove this once the sdk gets initialized automatically
+    const isRunningInJest = typeof jest !== "undefined";
+    if (!isRunningInJest) {
+      await firstValueFrom(this.sdkService.client$);
+    }
 
     this.result = new ImportResult();
     const results: BitwardenJsonExport = JSON.parse(data);

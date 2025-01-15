@@ -1,4 +1,5 @@
 import { mock, MockProxy } from "jest-mock-extended";
+import { of } from "rxjs";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { PinServiceAbstraction } from "@bitwarden/auth/common";
@@ -12,6 +13,7 @@ import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folde
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 import { KeyService } from "@bitwarden/key-management";
+import { BitwardenClient } from "@bitwarden/sdk-internal";
 
 import { BitwardenPasswordProtectedImporter } from "../importers/bitwarden/bitwarden-password-protected-importer";
 import { Importer } from "../importers/importer";
@@ -42,7 +44,9 @@ describe("ImportService", () => {
     keyService = mock<KeyService>();
     encryptService = mock<EncryptService>();
     pinService = mock<PinServiceAbstraction>();
+    const mockClient = mock<BitwardenClient>();
     sdkService = mock<SdkService>();
+    sdkService.client$ = of(mockClient, mockClient, mockClient);
 
     importService = new ImportService(
       cipherService,
