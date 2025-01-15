@@ -18,9 +18,10 @@ export class SshKeyExport {
   }
 
   static toView(req: SshKeyExport, view = new SshKeyView()) {
-    view.privateKey = req.privateKey;
-    view.publicKey = req.publicKey;
-    view.keyFingerprint = req.keyFingerprint;
+    const parsedKey = import_ssh_key(req.privateKey);
+    view.privateKey = parsedKey.private_key;
+    view.publicKey = parsedKey.public_key;
+    view.keyFingerprint = parsedKey.key_fingerprint;
     return view;
   }
 

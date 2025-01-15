@@ -10194,6 +10194,9 @@
   "sshKeyPasted": {
     "message": "SSH key imported successfully"
   },
+  "copySSHPrivateKey": {
+    "message": "Copy private key"
+  },
   "resellerRenewalWarningMsg": {
     "message": "Your subscription will renew soon. To ensure uninterrupted service, contact $RESELLER$ to confirm your renewal before $RENEWAL_DATE$.",
     "placeholders": {
