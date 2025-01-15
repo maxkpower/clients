@@ -1,6 +1,8 @@
+import { Message } from "@bitwarden/sdk-internal";
+
 export interface IpcMessage {
   type: "bitwarden-ipc-message";
-  payload: Uint8Array;
+  message: Message;
 }
 
 export function isIpcMessage(message: any): message is IpcMessage {

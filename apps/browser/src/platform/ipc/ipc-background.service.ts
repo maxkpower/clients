@@ -1,47 +1,44 @@
-import { Observable } from "rxjs";
+import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
+import { IpcService, PingMessagePayload, PongMessagePayload } from "@bitwarden/common/platform/ipc";
+import { Destination, Manager } from "@bitwarden/sdk-internal";
 
-import { IpcLink, IpcMessage, IpcService, isIpcMessage } from "@bitwarden/common/platform/ipc";
-
-import { BrowserApi } from "../browser/browser-api";
+import { BackgroundCommunicationProvider } from "./background-communication-provider";
 
 export class IpcBackgroundService extends IpcService {
-  private links = new Map<string, IpcLink>();
+  private communicationProvider: BackgroundCommunicationProvider;
 
-  override async init() {
+  constructor(sdkService: SdkService) {
+    super();
+  }
+
+  async init() {
+    this.communicationProvider = new BackgroundCommunicationProvider();
+    this.manager = new Manager(this.communicationProvider);
+
     await super.init();
 
-    BrowserApi.messageListener("platform.ipc", (message, sender) => {
-      if (!isIpcMessage(message)) {
-        return;
-      }
-
-      if (!this.links.has(sender.documentId)) {
-        // eslint-disable-next-line no-console
-        console.log("New link", message, sender);
-        this.links.set(
-          sender.documentId,
-          new IpcLink(
-            async (data) =>
-              BrowserApi.sendMessage("platform.ipc", {
-                type: "bitwarden-ipc-message",
-                payload: data,
-              } satisfies IpcMessage),
-            new Observable((subscriber) => {
-              const handler = (message: unknown) => {
-                if (!isIpcMessage(message)) {
-                  return;
-                }
-                subscriber.next(message.payload);
-              };
-
-              BrowserApi.addListener(chrome.runtime.onMessage, handler);
-
-              return () => BrowserApi.removeListener(chrome.runtime.onMessage, handler);
-            }),
-            [{ Web: sender.documentId }],
-          ),
-        );
+    this.messages$.subscribe((message) => {
+      if (message.data[0] === PingMessagePayload[0] && message.data[1] === PingMessagePayload[1]) {
+        void this.pong(message.source);
       }
     });
+  }
+
+  async pong(destination: Destination) {
+    try {
+      // eslint-disable-next-line no-console
+      console.log("[IPC] Pinging");
+      await this.manager.send({
+        destination,
+        // TODO: Fix hacky hack
+        data: PongMessagePayload as any as number[],
+        source: undefined,
+      });
+      // eslint-disable-next-line no-console
+      console.log("[IPC] Sent ping");
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[IPC] Ping failed", error);
+    }
   }
 }

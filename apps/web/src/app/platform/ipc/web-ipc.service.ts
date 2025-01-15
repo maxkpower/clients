@@ -1,43 +1,23 @@
-import { Observable } from "rxjs";
+import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
+import { IpcService, PingMessagePayload } from "@bitwarden/common/platform/ipc";
+import { Manager } from "@bitwarden/sdk-internal";
 
-import {
-  IpcLink,
-  IpcMessage,
-  IpcService,
-  isIpcMessage,
-  PingMessagePayload,
-  PongMessagePayload,
-} from "@bitwarden/common/platform/ipc";
+import { WebCommunicationProvider } from "./web-communication-provider";
 
 export class WebIpcService extends IpcService {
-  private static LinkToExtensionBackground = new IpcLink(
-    async (data) => {
-      window.postMessage(
-        { type: "bitwarden-ipc-message", payload: data } satisfies IpcMessage,
-        window.location.origin,
-      );
-    },
-    new Observable((subscriber) => {
-      const listener = (event: MessageEvent<unknown>) => {
-        const message = event.data;
-        if (!isIpcMessage(message)) {
-          return;
-        }
+  private communicationProvider: WebCommunicationProvider;
 
-        subscriber.next(message.payload);
-      };
-      window.addEventListener("message", listener);
+  constructor(sdkService: SdkService) {
+    super();
+  }
 
-      return () => window.removeEventListener("message", listener);
-    }),
-    ["BrowserBackground"],
-  );
+  async init() {
+    this.communicationProvider = new WebCommunicationProvider();
+    this.manager = new Manager(this.communicationProvider);
 
-  override async init() {
     await super.init();
 
-    this.manager.register_link(WebIpcService.LinkToExtensionBackground);
-
+    // TODO: remove
     void this.ping();
   }
 
@@ -45,15 +25,14 @@ export class WebIpcService extends IpcService {
     try {
       // eslint-disable-next-line no-console
       console.log("[IPC] Pinging");
-      await this.manager.send("BrowserBackground", PingMessagePayload);
+      await this.manager.send({
+        destination: "BrowserBackground",
+        // TODO: Fix hacky hack
+        data: PingMessagePayload as any as number[],
+        source: undefined,
+      });
       // eslint-disable-next-line no-console
       console.log("[IPC] Sent ping");
-      const message = await this.manager.receive("BrowserBackground");
-
-      if (message[0] === PongMessagePayload[0]) {
-        // eslint-disable-next-line no-console
-        console.log("[IPC] Received pong");
-      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("[IPC] Ping failed", error);

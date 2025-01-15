@@ -1,17 +1,33 @@
-import { firstValueFrom, map } from "rxjs";
+import { Observable, shareReplay } from "rxjs";
 
-import { Manager } from "@bitwarden/sdk-internal";
-
-import { SdkService } from "../abstractions/sdk/sdk.service";
+import { Manager, Message } from "@bitwarden/sdk-internal";
 
 export abstract class IpcService {
   protected manager: Manager;
 
-  constructor(private sdkService: SdkService) {}
+  messages$: Observable<Message>;
 
-  async init() {
-    this.manager = await firstValueFrom(
-      this.sdkService.client$.pipe(map((client) => client.ipc().create_manager())),
-    );
+  async init(): Promise<void> {
+    this.messages$ = new Observable<Message>((subscriber) => {
+      let isSubscribed = true;
+      while (isSubscribed) {
+        this.manager
+          .receive()
+          .then((message) => {
+            subscriber.next(message);
+          })
+          .catch((error) => {
+            subscriber.error(error);
+          });
+      }
+
+      return () => {
+        isSubscribed = false;
+      };
+    }).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+  }
+
+  async send(message: Message) {
+    await this.manager.send(message);
   }
 }
