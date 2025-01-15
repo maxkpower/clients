@@ -86,7 +86,7 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.IdpAutoSubmitLogin]: FALSE,
   [FeatureFlag.UnauthenticatedExtensionUIRefresh]: FALSE,
   [FeatureFlag.AccountDeprovisioning]: FALSE,
-  [FeatureFlag.SSHKeyVaultItem]: true,
+  [FeatureFlag.SSHKeyVaultItem]: FALSE,
   [FeatureFlag.SSHAgent]: FALSE,
   [FeatureFlag.AC2476_DeprecateStripeSourcesAPI]: FALSE,
   [FeatureFlag.CipherKeyEncryption]: FALSE,
