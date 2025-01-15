@@ -11,13 +11,14 @@ import {
   SimpleChanges,
   OnChanges,
 } from "@angular/core";
-import { Subject, takeUntil, Observable, firstValueFrom, fromEvent } from "rxjs";
+import { Subject, takeUntil, Observable, firstValueFrom, fromEvent, switchMap, map } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -60,16 +61,22 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
   protected showOnboarding = false;
   protected extensionRefreshEnabled = false;
 
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
+
   constructor(
     protected platformUtilsService: PlatformUtilsService,
     protected policyService: PolicyService,
     private apiService: ApiService,
     private vaultOnboardingService: VaultOnboardingServiceAbstraction,
     private configService: ConfigService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit() {
-    this.onboardingTasks$ = this.vaultOnboardingService.vaultOnboardingState$;
+    this.onboardingTasks$ = this.activeUserId$.pipe(
+      switchMap((userId) => this.vaultOnboardingService.getVaultOnboardingState$(userId)),
+    );
+
     await this.setOnboardingTasks();
     this.setInstallExtLink();
     this.individualVaultPolicyCheck();
