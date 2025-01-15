@@ -13,6 +13,8 @@ import { KeyService } from "@bitwarden/key-management";
 import { EncryptService } from "../abstractions/encrypt.service";
 import { I18nService } from "../abstractions/i18n.service";
 
+// FIXME: Remove when updating file. Eslint update
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const nodeURL = typeof self === "undefined" ? require("url") : null;
 
 declare global {
@@ -609,6 +611,8 @@ export class Utils {
       }
 
       return new URL(uriString);
+      // FIXME: Remove when updating file. Eslint update
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // Ignore error
     }

@@ -2,13 +2,13 @@ import { mock, MockProxy } from "jest-mock-extended";
 import { BehaviorSubject } from "rxjs";
 
 import { OrganizationUserApiService } from "@bitwarden/admin-console/common";
-import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
-import { UserId } from "@bitwarden/common/types/guid";
 import { KeyService } from "@bitwarden/key-management";
 
 import { OrganizationApiServiceAbstraction } from "../../admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationAutoEnrollStatusResponse } from "../../admin-console/models/response/organization-auto-enroll-status.response";
+import { EncryptService } from "../../platform/abstractions/encrypt.service";
 import { I18nService } from "../../platform/abstractions/i18n.service";
+import { UserId } from "../../types/guid";
 import { Account, AccountInfo, AccountService } from "../abstractions/account.service";
 
 import { PasswordResetEnrollmentServiceImplementation } from "./password-reset-enrollment.service.implementation";
