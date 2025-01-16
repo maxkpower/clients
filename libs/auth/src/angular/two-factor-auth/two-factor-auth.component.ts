@@ -87,7 +87,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   providers = TwoFactorProviders;
   providerType = TwoFactorProviderType;
   selectedProviderType: TwoFactorProviderType = TwoFactorProviderType.Authenticator;
-  providerData: { [key: string]: string }; // TODO: build more specific type
+  // TODO: PM-17176 - build more specific type for 2FA metadata
+  providerData: { [key: string]: string } | undefined;
 
   @ViewChild("duoComponent") duoComponent!: TwoFactorAuthDuoComponent;
 
@@ -186,7 +187,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   private async set2faProviderData() {
     const providerData = await this.twoFactorService.getProviders().then((providers) => {
-      return providers.get(this.selectedProviderType);
+      return providers?.get(this.selectedProviderType);
     });
     this.providerData = providerData;
   }
@@ -239,10 +240,17 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
   async selectOtherTwofactorMethod() {
     const dialogRef = TwoFactorOptionsComponent.open(this.dialogService);
-    const response: TwoFactorOptionsDialogResultType = await lastValueFrom(dialogRef.closed);
-    if (response.result === TwoFactorOptionsDialogResult.Provider) {
+    const response: TwoFactorOptionsDialogResultType | undefined = await lastValueFrom(
+      dialogRef.closed,
+    );
+
+    if (
+      response !== undefined &&
+      response !== null &&
+      response.result === TwoFactorOptionsDialogResult.Provider
+    ) {
       const providerData = await this.twoFactorService.getProviders().then((providers) => {
-        return providers.get(response.type);
+        return providers?.get(response.type);
       });
       this.providerData = providerData;
       this.selectedProviderType = response.type;
@@ -362,7 +370,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   private async isTrustedDeviceEncEnabled(
-    trustedDeviceOption: TrustedDeviceUserDecryptionOption,
+    trustedDeviceOption: TrustedDeviceUserDecryptionOption | undefined,
   ): Promise<boolean> {
     const ssoTo2faFlowActive = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
 
@@ -375,12 +383,18 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     // If user doesn't have a MP, but has reset password permission, they must set a MP
     if (
       !userDecryptionOpts.hasMasterPassword &&
-      userDecryptionOpts.trustedDeviceOption.hasManageResetPasswordPermission
+      userDecryptionOpts.trustedDeviceOption?.hasManageResetPasswordPermission
     ) {
       // Set flag so that auth guard can redirect to set password screen after decryption (trusted or untrusted device)
       // Note: we cannot directly navigate to the set password screen in this scenario as we are in a pre-decryption state, and
       // if you try to set a new MP before decrypting, you will invalidate the user's data by making a new user key.
       const userId = (await firstValueFrom(this.accountService.activeAccount$))?.id;
+
+      if (!userId) {
+        this.logService.error("User ID not found when setting TDE force set password reason");
+        return;
+      }
+
       await this.masterPasswordService.setForceSetPasswordReason(
         ForceSetPasswordReason.TdeUserWithoutPasswordHasPasswordResetPermission,
         userId,
