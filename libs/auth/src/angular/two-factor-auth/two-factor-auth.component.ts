@@ -345,12 +345,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // TODO: test extension + webauthn 2fa to ensure these calls are no longer necessary:
-    // this.onSuccessfulLogin = async () => {
-    //   this.messagingService.send("reloadPopup"); // this is just a navigate to "/"
-    //   window.close();
-    // };
-
     const defaultSuccessRoute = await this.determineDefaultSuccessRoute();
 
     await this.router.navigate([defaultSuccessRoute], {
