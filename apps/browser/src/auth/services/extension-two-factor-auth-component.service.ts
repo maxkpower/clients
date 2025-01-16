@@ -43,6 +43,9 @@ export class ExtensionTwoFactorAuthComponentService
 
     // We don't need this window anymore because the intent is for the user to be left
     // on the web vault screen which tells them to continue in the browser extension (sidebar or popup)
+    // We don't want the user to be left with a floating, popped out extension which could be lost behind
+    // another window or minimized. Currently, the popped out window thinks it is active and wouldn't time out
+    // which leads to the security concern. So, we close the popped out extension to avoid this.
     await closeTwoFactorAuthPopout();
   }
 
