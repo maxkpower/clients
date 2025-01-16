@@ -395,9 +395,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       );
     }
 
-    // TODO: determine why this is necessary?
-    if (this.twoFactorAuthComponentService.closeWindow !== undefined) {
-      this.twoFactorAuthComponentService.closeWindow();
+    if (this.twoFactorAuthComponentService.handleSso2faFlowSuccess !== undefined) {
+      await this.twoFactorAuthComponentService.handleSso2faFlowSuccess();
       return;
     }
 
