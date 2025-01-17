@@ -28,7 +28,7 @@ const VAULT_ONBOARDING_KEY = new UserKeyDefinition<VaultOnboardingTasks>(
 
 @Injectable()
 export class VaultOnboardingService implements VaultOnboardingServiceAbstraction {
-  private vaultOnboardingState: SingleUserState<VaultOnboardingTasks>;
+  private vaultOnboardingState?: SingleUserState<VaultOnboardingTasks>;
 
   constructor(private stateProvider: StateProvider) {}
 
