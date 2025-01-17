@@ -75,9 +75,13 @@ const MINIMIZE_ON_COPY = new UserKeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "
   clearOn: [], // User setting, no need to clear
 });
 
-const PEVENT_SCREENSHOTS = new KeyDefinition<boolean>(DESKTOP_SETTINGS_DISK, "preventScreenshots", {
-  deserializer: (b) => b,
-});
+const PREVENT_SCREENSHOTS = new KeyDefinition<boolean>(
+  DESKTOP_SETTINGS_DISK,
+  "preventScreenshots",
+  {
+    deserializer: (b) => b,
+  },
+);
 
 /**
  * Various settings for controlling application behavior specific to the desktop client.
@@ -151,7 +155,7 @@ export class DesktopSettingsService {
 
   sshAgentEnabled$ = this.sshAgentEnabledState.state$.pipe(map(Boolean));
 
-  private readonly preventScreenshotState = this.stateProvider.getGlobal(PEVENT_SCREENSHOTS);
+  private readonly preventScreenshotState = this.stateProvider.getGlobal(PREVENT_SCREENSHOTS);
 
   /**
    * The application setting for whether or not to allow screenshots of the app.
