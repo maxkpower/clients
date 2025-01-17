@@ -23,9 +23,10 @@ export class WebCommunicationProvider implements CommunicationProvider {
         { type: "bitwarden-ipc-message", message } satisfies IpcMessage,
         window.location.origin,
       );
+      return;
     }
 
-    throw new Error("Destination not supported.");
+    throw new Error(`Destination not supported: ${message.destination}`);
   }
 
   receive(): Promise<Message> {

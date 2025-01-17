@@ -17,6 +17,7 @@ export function sendExtensionMessage(message: unknown) {
 }
 
 window.addEventListener("message", (event) => {
+  console.log("Received message", event.data);
   if (isIpcMessage(event.data)) {
     sendExtensionMessage(event.data);
   }

@@ -10,12 +10,15 @@ export class BackgroundCommunicationProvider implements CommunicationProvider {
   constructor() {
     // Web listener
     BrowserApi.messageListener("platform.ipc", (message, sender) => {
+      console.log("BrowserApi.messageListener received", message);
       if (!isIpcMessage(message)) {
         return;
       }
 
       void this.queue.enqueue({ ...message.message, source: { Web: sender.documentId } });
     });
+
+    console.log("BackgroundCommunicationProvider initialized");
   }
 
   async send(message: Message): Promise<void> {
