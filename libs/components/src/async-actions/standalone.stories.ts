@@ -13,7 +13,7 @@ import { BitActionDirective } from "./bit-action.directive";
 
 const template = /*html*/ `
   <button bitButton buttonType="primary" [bitAction]="action" class="tw-mr-2">
-    {{buttonText}}
+    Perform action {{ statusEmoji }}
   </button>
   <button bitIconButton="bwi-trash" buttonType="danger" [bitAction]="action"></button>`;
 
@@ -22,13 +22,13 @@ const template = /*html*/ `
   selector: "app-promise-example",
 })
 class PromiseExampleComponent {
-  buttonText = "Perform action";
+  statusEmoji = "🟡";
   action = async () => {
     await new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         resolve();
-        this.buttonText = "Done";
-      }, 2000);
+        this.statusEmoji = "🟢";
+      }, 5000);
     });
   };
 }
@@ -38,13 +38,13 @@ class PromiseExampleComponent {
   selector: "app-action-resolves-quickly",
 })
 class ActionResolvesQuicklyComponent {
-  buttonText = "Perform action";
+  statusEmoji = "🟡";
 
   action = async () => {
     await new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         resolve();
-        this.buttonText = "Done";
+        this.statusEmoji = "🟢";
       }, 50);
     });
   };
@@ -55,8 +55,6 @@ class ActionResolvesQuicklyComponent {
   selector: "app-observable-example",
 })
 class ObservableExampleComponent {
-  buttonText = "Perform action";
-
   action = () => {
     return of("fake observable").pipe(delay(2000));
   };
@@ -67,8 +65,6 @@ class ObservableExampleComponent {
   selector: "app-rejected-promise-example",
 })
 class RejectedPromiseExampleComponent {
-  buttonText = "Perform action";
-
   action = async () => {
     await new Promise<void>((resolve, reject) => {
       setTimeout(() => reject(new Error("Simulated error")), 2000);
