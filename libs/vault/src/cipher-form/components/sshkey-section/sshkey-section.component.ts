@@ -119,32 +119,60 @@ export class SshKeySectionComponent implements OnInit {
     return import_ssh_key(key, password);
   }
 
-  async importSshKeyFromClipboard(password: string = "") {
-    const ATTEMPTS = 5;
+  async importSshKeyFromClipboard() {
     const key = await this.platformUtilsService.readFromClipboard();
 
+    let isPasswordProtectedSshKey = false;
+
     let parsedKey: SshKey = null;
-    for (let attempt = 0; attempt <= ATTEMPTS; attempt++) {
-      try {
-        parsedKey = await this.importUsingSdk(key, password);
-      } catch (e) {
-        const error = e as SshKeyImportError;
-        if (
-          error.variant === "WrongPassword" &&
-          ((password === "" && attempt === 0) || (password !== "" && attempt < ATTEMPTS))
-        ) {
-          password = await this.getSshKeyPassword();
-        } else {
-          this.toastService.showToast({
-            variant: "error",
-            title: "",
-            message: this.i18nService.t(this.sshImportErrorVariantToI18nKey(error.variant)),
-          });
+
+    try {
+      parsedKey = await this.importUsingSdk(key, "");
+    } catch (e) {
+      const error = e as SshKeyImportError;
+      if (error.variant === "PasswordRequired" || error.variant === "WrongPassword") {
+        isPasswordProtectedSshKey = true;
+      } else {
+        this.toastService.showToast({
+          variant: "error",
+          title: "",
+          message: this.i18nService.t(this.sshImportErrorVariantToI18nKey(error.variant)),
+        });
+        return;
+      }
+    }
+
+    if (isPasswordProtectedSshKey) {
+      for (;;) {
+        const password = await this.getSshKeyPassword();
+        if (password === "") {
           return;
         }
-        continue;
+
+        try {
+          parsedKey = await this.importUsingSdk(key, password);
+          break;
+        } catch (e) {
+          const error = e as SshKeyImportError;
+          if (error.variant !== "WrongPassword") {
+            this.toastService.showToast({
+              variant: "error",
+              title: "",
+              message: this.i18nService.t(this.sshImportErrorVariantToI18nKey(error.variant)),
+            });
+            return;
+          }
+        }
       }
-      break;
+    }
+
+    if (parsedKey == null) {
+      this.toastService.showToast({
+        variant: "error",
+        title: "",
+        message: this.i18nService.t("sshKeyWrongPassword"),
+      });
+      return;
     }
 
     this.sshKeyForm.setValue({
@@ -156,7 +184,7 @@ export class SshKeySectionComponent implements OnInit {
     this.toastService.showToast({
       variant: "success",
       title: "",
-      message: this.i18nService.t("sshKeyPasted"),
+      message: this.i18nService.t("sshKeyImported"),
     });
   }
 

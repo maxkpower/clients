@@ -822,7 +822,6 @@ export class AddEditComponent implements OnInit, OnDestroy {
   }
 
   async importSshKeyFromClipboard() {
-    const ATTEMPTS = 5;
     const key = await this.platformUtilsService.readFromClipboard();
 
     let isPasswordProtectedSshKey = false;
@@ -846,7 +845,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
 
     if (isPasswordProtectedSshKey) {
-      for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+      for (;;) {
         const password = await this.getSshKeyPassword();
         if (password === "") {
           return;
@@ -884,7 +883,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     this.toastService.showToast({
       variant: "success",
       title: "",
-      message: this.i18nService.t("sshKeyPasted"),
+      message: this.i18nService.t("sshKeyImported"),
     });
   }
 
