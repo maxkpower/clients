@@ -1,5 +1,5 @@
 import { mock, MockProxy } from "jest-mock-extended";
-import { of } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
 import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
@@ -42,7 +42,7 @@ describe("BitwardenPasswordProtectedImporter", () => {
     accountService = mock<AccountService>();
     const mockClient = mock<BitwardenClient>();
     sdkService = mock<SdkService>();
-    sdkService.client$ = of(mockClient, mockClient, mockClient);
+    sdkService.client$ = new BehaviorSubject(mockClient);
 
     importer = new BitwardenPasswordProtectedImporter(
       keyService,
