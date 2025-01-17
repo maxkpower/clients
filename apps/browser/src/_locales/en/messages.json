@@ -4928,7 +4928,7 @@
   "importSshKeyFromClipboard": {
     "message": "Import key from clipboard"
   },
-  "sshKeyPasted": {
+  "sshKeyImported": {
     "message": "SSH key imported successfully"
   }
 }

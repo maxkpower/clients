@@ -1780,7 +1780,7 @@
   },
   "requestPending": {
     "message": "Request pending"
-  },  
+  },
   "logBackInOthersToo": {
     "message": "Please log back in. If you are using other Bitwarden applications log out and back in to those as well."
   },
@@ -10224,7 +10224,7 @@
   "importSshKeyFromClipboard": {
     "message": "Import key from clipboard"
   },
-  "sshKeyPasted": {
+  "sshKeyImported": {
     "message": "SSH key imported successfully"
   },
   "copySSHPrivateKey": {
