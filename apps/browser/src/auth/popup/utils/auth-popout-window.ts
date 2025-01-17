@@ -82,11 +82,19 @@ async function closeTwoFactorAuthPopout() {
   await BrowserPopupUtils.closeSingleActionPopout(AuthPopoutType.twoFactorAuth);
 }
 
+/**
+ * Closes the two-factor authentication popout window.
+ */
+async function closeSsoAuthResultPopout() {
+  await BrowserPopupUtils.closeSingleActionPopout(AuthPopoutType.ssoAuthResult);
+}
+
 export {
   AuthPopoutType,
   openUnlockPopout,
   closeUnlockPopout,
   openSsoAuthResultPopout,
+  closeSsoAuthResultPopout,
   openTwoFactorAuthPopout,
   closeTwoFactorAuthPopout,
 };

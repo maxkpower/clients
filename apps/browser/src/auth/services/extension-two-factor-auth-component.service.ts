@@ -5,7 +5,7 @@ import {
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 
 import { BrowserApi } from "../../platform/browser/browser-api";
-import { closeTwoFactorAuthPopout } from "../popup/utils/auth-popout-window";
+import { closeSsoAuthResultPopout } from "../popup/utils/auth-popout-window";
 
 export class ExtensionTwoFactorAuthComponentService
   extends DefaultTwoFactorAuthComponentService
@@ -46,7 +46,7 @@ export class ExtensionTwoFactorAuthComponentService
     // We don't want the user to be left with a floating, popped out extension which could be lost behind
     // another window or minimized. Currently, the popped out window thinks it is active and wouldn't time out
     // which leads to the security concern. So, we close the popped out extension to avoid this.
-    await closeTwoFactorAuthPopout();
+    await closeSsoAuthResultPopout();
   }
 
   private async isLinux(): Promise<boolean> {
