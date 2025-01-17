@@ -454,9 +454,6 @@
   "length": {
     "message": "Даўжыня"
   },
-  "passwordMinLength": {
-    "message": "Мінімальная даўжыня пароля"
-  },
   "uppercase": {
     "message": "Вялікія літары (A-Z)",
     "description": "deprecated. Use uppercaseLabel instead."
@@ -527,10 +524,6 @@
   },
   "minSpecial": {
     "message": "Мінімум спецыяльных сімвалаў"
-  },
-  "avoidAmbChar": {
-    "message": "Пазбягаць неадназначных сімвалаў",
-    "description": "deprecated. Use avoidAmbiguous instead."
   },
   "avoidAmbiguous": {
     "message": "Пазбягаць неадназначных сімвалаў",
@@ -1011,6 +1004,9 @@
   "showIdentitiesCurrentTabDesc": {
     "message": "Спіс элементаў пасведчання на старонцы з укладкамі для лёгкага аўтазапаўнення."
   },
+  "clickToAutofillOnVault": {
+    "message": "Click items to autofill on Vault view"
+  },
   "clearClipboard": {
     "message": "Ачыстка буфера абмену",
     "description": "Clipboard is the operating system thing where you copy/paste data to on your device."
@@ -1156,9 +1152,6 @@
   },
   "moveToOrganization": {
     "message": "Перамясціць у арганізацыю"
-  },
-  "share": {
-    "message": "Абагуліць"
   },
   "movedItemToOrg": {
     "message": "$ITEMNAME$ перамешчана ў $ORGNAME$",
@@ -2047,9 +2040,6 @@
   "clone": {
     "message": "Кланіраваць"
   },
-  "passwordGeneratorPolicyInEffect": {
-    "message": "Адна або больш палітык арганізацыі ўплывае на налады генератара."
-  },
   "passwordGenerator": {
     "message": "Генератар пароляў"
   },
@@ -2334,6 +2324,9 @@
     "message": "Дамены",
     "description": "A category title describing the concept of web domains"
   },
+  "blockedDomains": {
+    "message": "Blocked domains"
+  },
   "excludedDomains": {
     "message": "Выключаныя дамены"
   },
@@ -2342,6 +2335,15 @@
   },
   "excludedDomainsDescAlt": {
     "message": "Bitwarden will not ask to save login details for these domains for all logged in accounts. You must refresh the page for changes to take effect."
+  },
+  "blockedDomainsDesc": {
+    "message": "Autofill and other related features will not be offered for these websites. You must refresh the page for changes to take effect."
+  },
+  "autofillBlockedNoticeV2": {
+    "message": "Autofill is blocked for this website."
+  },
+  "autofillBlockedNoticeGuidance": {
+    "message": "Change this in settings"
   },
   "websiteItemLabel": {
     "message": "Вэб-сайт $number$ (URI)",
@@ -2360,6 +2362,9 @@
         "example": "duckduckgo.com"
       }
     }
+  },
+  "blockedDomainsSavedSuccess": {
+    "message": "Blocked domain changes saved"
   },
   "excludedDomainsSavedSuccess": {
     "message": "Excluded domain changes saved"
@@ -2389,14 +2394,6 @@
     "message": "Падрабязнасці Send",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "searchSends": {
-    "message": "Пошук у Send'ах",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "addSend": {
-    "message": "Дадаць Send",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
   "sendTypeText": {
     "message": "Тэкст"
   },
@@ -2413,15 +2410,8 @@
   "hideTextByDefault": {
     "message": "Hide text by default"
   },
-  "maxAccessCountReached": {
-    "message": "Дасягнута максімальная колькасць доступаў",
-    "description": "This text will be displayed after a Send has been accessed the maximum amount of times."
-  },
   "expired": {
     "message": "Пратэрмінавана"
-  },
-  "pendingDeletion": {
-    "message": "Чакаецца выдаленне"
   },
   "passwordProtected": {
     "message": "Абаронена паролем"
@@ -2472,23 +2462,8 @@
     "message": "Рэдагаваць Send",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "sendTypeHeader": {
-    "message": "Які гэта тып Send'a?",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendNameDesc": {
-    "message": "Зразумелая назва для апісання гэтага Send'a.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendFileDesc": {
-    "message": "Файл, які вы хочаце адправіць."
-  },
   "deletionDate": {
     "message": "Дата выдалення"
-  },
-  "deletionDateDesc": {
-    "message": "Send будзе незваротна выдалены ў азначаныя дату і час.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "deletionDateDescV2": {
     "message": "The Send will be permanently deleted on this date.",
@@ -2496,10 +2471,6 @@
   },
   "expirationDate": {
     "message": "Дата завяршэння"
-  },
-  "expirationDateDesc": {
-    "message": "Калі зададзена, то доступ да гэтага Send міне ў азначаную дату і час.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "oneDay": {
     "message": "1 дзень"
@@ -2516,42 +2487,9 @@
   "custom": {
     "message": "Карыстальніцкі"
   },
-  "maximumAccessCount": {
-    "message": "Максімальная колькасць доступаў"
-  },
-  "maximumAccessCountDesc": {
-    "message": "Калі прызначана, то карыстальнікі больш не змогуць атрымаць доступ да гэтага Send пасля таго, як будзе дасягнута максімальная колькасць зваротаў.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendPasswordDesc": {
-    "message": "Па магчымасці запытваць у карыстальнікаў пароль для доступу да гэтага Send.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
   "sendPasswordDescV3": {
     "message": "Add an optional password for recipients to access this Send.",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendNotesDesc": {
-    "message": "Прыватныя нататкі пра гэты Send.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendDisableDesc": {
-    "message": "Адключыць гэты Send, каб ніхто не змог атрымаць да яго доступ.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendShareDesc": {
-    "message": "Скапіяваць спасылку на гэты Send у буфер абмену пасля захавання.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendTextDesc": {
-    "message": "Тэкст, які вы хочаце адправіць."
-  },
-  "sendHideText": {
-    "message": "Прадвызначана хаваць тэкст гэтага Send.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "currentAccessCount": {
-    "message": "Бягучая колькасць доступаў"
   },
   "createSend": {
     "message": "Стварыць новы Send",
@@ -2635,18 +2573,6 @@
   "sendFileCalloutHeader": {
     "message": "Перад тым, як пачаць"
   },
-  "sendFirefoxCustomDatePopoutMessage1": {
-    "message": "Для выкарыстання каляндарнага стылю выбару даты",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read '**To use a calendar style date picker ** click here to pop out your window.'"
-  },
-  "sendFirefoxCustomDatePopoutMessage2": {
-    "message": "націсніце тут",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To use a calendar style date picker **click here** to pop out your window.'"
-  },
-  "sendFirefoxCustomDatePopoutMessage3": {
-    "message": "для адкрыцця ў новым акне.",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To use a calendar style date picker click here **to pop out your window.**'"
-  },
   "expirationDateIsInvalid": {
     "message": "Азначаная дата завяршэння тэрміну дзеяння з'яўляецца няправільнай."
   },
@@ -2662,14 +2588,8 @@
   "dateParsingError": {
     "message": "Адбылася памылка пры захаванні дат выдалення і завяршэння тэрміну дзеяння."
   },
-  "hideEmail": {
-    "message": "Схаваць мой адрас электроннай пошты ад атрымальнікаў."
-  },
   "hideYourEmail": {
     "message": "Hide your email address from viewers."
-  },
-  "sendOptionsPolicyInEffect": {
-    "message": "Адна або больш палітык арганізацыі ўплываюць на параметры Send."
   },
   "passwordPrompt": {
     "message": "Паўторны запыт асноўнага пароля"
@@ -2884,8 +2804,19 @@
   "error": {
     "message": "Памылка"
   },
-  "regenerateUsername": {
-    "message": "Паўторна генерыраваць імя карыстальніка"
+  "decryptionError": {
+    "message": "Decryption error"
+  },
+  "couldNotDecryptVaultItemsBelow": {
+    "message": "Bitwarden could not decrypt the vault item(s) listed below."
+  },
+  "contactCSToAvoidDataLossPart1": {
+    "message": "Contact customer success",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
+  },
+  "contactCSToAvoidDataLossPart2": {
+    "message": "to avoid additional data loss.",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
   },
   "generateUsername": {
     "message": "Генерыраваць імя карыстальніка"
@@ -2927,9 +2858,6 @@
       }
     }
   },
-  "usernameType": {
-    "message": "Тып імя карыстальніка"
-  },
   "plusAddressedEmail": {
     "message": "Адрасы электроннай пошты з плюсам",
     "description": "Username generator option that appends a random sub-address to the username. For example: address+subaddress@email.com"
@@ -2951,12 +2879,6 @@
   },
   "websiteName": {
     "message": "Назва вэб-сайта"
-  },
-  "whatWouldYouLikeToGenerate": {
-    "message": "Што вы хочаце генерыраваць?"
-  },
-  "passwordType": {
-    "message": "Тып пароля"
   },
   "service": {
     "message": "Сэрвіс"
@@ -4088,6 +4010,9 @@
   "autofillSuggestions": {
     "message": "Autofill suggestions"
   },
+  "itemSuggestions": {
+    "message": "Suggested items"
+  },
   "autofillSuggestionsTip": {
     "message": "Save a login item for this site to autofill"
   },
@@ -4664,12 +4589,6 @@
   "textSends": {
     "message": "Text Sends"
   },
-  "bitwardenNewLook": {
-    "message": "Bitwarden has a new look!"
-  },
-  "bitwardenNewLookDesc": {
-    "message": "It's easier and more intuitive than ever to autofill and search from the Vault tab. Take a look around!"
-  },
   "accountActions": {
     "message": "Account actions"
   },
@@ -4747,6 +4666,33 @@
   },
   "noEditPermissions": {
     "message": "You don't have permission to edit this item"
+  },
+  "biometricsStatusHelptextUnlockNeeded": {
+    "message": "Biometric unlock is unavailable because PIN or password unlock is required first."
+  },
+  "biometricsStatusHelptextHardwareUnavailable": {
+    "message": "Biometric unlock is currently unavailable."
+  },
+  "biometricsStatusHelptextAutoSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextManualSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextDesktopDisconnected": {
+    "message": "Biometric unlock is unavailable because the Bitwarden desktop app is closed."
+  },
+  "biometricsStatusHelptextNotEnabledInDesktop": {
+    "message": "Biometric unlock is unavailable because it is not enabled for $EMAIL$ in the Bitwarden desktop app.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "mail@example.com"
+      }
+    }
+  },
+  "biometricsStatusHelptextUnavailableReasonUnknown": {
+    "message": "Biometric unlock is currently unavailable for an unknown reason."
   },
   "authenticating": {
     "message": "Authenticating"

@@ -16,8 +16,14 @@ import { ThemeType } from "@bitwarden/common/platform/enums";
 import { ThemeStateService } from "@bitwarden/common/platform/theming/theme-state.service";
 import { BadgeModule, CheckboxModule, Option } from "@bitwarden/components";
 
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { CardComponent } from "../../../../../../libs/components/src/card/card.component";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { FormFieldModule } from "../../../../../../libs/components/src/form-field/form-field.module";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { SelectModule } from "../../../../../../libs/components/src/select/select.module";
 import { PopOutComponent } from "../../../platform/popup/components/pop-out.component";
 import { PopupCompactModeService } from "../../../platform/popup/layout/popup-compact-mode.service";
@@ -25,8 +31,8 @@ import { PopupHeaderComponent } from "../../../platform/popup/layout/popup-heade
 import { PopupPageComponent } from "../../../platform/popup/layout/popup-page.component";
 import {
   PopupWidthOption,
-  PopupWidthService,
-} from "../../../platform/popup/layout/popup-width.service";
+  PopupSizeService,
+} from "../../../platform/popup/layout/popup-size.service";
 import { VaultPopupCopyButtonsService } from "../services/vault-popup-copy-buttons.service";
 
 @Component({
@@ -49,7 +55,7 @@ import { VaultPopupCopyButtonsService } from "../services/vault-popup-copy-butto
 export class AppearanceV2Component implements OnInit {
   private compactModeService = inject(PopupCompactModeService);
   private copyButtonsService = inject(VaultPopupCopyButtonsService);
-  private popupWidthService = inject(PopupWidthService);
+  private popupSizeService = inject(PopupSizeService);
   private i18nService = inject(I18nService);
 
   appearanceForm = this.formBuilder.group({
@@ -103,7 +109,7 @@ export class AppearanceV2Component implements OnInit {
     const showQuickCopyActions = await firstValueFrom(
       this.copyButtonsService.showQuickCopyActions$,
     );
-    const width = await firstValueFrom(this.popupWidthService.width$);
+    const width = await firstValueFrom(this.popupSizeService.width$);
 
     // Set initial values for the form
     this.appearanceForm.setValue({
@@ -187,6 +193,6 @@ export class AppearanceV2Component implements OnInit {
   }
 
   async updateWidth(width: PopupWidthOption) {
-    await this.popupWidthService.setWidth(width);
+    await this.popupSizeService.setWidth(width);
   }
 }
