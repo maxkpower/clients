@@ -3,7 +3,16 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { BehaviorSubject, Observable, Subject, firstValueFrom } from "rxjs";
-import { concatMap, debounceTime, filter, map, switchMap, takeUntil, tap } from "rxjs/operators";
+import {
+  concatMap,
+  debounceTime,
+  filter,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+  timeout,
+} from "rxjs/operators";
 
 import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
@@ -773,6 +782,29 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   async savePreventScreenshots() {
     await this.desktopSettingsService.setPreventScreenshots(!this.form.value.allowScreenshots);
+
+    if (!this.form.value.allowScreenshots) {
+      const dialogRef = this.dialogService.openSimpleDialogRef({
+        title: { key: "confirmWindowStillVisibleTitle" },
+        content: { key: "confirmWindowStillVisibleContent" },
+        acceptButtonText: { key: "ok" },
+        cancelButtonText: null,
+        type: "info",
+      });
+      let enabled = true;
+      try {
+        enabled = await firstValueFrom(dialogRef.closed.pipe(timeout(10000)));
+      } catch {
+        enabled = false;
+      } finally {
+        dialogRef.close();
+      }
+
+      if (!enabled) {
+        await this.desktopSettingsService.setPreventScreenshots(false);
+        this.form.controls.allowScreenshots.setValue(true, { emitEvent: false });
+      }
+    }
   }
 
   private async generateVaultTimeoutOptions(): Promise<VaultTimeoutOption[]> {
