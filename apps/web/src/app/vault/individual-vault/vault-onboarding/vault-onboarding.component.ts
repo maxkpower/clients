@@ -74,7 +74,7 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
 
   async ngOnInit() {
     this.onboardingTasks$ = this.activeUserId$.pipe(
-      switchMap((userId) => this.vaultOnboardingService.getVaultOnboardingState$(userId)),
+      switchMap((userId) => this.vaultOnboardingService.vaultOnboardingState$(userId)),
     );
 
     await this.setOnboardingTasks();
