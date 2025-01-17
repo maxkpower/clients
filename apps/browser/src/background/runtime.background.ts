@@ -333,6 +333,8 @@ export default class RuntimeBackground {
           return;
         }
 
+        // TODO: investigate when this is triggered and consider a rename to make it specific
+        // to webauthn 2fa
         await openTwoFactorAuthPopout(msg);
         break;
       }
