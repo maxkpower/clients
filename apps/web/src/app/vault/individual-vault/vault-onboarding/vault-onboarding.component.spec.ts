@@ -44,6 +44,7 @@ describe("VaultOnboardingComponent", () => {
     };
     mockVaultOnboardingService = mock<VaultOnboardingServiceAbstraction>();
     mockStateProvider = {
+      activeUserId$: of(Utils.newGuid() as UserId),
       getUser: jest.fn().mockReturnValue(
         of({
           createAccount: true,

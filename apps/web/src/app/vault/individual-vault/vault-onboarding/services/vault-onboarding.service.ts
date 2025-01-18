@@ -1,5 +1,5 @@
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Injectable, OnDestroy } from "@angular/core";
+import { Observable, Subject, takeUntil } from "rxjs";
 
 import {
   SingleUserState,
@@ -27,17 +27,29 @@ const VAULT_ONBOARDING_KEY = new UserKeyDefinition<VaultOnboardingTasks>(
 );
 
 @Injectable()
-export class VaultOnboardingService implements VaultOnboardingServiceAbstraction {
-  private vaultOnboardingState?: SingleUserState<VaultOnboardingTasks> = null;
+export class VaultOnboardingService implements VaultOnboardingServiceAbstraction, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private vaultOnboardingState: SingleUserState<VaultOnboardingTasks> | undefined;
 
-  constructor(private stateProvider: StateProvider) {}
+  constructor(private stateProvider: StateProvider) {
+    this.stateProvider.activeUserId$.pipe(takeUntil(this.destroy$)).subscribe((userId) => {
+      if (userId) {
+        this.vaultOnboardingState = this.stateProvider.getUser(userId, VAULT_ONBOARDING_KEY);
+      }
+    });
+  }
 
-  vaultOnboardingState$(userId: UserId): Observable<VaultOnboardingTasks | null> {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  vaultOnboardingState$(userId: UserId): Observable<VaultOnboardingTasks> {
     this.vaultOnboardingState = this.stateProvider.getUser(userId, VAULT_ONBOARDING_KEY);
     return this.vaultOnboardingState.state$;
   }
   async setVaultOnboardingTasks(newState: VaultOnboardingTasks): Promise<void> {
-    await this.vaultOnboardingState?.update(() => {
+    await this.vaultOnboardingState.update(() => {
       return { ...newState };
     });
   }

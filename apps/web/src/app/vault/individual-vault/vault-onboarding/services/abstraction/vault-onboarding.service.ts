@@ -8,5 +8,5 @@ import { VaultOnboardingTasks } from "../vault-onboarding.service";
 
 export abstract class VaultOnboardingService {
   abstract setVaultOnboardingTasks(newState: VaultOnboardingTasks): Promise<void>;
-  abstract vaultOnboardingState$(userId: UserId): Observable<VaultOnboardingTasks | null>;
+  abstract vaultOnboardingState$(userId: UserId): Observable<VaultOnboardingTasks>;
 }
