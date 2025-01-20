@@ -6,6 +6,8 @@ import {
   UserDecryptionOptionsServiceAbstraction,
 } from "@bitwarden/auth/common";
 import { AccountInfo, AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { DevicesServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices/devices.service.abstraction";
+import { DeviceView } from "@bitwarden/common/auth/abstractions/devices/views/device.view";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -36,6 +38,7 @@ describe("VaultBannersService", () => {
   const accounts$ = new BehaviorSubject<Record<UserId, AccountInfo>>({
     [userId]: { email: "test@bitwarden.com", emailVerified: true, name: "name" } as AccountInfo,
   });
+  const devices$ = new BehaviorSubject<DeviceView[]>([]);
 
   beforeEach(() => {
     lastSync$.next(new Date("2024-05-14"));
@@ -78,6 +81,10 @@ describe("VaultBannersService", () => {
           useValue: {
             userDecryptionOptionsById$: () => userDecryptionOptions$,
           },
+        },
+        {
+          provide: DevicesServiceAbstraction,
+          useValue: { getDevices$: () => devices$ },
         },
       ],
     });
@@ -272,6 +279,49 @@ describe("VaultBannersService", () => {
       await service.dismissBanner(userId, VisibleVaultBanner.VerifyEmail);
 
       expect(await service.shouldShowVerifyEmailBanner(userId)).toBe(false);
+    });
+  });
+
+  describe("PendingAuthRequest", () => {
+    beforeEach(async () => {
+      devices$.next([
+        {
+          id: "device1",
+          response: {
+            devicePendingAuthRequest: {
+              id: "auth1",
+              creationDate: new Date().toISOString(),
+            },
+          },
+        } as DeviceView,
+      ]);
+    });
+
+    it("shows pending auth request banner", async () => {
+      service = TestBed.inject(VaultBannersService);
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(true);
+    });
+
+    it("does not show banner when no pending requests exist", async () => {
+      devices$.next([
+        {
+          id: "device1",
+          response: {
+            devicePendingAuthRequest: null,
+          },
+        } as DeviceView,
+      ]);
+
+      service = TestBed.inject(VaultBannersService);
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(false);
+    });
+
+    it("dismisses pending auth request banner", async () => {
+      service = TestBed.inject(VaultBannersService);
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(true);
+
+      await service.dismissBanner(userId, VisibleVaultBanner.PendingAuthRequest);
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(false);
     });
   });
 });

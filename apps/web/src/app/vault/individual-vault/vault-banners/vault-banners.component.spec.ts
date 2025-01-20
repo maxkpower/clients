@@ -32,6 +32,7 @@ describe("VaultBannersComponent", () => {
     shouldShowUpdateBrowserBanner: jest.fn(),
     shouldShowVerifyEmailBanner: jest.fn(),
     shouldShowLowKDFBanner: jest.fn(),
+    shouldShowPendingAuthRequestBanner: jest.fn(),
     dismissBanner: jest.fn(),
   });
 
@@ -41,6 +42,7 @@ describe("VaultBannersComponent", () => {
     bannerService.shouldShowUpdateBrowserBanner.mockResolvedValue(false);
     bannerService.shouldShowVerifyEmailBanner.mockResolvedValue(false);
     bannerService.shouldShowLowKDFBanner.mockResolvedValue(false);
+    bannerService.shouldShowPendingAuthRequestBanner.mockResolvedValue(false);
 
     premiumBanner$.next(false);
 
@@ -123,6 +125,11 @@ describe("VaultBannersComponent", () => {
         name: "LowKDF",
         method: bannerService.shouldShowLowKDFBanner,
         banner: VisibleVaultBanner.KDFSettings,
+      },
+      {
+        name: "PendingAuthRequest",
+        method: bannerService.shouldShowPendingAuthRequestBanner,
+        banner: VisibleVaultBanner.PendingAuthRequest,
       },
     ].forEach(({ name, method, banner }) => {
       describe(name, () => {
