@@ -963,7 +963,11 @@ export default class MainBackground {
       this.authService,
       this.accountService,
     );
-    this.totpService = new TotpService(this.cryptoFunctionService, this.logService);
+    this.totpService = new TotpService(
+      this.cryptoFunctionService,
+      this.logService,
+      this.sdkService,
+    );
 
     this.scriptInjectorService = new BrowserScriptInjectorService(
       this.domainSettingsService,
