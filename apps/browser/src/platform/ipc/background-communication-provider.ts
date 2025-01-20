@@ -10,10 +10,10 @@ export class BackgroundCommunicationProvider implements CommunicationProvider {
   constructor() {
     // Web listener
     BrowserApi.messageListener("platform.ipc", (message, sender) => {
-      console.log("BrowserApi.messageListener received", message);
       if (!isIpcMessage(message)) {
         return;
       }
+      console.log("BrowserApi.messageListener(platform.ipc) received", message);
 
       void this.queue.enqueue({ ...message.message, source: { Web: sender.documentId } });
     });
@@ -23,16 +23,24 @@ export class BackgroundCommunicationProvider implements CommunicationProvider {
 
   async send(message: Message): Promise<void> {
     if (typeof message.destination === "object") {
-      await BrowserApi.sendMessage("platform.ipc", {
-        type: "bitwarden-ipc-message",
+      console.log(
+        "BackgroundCommunicationProvider.send() sending message to Web",
+        message.destination.Web,
+      );
+      await BrowserApi.tabSendMessage(
+        // TODO: We should change Web(String) to Web(Number) in the SDK
+        { id: Number(message.destination.Web) } as chrome.tabs.Tab,
         message,
-      } satisfies IpcMessage);
+      );
+      return;
     }
 
     throw new Error("Destination not supported.");
   }
 
-  receive(): Promise<Message> {
-    return this.queue.dequeue();
+  async receive(): Promise<Message> {
+    const message = await this.queue.dequeue();
+    console.log("BackgroundCommunicationProvider.receive() returning message", message);
+    return message;
   }
 }

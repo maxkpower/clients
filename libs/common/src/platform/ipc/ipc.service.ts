@@ -10,16 +10,19 @@ export abstract class IpcService {
   async init(): Promise<void> {
     this.messages$ = new Observable<Message>((subscriber) => {
       let isSubscribed = true;
-      while (isSubscribed) {
-        this.manager
-          .receive()
-          .then((message) => {
+
+      const receiveLoop = async () => {
+        while (isSubscribed) {
+          try {
+            const message = await this.manager.receive();
             subscriber.next(message);
-          })
-          .catch((error) => {
+          } catch (error) {
             subscriber.error(error);
-          });
-      }
+            break;
+          }
+        }
+      };
+      void receiveLoop();
 
       return () => {
         isSubscribed = false;

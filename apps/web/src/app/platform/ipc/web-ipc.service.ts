@@ -1,17 +1,23 @@
+import { firstValueFrom } from "rxjs";
+
 import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { IpcService, PingMessagePayload } from "@bitwarden/common/platform/ipc";
-import { Manager, SendError } from "@bitwarden/sdk-internal";
+import { Manager } from "@bitwarden/sdk-internal";
 
 import { WebCommunicationProvider } from "./web-communication-provider";
 
 export class WebIpcService extends IpcService {
   private communicationProvider: WebCommunicationProvider;
 
-  constructor(sdkService: SdkService) {
+  constructor(private sdkService: SdkService) {
     super();
   }
 
   async init() {
+    // Hack to initialize WASM
+    // TODO: remove when https://github.com/bitwarden/clients/pull/12764 is merged
+    await firstValueFrom(this.sdkService.client$);
+
     this.communicationProvider = new WebCommunicationProvider();
     this.manager = new Manager(this.communicationProvider);
 
@@ -34,7 +40,9 @@ export class WebIpcService extends IpcService {
       // eslint-disable-next-line no-console
       console.log("[IPC] Sent ping");
     } catch (error) {
-      if (error instanceof SendError) {
+      // Doesn't work for some reason?
+      // if (error instanceof SendError) {
+      if (typeof error.debug === "function") {
         // eslint-disable-next-line no-console
         return console.error("[IPC] Ping failed", error.debug());
       }

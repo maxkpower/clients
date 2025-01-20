@@ -1,3 +1,5 @@
+import { firstValueFrom } from "rxjs";
+
 import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { IpcService, PingMessagePayload, PongMessagePayload } from "@bitwarden/common/platform/ipc";
 import { Destination, Manager } from "@bitwarden/sdk-internal";
@@ -7,27 +9,40 @@ import { BackgroundCommunicationProvider } from "./background-communication-prov
 export class IpcBackgroundService extends IpcService {
   private communicationProvider: BackgroundCommunicationProvider;
 
-  constructor(sdkService: SdkService) {
+  constructor(private sdkService: SdkService) {
     super();
   }
 
-  async init() {
-    this.communicationProvider = new BackgroundCommunicationProvider();
-    this.manager = new Manager(this.communicationProvider);
+  override async init() {
+    try {
+      // Hack to initialize WASM
+      // TODO: remove when https://github.com/bitwarden/clients/pull/12764 is merged
+      await firstValueFrom(this.sdkService.client$);
+      this.communicationProvider = new BackgroundCommunicationProvider();
+      this.manager = new Manager(this.communicationProvider);
 
-    await super.init();
+      await super.init();
 
-    this.messages$.subscribe((message) => {
-      if (message.data[0] === PingMessagePayload[0] && message.data[1] === PingMessagePayload[1]) {
-        void this.pong(message.source);
-      }
-    });
+      this.messages$.subscribe((message) => {
+        if (
+          message.data[0] === PingMessagePayload[0] &&
+          message.data[1] === PingMessagePayload[1]
+        ) {
+          // eslint-disable-next-line no-console
+          console.log("[IPC] Received ping");
+          void this.pong(message.source);
+        }
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[IPC] Initialization failed", e);
+    }
   }
 
   async pong(destination: Destination) {
     try {
       // eslint-disable-next-line no-console
-      console.log("[IPC] Pinging");
+      console.log("[IPC] Ponging");
       await this.manager.send({
         destination,
         // TODO: Fix hacky hack
@@ -35,8 +50,13 @@ export class IpcBackgroundService extends IpcService {
         source: undefined,
       });
       // eslint-disable-next-line no-console
-      console.log("[IPC] Sent ping");
+      console.log("[IPC] Sent pong");
     } catch (error) {
+      if (typeof error.debug === "function") {
+        // eslint-disable-next-line no-console
+        return console.error("[IPC] Pong failed", error.debug());
+      }
+
       // eslint-disable-next-line no-console
       console.error("[IPC] Ping failed", error);
     }

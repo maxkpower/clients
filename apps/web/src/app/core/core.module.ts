@@ -66,6 +66,7 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SdkClientFactory } from "@bitwarden/common/platform/abstractions/sdk/sdk-client-factory";
+import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
 import { ThemeType } from "@bitwarden/common/platform/enums";
 import { IpcService } from "@bitwarden/common/platform/ipc";

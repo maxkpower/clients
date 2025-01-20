@@ -36,6 +36,7 @@ export class InitService {
     private userAutoUnlockKeyService: UserAutoUnlockKeyService,
     private accountService: AccountService,
     private versionService: VersionService,
+    private ipcService: IpcService,
     @Inject(DOCUMENT) private document: Document,
   ) {}
 
