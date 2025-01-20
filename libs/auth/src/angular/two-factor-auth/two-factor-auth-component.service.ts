@@ -47,8 +47,8 @@ export abstract class TwoFactorAuthComponentService {
   abstract determineLegacyKeyMigrationAction(): LegacyKeyMigrationAction;
 
   /**
-   * Optionally handles the success flow for the SSO + 2FA required flow.
+   * Optionally executes 2FA success logic.
    * Only defined on clients that require custom success handling.
    */
-  abstract handleSso2faFlowSuccess?(): Promise<void>;
+  abstract handle2faSuccess?(): Promise<void>;
 }

@@ -72,7 +72,10 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
       const webAuthnResponse = this.route.snapshot.paramMap.get("webAuthnResponse");
 
       if (webAuthnResponse != null) {
+        // TODO: determine if we even need this with the top level processing of the webauthn response.
         this.token.emit(webAuthnResponse);
+        // TODO: should we early return?
+        // return;
       }
     }
 

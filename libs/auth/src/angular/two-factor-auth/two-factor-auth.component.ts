@@ -146,6 +146,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
     if (this.twoFactorAuthComponentService.shouldCheckForWebauthnResponseOnInit()) {
       await this.processWebAuthnResponseIfExists();
+      // TODO: should we return here?
+      // return;
     }
 
     await this.setSelected2faProviderType();
@@ -336,12 +338,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       return await this.handleChangePasswordRequired(this.orgSsoIdentifier);
     }
 
-    // if we are in the SSO flow and we have a custom success handler, call it
-    if (
-      this.inSsoFlow &&
-      this.twoFactorAuthComponentService.handleSso2faFlowSuccess !== undefined
-    ) {
-      await this.twoFactorAuthComponentService.handleSso2faFlowSuccess();
+    // if we have a custom success handler, call it
+    if (this.twoFactorAuthComponentService.handle2faSuccess !== undefined) {
+      await this.twoFactorAuthComponentService.handle2faSuccess();
       return;
     }
 
@@ -395,8 +394,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       );
     }
 
-    if (this.twoFactorAuthComponentService.handleSso2faFlowSuccess !== undefined) {
-      await this.twoFactorAuthComponentService.handleSso2faFlowSuccess();
+    if (this.twoFactorAuthComponentService.handle2faSuccess !== undefined) {
+      await this.twoFactorAuthComponentService.handle2faSuccess();
       return;
     }
 
