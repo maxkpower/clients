@@ -20,6 +20,7 @@ import {
   DefaultLoginComponentService,
   LoginDecryptionOptionsService,
   DefaultLoginDecryptionOptionsService,
+  DefaultLoginApprovalComponentService,
 } from "@bitwarden/auth/angular";
 import {
   AuthRequestServiceAbstraction,
@@ -39,6 +40,7 @@ import {
   DefaultAuthRequestApiService,
   DefaultLoginSuccessHandlerService,
   LoginSuccessHandlerService,
+  LoginApprovalComponentServiceAbstraction,
 } from "@bitwarden/auth/common";
 import { ApiService as ApiServiceAbstraction } from "@bitwarden/common/abstractions/api.service";
 import { AuditService as AuditServiceAbstraction } from "@bitwarden/common/abstractions/audit.service";
@@ -291,6 +293,7 @@ import {
   UserAsymmetricKeysRegenerationApiService,
   DefaultUserAsymmetricKeysRegenerationApiService,
 } from "@bitwarden/key-management";
+import { SafeInjectionToken } from "@bitwarden/ui-common";
 import { PasswordRepromptService } from "@bitwarden/vault";
 import {
   VaultExportService,
@@ -321,7 +324,6 @@ import {
   MEMORY_STORAGE,
   OBSERVABLE_DISK_STORAGE,
   OBSERVABLE_MEMORY_STORAGE,
-  SafeInjectionToken,
   SECURE_STORAGE,
   STATE_FACTORY,
   SUPPORTS_SECURE_STORAGE,
@@ -1404,6 +1406,11 @@ const safeProviders: SafeProvider[] = [
     provide: AuthRequestApiService,
     useClass: DefaultAuthRequestApiService,
     deps: [ApiServiceAbstraction, LogService],
+  }),
+  safeProvider({
+    provide: LoginApprovalComponentServiceAbstraction,
+    useClass: DefaultLoginApprovalComponentService,
+    deps: [],
   }),
   safeProvider({
     provide: LoginDecryptionOptionsService,
