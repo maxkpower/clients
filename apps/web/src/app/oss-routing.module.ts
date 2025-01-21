@@ -104,7 +104,7 @@ const routes: Routes = [
   },
   {
     path: "trial",
-    redirectTo: "register",
+    redirectTo: "signup",
     pathMatch: "full",
   },
   {
