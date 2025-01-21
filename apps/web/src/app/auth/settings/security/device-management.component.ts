@@ -83,18 +83,24 @@ export class DeviceManagementComponent {
    */
   private initializeAutoRefresh(): void {
     const deviceUpdates$ = interval(this.REFRESH_INTERVAL).pipe(
+      // Start emitting immediately, then every REFRESH_INTERVAL ms
       startWith(0),
       switchMap(() =>
+        // Combine current device and all devices into a single stream
         combineLatest([
           this.devicesService.getCurrentDevice$(),
           this.devicesService.getDevices$(),
         ]).pipe(
+          // Retry failed requests up to MAX_RETRIES times
           retry(this.MAX_RETRIES),
+          // Handle any errors after retries are exhausted
           catchError((error: unknown) => {
             this.validationService.showError(error);
             this.loading = false;
+            // Return default empty values on error
             return of([null, []] as [DeviceResponse | null, DeviceView[]]);
           }),
+          // Share the subscription with multiple subscribers
           share(),
         ),
       ),
