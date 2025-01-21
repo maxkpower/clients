@@ -868,15 +868,6 @@ export class AddEditComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (parsedKey == null) {
-      this.toastService.showToast({
-        variant: "error",
-        title: "",
-        message: this.i18nService.t("sshKeyWrongPassword"),
-      });
-      return;
-    }
-
     this.cipher.sshKey.privateKey = parsedKey.private_key;
     this.cipher.sshKey.publicKey = parsedKey.public_key;
     this.cipher.sshKey.keyFingerprint = parsedKey.key_fingerprint;

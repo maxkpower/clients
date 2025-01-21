@@ -166,15 +166,6 @@ export class SshKeySectionComponent implements OnInit {
       }
     }
 
-    if (parsedKey == null) {
-      this.toastService.showToast({
-        variant: "error",
-        title: "",
-        message: this.i18nService.t("sshKeyWrongPassword"),
-      });
-      return;
-    }
-
     this.sshKeyForm.setValue({
       privateKey: parsedKey.private_key,
       publicKey: parsedKey.public_key,
