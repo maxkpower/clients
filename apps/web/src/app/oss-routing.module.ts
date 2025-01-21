@@ -95,9 +95,16 @@ import { SendComponent } from "./tools/send/send.component";
 import { VaultModule } from "./vault/individual-vault/vault.module";
 
 const routes: Routes = [
+  // These need to be placed at the top of the list prior to the root
+  // so that the redirectGuard does not interrupt the navigation.
   {
     path: "register",
     redirectTo: "signup",
+    pathMatch: "full",
+  },
+  {
+    path: "trial",
+    redirectTo: "register",
     pathMatch: "full",
   },
   {
@@ -115,11 +122,6 @@ const routes: Routes = [
         path: "login-with-passkey",
         component: LoginViaWebAuthnComponent,
         data: { titleId: "logInWithPasskey" } satisfies RouteDataProperties,
-      },
-      {
-        path: "trial",
-        redirectTo: "register",
-        pathMatch: "full",
       },
       {
         path: "set-password",
