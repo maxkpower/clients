@@ -155,7 +155,6 @@
   a {
     @include themify($themes) {
       color: themed("textHeadingColor");
-      font-weight: themed("linkWeight");
     }
   }
   .show-active {
