@@ -140,12 +140,10 @@ export class VaultBannersService {
         const hasPendingRequest = devices.some(
           (device) => device.response?.devicePendingAuthRequest !== null,
         );
-        //const alreadyDismissed =
-        //  dismissedBanners?.includes(VisibleVaultBanner.PendingAuthRequest) ?? false;
+        const alreadyDismissed =
+          dismissedBanners?.includes(VisibleVaultBanner.PendingAuthRequest) ?? false;
 
-        //return hasPendingRequest && !alreadyDismissed;
-        return hasPendingRequest;
-        return true;
+        return hasPendingRequest && !alreadyDismissed;
       }),
     );
   }
