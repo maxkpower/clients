@@ -33,16 +33,24 @@ describe("DeviceManagementComponent", () => {
   let mockDevices: DeviceView[];
   let destroyRefSpy: { onDestroy: jest.Mock; cleanup: (() => void) | null };
 
-  const mockCurrentDevice: DeviceResponse = {
+  const createDeviceResponse = (overrides: Partial<DeviceResponse> = {}): DeviceResponse =>
+    ({
+      id: "default-id",
+      userId: "user1",
+      name: "Default Device",
+      type: DeviceType.Android,
+      identifier: "default-identifier",
+      creationDate: "2024-01-01",
+      revisionDate: "2024-01-01",
+      isTrusted: true,
+      ...overrides,
+    }) as DeviceResponse;
+
+  const mockCurrentDevice = createDeviceResponse({
     id: "current-device",
-    userId: "user1",
     name: "Current Device",
-    type: DeviceType.Android,
     identifier: "current-identifier",
-    creationDate: "2024-01-01",
-    revisionDate: "2024-01-01",
-    isTrusted: true,
-  } as DeviceResponse;
+  });
 
   // Mock ResizeObserver since bit-table-scroll uses it internally
   const mockResizeObserver = jest.fn(function (callback) {
@@ -77,27 +85,19 @@ describe("DeviceManagementComponent", () => {
 
     i18nService.t.mockImplementation((key) => key);
 
-    const device1Response = {
+    const device1Response = createDeviceResponse({
       id: "1",
-      userId: "user1",
       name: "Device 1",
-      type: DeviceType.Android,
       identifier: "id1",
-      creationDate: "2024-01-01",
-      revisionDate: "2024-01-01",
-      isTrusted: true,
-    } as DeviceResponse;
+    });
 
-    const device2Response = {
+    const device2Response = createDeviceResponse({
       id: "2",
-      userId: "user1",
       name: "Device 2",
       type: DeviceType.ChromeBrowser,
       identifier: "id2",
-      creationDate: "2024-01-01",
-      revisionDate: "2024-01-01",
       isTrusted: false,
-    } as DeviceResponse;
+    });
 
     mockDevices = [new DeviceView(device1Response), new DeviceView(device2Response)];
 
@@ -199,7 +199,7 @@ describe("DeviceManagementComponent", () => {
       expect(validationService.showError).toHaveBeenCalledWith(error);
       expect(component.loading).toBe(false);
 
-      // Verify subsequent refresh
+      // Verify refresh
       jest.advanceTimersByTime(REFRESH_INTERVAL);
       expect(validationService.showError).toHaveBeenCalledTimes(3);
       expect(component.loading).toBe(false);
@@ -209,40 +209,24 @@ describe("DeviceManagementComponent", () => {
     });
 
     it("updates device status when a new auth request is received", () => {
-      const device2WithAuthResponse = new DeviceResponse({
-        Id: "device-2",
-        UserId: "user1",
-        Name: "Device 2",
-        Identifier: "identifier-2",
-        Type: DeviceType.Android,
-        CreationDate: "2024-01-01",
-        RevisionDate: "2024-01-01",
-        IsTrusted: false,
-        DevicePendingAuthRequest: {
+      const device2WithAuthResponse = createDeviceResponse({
+        id: "device-2",
+        name: "Device 2",
+        identifier: "identifier-2",
+        isTrusted: false,
+        devicePendingAuthRequest: {
           id: "auth-1",
           creationDate: "2024-01-01",
         },
       });
 
       const deviceWithAuthRequest = {
-        id: device2WithAuthResponse.id,
-        userId: device2WithAuthResponse.userId,
-        name: device2WithAuthResponse.name,
-        identifier: device2WithAuthResponse.identifier,
-        type: device2WithAuthResponse.type,
-        creationDate: device2WithAuthResponse.creationDate,
-        revisionDate: device2WithAuthResponse.revisionDate,
+        ...device2WithAuthResponse,
         response: device2WithAuthResponse,
       } as DeviceView;
 
       const currentDeviceView = {
-        id: mockCurrentDevice.id,
-        userId: mockCurrentDevice.userId,
-        name: mockCurrentDevice.name,
-        identifier: mockCurrentDevice.identifier,
-        type: mockCurrentDevice.type,
-        creationDate: mockCurrentDevice.creationDate,
-        revisionDate: mockCurrentDevice.revisionDate,
+        ...mockCurrentDevice,
         response: mockCurrentDevice,
       } as DeviceView;
 
