@@ -131,17 +131,23 @@ export class VaultBannersService {
   }
 
   /** Returns true when the pending auth request banner should be shown */
-  async shouldShowPendingAuthRequestBanner(userId: UserId): Promise<boolean> {
-    const devices = await firstValueFrom(this.devicesService.getDevices$());
-    const hasPendingRequest = devices.some(
-      (device) => device.response.devicePendingAuthRequest !== null,
-    );
+  shouldShowPendingAuthRequestBanner$(userId: UserId): Observable<boolean> {
+    return combineLatest([
+      this.devicesService.getDevices$(),
+      this.sessionBannerState(userId).state$,
+    ]).pipe(
+      map(([devices, dismissedBanners]) => {
+        const hasPendingRequest = devices.some(
+          (device) => device.response?.devicePendingAuthRequest !== null,
+        );
+        //const alreadyDismissed =
+        //  dismissedBanners?.includes(VisibleVaultBanner.PendingAuthRequest) ?? false;
 
-    const alreadyDismissed = (await this.getBannerDismissedState(userId)).includes(
-      VisibleVaultBanner.PendingAuthRequest,
+        //return hasPendingRequest && !alreadyDismissed;
+        return hasPendingRequest;
+        return true;
+      }),
     );
-
-    return hasPendingRequest && !alreadyDismissed;
   }
 
   /** Dismiss the given banner and perform any respective side effects */

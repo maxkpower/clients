@@ -63,15 +63,16 @@ export class VaultBannersComponent implements OnInit {
   }
 
   /** Determine which banners should be present */
-  private async determineVisibleBanners(): Promise<void> {
+  async determineVisibleBanners(): Promise<void> {
     const activeUserId = await firstValueFrom(this.activeUserId$);
 
     const showBrowserOutdated =
       await this.vaultBannerService.shouldShowUpdateBrowserBanner(activeUserId);
     const showVerifyEmail = await this.vaultBannerService.shouldShowVerifyEmailBanner(activeUserId);
     const showLowKdf = await this.vaultBannerService.shouldShowLowKDFBanner(activeUserId);
-    const showPendingAuthRequest =
-      await this.vaultBannerService.shouldShowPendingAuthRequestBanner(activeUserId);
+    const showPendingAuthRequest = await firstValueFrom(
+      this.vaultBannerService.shouldShowPendingAuthRequestBanner$(activeUserId),
+    );
 
     this.visibleBanners = [
       showBrowserOutdated ? VisibleVaultBanner.OutdatedBrowser : null,

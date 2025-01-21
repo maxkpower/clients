@@ -1,7 +1,17 @@
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { combineLatest, firstValueFrom } from "rxjs";
+import {
+  catchError,
+  combineLatest,
+  firstValueFrom,
+  interval,
+  of,
+  retry,
+  share,
+  startWith,
+  switchMap,
+} from "rxjs";
 
 import { LoginApprovalComponent } from "@bitwarden/auth/angular";
 import { DevicesServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices/devices.service.abstraction";
@@ -23,6 +33,9 @@ import {
 
 import { SharedModule } from "../../../shared";
 
+/**
+ * Interface representing a row in the device management table
+ */
 interface DeviceTableData {
   id: string;
   type: DeviceType;
@@ -44,11 +57,16 @@ interface DeviceTableData {
   imports: [CommonModule, SharedModule, TableModule, PopoverModule],
 })
 export class DeviceManagementComponent {
-  protected readonly tableId = "device-management-table";
-  protected dataSource = new TableDataSource<DeviceTableData>();
-  protected currentDevice: DeviceView | undefined;
-  protected loading = true;
-  protected asyncActionLoading = false;
+  readonly tableId = "device-management-table";
+  dataSource = new TableDataSource<DeviceTableData>();
+  currentDevice: DeviceView | undefined;
+  loading = true;
+  asyncActionLoading = false;
+
+  /** Interval in milliseconds between auto-refresh cycles */
+  private readonly REFRESH_INTERVAL = 10000; // 10 seconds
+  /** Maximum number of retry attempts for failed requests */
+  private readonly MAX_RETRIES = 3;
 
   constructor(
     private i18nService: I18nService,
@@ -57,31 +75,67 @@ export class DeviceManagementComponent {
     private toastService: ToastService,
     private validationService: ValidationService,
   ) {
-    combineLatest([this.devicesService.getCurrentDevice$(), this.devicesService.getDevices$()])
-      .pipe(takeUntilDestroyed())
-      .subscribe({
-        next: ([currentDevice, devices]: [DeviceResponse, Array<DeviceView>]) => {
-          this.currentDevice = new DeviceView(currentDevice);
+    this.initializeAutoRefresh();
+  }
 
-          this.dataSource.data = devices.map((device: DeviceView): DeviceTableData => {
-            return {
-              id: device.id,
-              type: device.type,
-              displayName: this.getHumanReadableDeviceType(device.type),
-              loginStatus: this.getLoginStatus(device),
-              firstLogin: new Date(device.creationDate),
-              trusted: device.response.isTrusted,
-              devicePendingAuthRequest: device.response.devicePendingAuthRequest,
-              hasPendingAuthRequest: this.hasPendingAuthRequest(device.response),
-            };
-          });
+  /**
+   * Initialize real-time updates for device status via an interval
+   */
+  private initializeAutoRefresh(): void {
+    const deviceUpdates$ = interval(this.REFRESH_INTERVAL).pipe(
+      startWith(0),
+      switchMap(() =>
+        combineLatest([
+          this.devicesService.getCurrentDevice$(),
+          this.devicesService.getDevices$(),
+        ]).pipe(
+          retry(this.MAX_RETRIES),
+          catchError((error: unknown) => {
+            this.validationService.showError(error);
+            this.loading = false;
+            return of([null, []] as [DeviceResponse | null, DeviceView[]]);
+          }),
+          share(),
+        ),
+      ),
+    );
 
+    deviceUpdates$.pipe(takeUntilDestroyed()).subscribe({
+      next: ([currentDevice, devices]: [DeviceResponse | null, DeviceView[]]) => {
+        if (!currentDevice) {
           this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-        },
-      });
+          return;
+        }
+
+        this.currentDevice = new DeviceView(currentDevice);
+        this.updateDeviceTable(devices);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  /**
+   * Updates the device table with the latest device data
+   * @param devices - Array of device views to display in the table
+   */
+  private updateDeviceTable(devices: Array<DeviceView>): void {
+    this.dataSource.data = devices.map((device: DeviceView): DeviceTableData => {
+      return {
+        id: device.id,
+        type: device.type,
+        displayName: this.getHumanReadableDeviceType(device.type),
+        loginStatus: this.getLoginStatus(device),
+        firstLogin: new Date(device.creationDate),
+        trusted: device?.response?.isTrusted ?? false,
+        devicePendingAuthRequest: device?.response?.devicePendingAuthRequest ?? null,
+        hasPendingAuthRequest: device?.response
+          ? this.hasPendingAuthRequest(device.response)
+          : false,
+      };
+    });
   }
 
   /**
@@ -140,7 +194,7 @@ export class DeviceManagementComponent {
       return this.i18nService.t("currentSession");
     }
 
-    if (device.response.devicePendingAuthRequest?.creationDate) {
+    if (device?.response?.devicePendingAuthRequest?.creationDate) {
       return this.i18nService.t("requestPending");
     }
 

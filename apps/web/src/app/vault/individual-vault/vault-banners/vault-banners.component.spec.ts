@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { RouterTestingModule } from "@angular/router/testing";
 import { mock } from "jest-mock-extended";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
 import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -25,14 +25,15 @@ describe("VaultBannersComponent", () => {
   let component: VaultBannersComponent;
   let fixture: ComponentFixture<VaultBannersComponent>;
   const premiumBanner$ = new BehaviorSubject<boolean>(false);
+  const pendingAuthRequest$ = new BehaviorSubject<boolean>(false);
   const mockUserId = Utils.newGuid() as UserId;
 
   const bannerService = mock<VaultBannersService>({
-    shouldShowPremiumBanner$: jest.fn((userId$: Observable<UserId>) => premiumBanner$),
+    shouldShowPremiumBanner$: jest.fn((userId: UserId) => premiumBanner$),
     shouldShowUpdateBrowserBanner: jest.fn(),
     shouldShowVerifyEmailBanner: jest.fn(),
     shouldShowLowKDFBanner: jest.fn(),
-    shouldShowPendingAuthRequestBanner: jest.fn(),
+    shouldShowPendingAuthRequestBanner$: jest.fn((userId: UserId) => pendingAuthRequest$),
     dismissBanner: jest.fn(),
   });
 
@@ -42,8 +43,7 @@ describe("VaultBannersComponent", () => {
     bannerService.shouldShowUpdateBrowserBanner.mockResolvedValue(false);
     bannerService.shouldShowVerifyEmailBanner.mockResolvedValue(false);
     bannerService.shouldShowLowKDFBanner.mockResolvedValue(false);
-    bannerService.shouldShowPendingAuthRequestBanner.mockResolvedValue(false);
-
+    pendingAuthRequest$.next(false);
     premiumBanner$.next(false);
 
     await TestBed.configureTestingModule({
@@ -126,11 +126,6 @@ describe("VaultBannersComponent", () => {
         method: bannerService.shouldShowLowKDFBanner,
         banner: VisibleVaultBanner.KDFSettings,
       },
-      {
-        name: "PendingAuthRequest",
-        method: bannerService.shouldShowPendingAuthRequestBanner,
-        banner: VisibleVaultBanner.PendingAuthRequest,
-      },
     ].forEach(({ name, method, banner }) => {
       describe(name, () => {
         beforeEach(async () => {
@@ -158,6 +153,44 @@ describe("VaultBannersComponent", () => {
 
           expect(component.visibleBanners).toEqual([]);
         });
+      });
+    });
+
+    describe("PendingAuthRequest", () => {
+      beforeEach(async () => {
+        pendingAuthRequest$.next(true);
+        await component.ngOnInit();
+        fixture.detectChanges();
+      });
+
+      it("shows pending auth request banner", async () => {
+        expect(component.visibleBanners).toEqual([VisibleVaultBanner.PendingAuthRequest]);
+      });
+
+      it("dismisses pending auth request banner", async () => {
+        const dismissButton = fixture.debugElement.nativeElement.querySelector(
+          'button[biticonbutton="bwi-close"]',
+        );
+
+        // Update observable to emit false before dismissal
+        pendingAuthRequest$.next(false);
+
+        // Then trigger the dismissal
+        dismissButton.click();
+        fixture.detectChanges();
+
+        expect(bannerService.dismissBanner).toHaveBeenCalledWith(
+          mockUserId,
+          VisibleVaultBanner.PendingAuthRequest,
+        );
+
+        // Wait for async operations to complete
+        await fixture.whenStable();
+        // Force a re-evaluation of the banners
+        await component.determineVisibleBanners();
+        fixture.detectChanges();
+
+        expect(component.visibleBanners).toEqual([]);
       });
     });
   });

@@ -299,29 +299,28 @@ describe("VaultBannersService", () => {
 
     it("shows pending auth request banner", async () => {
       service = TestBed.inject(VaultBannersService);
-      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(true);
+      const result = await firstValueFrom(service.shouldShowPendingAuthRequestBanner$(userId));
+      expect(result).toBe(true);
     });
 
     it("does not show banner when no pending requests exist", async () => {
-      devices$.next([
-        {
-          id: "device1",
-          response: {
-            devicePendingAuthRequest: null,
-          },
-        } as DeviceView,
-      ]);
-
+      devices$.next([]);
       service = TestBed.inject(VaultBannersService);
-      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(false);
+      const result = await firstValueFrom(service.shouldShowPendingAuthRequestBanner$(userId));
+      expect(result).toBe(false);
     });
 
     it("dismisses pending auth request banner", async () => {
       service = TestBed.inject(VaultBannersService);
-      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(true);
+      const result = await firstValueFrom(service.shouldShowPendingAuthRequestBanner$(userId));
+      expect(result).toBe(true);
 
       await service.dismissBanner(userId, VisibleVaultBanner.PendingAuthRequest);
-      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(false);
+      devices$.next([]);
+      const afterDismiss = await firstValueFrom(
+        service.shouldShowPendingAuthRequestBanner$(userId),
+      );
+      expect(afterDismiss).toBe(false);
     });
   });
 });
