@@ -1,4 +1,5 @@
+import { TotpResponse } from "@bitwarden/sdk-internal";
+
 export abstract class TotpService {
-  abstract getCode(key: string | undefined): Promise<string | undefined>;
-  abstract getTimeInterval(key: string): number;
+  abstract getCode(key: string | undefined): Promise<TotpResponse | undefined>;
 }

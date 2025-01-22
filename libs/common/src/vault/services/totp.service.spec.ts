@@ -1,17 +1,31 @@
 import { mock } from "jest-mock-extended";
+import { of } from "rxjs";
 
-import { LogService } from "../../platform/abstractions/log.service";
-import { WebCryptoFunctionService } from "../../platform/services/web-crypto-function.service";
+import { BitwardenClient } from "@bitwarden/sdk-internal";
+
+import { SdkService } from "../../platform/abstractions/sdk/sdk.service";
 
 import { TotpService } from "./totp.service";
 
 describe("TotpService", () => {
   let totpService: TotpService;
 
-  const logService = mock<LogService>();
+  const sdkService = mock<SdkService>();
+  const mockBitwardenClient = {
+    vault: () => ({
+      totp: () => ({
+        generate_totp: jest.fn().mockResolvedValue({
+          code: "123456",
+          period: 30,
+        }),
+      }),
+    }),
+  };
 
   beforeEach(() => {
-    totpService = new TotpService(new WebCryptoFunctionService(global), logService);
+    sdkService.client$ = of(mockBitwardenClient as unknown as BitwardenClient);
+
+    totpService = new TotpService(sdkService);
 
     // TOTP is time-based, so we need to mock the current time
     jest.useFakeTimers({
@@ -24,40 +38,18 @@ describe("TotpService", () => {
     jest.useRealTimers();
   });
 
-  it("should return null if key is null", async () => {
-    const result = await totpService.getCode(null);
-    expect(result).toBeNull();
+  it("should return undefined if key is undefined", async () => {
+    const result = await totpService.getCode(undefined);
+    expect(result).toBeUndefined();
   });
 
-  it("should return a code if key is not null", async () => {
+  it("should return TOTP response when is provided", async () => {
     const result = await totpService.getCode("WQIQ25BRKZYCJVYP");
-    expect(result).toBe("194506");
+    expect(result).toEqual({ code: "123456", period: 30 });
   });
 
-  it("should handle otpauth keys", async () => {
-    const key = "otpauth://totp/test-account?secret=WQIQ25BRKZYCJVYP";
-    const result = await totpService.getCode(key);
-    expect(result).toBe("194506");
-
-    const period = totpService.getTimeInterval(key);
-    expect(period).toBe(30);
-  });
-
-  it("should handle otpauth different period", async () => {
-    const key = "otpauth://totp/test-account?secret=WQIQ25BRKZYCJVYP&period=60";
-    const result = await totpService.getCode(key);
-    expect(result).toBe("730364");
-
-    const period = totpService.getTimeInterval(key);
-    expect(period).toBe(60);
-  });
-
-  it("should handle steam keys", async () => {
-    const key = "steam://HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ";
-    const result = await totpService.getCode(key);
-    expect(result).toBe("7W6CJ");
-
-    const period = totpService.getTimeInterval(key);
-    expect(period).toBe(30);
+  it("should throw error when SDK is undefined", async () => {
+    sdkService.client$ = of(undefined);
+    await expect(totpService.getCode("WQIQ25BRKZYCJVYP")).rejects.toThrow("SDK is undefined");
   });
 });
