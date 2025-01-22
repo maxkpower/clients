@@ -24,6 +24,7 @@ import {
   UriMatchStrategySetting,
 } from "@bitwarden/common/models/domain/domain-service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { CipherFormUriService } from "@bitwarden/common/vault/services/cipher-form-uri.service";
 import {
   FormFieldModule,
   IconButtonModule,
@@ -135,8 +136,10 @@ export class UriOptionComponent implements ControlValueAccessor {
   constructor(
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
+    private cipherFormUriService: CipherFormUriService,
   ) {
     this.uriForm.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      this.cipherFormUriService.setUri(value.uri ?? "");
       this.onChange(value);
     });
 

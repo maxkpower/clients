@@ -23,6 +23,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { IntegrationId } from "@bitwarden/common/tools/integration";
 import { UserId } from "@bitwarden/common/types/guid";
+import { CipherFormUriService } from "@bitwarden/common/vault/services/cipher-form-uri.service";
 import { ToastService, Option } from "@bitwarden/components";
 import {
   AlgorithmInfo,
@@ -66,6 +67,7 @@ export class UsernameGeneratorComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private zone: NgZone,
     private formBuilder: FormBuilder,
+    private cipherFormUriService: CipherFormUriService,
   ) {}
 
   /** Binds the component to a specific user's settings. When this input is not provided,
@@ -336,7 +338,11 @@ export class UsernameGeneratorComponent implements OnInit, OnDestroy {
 
   private typeToGenerator$(type: CredentialAlgorithm) {
     const dependencies = {
-      on$: this.generate$,
+      on$: this.generate$.pipe(
+        map(() => ({
+          website: this.cipherFormUriService.uri,
+        })),
+      ),
       userId$: this.userId$,
     };
 

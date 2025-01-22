@@ -3,7 +3,6 @@
 import {
   BehaviorSubject,
   combineLatest,
-  concat,
   concatMap,
   distinctUntilChanged,
   endWith,
@@ -15,7 +14,6 @@ import {
   Observable,
   ReplaySubject,
   share,
-  skipUntil,
   switchMap,
   takeUntil,
   withLatestFrom,
@@ -123,31 +121,22 @@ export class CredentialGeneratorService {
     const engine = configuration.engine.create(this.getDependencyProvider());
 
     // stream blocks until all of these values are received
-    const website$ = dependencies?.website$ ?? new BehaviorSubject<string>(null);
-    const request$ = website$.pipe(map((website) => ({ website })));
     const settings$ = this.settings$(configuration, dependencies);
 
-    // if on$ triggers before settings are loaded, trigger as soon
-    // as they become available.
-    let readyOn$: Observable<any> = null;
-    if (dependencies?.on$) {
-      const NO_EMISSIONS = {};
-      const ready$ = combineLatest([settings$, request$]).pipe(
-        first(null, NO_EMISSIONS),
-        filter((value) => value !== NO_EMISSIONS),
-        share(),
-      );
-      readyOn$ = concat(
-        dependencies.on$?.pipe(switchMap(() => ready$)),
-        dependencies.on$.pipe(skipUntil(ready$)),
-      );
-    }
+    // Handle the on$ emissions which now include the website data
+    const on$ =
+      dependencies?.on$ ?? new BehaviorSubject<{ website: string | null }>({ website: null });
+    // Ensure that settings are loaded before proceeding
+    const ready$ = combineLatest([settings$, on$]).pipe(first(), share());
 
-    // generation proper
-    const generate$ = (readyOn$ ?? settings$).pipe(
-      withLatestFrom(request$, settings$),
-      concatMap(([, request, settings]) => engine.generate(request, settings)),
-      takeUntil(anyComplete([request$, settings$])),
+    // Generation logic
+    const generate$ = ready$.pipe(
+      withLatestFrom(on$, settings$),
+      concatMap(([, { website }, settings]) => {
+        const request = { website };
+        return engine.generate(request, settings);
+      }),
+      takeUntil(anyComplete([on$, settings$])),
     );
 
     return generate$;
