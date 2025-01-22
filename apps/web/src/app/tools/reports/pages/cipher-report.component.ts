@@ -2,7 +2,7 @@
 // @ts-strict-ignore
 import { DialogRef } from "@angular/cdk/dialog";
 import { Directive, ViewChild, ViewContainerRef, OnDestroy } from "@angular/core";
-import { BehaviorSubject, Observable, Subject, switchMap, takeUntil } from "rxjs";
+import { BehaviorSubject, lastValueFrom, Observable, Subject, switchMap, takeUntil } from "rxjs";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
