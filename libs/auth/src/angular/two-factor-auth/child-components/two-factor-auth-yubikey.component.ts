@@ -4,7 +4,6 @@ import { Component, EventEmitter, Output } from "@angular/core";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import {
   ButtonModule,
   LinkModule,
@@ -29,7 +28,7 @@ import {
     AsyncActionsModule,
     FormsModule,
   ],
-  providers: [I18nPipe],
+  providers: [],
 })
 export class TwoFactorAuthYubikeyComponent {
   tokenValue: string = "";

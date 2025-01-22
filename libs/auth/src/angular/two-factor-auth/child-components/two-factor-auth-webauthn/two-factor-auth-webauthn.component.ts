@@ -6,7 +6,6 @@ import { ActivatedRoute } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import { WINDOW } from "@bitwarden/angular/services/injection-tokens";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
@@ -42,7 +41,7 @@ import { TwoFactorAuthWebAuthnComponentService } from "./two-factor-auth-webauth
     AsyncActionsModule,
     FormsModule,
   ],
-  providers: [I18nPipe],
+  providers: [],
 })
 export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   @Output() token = new EventEmitter<string>();
