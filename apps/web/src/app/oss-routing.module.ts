@@ -10,8 +10,8 @@ import {
   tdeDecryptionRequiredGuard,
   unauthGuardFn,
 } from "@bitwarden/angular/auth/guards";
-import { canAccessFeature } from "@bitwarden/angular/platform/guard/feature-flag.guard";
 import { generatorSwap } from "@bitwarden/angular/tools/generator/generator-swap";
+import { twofactorRefactorSwap } from "@bitwarden/angular/utils/two-factor-component-refactor-route-swap";
 import { NewDeviceVerificationNoticeGuard } from "@bitwarden/angular/vault/guards";
 import {
   AnonLayoutWrapperComponent,
@@ -38,7 +38,6 @@ import {
   VaultIcon,
   LoginDecryptionOptionsComponent,
 } from "@bitwarden/auth/angular";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { LockComponent } from "@bitwarden/key-management/angular";
 import {
   NewDeviceVerificationNoticePageOneComponent,
@@ -46,7 +45,6 @@ import {
   VaultIcons,
 } from "@bitwarden/vault";
 
-import { twofactorRefactorSwap } from "../../../../libs/angular/src/utils/two-factor-component-refactor-route-swap";
 import { flagEnabled, Flags } from "../utils/flags";
 
 import { VerifyRecoverDeleteOrgComponent } from "./admin-console/organizations/manage/verify-recover-delete-org.component";
@@ -344,7 +342,7 @@ const routes: Routes = [
     children: [
       {
         path: "signup",
-        canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
+        canActivate: [unauthGuardFn()],
         data: {
           pageIcon: RegistrationUserAddIcon,
           pageTitle: {
@@ -369,7 +367,7 @@ const routes: Routes = [
       },
       {
         path: "finish-signup",
-        canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
+        canActivate: [unauthGuardFn()],
         data: {
           pageIcon: RegistrationLockAltIcon,
           titleId: "setAStrongPassword",
@@ -403,7 +401,6 @@ const routes: Routes = [
       },
       {
         path: "set-password-jit",
-        canActivate: [canAccessFeature(FeatureFlag.EmailVerification)],
         component: SetPasswordJitComponent,
         data: {
           pageTitle: {
@@ -416,7 +413,7 @@ const routes: Routes = [
       },
       {
         path: "signup-link-expired",
-        canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
+        canActivate: [unauthGuardFn()],
         data: {
           pageIcon: RegistrationExpiredLinkIcon,
           pageTitle: {
@@ -653,7 +650,7 @@ const routes: Routes = [
       },
       {
         path: "trial-initiation",
-        canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
+        canActivate: [unauthGuardFn()],
         component: CompleteTrialInitiationComponent,
         resolve: {
           pageTitle: freeTrialTextResolver,
@@ -664,7 +661,7 @@ const routes: Routes = [
       },
       {
         path: "secrets-manager-trial-initiation",
-        canActivate: [canAccessFeature(FeatureFlag.EmailVerification), unauthGuardFn()],
+        canActivate: [unauthGuardFn()],
         component: CompleteTrialInitiationComponent,
         resolve: {
           pageTitle: freeTrialTextResolver,
