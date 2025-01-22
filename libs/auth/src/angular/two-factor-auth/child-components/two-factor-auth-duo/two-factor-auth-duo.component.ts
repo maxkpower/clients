@@ -5,7 +5,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import {
@@ -38,7 +37,7 @@ import {
     AsyncActionsModule,
     FormsModule,
   ],
-  providers: [I18nPipe],
+  providers: [],
 })
 export class TwoFactorAuthDuoComponent implements OnInit {
   @Output() token = new EventEmitter<string>();

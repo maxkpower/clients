@@ -6,7 +6,6 @@ import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { lastValueFrom, firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import { WINDOW } from "@bitwarden/angular/services/injection-tokens";
 import {
   LoginStrategyServiceAbstraction,
@@ -74,7 +73,7 @@ import {
     TwoFactorAuthYubikeyComponent,
     TwoFactorAuthWebAuthnComponent,
   ],
-  providers: [I18nPipe],
+  providers: [],
 })
 export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   loading = true;
