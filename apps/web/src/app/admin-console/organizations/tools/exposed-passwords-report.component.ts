@@ -15,7 +15,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { DialogService } from "@bitwarden/components/src/dialog/dialog.service";
+import { DialogService } from "@bitwarden/components";
 import { PasswordRepromptService, CipherFormConfigService } from "@bitwarden/vault";
 
 // eslint-disable-next-line no-restricted-imports

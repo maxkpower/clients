@@ -10,7 +10,7 @@ import { WebAuthnLoginServiceAbstraction } from "@bitwarden/common/auth/abstract
 import { WebAuthnLoginCredentialAssertionOptionsView } from "@bitwarden/common/auth/models/view/webauthn-login/webauthn-login-credential-assertion-options.view";
 import { Verification } from "@bitwarden/common/auth/types/verification";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
-import { DialogService } from "@bitwarden/components/src/dialog/dialog.service";
+import { DialogService } from "@bitwarden/components";
 
 import { WebauthnLoginAdminService } from "../../../core/services/webauthn-login/webauthn-login-admin.service";
 import { WebauthnLoginCredentialView } from "../../../core/views/webauthn-login-credential.view";
