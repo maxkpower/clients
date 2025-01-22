@@ -1,19 +1,20 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-
 import { DialogRef } from "@angular/cdk/dialog";
 import { Directive, ViewChild, ViewContainerRef, OnDestroy } from "@angular/core";
-import { BehaviorSubject, lastValueFrom, Observable, Subject, takeUntil } from "rxjs";
+import { BehaviorSubject, Observable, Subject, switchMap, takeUntil } from "rxjs";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherId, CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherRepromptType } from "@bitwarden/common/vault/enums/cipher-reprompt-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { DialogService, TableDataSource } from "@bitwarden/components";
+import { TableDataSource } from "@bitwarden/components";
+import { DialogService } from "@bitwarden/components/src/dialog/dialog.service";
 import {
   CipherFormConfig,
   CipherFormConfigService,
@@ -54,11 +55,14 @@ export class CipherReportComponent implements OnDestroy {
     private dialogService: DialogService,
     protected passwordRepromptService: PasswordRepromptService,
     protected organizationService: OrganizationService,
+    protected accountService: AccountService,
     protected i18nService: I18nService,
     private syncService: SyncService,
     private cipherFormConfigService: CipherFormConfigService,
   ) {
-    this.organizations$ = this.organizationService.organizations$;
+    this.organizations$ = this.accountService.activeAccount$.pipe(
+      switchMap((account) => this.organizationService.organizations$(account?.id)),
+    );
     this.organizations$.pipe(takeUntil(this.destroyed$)).subscribe((orgs) => {
       this.organizations = orgs;
     });

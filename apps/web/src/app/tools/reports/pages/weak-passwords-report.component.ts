@@ -3,6 +3,7 @@
 import { Component, OnInit } from "@angular/core";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
@@ -10,7 +11,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { BadgeVariant, DialogService } from "@bitwarden/components";
+import { DialogService } from "@bitwarden/components/src/dialog/dialog.service";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 import { CipherReportComponent } from "./cipher-report.component";
@@ -32,6 +33,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
     protected passwordStrengthService: PasswordStrengthServiceAbstraction,
     protected organizationService: OrganizationService,
     dialogService: DialogService,
+    protected accountService: AccountService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
     syncService: SyncService,
@@ -42,6 +44,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
       dialogService,
       passwordRepromptService,
       organizationService,
+      accountService,
       i18nService,
       syncService,
       cipherFormConfigService,
