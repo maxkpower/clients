@@ -173,12 +173,15 @@ export class ViewComponent implements OnDestroy, OnInit {
 
     if (this.cipher.type === CipherType.Login && this.cipher.login.totp && canGenerateTotp) {
       await this.totpUpdateCode();
-      const interval = this.totpService.getTimeInterval(this.cipher.login.totp);
-      await this.totpTick(interval);
-
-      this.totpInterval = setInterval(async () => {
+      const totpResponse = await this.totpService.getCode(this.cipher.login.totp);
+      if (totpResponse) {
+        const interval = totpResponse.period;
         await this.totpTick(interval);
-      }, 1000);
+
+        this.totpInterval = setInterval(async () => {
+          await this.totpTick(interval);
+        }, 1000);
+      }
     }
 
     if (this.previousCipherId !== this.cipherId) {
@@ -537,7 +540,7 @@ export class ViewComponent implements OnDestroy, OnInit {
       return;
     }
 
-    this.totpCode = await this.totpService.getCode(this.cipher.login.totp);
+    this.totpCode = (await this.totpService.getCode(this.cipher.login.totp))?.code;
     if (this.totpCode != null) {
       if (this.totpCode.length > 4) {
         const half = Math.floor(this.totpCode.length / 2);

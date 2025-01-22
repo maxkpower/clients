@@ -1263,7 +1263,7 @@ export class VaultComponent implements OnInit, OnDestroy {
       typeI18nKey = "password";
     } else if (field === "totp") {
       aType = "TOTP";
-      value = await this.totpService.getCode(cipher.login.totp);
+      value = (await this.totpService.getCode(cipher.login.totp))?.code;
       typeI18nKey = "verificationCodeTotp";
     } else {
       this.toastService.showToast({

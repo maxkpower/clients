@@ -918,7 +918,7 @@ describe("AutofillService", () => {
         .spyOn(billingAccountProfileStateService, "hasPremiumFromAnySource$")
         .mockImplementation(() => of(true));
       jest.spyOn(autofillService, "getShouldAutoCopyTotp").mockResolvedValue(true);
-      jest.spyOn(totpService, "getCode").mockResolvedValue(totpCode);
+      jest.spyOn(totpService, "getCode").mockResolvedValue({ code: totpCode, period: 30 });
 
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
 

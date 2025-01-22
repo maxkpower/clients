@@ -136,7 +136,7 @@ describe("CopyCipherFieldService", () => {
 
       it("should get TOTP code when allowed from premium", async () => {
         billingAccountProfileStateService.hasPremiumFromAnySource$.mockReturnValue(of(true));
-        totpService.getCode.mockResolvedValue("123456");
+        totpService.getCode.mockResolvedValue({ code: "123456", period: 30 });
         const result = await service.copy(valueToCopy, actionType, cipher, skipReprompt);
         expect(result).toBeTruthy();
         expect(totpService.getCode).toHaveBeenCalledWith(valueToCopy);
@@ -148,7 +148,7 @@ describe("CopyCipherFieldService", () => {
 
       it("should get TOTP code when allowed from organization", async () => {
         cipher.organizationUseTotp = true;
-        totpService.getCode.mockResolvedValue("123456");
+        totpService.getCode.mockResolvedValue({ code: "123456", period: 30 });
         const result = await service.copy(valueToCopy, actionType, cipher, skipReprompt);
         expect(result).toBeTruthy();
         expect(totpService.getCode).toHaveBeenCalledWith(valueToCopy);

@@ -159,10 +159,16 @@ describe("ContextMenuClickedHandler", () => {
 
       totpService.getCode.mockImplementation((seed) => {
         if (seed === "TEST_TOTP_SEED") {
-          return Promise.resolve("123456");
+          return Promise.resolve({
+            code: "123456",
+            period: 30,
+          });
         }
 
-        return Promise.resolve("654321");
+        return Promise.resolve({
+          code: "654321",
+          period: 30,
+        });
       });
 
       await sut.run(createData(`${COPY_VERIFICATION_CODE_ID}_1`, COPY_VERIFICATION_CODE_ID), {
