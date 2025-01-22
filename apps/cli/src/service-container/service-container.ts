@@ -750,11 +750,7 @@ export class ServiceContainer {
       this.stateProvider,
     );
 
-    this.totpService = new TotpService(
-      this.cryptoFunctionService,
-      this.logService,
-      this.sdkService,
-    );
+    this.totpService = new TotpService(this.sdkService);
 
     this.importApiService = new ImportApiService(this.apiService);
 

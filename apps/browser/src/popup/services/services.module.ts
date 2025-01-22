@@ -267,7 +267,7 @@ const safeProviders: SafeProvider[] = [
   safeProvider({
     provide: TotpServiceAbstraction,
     useClass: TotpService,
-    deps: [CryptoFunctionService, LogService, SdkService],
+    deps: [SdkService],
   }),
   safeProvider({
     provide: OffscreenDocumentService,
