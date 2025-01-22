@@ -11,6 +11,7 @@ import { ProviderService } from "@bitwarden/common/admin-console/abstractions/pr
 import { ProviderStatusType, ProviderUserType } from "@bitwarden/common/admin-console/enums";
 import { Provider } from "@bitwarden/common/admin-console/models/domain/provider";
 import { ProviderOrganizationOrganizationDetailsResponse } from "@bitwarden/common/admin-console/models/response/provider/provider-organization.response";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { BillingApiServiceAbstraction as BillingApiService } from "@bitwarden/common/billing/abstractions/billing-api.service.abstraction";
 import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -56,6 +57,7 @@ export class ManageClientsComponent extends BaseClientsComponent {
     toastService: ToastService,
     validationService: ValidationService,
     webProviderService: WebProviderService,
+    accountService: AccountService,
   ) {
     super(
       activatedRoute,
@@ -65,6 +67,7 @@ export class ManageClientsComponent extends BaseClientsComponent {
       toastService,
       validationService,
       webProviderService,
+      accountService,
     );
 
     this.activatedRoute.parent.params

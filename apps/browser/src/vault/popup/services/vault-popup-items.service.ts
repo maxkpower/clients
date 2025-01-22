@@ -24,9 +24,10 @@ import {
 import { CollectionService } from "@bitwarden/admin-console/common";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SyncService } from "@bitwarden/common/platform/sync";
-import { CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
+import { CollectionId, OrganizationId, UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault-settings/vault-settings.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -123,23 +124,37 @@ export class VaultPopupItemsService {
    * Observable that indicates whether there is search text present that is searchable.
    * @private
    */
-  private _hasSearchText$ = this._searchText$.pipe(
-    switchMap((searchText) => this.searchService.isSearchable(searchText)),
+  private _hasSearchText$ = combineLatest([
+    this._searchText$,
+    this.accountService.activeAccount$.pipe(
+      map((a) => a?.id),
+      filter((userId) => userId != null),
+    ),
+  ]).pipe(
+    switchMap(([searchText, userId]) => {
+      return this.searchService.isSearchable(userId, searchText);
+    }),
   );
 
   private _filteredCipherList$: Observable<PopupCipherView[]> = combineLatest([
     this._activeCipherList$,
     this._searchText$,
     this.vaultPopupListFiltersService.filterFunction$,
+    this.accountService.activeAccount$.pipe(
+      map((a) => a?.id),
+      filter((userId) => userId != null),
+    ),
   ]).pipe(
-    map(([ciphers, searchText, filterFunction]): [CipherView[], string] => [
+    map(([ciphers, searchText, filterFunction, userId]): [CipherView[], string, UserId] => [
       filterFunction(ciphers),
       searchText,
+      userId,
     ]),
-    switchMap(
-      ([ciphers, searchText]) =>
-        this.searchService.searchCiphers(searchText, null, ciphers) as Promise<PopupCipherView[]>,
-    ),
+    switchMap(([ciphers, searchText, userId]) => {
+      return this.searchService.searchCiphers(userId, searchText, null, ciphers) as Promise<
+        PopupCipherView[]
+      >;
+    }),
     shareReplay({ refCount: true, bufferSize: 1 }),
   );
 
@@ -281,6 +296,7 @@ export class VaultPopupItemsService {
     private collectionService: CollectionService,
     private vaultPopupAutofillService: VaultPopupAutofillService,
     private syncService: SyncService,
+    private accountService: AccountService,
   ) {}
 
   applyFilter(newSearchText: string) {

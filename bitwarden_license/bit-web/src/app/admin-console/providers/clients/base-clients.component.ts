@@ -3,11 +3,12 @@
 import { SelectionModel } from "@angular/cdk/collections";
 import { Directive, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { BehaviorSubject, from, Subject, switchMap } from "rxjs";
-import { first, takeUntil } from "rxjs/operators";
+import { BehaviorSubject, combineLatest, from, Subject, switchMap } from "rxjs";
+import { filter, first, map, takeUntil } from "rxjs/operators";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { ProviderOrganizationOrganizationDetailsResponse } from "@bitwarden/common/admin-console/models/response/provider/provider-organization.response";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
 import { DialogService, TableDataSource, ToastService } from "@bitwarden/components";
@@ -50,6 +51,7 @@ export abstract class BaseClientsComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private validationService: ValidationService,
     private webProviderService: WebProviderService,
+    private accountService: AccountService,
   ) {}
 
   abstract load(): Promise<void>;
@@ -61,10 +63,17 @@ export abstract class BaseClientsComponent implements OnInit, OnDestroy {
         this.searchText = queryParams.search;
       });
 
-    this.searchText$
+    combineLatest([
+      this.searchText$,
+      this.accountService.activeAccount$.pipe(
+        map((a) => a?.id),
+        filter((userId) => userId != null),
+      ),
+    ])
       .pipe(
-        switchMap((searchText) => from(this.searchService.isSearchable(searchText))),
-        takeUntil(this.destroy$),
+        switchMap(([searchText, userId]) => {
+          return from(this.searchService.isSearchable(userId, searchText));
+        }),
       )
       .subscribe((isSearchable) => {
         this.searching = isSearchable;

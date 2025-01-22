@@ -359,16 +359,25 @@ export class VaultComponent implements OnInit, OnDestroy {
       this.cipherService.cipherViews$.pipe(filter((c) => c !== null)),
       filter$,
       this.currentSearchText$,
+      this.accountService.activeAccount$.pipe(
+        map((a) => a?.id),
+        filter((userId) => userId != null),
+      ),
     ]).pipe(
       filter(([ciphers, filter]) => ciphers != undefined && filter != undefined),
-      concatMap(async ([ciphers, filter, searchText]) => {
+      concatMap(async ([ciphers, filter, searchText, userId]) => {
         const failedCiphers = await firstValueFrom(this.cipherService.failedToDecryptCiphers$);
         const filterFunction = createFilterFunction(filter);
         // Append any failed to decrypt ciphers to the top of the cipher list
         const allCiphers = [...failedCiphers, ...ciphers];
 
-        if (await this.searchService.isSearchable(searchText)) {
-          return await this.searchService.searchCiphers(searchText, [filterFunction], allCiphers);
+        if (await this.searchService.isSearchable(userId, searchText)) {
+          return await this.searchService.searchCiphers(
+            userId,
+            searchText,
+            [filterFunction],
+            allCiphers,
+          );
         }
 
         return allCiphers.filter(filterFunction);
@@ -397,7 +406,7 @@ export class VaultComponent implements OnInit, OnDestroy {
           collectionsToReturn = selectedCollection?.children.map((c) => c.node) ?? [];
         }
 
-        if (await this.searchService.isSearchable(searchText)) {
+        if (await this.searchService.isSearchable(this.activeUserId, searchText)) {
           collectionsToReturn = this.searchPipe.transform(
             collectionsToReturn,
             searchText,

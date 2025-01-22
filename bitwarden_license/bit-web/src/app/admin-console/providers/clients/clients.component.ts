@@ -12,6 +12,7 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { ProviderStatusType, ProviderUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { PlanType } from "@bitwarden/common/billing/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
@@ -53,6 +54,7 @@ export class ClientsComponent extends BaseClientsComponent implements OnInit, On
     toastService: ToastService,
     validationService: ValidationService,
     webProviderService: WebProviderService,
+    accountService: AccountService,
   ) {
     super(
       activatedRoute,
@@ -62,6 +64,7 @@ export class ClientsComponent extends BaseClientsComponent implements OnInit, On
       toastService,
       validationService,
       webProviderService,
+      accountService,
     );
   }
 
