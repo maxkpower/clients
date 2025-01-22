@@ -124,7 +124,7 @@ export class SshKeySectionComponent implements OnInit {
 
     let isPasswordProtectedSshKey = false;
 
-    let parsedKey: SshKey = null;
+    let parsedKey: SshKey | null = null;
 
     try {
       parsedKey = await this.importUsingSdk(key, "");
