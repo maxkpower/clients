@@ -20,7 +20,7 @@ import {
   TypographyModule,
 } from "@bitwarden/components";
 import { generate_ssh_key } from "@bitwarden/sdk-internal";
-import { SshImportPromptService } from "@bitwarden/vault";
+import { SshImportPromptService } from "../../../services/ssh-import-prompt.service";
 
 import { CipherFormContainer } from "../../cipher-form-container";
 
@@ -104,9 +104,9 @@ export class SshKeySectionComponent implements OnInit {
     const key = await this.sshImportPromptService.importSshKeyFromClipboard();
     if (key != null) {
       this.sshKeyForm.setValue({
-        privateKey: key.private_key,
-        publicKey: key.public_key,
-        keyFingerprint: key.key_fingerprint,
+        privateKey: key.privateKey,
+        publicKey: key.publicKey,
+        keyFingerprint: key.keyFingerprint,
       });
     }
   }

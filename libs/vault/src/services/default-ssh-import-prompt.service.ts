@@ -6,11 +6,16 @@ import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.serv
 import { DialogService, ToastService } from "@bitwarden/components";
 import { SshKeyPasswordPromptComponent } from "@bitwarden/importer/ui";
 import { import_ssh_key, SshKey, SshKeyImportError } from "@bitwarden/sdk-internal";
+import { Injectable } from "@angular/core";
+import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
+import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
+import { SshImportPromptService } from "./ssh-import-prompt.service";
 
 /**
  * Used to import ssh keys and prompt for their password.
  */
-export class DefaultSshImportPromptService {
+@Injectable()
+export class DefaultSshImportPromptService implements SshImportPromptService {
   constructor(
     private dialogService: DialogService,
     private sdkService: SdkService,
@@ -24,7 +29,7 @@ export class DefaultSshImportPromptService {
     return import_ssh_key(key, password);
   }
 
-  async importSshKeyFromClipboard(): Promise<SshKey | null> {
+  async importSshKeyFromClipboard(): Promise<SshKeyData | null> {
     const key = await this.platformUtilsService.readFromClipboard();
 
     let isPasswordProtectedSshKey = false;
@@ -77,7 +82,13 @@ export class DefaultSshImportPromptService {
       message: this.i18nService.t("sshKeyImported"),
     });
 
-    return parsedKey;
+    return new SshKeyData(
+      new SshKeyApi({
+        privateKey: parsedKey!.private_key,
+        publicKey: parsedKey!.public_key,
+        keyFingerprint: parsedKey!.key_fingerprint,
+      }),
+    );
   }
 
   private sshImportErrorVariantToI18nKey(variant: string): string {

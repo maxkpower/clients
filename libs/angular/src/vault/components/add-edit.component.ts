@@ -826,9 +826,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
   async importSshKeyFromClipboard() {
     const key = await this.sshImportPromptService.importSshKeyFromClipboard();
     if (key != null) {
-      this.cipher.sshKey.privateKey = key.private_key;
-      this.cipher.sshKey.publicKey = key.public_key;
-      this.cipher.sshKey.keyFingerprint = key.key_fingerprint;
+      this.cipher.sshKey.privateKey = key.privateKey;
+      this.cipher.sshKey.publicKey = key.publicKey;
+      this.cipher.sshKey.keyFingerprint = key.keyFingerprint;
     }
   }
 

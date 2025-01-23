@@ -33,8 +33,8 @@ import {
   CipherFormConfig,
   CipherFormGenerationService,
   PasswordRepromptService,
-  SshImportPromptService,
 } from "@bitwarden/vault";
+import { SshImportPromptService } from "../services/ssh-import-prompt.service";
 // FIXME: remove `/apps` import from `/libs`
 // FIXME: remove `src` and fix import
 // eslint-disable-next-line import/no-restricted-paths, no-restricted-imports
@@ -45,6 +45,7 @@ import { TotpCaptureService } from "./abstractions/totp-capture.service";
 import { CipherFormModule } from "./cipher-form.module";
 import { CipherFormComponent } from "./components/cipher-form.component";
 import { CipherFormCacheService } from "./services/default-cipher-form-cache.service";
+import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
 
 const defaultConfig: CipherFormConfig = {
   mode: "add",
@@ -148,6 +149,12 @@ export default {
           },
         },
         {
+          provide: SshImportPromptService,
+          useValue: {
+            importSshKeyFromClipboard: () => Promise.resolve(new SshKeyData()),
+          },
+        },
+        {
           provide: CipherFormGenerationService,
           useValue: {
             generateInitialPassword: () => Promise.resolve("initial-password"),
@@ -215,12 +222,6 @@ export default {
           provide: ConfigService,
           useValue: {
             getFeatureFlag: () => Promise.resolve(false),
-          },
-        },
-        {
-          provide: SshImportPromptService,
-          useValue: {
-            importSshKeyFromClipboard: () => Promise.resolve(null),
           },
         },
       ],

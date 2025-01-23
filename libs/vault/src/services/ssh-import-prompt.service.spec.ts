@@ -8,6 +8,8 @@ import { DialogService, ToastService } from "@bitwarden/components";
 import * as sdkInternal from "@bitwarden/sdk-internal";
 
 import { DefaultSshImportPromptService } from "./default-ssh-import-prompt.service";
+import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
+import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
 
 jest.mock("@bitwarden/sdk-internal");
 
@@ -16,6 +18,14 @@ const exampleSshKey = {
   public_key: "public_key",
   key_fingerprint: "key_fingerprint",
 } as sdkInternal.SshKey;
+
+const exampleSshKeyData = new SshKeyData(
+  new SshKeyApi({
+    publicKey: exampleSshKey.public_key,
+    privateKey: exampleSshKey.private_key,
+    keyFingerprint: exampleSshKey.key_fingerprint,
+  }),
+);
 
 describe("SshImportPromptService", () => {
   let sshImportPromptService: DefaultSshImportPromptService;
@@ -48,7 +58,7 @@ describe("SshImportPromptService", () => {
     it("imports unencrypted ssh key", async () => {
       jest.spyOn(sdkInternal, "import_ssh_key").mockReturnValue(exampleSshKey);
       platformUtilsService.readFromClipboard.mockResolvedValue("ssh_key");
-      expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(exampleSshKey);
+      expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(exampleSshKeyData);
     });
 
     it("requests password for encrypted ssh key", async () => {
@@ -61,7 +71,7 @@ describe("SshImportPromptService", () => {
       dialogService.open.mockReturnValue({ closed: new BehaviorSubject("password") } as any);
       platformUtilsService.readFromClipboard.mockResolvedValue("ssh_key");
 
-      expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(exampleSshKey);
+      expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(exampleSshKeyData);
       expect(dialogService.open).toHaveBeenCalled();
     });
 
