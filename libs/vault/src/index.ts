@@ -19,3 +19,6 @@ export { NewDeviceVerificationNoticePageTwoComponent } from "./components/new-de
 export { DecryptionFailureDialogComponent } from "./components/decryption-failure-dialog/decryption-failure-dialog.component";
 
 export * as VaultIcons from "./icons";
+
+export { DefaultSshImportPromptService } from "./services/default-ssh-import-prompt.service";
+export { SshImportPromptService } from "./services/ssh-import-prompt.service";

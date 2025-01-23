@@ -22,7 +22,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { DialogService, ToastService } from "@bitwarden/components";
-import { PasswordRepromptService } from "@bitwarden/vault";
+import { PasswordRepromptService, SshImportPromptService } from "@bitwarden/vault";
 
 const BroadcasterSubscriptionId = "AddEditComponent";
 
@@ -56,6 +56,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
     toastService: ToastService,
     cipherAuthorizationService: CipherAuthorizationService,
     sdkService: SdkService,
+    sshImportPromptService: SshImportPromptService,
   ) {
     super(
       cipherService,
@@ -78,6 +79,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
       cipherAuthorizationService,
       toastService,
       sdkService,
+      sshImportPromptService,
     );
   }
 
