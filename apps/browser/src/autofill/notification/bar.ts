@@ -1,3 +1,5 @@
+import { render } from "lit";
+import { Theme } from "@bitwarden/common/platform/enums";
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { ThemeTypes } from "@bitwarden/common/platform/enums";
@@ -5,6 +7,7 @@ import { ConsoleLogService } from "@bitwarden/common/platform/services/console-l
 import type { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
 import { AdjustNotificationBarMessageData } from "../background/abstractions/notification.background";
+import { NotificationContainer } from "../content/components/notification/container";
 import { buildSvgDomElement } from "../utils";
 import { circleCheckIcon } from "../utils/svg-icons";
 
@@ -12,11 +15,19 @@ import {
   NotificationBarWindowMessageHandlers,
   NotificationBarWindowMessage,
   NotificationBarIframeInitData,
+  NotificationType
 } from "./abstractions/notification-bar";
+import "../content/components/registry";
+import { themeContext } from "../content/components/contexts/theme";
+// import { HostContainer } from "./components/host-container";
 
-// FIXME: Remove when updating file. Eslint update
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-require("./bar.scss");
+const useComponentBar = true;
+
+if (!useComponentBar) {
+  // FIXME: Remove when updating file. Eslint update
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require("./bar.scss");
+}
 
 const logService = new ConsoleLogService(false);
 let notificationBarIframeInitData: NotificationBarIframeInitData = {};
@@ -39,12 +50,8 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
   }
 
   notificationBarIframeInitData = initData;
-  const { isVaultLocked } = notificationBarIframeInitData;
-  setNotificationBarTheme();
-
-  (document.getElementById("logo") as HTMLImageElement).src = isVaultLocked
-    ? chrome.runtime.getURL("images/icon38_locked.png")
-    : chrome.runtime.getURL("images/icon38.png");
+  const { isVaultLocked, theme } = notificationBarIframeInitData;
+  console.log("notificationBarIframeInitData:", notificationBarIframeInitData);
 
   const i18n = {
     appName: chrome.i18n.getMessage("appName"),
@@ -58,7 +65,49 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
     notificationChangeDesc: chrome.i18n.getMessage("notificationChangeDesc"),
     notificationUnlock: chrome.i18n.getMessage("notificationUnlock"),
     notificationUnlockDesc: chrome.i18n.getMessage("notificationUnlockDesc"),
+
+    // @TODO move values to message catalog
+    saveAction: "Save",
+    saveAsNewLoginAction: "Save as new login",
+    updateLoginAction: "Update login",
+    saveLoginPrompt: "Save login?",
+    updateLoginPrompt: "Update existing login?",
+    loginSaveSuccess: "Login saved",
+    loginSaveSuccessDetails: "Login saved to Bitwarden.",
+    loginUpdateSuccess: "Login saved",
+    loginUpdateSuccessDetails: "Login updated in Bitwarden.",
+    saveFailure: "Error saving",
+    saveFailureDetails: "Oh no! We couldn't save this. Try entering the details as a New item",
   };
+
+  if (useComponentBar) {
+    document.body.innerHTML = "";
+    // Temporary workaround for removing required stylesheet for old notification bar experience
+    document.head.querySelectorAll('link[rel="stylesheet"]').forEach(node => node.remove());
+
+    const themeType = getTheme(globalThis, theme);
+
+    // There are other possible passed theme values, but for now, resolve to dark or light
+    const resolvedTheme: Theme = themeType === ThemeTypes.Dark ? ThemeTypes.Dark : ThemeTypes.Light;
+
+    // @TODO use context to avoid prop drilling
+    return render(
+      NotificationContainer({
+        ...notificationBarIframeInitData,
+        type: notificationBarIframeInitData.type as NotificationType,
+        theme: resolvedTheme,
+        handleCloseNotification,
+        i18n,
+      }),
+      document.body,
+    );
+  }
+
+  setNotificationBarTheme();
+
+  (document.getElementById("logo") as HTMLImageElement).src = isVaultLocked
+    ? chrome.runtime.getURL("images/icon38_locked.png")
+    : chrome.runtime.getURL("images/icon38.png");
 
   setupLogoLink(i18n);
 
@@ -106,7 +155,7 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
   closeButton.title = i18n.close;
 
   const notificationType = initData.type;
-  if (initData.type === "add") {
+  if (notificationType === "add") {
     handleTypeAdd();
   } else if (notificationType === "change") {
     handleTypeChange();
@@ -114,15 +163,17 @@ function initNotificationBar(message: NotificationBarWindowMessage) {
     handleTypeUnlock();
   }
 
-  closeButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    sendPlatformMessage({
-      command: "bgCloseNotificationBar",
-    });
-  });
+  closeButton.addEventListener("click", handleCloseNotification);
 
   globalThis.addEventListener("resize", adjustHeight);
   adjustHeight();
+}
+
+function handleCloseNotification(e: Event) {
+  e.preventDefault();
+  sendPlatformMessage({
+    command: "bgCloseNotificationBar",
+  });
 }
 
 function handleTypeAdd() {
@@ -317,13 +368,18 @@ function setupLogoLink(i18n: Record<string, string>) {
   sendPlatformMessage({ command: "getWebVaultUrlForNotification" }, setWebVaultUrlLink);
 }
 
-function setNotificationBarTheme() {
-  let theme = notificationBarIframeInitData.theme;
+function getTheme(globalThis: any, theme: NotificationBarIframeInitData["theme"]) {
   if (theme === ThemeTypes.System) {
-    theme = globalThis.matchMedia("(prefers-color-scheme: dark)").matches
+    return globalThis.matchMedia("(prefers-color-scheme: dark)").matches
       ? ThemeTypes.Dark
       : ThemeTypes.Light;
   }
+
+  return theme;
+}
+
+function setNotificationBarTheme() {
+  const theme = getTheme(globalThis, notificationBarIframeInitData.theme);
 
   document.documentElement.classList.add(`theme_${theme}`);
 

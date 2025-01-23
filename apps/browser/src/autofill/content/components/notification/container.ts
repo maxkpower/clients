@@ -13,11 +13,9 @@ import { CipherData } from "../cipher/types";
 import { themes, spacing } from "../constants/styles";
 
 import { NotificationBody, componentClassPrefix as notificationBodyClassPrefix } from "./body";
+import { NotificationHeader } from "./header";
 import { NotificationFooter } from "./footer";
-import {
-  NotificationHeader,
-  componentClassPrefix as notificationHeaderClassPrefix,
-} from "./header";
+import { componentClassPrefix as notificationHeaderClassPrefix } from "./header";
 
 export function NotificationContainer({
   handleCloseNotification,
@@ -31,8 +29,25 @@ export function NotificationContainer({
   const headerMessage = getHeaderMessage(i18n, type);
   const showBody = true;
 
+  const cipher = {
+    id: "inline-menu-cipher-0",
+    name: "fedex.com/secure-login",
+    type: 1,
+    reprompt: 0,
+    favorite: false,
+    icon: {
+      imageEnabled: true,
+      image: "https://localhost:8443/icons/www.fedex.com/icon.png",
+      icon: "bwi-globe",
+    },
+    accountCreationFieldType: "text",
+    login: {
+      username: "bwplaywright@gmail.com",
+    },
+  } as CipherData;
   // @TODO remove mock ciphers for development
   const ciphers = [
+    cipher,
     createAutofillOverlayCipherDataMock(1),
     { ...createAutofillOverlayCipherDataMock(2), icon: { imageEnabled: false } },
     {

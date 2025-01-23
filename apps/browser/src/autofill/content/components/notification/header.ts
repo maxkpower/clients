@@ -1,4 +1,4 @@
-import createEmotion from "@emotion/css/create-instance";
+import createEmotion from '@emotion/css/create-instance';
 import { html } from "lit";
 
 import { Theme, ThemeTypes } from "@bitwarden/common/platform/enums";

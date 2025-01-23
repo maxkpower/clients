@@ -27,8 +27,8 @@ export function CipherItem({
   notificationType?: NotificationType;
   theme: Theme;
 }) {
-  const { icon } = cipher;
-  const uri = (icon.imageEnabled && icon.image) || undefined;
+  const { icon } = cipher || {};
+  const uri = (icon?.imageEnabled && icon?.image) || undefined;
 
   let cipherActionButton = null;
 

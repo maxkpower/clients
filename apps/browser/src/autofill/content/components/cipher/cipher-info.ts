@@ -10,7 +10,7 @@ import { CipherData } from "./types";
 
 // @TODO support other cipher types (card, identity, notes, etc)
 export function CipherInfo({ cipher, theme }: { cipher: CipherData; theme: Theme }) {
-  const { name, login } = cipher;
+  const { name, login } = cipher || {};
 
   return html`
     <div>

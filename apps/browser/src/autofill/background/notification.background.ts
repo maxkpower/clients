@@ -172,7 +172,8 @@ export default class NotificationBackground {
         this.notificationQueue.splice(i, 1);
       }
     }
-    setTimeout(() => this.cleanupNotificationQueue(), 30000); // check every 30 seconds
+    // DO NOT MERGE - Hold the window open for development
+    setTimeout(() => this.cleanupNotificationQueue(), 3000000); // check every 30 seconds
   }
 
   private async doNotificationQueueCheck(tab: chrome.tabs.Tab): Promise<void> {
@@ -509,6 +510,7 @@ export default class NotificationBackground {
 
       folderId = (await this.folderExists(folderId)) ? folderId : null;
       const newCipher = this.convertAddLoginQueueMessageToCipherView(queueMessage, folderId);
+      console.log('newCipher:', newCipher);
 
       if (edit) {
         await this.editItem(newCipher, tab);
