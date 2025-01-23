@@ -37,9 +37,9 @@ export interface ActiveUserState<T> extends UserState<T> {
    * Resolves to the new state. If `shouldUpdate` returns false, the promise will resolve to the current state.
    */
   readonly update: <TCombine>(
-    configureState: (state: T, dependencies: TCombine) => T,
+    configureState: (state: T | null, dependencies: TCombine) => T | null,
     options?: StateUpdateOptions<T, TCombine>,
-  ) => Promise<[UserId, T]>;
+  ) => Promise<[UserId, T | null]>;
 }
 export interface SingleUserState<T> extends UserState<T> {
   readonly userId: UserId;
@@ -56,7 +56,7 @@ export interface SingleUserState<T> extends UserState<T> {
    * Resolves to the new state. If `shouldUpdate` returns false, the promise will resolve to the current state.
    */
   readonly update: <TCombine>(
-    configureState: (state: T, dependencies: TCombine) => T,
+    configureState: (state: T | null, dependencies: TCombine) => T | null,
     options?: StateUpdateOptions<T, TCombine>,
-  ) => Promise<T>;
+  ) => Promise<T | null>;
 }
