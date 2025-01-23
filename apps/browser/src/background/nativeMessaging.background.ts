@@ -379,7 +379,7 @@ export class NativeMessagingBackground {
       this.connected = false;
 
       if (messageId != null && this.callbacks.has(messageId)) {
-        this.callbacks.get(messageId)?.rejecter("invalidateEncryption");
+        this.callbacks.get(messageId)!.rejecter("invalidateEncryption");
       }
     }
   }
