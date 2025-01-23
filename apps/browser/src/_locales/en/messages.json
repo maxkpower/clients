@@ -2388,6 +2388,15 @@
       }
     }
   },
+  "reviewAndChangeAtRiskPasswords": {
+    "message": "Review and change $COUNT$ at-risk passwords",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
   "websiteItemLabel": {
     "message": "Website $number$ (URI)",
     "placeholders": {

@@ -7,10 +7,17 @@ import { combineLatest, Observable, shareReplay, switchMap } from "rxjs";
 import { filter, map, take } from "rxjs/operators";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { CipherId, CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
-import { ButtonModule, DialogService, Icons, NoItemsModule } from "@bitwarden/components";
+import {
+  BannerComponent,
+  ButtonModule,
+  DialogService,
+  Icons,
+  NoItemsModule,
+} from "@bitwarden/components";
 import { DecryptionFailureDialogComponent, VaultIcons } from "@bitwarden/vault";
 
 import { CurrentAccountComponent } from "../../../../auth/popup/account-switching/current-account.component";
@@ -19,6 +26,7 @@ import { PopupHeaderComponent } from "../../../../platform/popup/layout/popup-he
 import { PopupPageComponent } from "../../../../platform/popup/layout/popup-page.component";
 import { VaultPopupItemsService } from "../../services/vault-popup-items.service";
 import { VaultPopupListFiltersService } from "../../services/vault-popup-list-filters.service";
+import { AtRiskPasswordCalloutComponent } from "../at-risk-callout/at-risk-password-callout.component";
 
 import { BlockedInjectionBanner } from "./blocked-injection-banner/blocked-injection-banner.component";
 import {
@@ -56,6 +64,8 @@ enum VaultState {
     ScrollingModule,
     VaultHeaderV2Component,
     DecryptionFailureDialogComponent,
+    BannerComponent,
+    AtRiskPasswordCalloutComponent,
   ],
 })
 export class VaultV2Component implements OnInit, OnDestroy {
@@ -135,4 +145,6 @@ export class VaultV2Component implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {}
+
+  protected readonly FeatureFlag = FeatureFlag;
 }
