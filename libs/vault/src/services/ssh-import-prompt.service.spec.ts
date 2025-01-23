@@ -9,7 +9,6 @@ import * as sdkInternal from "@bitwarden/sdk-internal";
 
 import { DefaultSshImportPromptService } from "./default-ssh-import-prompt.service";
 
-
 jest.mock("@bitwarden/sdk-internal");
 
 const exampleSshKey = {
