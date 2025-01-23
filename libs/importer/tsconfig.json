@@ -17,11 +17,6 @@
       "@bitwarden/vault-export-core": ["../tools/export/vault-export/vault-export-core/src"]
     }
   },
-  "include": [
-    "src",
-    "spec",
-    "../vault/src/services/ssh-import-prompt.service.ts",
-    "../vault/src/services/default-ssh-import-prompt.service.ts"
-  ],
+  "include": ["src", "spec"],
   "exclude": ["node_modules", "dist"]
 }
