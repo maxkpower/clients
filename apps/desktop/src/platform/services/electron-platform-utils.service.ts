@@ -8,7 +8,6 @@ import {
   PlatformUtilsService,
 } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
-import { isSnapStore, isFlatpak } from "../../utils";
 import { ClipboardWriteMessage } from "../types/clipboard";
 
 export const ELECTRON_SUPPORTS_SECURE_STORAGE = true;
@@ -80,7 +79,7 @@ export class ElectronPlatformUtilsService implements PlatformUtilsService {
 
   // Linux and Mac are missing a pinentry, sandboxed linux needs further work to allow the devices
   supportsWebAuthn(win: Window): boolean {
-    return !isSnapStore() && !isFlatpak();
+    return true;
   }
 
   supportsDuo(): boolean {
