@@ -1,8 +1,17 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { Directive, ViewChild, ViewContainerRef } from "@angular/core";
+import { Directive, ViewChild, ViewContainerRef, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { firstValueFrom, concatMap, map, lastValueFrom, startWith, debounceTime } from "rxjs";
+import {
+  firstValueFrom,
+  concatMap,
+  map,
+  lastValueFrom,
+  startWith,
+  debounceTime,
+  combineLatest,
+  filter,
+} from "rxjs";
 
 import { SearchPipe } from "@bitwarden/angular/pipes/search.pipe";
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
@@ -16,6 +25,7 @@ import {
   ProviderUserType,
 } from "@bitwarden/common/admin-console/enums";
 import { ProviderUserUserDetailsResponse } from "@bitwarden/common/admin-console/models/response/provider/provider-user.response";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -35,7 +45,8 @@ const MaxCheckedCount = 500;
 @Directive()
 export abstract class BasePeopleComponent<
   UserType extends ProviderUserUserDetailsResponse | OrganizationUserView,
-> {
+> implements OnInit
+{
   @ViewChild("confirmTemplate", { read: ViewContainerRef, static: true })
   confirmModalRef: ViewContainerRef;
 
@@ -99,11 +110,19 @@ export abstract class BasePeopleComponent<
   protected pageSize = 100;
 
   protected searchControl = new FormControl("", { nonNullable: true });
-  protected isSearching$ = this.searchControl.valueChanges.pipe(
+
+  private isSearching$ = combineLatest([
+    this.searchControl.valueChanges,
+    this.accountService.activeAccount$.pipe(
+      map((a) => a?.id),
+      filter((userId) => userId != null),
+    ),
+  ]).pipe(
     debounceTime(500),
-    concatMap((searchText) => this.searchService.isSearchable(searchText)),
+    concatMap(([searchText, userId]) => this.searchService.isSearchable(userId, searchText)),
     startWith(false),
   );
+
   protected isPaging$ = this.isSearching$.pipe(
     map((isSearching) => {
       if (isSearching && this.didScroll) {
@@ -128,6 +147,7 @@ export abstract class BasePeopleComponent<
     protected dialogService: DialogService,
     protected organizationManagementPreferencesService: OrganizationManagementPreferencesService,
     protected toastService: ToastService,
+    protected accountService: AccountService,
   ) {}
 
   abstract edit(user: UserType): void;
@@ -137,6 +157,10 @@ export abstract class BasePeopleComponent<
   abstract restoreUser(id: string): Promise<void>;
   abstract reinviteUser(id: string): Promise<void>;
   abstract confirmUser(user: UserType, publicKey: Uint8Array): Promise<void>;
+
+  // ngOnInit() {
+  //   this.isSearching$ =
+  // }
 
   async load() {
     const response = await this.getUsers();
