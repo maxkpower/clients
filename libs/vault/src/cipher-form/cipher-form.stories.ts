@@ -33,6 +33,7 @@ import {
   CipherFormConfig,
   CipherFormGenerationService,
   PasswordRepromptService,
+  SshImportPromptService,
 } from "@bitwarden/vault";
 // FIXME: remove `/apps` import from `/libs`
 // FIXME: remove `src` and fix import
@@ -214,6 +215,12 @@ export default {
           provide: ConfigService,
           useValue: {
             getFeatureFlag: () => Promise.resolve(false),
+          },
+        },
+        {
+          provide: SshImportPromptService,
+          useValue: {
+            importSshKeyFromClipboard: () => Promise.resolve(null),
           },
         },
       ],
