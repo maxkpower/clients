@@ -77,7 +77,7 @@ export class ElectronPlatformUtilsService implements PlatformUtilsService {
     return (await this.getApplicationVersion()).split(/[+|-]/)[0].trim();
   }
 
-  // Linux and Mac are missing ui to enter a pin, so this works for two-factor security keys, when always-uv is not active
+  // Linux and Mac are missing a ui to enter a pin, so this works for two-factor security keys, when always-uv is not active
   supportsWebAuthn(win: Window): boolean {
     return true;
   }
