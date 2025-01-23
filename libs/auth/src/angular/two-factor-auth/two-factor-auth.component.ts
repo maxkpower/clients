@@ -113,7 +113,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.submit();
   };
 
-  private twoFactorSessionTimeoutRoute = "2fa-timeout";
+  private authenticationSessionTimeoutRoute = "authentication-timeout";
 
   constructor(
     private loginStrategyService: LoginStrategyServiceAbstraction,
@@ -144,7 +144,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.orgSsoIdentifier =
       this.activatedRoute.snapshot.queryParamMap.get("identifier") ?? undefined;
 
-    this.listenFor2faSessionTimeout();
+    this.listenForAuthnSessionTimeout();
 
     await this.setSelected2faProviderType();
     await this.set2faProviderData();
@@ -192,8 +192,8 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.providerData = providerData;
   }
 
-  private listenFor2faSessionTimeout() {
-    this.loginStrategyService.twoFactorTimeout$
+  private listenForAuthnSessionTimeout() {
+    this.loginStrategyService.authenticationSessionTimeout$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(async (expired) => {
         if (!expired) {
@@ -201,10 +201,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
         }
 
         try {
-          await this.router.navigate([this.twoFactorSessionTimeoutRoute]);
+          await this.router.navigate([this.authenticationSessionTimeoutRoute]);
         } catch (err) {
           this.logService.error(
-            `Failed to navigate to ${this.twoFactorSessionTimeoutRoute} route`,
+            `Failed to navigate to ${this.authenticationSessionTimeoutRoute} route`,
             err,
           );
         }
