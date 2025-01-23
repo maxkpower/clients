@@ -9,7 +9,8 @@ import BrowserPopupUtils from "../../platform/popup/browser-popup-utils";
 import {
   AuthPopoutType,
   closeSsoAuthResultPopout,
-  closeTwoFactorAuthPopout,
+  closeTwoFactorAuthEmailPopout,
+  closeTwoFactorAuthWebAuthnPopout,
 } from "../popup/utils/auth-popout-window";
 
 export class ExtensionTwoFactorAuthComponentService
@@ -67,13 +68,24 @@ export class ExtensionTwoFactorAuthComponentService
       return;
     }
 
-    const inTwoFactorAuthPopout = BrowserPopupUtils.inSingleActionPopout(
+    const inTwoFactorAuthWebAuthnPopout = BrowserPopupUtils.inSingleActionPopout(
       this.window,
-      AuthPopoutType.twoFactorAuth,
+      AuthPopoutType.twoFactorAuthWebAuthn,
     );
 
-    if (inTwoFactorAuthPopout) {
-      await closeTwoFactorAuthPopout();
+    if (inTwoFactorAuthWebAuthnPopout) {
+      await closeTwoFactorAuthWebAuthnPopout();
+      return;
+    }
+
+    const inTwoFactorAuthEmailPopout = BrowserPopupUtils.inSingleActionPopout(
+      this.window,
+      AuthPopoutType.twoFactorAuthEmail,
+    );
+
+    if (inTwoFactorAuthEmailPopout) {
+      await closeTwoFactorAuthEmailPopout();
+      return;
     }
   }
 

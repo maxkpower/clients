@@ -4,6 +4,7 @@ import {
 } from "@bitwarden/auth/angular";
 import { DialogService } from "@bitwarden/components";
 
+import { openTwoFactorAuthEmailPopout } from "../../auth/popup/utils/auth-popout-window";
 import BrowserPopupUtils from "../../platform/popup/browser-popup-utils";
 
 // TODO: popup state persistence should eventually remove the need for this service
@@ -26,7 +27,7 @@ export class ExtensionTwoFactorAuthEmailComponentService
         type: "warning",
       });
       if (confirmed) {
-        await BrowserPopupUtils.openCurrentPagePopout(this.window);
+        await openTwoFactorAuthEmailPopout();
       }
     }
   }
