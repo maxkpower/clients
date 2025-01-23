@@ -71,9 +71,10 @@ export abstract class BaseClientsComponent implements OnInit, OnDestroy {
       ),
     ])
       .pipe(
-        switchMap(([searchText, userId]) => {
-          return from(this.searchService.isSearchable(userId, searchText));
-        }),
+        switchMap(([searchText, userId]) =>
+          from(this.searchService.isSearchable(userId, searchText)),
+        ),
+        takeUntil(this.destroy$),
       )
       .subscribe((isSearchable) => {
         this.searching = isSearchable;

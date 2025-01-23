@@ -359,21 +359,17 @@ export class VaultComponent implements OnInit, OnDestroy {
       this.cipherService.cipherViews$.pipe(filter((c) => c !== null)),
       filter$,
       this.currentSearchText$,
-      this.accountService.activeAccount$.pipe(
-        map((a) => a?.id),
-        filter((userId) => userId != null),
-      ),
     ]).pipe(
       filter(([ciphers, filter]) => ciphers != undefined && filter != undefined),
-      concatMap(async ([ciphers, filter, searchText, userId]) => {
+      concatMap(async ([ciphers, filter, searchText]) => {
         const failedCiphers = await firstValueFrom(this.cipherService.failedToDecryptCiphers$);
         const filterFunction = createFilterFunction(filter);
         // Append any failed to decrypt ciphers to the top of the cipher list
         const allCiphers = [...failedCiphers, ...ciphers];
 
-        if (await this.searchService.isSearchable(userId, searchText)) {
+        if (await this.searchService.isSearchable(this.activeUserId, searchText)) {
           return await this.searchService.searchCiphers(
-            userId,
+            this.activeUserId,
             searchText,
             [filterFunction],
             allCiphers,

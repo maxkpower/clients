@@ -1,4 +1,5 @@
 import { TestBed } from "@angular/core/testing";
+import { mock } from "jest-mock-extended";
 import { BehaviorSubject, firstValueFrom, timeout } from "rxjs";
 
 import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
