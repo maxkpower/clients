@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
+import { AuthenticationTimeoutComponent } from "@bitwarden/angular/auth/components/authentication-timeout.component";
 import {
   DesktopDefaultOverlayPosition,
   EnvironmentSelectorComponent,
@@ -9,10 +10,12 @@ import { unauthUiRefreshSwap } from "@bitwarden/angular/auth/functions/unauth-ui
 import {
   authGuard,
   lockGuard,
+  activeAuthGuard,
   redirectGuard,
   tdeDecryptionRequiredGuard,
   unauthGuardFn,
 } from "@bitwarden/angular/auth/guards";
+import { canAccessFeature } from "@bitwarden/angular/platform/guard/feature-flag.guard";
 import { NewDeviceVerificationNoticeGuard } from "@bitwarden/angular/vault/guards";
 import {
   AnonLayoutWrapperComponent,
@@ -36,9 +39,11 @@ import {
   SsoComponent,
   TwoFactorTimeoutIcon,
   TwoFactorAuthComponent,
-  TwoFactorTimeoutComponent,
   TwoFactorAuthGuard,
+  NewDeviceVerificationComponent,
+  DeviceVerificationIcon,
 } from "@bitwarden/auth/angular";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { LockComponent } from "@bitwarden/key-management/angular";
 import {
   NewDeviceVerificationNoticePageOneComponent,
@@ -97,18 +102,37 @@ const routes: Routes = [
     },
   ),
   {
-    path: "2fa-timeout",
+    path: "authentication-timeout",
     component: AnonLayoutWrapperComponent,
     children: [
       {
         path: "",
-        component: TwoFactorTimeoutComponent,
+        component: AuthenticationTimeoutComponent,
       },
     ],
     data: {
       pageIcon: TwoFactorTimeoutIcon,
       pageTitle: {
         key: "authenticationTimeout",
+      },
+    } satisfies RouteDataProperties & AnonLayoutWrapperData,
+  },
+  {
+    path: "device-verification",
+    component: AnonLayoutWrapperComponent,
+    canActivate: [
+      canAccessFeature(FeatureFlag.NewDeviceVerification),
+      unauthGuardFn(),
+      activeAuthGuard(),
+    ],
+    children: [{ path: "", component: NewDeviceVerificationComponent }],
+    data: {
+      pageIcon: DeviceVerificationIcon,
+      pageTitle: {
+        key: "verifyIdentity",
+      },
+      pageSubtitle: {
+        key: "weDontRecognizeThisDevice",
       },
     } satisfies RouteDataProperties & AnonLayoutWrapperData,
   },

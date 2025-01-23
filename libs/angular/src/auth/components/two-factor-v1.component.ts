@@ -71,7 +71,7 @@ export class TwoFactorComponentV1 extends CaptchaProtectedComponent implements O
   protected changePasswordRoute = "set-password";
   protected forcePasswordResetRoute = "update-temp-password";
   protected successRoute = "vault";
-  protected twoFactorTimeoutRoute = "2fa-timeout";
+  protected twoFactorTimeoutRoute = "authentication-timeout";
 
   get isDuoProvider(): boolean {
     return (
@@ -104,8 +104,8 @@ export class TwoFactorComponentV1 extends CaptchaProtectedComponent implements O
     super(environmentService, i18nService, platformUtilsService, toastService);
     this.webAuthnSupported = this.platformUtilsService.supportsWebAuthn(win);
 
-    // Add subscription to twoFactorTimeout$ and navigate to twoFactorTimeoutRoute if expired
-    this.loginStrategyService.twoFactorTimeout$
+    // Add subscription to authenticationSessionTimeout$ and navigate to twoFactorTimeoutRoute if expired
+    this.loginStrategyService.authenticationSessionTimeout$
       .pipe(takeUntilDestroyed())
       .subscribe(async (expired) => {
         if (!expired) {

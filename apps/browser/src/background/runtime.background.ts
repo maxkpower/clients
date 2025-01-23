@@ -22,7 +22,7 @@ import { BiometricsCommands } from "@bitwarden/key-management";
 import {
   closeUnlockPopout,
   openSsoAuthResultPopout,
-  openTwoFactorAuthPopout,
+  openTwoFactorAuthWebAuthnPopout,
 } from "../auth/popup/utils/auth-popout-window";
 import { LockedVaultPendingNotificationsData } from "../autofill/background/abstractions/notification.background";
 import { AutofillService } from "../autofill/services/abstractions/autofill.service";
@@ -333,9 +333,7 @@ export default class RuntimeBackground {
           return;
         }
 
-        // TODO: investigate when this is triggered and consider a rename to make it specific
-        // to webauthn 2fa
-        await openTwoFactorAuthPopout(msg);
+        await openTwoFactorAuthWebAuthnPopout(msg);
         break;
       }
       case "reloadPopup":
