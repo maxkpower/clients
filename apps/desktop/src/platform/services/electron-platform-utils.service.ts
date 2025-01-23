@@ -8,6 +8,7 @@ import {
   PlatformUtilsService,
 } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
+import { isSnapStore, isFlatpak } from "../../utils";
 import { ClipboardWriteMessage } from "../types/clipboard";
 
 export const ELECTRON_SUPPORTS_SECURE_STORAGE = true;
@@ -77,11 +78,9 @@ export class ElectronPlatformUtilsService implements PlatformUtilsService {
     return (await this.getApplicationVersion()).split(/[+|-]/)[0].trim();
   }
 
-  // Restricted to Windows and Mac. Mac is missing support for pin entry, and Linux is missing support entirely and has to be implemented in another way.
+  // Linux and Mac are missing a pinentry, sandboxed linux needs further work to allow the devices
   supportsWebAuthn(win: Window): boolean {
-    return (
-      this.getDevice() === DeviceType.WindowsDesktop || this.getDevice() === DeviceType.MacOsDesktop
-    );
+    return !isSnapStore() && !isFlatpak();
   }
 
   supportsDuo(): boolean {
