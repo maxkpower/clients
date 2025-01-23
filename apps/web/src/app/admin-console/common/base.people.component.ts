@@ -1,6 +1,6 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { Directive, ViewChild, ViewContainerRef, OnInit } from "@angular/core";
+import { Directive, ViewChild, ViewContainerRef } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import {
   firstValueFrom,
@@ -45,8 +45,7 @@ const MaxCheckedCount = 500;
 @Directive()
 export abstract class BasePeopleComponent<
   UserType extends ProviderUserUserDetailsResponse | OrganizationUserView,
-> implements OnInit
-{
+> {
   @ViewChild("confirmTemplate", { read: ViewContainerRef, static: true })
   confirmModalRef: ViewContainerRef;
 
