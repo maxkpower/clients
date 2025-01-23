@@ -12,7 +12,7 @@ export interface UserState<T> {
   readonly state$: Observable<T | null>;
 
   /** Emits a stream of tuples, with the first element being a user id and the second element being the data for that user. */
-  readonly combinedState$: Observable<CombinedState<T>>;
+  readonly combinedState$: Observable<CombinedState<T | null>>;
 }
 
 export const activeMarker: unique symbol = Symbol("active");
