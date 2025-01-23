@@ -23,7 +23,7 @@ import {
 } from "@bitwarden/key-management";
 
 import { BrowserSyncVerificationDialogComponent } from "../app/components/browser-sync-verification-dialog.component";
-import { LegacyMessage , LegacyMessageWrapper } from "../models/native-messaging";
+import { LegacyMessage, LegacyMessageWrapper } from "../models/native-messaging";
 import { DesktopSettingsService } from "../platform/services/desktop-settings.service";
 
 const MessageValidTimeout = 10 * 1000;
