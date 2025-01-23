@@ -4,12 +4,12 @@ import { BehaviorSubject } from "rxjs";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
+import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
+import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
 import { DialogService, ToastService } from "@bitwarden/components";
 import * as sdkInternal from "@bitwarden/sdk-internal";
 
 import { DefaultSshImportPromptService } from "./default-ssh-import-prompt.service";
-import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
-import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
 
 jest.mock("@bitwarden/sdk-internal");
 

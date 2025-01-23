@@ -1,14 +1,15 @@
+import { Injectable } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
+import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
+import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
 import { DialogService, ToastService } from "@bitwarden/components";
 import { SshKeyPasswordPromptComponent } from "@bitwarden/importer/ui";
 import { import_ssh_key, SshKey, SshKeyImportError } from "@bitwarden/sdk-internal";
-import { Injectable } from "@angular/core";
-import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
-import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
+
 import { SshImportPromptService } from "./ssh-import-prompt.service";
 
 /**

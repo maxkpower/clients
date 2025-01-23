@@ -20,8 +20,8 @@ import {
   TypographyModule,
 } from "@bitwarden/components";
 import { generate_ssh_key } from "@bitwarden/sdk-internal";
-import { SshImportPromptService } from "../../../services/ssh-import-prompt.service";
 
+import { SshImportPromptService } from "../../../services/ssh-import-prompt.service";
 import { CipherFormContainer } from "../../cipher-form-container";
 
 @Component({
