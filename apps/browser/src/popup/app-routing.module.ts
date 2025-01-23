@@ -91,6 +91,7 @@ import { MoreFromBitwardenPageV2Component } from "../tools/popup/settings/about-
 import { ExportBrowserV2Component } from "../tools/popup/settings/export/export-browser-v2.component";
 import { ImportBrowserV2Component } from "../tools/popup/settings/import/import-browser-v2.component";
 import { SettingsV2Component } from "../tools/popup/settings/settings-v2.component";
+import { canAccessAtRiskPasswords } from "../vault/guards/at-risk-passwords.guard";
 import { clearVaultStateGuard } from "../vault/guards/clear-vault-state.guard";
 import { AtRiskPasswordsComponent } from "../vault/popup/components/at-risk-passwords/at-risk-passwords.component";
 import { AddEditV2Component } from "../vault/popup/components/vault-v2/add-edit/add-edit-v2.component";
@@ -763,7 +764,7 @@ const routes: Routes = [
   {
     path: "at-risk-passwords",
     component: AtRiskPasswordsComponent,
-    canActivate: [authGuard, canAccessFeature(FeatureFlag.SecurityTasks)],
+    canActivate: [authGuard, canAccessAtRiskPasswords],
   },
   {
     path: "account-switcher",
