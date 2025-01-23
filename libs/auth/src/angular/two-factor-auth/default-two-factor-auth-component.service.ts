@@ -4,7 +4,7 @@ import {
 } from "./two-factor-auth-component.service";
 
 export class DefaultTwoFactorAuthComponentService implements TwoFactorAuthComponentService {
-  shouldCheckForWebauthnResponseOnInit() {
+  shouldCheckForWebAuthnQueryParamResponse() {
     return false;
   }
 

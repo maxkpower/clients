@@ -19,7 +19,7 @@
       *ngIf="selectedProviderType === providerType.Yubikey"
     />
     <app-two-factor-auth-webauthn
-      (token)="token = $event; submitForm()"
+      (webAuthnResultEmitter)="processWebAuthnResult($event)"
       *ngIf="selectedProviderType === providerType.WebAuthn"
     />
     <app-two-factor-auth-duo

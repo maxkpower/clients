@@ -25,6 +25,11 @@ import {
 
 import { TwoFactorAuthWebAuthnComponentService } from "./two-factor-auth-webauthn-component.service";
 
+export interface WebAuthnResult {
+  token: string;
+  remember?: boolean;
+}
+
 @Component({
   standalone: true,
   selector: "app-two-factor-auth-webauthn",
@@ -44,7 +49,7 @@ import { TwoFactorAuthWebAuthnComponentService } from "./two-factor-auth-webauth
   providers: [],
 })
 export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
-  @Output() token = new EventEmitter<string>();
+  @Output() webAuthnResultEmitter = new EventEmitter<WebAuthnResult>();
 
   webAuthnReady = false;
   webAuthnNewTab = false;
@@ -67,17 +72,26 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    if (this.route.snapshot.paramMap.has("webAuthnResponse")) {
-      const webAuthnResponse = this.route.snapshot.paramMap.get("webAuthnResponse");
-
-      if (webAuthnResponse != null) {
-        // TODO: determine if we even need this with the top level processing of the webauthn response.
-        this.token.emit(webAuthnResponse);
-        // TODO: should we early return?
-        // return;
-      }
+    if (this.webAuthnNewTab && this.route.snapshot.paramMap.has("webAuthnResponse")) {
+      this.submitWebAuthnNewTabResponse();
+    } else {
+      await this.buildWebAuthnIFrame();
     }
+  }
 
+  private submitWebAuthnNewTabResponse() {
+    const webAuthnNewTabResponse = this.route.snapshot.paramMap.get("webAuthnResponse");
+    const remember = this.route.snapshot.queryParamMap.get("remember") === "true";
+
+    if (webAuthnNewTabResponse != null) {
+      this.webAuthnResultEmitter.emit({
+        token: webAuthnNewTabResponse,
+        remember,
+      });
+    }
+  }
+
+  private async buildWebAuthnIFrame() {
     if (this.win != null && this.webAuthnSupported) {
       const env = await firstValueFrom(this.environmentService.environment$);
       const webVaultUrl = env.getWebVaultUrl();
@@ -88,7 +102,7 @@ export class TwoFactorAuthWebAuthnComponent implements OnInit, OnDestroy {
         this.platformUtilsService,
         this.i18nService,
         (token: string) => {
-          this.token.emit(token);
+          this.webAuthnResultEmitter.emit({ token });
         },
         (error: string) => {
           this.toastService.showToast({

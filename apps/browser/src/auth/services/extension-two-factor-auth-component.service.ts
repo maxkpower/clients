@@ -20,7 +20,7 @@ export class ExtensionTwoFactorAuthComponentService
     super();
   }
 
-  shouldCheckForWebauthnResponseOnInit(): boolean {
+  shouldCheckForWebAuthnQueryParamResponse(): boolean {
     return true;
   }
 

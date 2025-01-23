@@ -12,6 +12,12 @@ export class ExtensionTwoFactorAuthWebAuthnComponentService
     super();
   }
 
+  /**
+   * In the browser extension, we open webAuthn in a new web client tab sometimes due to inline
+   * WebAuthn Iframe's not working in some browsers. We open a 2FA popout upon successful
+   * completion of WebAuthn submission with query parameters to finish the 2FA process.
+   * @returns boolean
+   */
   shouldOpenWebAuthnInNewTab(): boolean {
     const isChrome = this.platformUtilsService.isChrome();
     if (isChrome) {

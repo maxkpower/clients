@@ -12,9 +12,9 @@ export enum LegacyKeyMigrationAction {
 export abstract class TwoFactorAuthComponentService {
   /**
    * Determines if the client should check for a webauthn response on init.
-   * Currently, only the extension should check on init.
+   * Currently, only the extension should check during component initialization.
    */
-  abstract shouldCheckForWebauthnResponseOnInit(): boolean;
+  abstract shouldCheckForWebAuthnQueryParamResponse(): boolean;
 
   /**
    * Extends the popup width if required.

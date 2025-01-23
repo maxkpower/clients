@@ -41,7 +41,10 @@ import {
 import { TwoFactorAuthAuthenticatorComponent } from "./child-components/two-factor-auth-authenticator.component";
 import { TwoFactorAuthDuoComponent } from "./child-components/two-factor-auth-duo/two-factor-auth-duo.component";
 import { TwoFactorAuthEmailComponent } from "./child-components/two-factor-auth-email/two-factor-auth-email.component";
-import { TwoFactorAuthWebAuthnComponent } from "./child-components/two-factor-auth-webauthn/two-factor-auth-webauthn.component";
+import {
+  TwoFactorAuthWebAuthnComponent,
+  WebAuthnResult,
+} from "./child-components/two-factor-auth-webauthn/two-factor-auth-webauthn.component";
 import { TwoFactorAuthYubikeyComponent } from "./child-components/two-factor-auth-yubikey.component";
 import {
   LegacyKeyMigrationAction,
@@ -143,12 +146,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
     this.listenFor2faSessionTimeout();
 
-    if (this.twoFactorAuthComponentService.shouldCheckForWebauthnResponseOnInit()) {
-      await this.processWebAuthnResponseIfExists();
-      // TODO: should we return here?
-      // return;
-    }
-
     await this.setSelected2faProviderType();
     await this.set2faProviderData();
     await this.setTitleByTwoFactorProviderType();
@@ -170,19 +167,21 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
-  private async processWebAuthnResponseIfExists() {
-    const webAuthn2faResponse = this.activatedRoute.snapshot.queryParamMap.get("webAuthnResponse");
-    if (webAuthn2faResponse) {
-      this.selectedProviderType = TwoFactorProviderType.WebAuthn;
-      await this.set2faProviderData();
-      this.token = webAuthn2faResponse;
-      this.remember = this.activatedRoute.snapshot.queryParamMap.get("remember") === "true";
-      await this.submit();
-    }
-  }
-
   private async setSelected2faProviderType() {
     const webAuthnSupported = this.platformUtilsService.supportsWebAuthn(this.win);
+
+    if (
+      this.twoFactorAuthComponentService.shouldCheckForWebAuthnQueryParamResponse() &&
+      webAuthnSupported
+    ) {
+      const webAuthn2faResponse =
+        this.activatedRoute.snapshot.queryParamMap.get("webAuthnResponse");
+      if (webAuthn2faResponse) {
+        this.selectedProviderType = TwoFactorProviderType.WebAuthn;
+        return;
+      }
+    }
+
     this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
   }
 
@@ -210,6 +209,14 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
           );
         }
       });
+  }
+
+  async processWebAuthnResult(webAuthnResponse: WebAuthnResult) {
+    this.token = webAuthnResponse.token;
+    if (webAuthnResponse.remember) {
+      this.remember = webAuthnResponse.remember;
+    }
+    await this.submit();
   }
 
   async submit() {
