@@ -220,14 +220,12 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async submit() {
-    this.loading = true;
     if (this.token == null || this.token === "") {
       this.toastService.showToast({
         variant: "error",
         title: this.i18nService.t("errorOccurred"),
         message: this.i18nService.t("verificationCodeRequired"),
       });
-      this.loading = false;
       return;
     }
 
@@ -245,8 +243,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
         title: this.i18nService.t("errorOccurred"),
         message: this.i18nService.t("invalidVerificationCode"),
       });
-    } finally {
-      this.loading = false;
     }
   }
 
