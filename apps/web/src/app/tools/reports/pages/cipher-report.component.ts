@@ -13,7 +13,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherRepromptType } from "@bitwarden/common/vault/enums/cipher-reprompt-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { TableDataSource , DialogService } from "@bitwarden/components";
+import { TableDataSource, DialogService } from "@bitwarden/components";
 import {
   CipherFormConfig,
   CipherFormConfigService,
@@ -59,7 +59,7 @@ export class CipherReportComponent implements OnDestroy {
     protected i18nService: I18nService,
     private syncService: SyncService,
     private cipherFormConfigService: CipherFormConfigService,
-    private adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
+    private adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     this.organizations$ = this.accountService.activeAccount$.pipe(
       switchMap((account) => this.organizationService.organizations$(account?.id)),
@@ -146,26 +146,26 @@ export class CipherReportComponent implements OnDestroy {
     if (!(await this.repromptCipher(cipher))) {
       return;
     }
-    
-      console.error("here");
 
-      if(this.organization){
-        const adminCipherFormConfig = await this.adminConsoleCipherFormConfigService.buildConfig(
-          "edit",
-          cipher.id as CipherId,
-          cipher.type,
-        );
-  
-        console.error("failed");
-        await this.openVaultItemDialog("view", adminCipherFormConfig);
-      } else {
-        const cipherFormConfig = await this.cipherFormConfigService.buildConfig(
-          "edit",
-          cipher.id as CipherId,
-          cipher.type,
-        );
-        await this.openVaultItemDialog("view", cipherFormConfig);
-      }
+    console.error("here");
+
+    if (this.organization) {
+      const adminCipherFormConfig = await this.adminConsoleCipherFormConfigService.buildConfig(
+        "edit",
+        cipher.id as CipherId,
+        cipher.type,
+      );
+
+      console.error("failed");
+      await this.openVaultItemDialog("view", adminCipherFormConfig);
+    } else {
+      const cipherFormConfig = await this.cipherFormConfigService.buildConfig(
+        "edit",
+        cipher.id as CipherId,
+        cipher.type,
+      );
+      await this.openVaultItemDialog("view", cipherFormConfig);
+    }
   }
 
   /**

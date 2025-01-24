@@ -20,11 +20,22 @@ import { PasswordRepromptService, CipherFormConfigService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { ExposedPasswordsReportComponent as BaseExposedPasswordsReportComponent } from "../../../tools/reports/pages/exposed-passwords-report.component";
+import { RoutedVaultFilterBridgeService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter-bridge.service";
+import { RoutedVaultFilterService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter.service";
 import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-org-exposed-passwords-report",
   templateUrl: "../../../tools/reports/pages/exposed-passwords-report.component.html",
+  providers: [
+    {
+      provide: CipherFormConfigService,
+      useClass: AdminConsoleCipherFormConfigService,
+    },
+    AdminConsoleCipherFormConfigService,
+    RoutedVaultFilterService,
+    RoutedVaultFilterBridgeService,
+  ],
 })
 // eslint-disable-next-line rxjs-angular/prefer-takeuntil
 export class ExposedPasswordsReportComponent
@@ -44,7 +55,7 @@ export class ExposedPasswordsReportComponent
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormService: CipherFormConfigService,
-    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     super(
       cipherService,
