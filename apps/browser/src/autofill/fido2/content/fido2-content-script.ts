@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import {
   AssertCredentialParams,
   CreateCredentialParams,
@@ -59,6 +61,10 @@ import { MessageWithMetadata, Messenger } from "./messaging/messenger";
           requestId,
           message.data as InsecureAssertCredentialParams,
         );
+      }
+
+      if (message.type === MessageType.AbortRequest) {
+        return sendExtensionMessage("fido2AbortRequest", { abortedRequestId: requestId });
       }
     } finally {
       abortController.signal.removeEventListener("abort", abortHandler);

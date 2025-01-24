@@ -1,7 +1,5 @@
-import { Observable } from "rxjs";
-
-import { Fido2CredentialView } from "../../../vault/models/view/fido2-credential.view";
-
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 export const UserRequestedFallbackAbortReason = "UserRequestedFallback";
 
 export type UserVerification = "discouraged" | "preferred" | "required";
@@ -17,12 +15,8 @@ export type UserVerification = "discouraged" | "preferred" | "required";
  * It is responsible for both marshalling the inputs for the underlying authenticator operations,
  * and for returning the results of the latter operations to the Web Authentication API's callers.
  */
-export abstract class Fido2ClientService {
+export abstract class Fido2ClientService<ParentWindowReference> {
   isFido2FeatureEnabled: (hostname: string, origin: string) => Promise<boolean>;
-
-  availableAutofillCredentials$: (tabId: number) => Observable<Fido2CredentialView[]>;
-
-  autofillCredential: (tabId: number, credentialId: string) => Promise<void>;
 
   /**
    * Allows WebAuthn Relying Party scripts to request the creation of a new public key credential source.
@@ -34,7 +28,7 @@ export abstract class Fido2ClientService {
    */
   createCredential: (
     params: CreateCredentialParams,
-    tab: chrome.tabs.Tab,
+    window: ParentWindowReference,
     abortController?: AbortController,
   ) => Promise<CreateCredentialResult>;
 
@@ -49,7 +43,7 @@ export abstract class Fido2ClientService {
    */
   assertCredential: (
     params: AssertCredentialParams,
-    tab: chrome.tabs.Tab,
+    window: ParentWindowReference,
     abortController?: AbortController,
   ) => Promise<AssertCredentialResult>;
 }

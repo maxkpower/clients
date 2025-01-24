@@ -14,10 +14,22 @@
     "message": "Logi oma olemasolevasse kontosse sisse või loo uus konto."
   },
   "inviteAccepted": {
-    "message": "Invitation accepted"
+    "message": "Kutse vastu võetud"
   },
   "createAccount": {
     "message": "Konto loomine"
+  },
+  "newToBitwarden": {
+    "message": "Esimene kord?"
+  },
+  "logInWithPasskey": {
+    "message": "Logi sisse pääsuvõtmega"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
+  },
+  "welcomeBack": {
+    "message": "Tere tulemast tagasi"
   },
   "setAStrongPassword": {
     "message": "Määra tugev parool"
@@ -69,10 +81,19 @@
     "message": "Ülemparooli vihje (ei ole kohustuslik)"
   },
   "joinOrganization": {
-    "message": "Join organization"
+    "message": "Liitu organisatsiooniga"
+  },
+  "joinOrganizationName": {
+    "message": "Liitu $ORGANIZATIONNAME$ organisatsiooniga",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
   },
   "finishJoiningThisOrganizationBySettingAMasterPassword": {
-    "message": "Finish joining this organization by setting a master password."
+    "message": "Lõpeta organisatsiooniga liitumine määrates ülemparool."
   },
   "tab": {
     "message": "Kaart"
@@ -98,6 +119,9 @@
   "copyPassword": {
     "message": "Kopeeri parool"
   },
+  "copyPassphrase": {
+    "message": "Copy passphrase"
+  },
   "copyNote": {
     "message": "Kopeeri märkus"
   },
@@ -114,19 +138,47 @@
     "message": "Kopeeri turvakood"
   },
   "copyName": {
-    "message": "Copy name"
+    "message": "Kopeeri nimi"
   },
   "copyCompany": {
-    "message": "Copy company"
+    "message": "Kopeeri firma nimi"
   },
   "copySSN": {
-    "message": "Copy Social Security number"
+    "message": "Kopeeri isikukood"
   },
   "copyPassportNumber": {
-    "message": "Copy passport number"
+    "message": "Kopeeri passi number"
   },
   "copyLicenseNumber": {
-    "message": "Copy license number"
+    "message": "Kopeeri litsentsi number"
+  },
+  "copyPrivateKey": {
+    "message": "Copy private key"
+  },
+  "copyPublicKey": {
+    "message": "Copy public key"
+  },
+  "copyFingerprint": {
+    "message": "Copy fingerprint"
+  },
+  "copyCustomField": {
+    "message": "Copy $FIELD$",
+    "placeholders": {
+      "field": {
+        "content": "$1",
+        "example": "Custom field label"
+      }
+    }
+  },
+  "copyWebsite": {
+    "message": "Copy website"
+  },
+  "copyNotes": {
+    "message": "Copy notes"
+  },
+  "fill": {
+    "message": "Fill",
+    "description": "This string is used on the vault page to indicate autofilling. Horizontal space is limited in the interface here so try and keep translations as concise as possible."
   },
   "autoFill": {
     "message": "Automaatne täitmine"
@@ -139,6 +191,13 @@
   },
   "autoFillIdentity": {
     "message": "Täida identiteet"
+  },
+  "fillVerificationCode": {
+    "message": "Fill verification code"
+  },
+  "fillVerificationCodeAria": {
+    "message": "Fill Verification Code",
+    "description": "Aria label for the heading displayed the inline menu for totp code autofill"
   },
   "generatePasswordCopied": {
     "message": "Genereeri parool (kopeeritakse)"
@@ -178,6 +237,18 @@
   },
   "addItem": {
     "message": "Lisa ese"
+  },
+  "accountEmail": {
+    "message": "Account email"
+  },
+  "requestHint": {
+    "message": "Request hint"
+  },
+  "requestPasswordHint": {
+    "message": "Request password hint"
+  },
+  "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
+    "message": "Enter your account email address and your password hint will be sent to you"
   },
   "passwordHint": {
     "message": "Parooli vihje"
@@ -225,7 +296,7 @@
     "message": "Mine edasi veebilaienduste poodi?"
   },
   "continueToBrowserExtensionStoreDesc": {
-    "message": "Help others find out if Bitwarden is right for them. Visit your browser's extension store and leave a rating now."
+    "message": "Aita meil jõuda rohkemate inimesteni. Külasta enda laienduste veebipoodi ja jäta sinna positiivne hinnang."
   },
   "changeMasterPasswordOnWebConfirmation": {
     "message": "Ülemparooli saab muuta Bitwardeni veebirakenduses."
@@ -251,7 +322,7 @@
     "message": "Rakenduse info"
   },
   "moreFromBitwarden": {
-    "message": "More from Bitwarden"
+    "message": "Rohkem Bitwardeni kohta"
   },
   "continueToBitwardenDotCom": {
     "message": "Mine edasi bitwarden.com-i?"
@@ -263,25 +334,25 @@
     "message": "Bitwarden Authenticator"
   },
   "continueToAuthenticatorPageDesc": {
-    "message": "Bitwarden Authenticator allows you to store authenticator keys and generate TOTP codes for 2-step verification flows. Learn more on the bitwarden.com website"
+    "message": "Bitwardeni Autentiteerijaga saad sa hoiustada autentiteerimise võtmeid ja luua TOTP koode kaheastmeliseks kinnitamiseks. Uuri lähemalt veebilehelt bitwarden.com"
   },
   "bitwardenSecretsManager": {
     "message": "Bitwarden Secrets Manager"
   },
   "continueToSecretsManagerPageDesc": {
-    "message": "Securely store, manage, and share developer secrets with Bitwarden Secrets Manager. Learn more on the bitwarden.com website."
+    "message": "Hoiusta, halda ja jaga turvaliselt arendajate saladusi läbi Bitwarden Secrets Manageri. Uuri lähemalt veebilehelt bitwarden.com."
   },
   "passwordlessDotDev": {
     "message": "Passwordless.dev"
   },
   "continueToPasswordlessDotDevPageDesc": {
-    "message": "Create smooth and secure login experiences free from traditional passwords with Passwordless.dev. Learn more on the bitwarden.com website."
+    "message": "Loo sujuv ja turvaline kogemus sisselogimisel Passwordless.dev-iga ja ilma traditsiooniliste paroolideta. Uuri lähemalt veebilehelt bitwarden.com."
   },
   "freeBitwardenFamilies": {
     "message": "Tasuta Bitwarden Peredele"
   },
   "freeBitwardenFamiliesPageDesc": {
-    "message": "You are eligible for Free Bitwarden Families. Redeem this offer today in the web app."
+    "message": "Sul on võimalik saada endale tasuta Bitwarden Families plaan. Lunasta see pakkumine meie veebirakenduses."
   },
   "version": {
     "message": "Versioon"
@@ -302,22 +373,22 @@
     "message": "Muuda kausta"
   },
   "newFolder": {
-    "message": "New folder"
+    "message": "Uus kaust"
   },
   "folderName": {
-    "message": "Folder name"
+    "message": "Kausta nimi"
   },
   "folderHintText": {
-    "message": "Nest a folder by adding the parent folder's name followed by a “/”. Example: Social/Forums"
+    "message": "Kausta teise kasuta panemiseks lisa sihtkausta nimi, millele järgneb \"/\". Näiteks: Sotsiaalmeedia/Foorumid"
   },
   "noFoldersAdded": {
-    "message": "No folders added"
+    "message": "Ei lisanud ühtegi kausta"
   },
   "createFoldersToOrganize": {
-    "message": "Create folders to organize your vault items"
+    "message": "Loo kaustasid, et oma hoidla kirjeid organiseerida"
   },
   "deleteFolderPermanently": {
-    "message": "Are you sure you want to permanently delete this folder?"
+    "message": "Kas sa oled kindel, et soovid selle kausta jäädavalt kustutada?"
   },
   "deleteFolder": {
     "message": "Kustuta Kaust"
@@ -354,7 +425,7 @@
   },
   "generator": {
     "message": "Genereerija",
-    "description": "Short for 'Password Generator'."
+    "description": "Short for 'credential generator'."
   },
   "passGenInfo": {
     "message": "Loo oma kontodele tugevaid ja unikaalseid paroole."
@@ -371,6 +442,9 @@
   "generatePassword": {
     "message": "Loo parool"
   },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
+  },
   "regeneratePassword": {
     "message": "Genereeri parool uuesti"
   },
@@ -379,9 +453,6 @@
   },
   "length": {
     "message": "Pikkus"
-  },
-  "passwordMinLength": {
-    "message": "Lühim lubatud parooli pikkus"
   },
   "uppercase": {
     "message": "Suurtäht (A-Z) ",
@@ -400,11 +471,11 @@
     "description": "deprecated. Use specialCharactersLabel instead."
   },
   "include": {
-    "message": "Include",
+    "message": "Kasuta",
     "description": "Card header for password generator include block"
   },
   "uppercaseDescription": {
-    "message": "Include uppercase characters",
+    "message": "Kasuta trükitähti",
     "description": "Tooltip for the password generator uppercase character checkbox"
   },
   "uppercaseLabel": {
@@ -412,7 +483,7 @@
     "description": "Label for the password generator uppercase character checkbox"
   },
   "lowercaseDescription": {
-    "message": "Include lowercase characters",
+    "message": "Kasuta kirjatähti",
     "description": "Full description for the password generator lowercase character checkbox"
   },
   "lowercaseLabel": {
@@ -420,7 +491,7 @@
     "description": "Label for the password generator lowercase character checkbox"
   },
   "numbersDescription": {
-    "message": "Include numbers",
+    "message": "Kasuta numbreid",
     "description": "Full description for the password generator numbers checkbox"
   },
   "numbersLabel": {
@@ -428,7 +499,7 @@
     "description": "Label for the password generator numbers checkbox"
   },
   "specialCharactersDescription": {
-    "message": "Include special characters",
+    "message": "Kasuta sümboleid",
     "description": "Full description for the password generator special characters checkbox"
   },
   "specialCharactersLabel": {
@@ -454,13 +525,13 @@
   "minSpecial": {
     "message": "Vähim arv spetsiaalmärke"
   },
-  "avoidAmbChar": {
-    "message": "Väldi ebamääraseid kirjamärke",
-    "description": "deprecated. Use avoidAmbiguous instead."
-  },
   "avoidAmbiguous": {
-    "message": "Avoid ambiguous characters",
+    "message": "Väldi raskesti eristatavaid tähti ja sümboleid",
     "description": "Label for the avoid ambiguous characters checkbox."
+  },
+  "generatorPolicyInEffect": {
+    "message": "Enterprise policy requirements have been applied to your generator options.",
+    "description": "Indicates that a policy limits the credential generator screen."
   },
   "searchVault": {
     "message": "Otsi hoidlast"
@@ -484,7 +555,7 @@
     "message": "Parool"
   },
   "totp": {
-    "message": "Authenticator secret"
+    "message": "Salajane autentikaatori võti"
   },
   "passphrase": {
     "message": "Paroolifraas"
@@ -503,6 +574,9 @@
   },
   "notes": {
     "message": "Märkmed"
+  },
+  "privateNote": {
+    "message": "Private note"
   },
   "note": {
     "message": "Märkus"
@@ -525,6 +599,15 @@
   "launchWebsite": {
     "message": "Ava Veebileht"
   },
+  "launchWebsiteName": {
+    "message": "Launch website $ITEMNAME$",
+    "placeholders": {
+      "itemname": {
+        "content": "$1",
+        "example": "Secret item"
+      }
+    }
+  },
   "website": {
     "message": "Veebileht"
   },
@@ -538,16 +621,19 @@
     "message": "Muu"
   },
   "unlockMethods": {
-    "message": "Unlock options"
+    "message": "Avamise valikud"
   },
   "unlockMethodNeededToChangeTimeoutActionDesc": {
     "message": "Hoidla ajalõpu tegevuse muutmiseks vali esmalt lahtilukustamise meetod."
   },
   "unlockMethodNeeded": {
-    "message": "Set up an unlock method in Settings"
+    "message": "Määra avamise meetod seadetes"
   },
   "sessionTimeoutHeader": {
     "message": "Sessiooni ajalõpp"
+  },
+  "vaultTimeoutHeader": {
+    "message": "Vault timeout"
   },
   "otherOptions": {
     "message": "Muud valikud"
@@ -555,17 +641,29 @@
   "rateExtension": {
     "message": "Hinda seda laiendust"
   },
-  "rateExtensionDesc": {
-    "message": "Soovi korral võid meid positiivse hinnanguga toetada!"
-  },
   "browserNotSupportClipboard": {
     "message": "Kasutatav brauser ei toeta lihtsat lõikelaua kopeerimist. Kopeeri see käsitsi."
   },
   "verifyIdentity": {
     "message": "Identiteedi kinnitamine"
   },
+  "weDontRecognizeThisDevice": {
+    "message": "We don't recognize this device. Enter the code sent to your email to verify your identity."
+  },
+  "continueLoggingIn": {
+    "message": "Continue logging in"
+  },
   "yourVaultIsLocked": {
     "message": "Hoidla on lukus. Jätkamiseks sisesta ülemparool."
+  },
+  "yourVaultIsLockedV2": {
+    "message": "Your vault is locked"
+  },
+  "yourAccountIsLocked": {
+    "message": "Your account is locked"
+  },
+  "or": {
+    "message": "or"
   },
   "unlock": {
     "message": "Lukusta lahti"
@@ -588,6 +686,9 @@
   },
   "vaultTimeout": {
     "message": "Hoidla ajalõpp"
+  },
+  "vaultTimeout1": {
+    "message": "Timeout"
   },
   "lockNow": {
     "message": "Lukusta paroolihoidla"
@@ -684,10 +785,10 @@
     "message": "Konto on loodud! Võid nüüd sisse logida."
   },
   "newAccountCreated2": {
-    "message": "Your new account has been created!"
+    "message": "Uus konto loodud!"
   },
   "youHaveBeenLoggedIn": {
-    "message": "You have been logged in!"
+    "message": "Olete sisse logitud!"
   },
   "youSuccessfullyLoggedIn": {
     "message": "Sisselogimine õnnestus"
@@ -702,7 +803,7 @@
     "message": "Nõutav on kinnituskood."
   },
   "webauthnCancelOrTimeout": {
-    "message": "The authentication was cancelled or took too long. Please try again."
+    "message": "Autentimine tühistati või kestis liiga kaua aega. Palun proovi uuesti."
   },
   "invalidVerificationCode": {
     "message": "Vale kinnituskood"
@@ -724,25 +825,25 @@
     "message": "Ei õnnestunud skännida sellelt lehelt QR-kood"
   },
   "totpCaptureSuccess": {
-    "message": "Authenticator key added"
+    "message": "Autentimise võti on lisatud"
   },
   "totpCapture": {
-    "message": "Scan authenticator QR code from current webpage"
+    "message": "Skänneeri see QR-kood läbi autentikaatori"
   },
   "totpHelperTitle": {
-    "message": "Make 2-step verification seamless"
+    "message": "Muuda 2-astmeline kinnitamine sujuvaks"
   },
   "totpHelper": {
-    "message": "Bitwarden can store and fill 2-step verification codes. Copy and paste the key into this field."
+    "message": "Bitwarden saab hoiustada ja täita 2-astmelise kinnitamise koode. Kopeeri ja kleebi võti siia."
   },
   "totpHelperWithCapture": {
-    "message": "Bitwarden can store and fill 2-step verification codes. Select the camera icon to take a screenshot of this website's authenticator QR code, or copy and paste the key into this field."
+    "message": "Bitwarden saab hoiustada ja täita 2-astmelise kinnitamise koode. Vajuta kaamera ikoonile, et teha ekraanipilt autentiteerimise QR koodist või kopeeri ja kleebi võti siia."
   },
   "learnMoreAboutAuthenticators": {
-    "message": "Learn more about authenticators"
+    "message": "Uuri lähemalt autentikaatorite kohta"
   },
   "copyTOTP": {
-    "message": "Copy Authenticator key (TOTP)"
+    "message": "Kopeeri autentiteerimise võti (TOTP)"
   },
   "loggedOut": {
     "message": "Välja logitud"
@@ -754,16 +855,19 @@
     "message": "Sessioon on aegunud."
   },
   "logIn": {
-    "message": "Log in"
+    "message": "Logi sisse"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
   },
   "restartRegistration": {
-    "message": "Restart registration"
+    "message": "Alusta registreerimist uuesti"
   },
   "expiredLink": {
-    "message": "Expired link"
+    "message": "Aegunud link"
   },
   "pleaseRestartRegistrationOrTryLoggingIn": {
-    "message": "Please restart registration or try logging in."
+    "message": "Palun alusta registreerimist uuesti või proovi sisse logida."
   },
   "youMayAlreadyHaveAnAccount": {
     "message": "You may already have an account"
@@ -788,6 +892,12 @@
   },
   "twoStepLoginConfirmation": {
     "message": "Kaheastmeline kinnitamine aitab konto turvalisust tõsta. Lisaks paroolile pead kontole ligipääsemiseks kinnitama sisselogimise päringu SMS-ga, telefonikõnega, autentimise rakendusega või e-postiga. Kaheastmelist kinnitust saab sisse lülitada bitwarden.com veebihoidlas. Soovid seda kohe avada?"
+  },
+  "twoStepLoginConfirmationContent": {
+    "message": "Make your account more secure by setting up two-step login in the Bitwarden web app."
+  },
+  "twoStepLoginConfirmationTitle": {
+    "message": "Continue to web app?"
   },
   "editedFolder": {
     "message": "Kaust on muudetud"
@@ -882,8 +992,8 @@
   "addLoginNotificationDescAlt": {
     "message": "Ask to add an item if one isn't found in your vault. Applies to all logged in accounts."
   },
-  "showCardsInVaultView": {
-    "message": "Show cards as Autofill suggestions on Vault view"
+  "showCardsInVaultViewV2": {
+    "message": "Always show cards as Autofill suggestions on Vault view"
   },
   "showCardsCurrentTab": {
     "message": "Kuva \"Kaart\" vaates kaardiandmed"
@@ -891,14 +1001,17 @@
   "showCardsCurrentTabDesc": {
     "message": "Kuvab \"Kaart\" vaates kaardiandmeid, et neid saaks kiiresti sisestada"
   },
-  "showIdentitiesInVaultView": {
-    "message": "Show identifies as Autofill suggestions on Vault view"
+  "showIdentitiesInVaultViewV2": {
+    "message": "Always show identities as Autofill suggestions on Vault view"
   },
   "showIdentitiesCurrentTab": {
     "message": "Kuva \"Kaart\" vaates identiteete"
   },
   "showIdentitiesCurrentTabDesc": {
     "message": "Kuvab \"Kaart\" vaates identiteete, et neid saaks kiiresti sisestada"
+  },
+  "clickToAutofillOnVault": {
+    "message": "Click items to autofill on Vault view"
   },
   "clearClipboard": {
     "message": "Lõikelaua sisu kustutamine",
@@ -1018,6 +1131,10 @@
     "message": "HOIATUS",
     "description": "WARNING (should stay in capitalized letters if the language permits)"
   },
+  "warningCapitalized": {
+    "message": "Warning",
+    "description": "Warning (should maintain locale-relevant capitalization)"
+  },
   "confirmVaultExport": {
     "message": "Hoidla eksportimise kinnitamine"
   },
@@ -1041,9 +1158,6 @@
   },
   "moveToOrganization": {
     "message": "Teisalda organisatsiooni"
-  },
-  "share": {
-    "message": "Jaga"
   },
   "movedItemToOrg": {
     "message": "$ITEMNAME$ teisaldati $ORGNAME$",
@@ -1096,6 +1210,9 @@
   },
   "file": {
     "message": "Fail"
+  },
+  "fileToShare": {
+    "message": "File to share"
   },
   "selectFile": {
     "message": "Vali fail."
@@ -1204,6 +1321,12 @@
   },
   "enterVerificationCodeApp": {
     "message": "Sisesta autentimise rakendusest 6 kohaline number."
+  },
+  "authenticationTimeout": {
+    "message": "Authentication timeout"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "The authentication session timed out. Please restart the login process."
   },
   "enterVerificationCodeEmail": {
     "message": "Sisesta 6 kohaline number, mis saadeti e-posti aadressile $EMAIL$.",
@@ -1322,6 +1445,10 @@
   "baseUrl": {
     "message": "Serveri URL"
   },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
+  },
   "apiUrl": {
     "message": "API serveri URL"
   },
@@ -1349,6 +1476,12 @@
   },
   "showInlineMenuLabel": {
     "message": "Show autofill suggestions on form fields"
+  },
+  "showInlineMenuIdentitiesLabel": {
+    "message": "Display identities as suggestions"
+  },
+  "showInlineMenuCardsLabel": {
+    "message": "Display cards as suggestions"
   },
   "showInlineMenuOnIconSelectionLabel": {
     "message": "Display suggestions when icon is selected"
@@ -1382,19 +1515,6 @@
   },
   "enableAutoFillOnPageLoadDesc": {
     "message": "Sisselogimise vormi tuvastamisel sisestatakse sinna kontoandmed automaatselt."
-  },
-  "autofillOnPageLoadWarning": {
-    "message": "$OPENTAG$Warning:$CLOSETAG$ Compromised or untrusted websites can exploit autofill on page load.",
-    "placeholders": {
-      "openTag": {
-        "content": "$1",
-        "example": "<b>"
-      },
-      "closeTag": {
-        "content": "$2",
-        "example": "</b>"
-      }
-    }
   },
   "experimentalFeature": {
     "message": "Häkitud või ebausaldusväärsed veebilehed võivad lehe laadimisel automaatset sisestamist kuritarvitada."
@@ -1469,7 +1589,7 @@
     "message": "Boolean"
   },
   "cfTypeCheckbox": {
-    "message": "Checkbox"
+    "message": "Märkeruut"
   },
   "cfTypeLinked": {
     "message": "Ühenduses",
@@ -1492,7 +1612,7 @@
     "message": "Kuvab iga kirje kõrval lehekülje ikooni."
   },
   "faviconDescAlt": {
-    "message": "Show a recognizable image next to each login. Applies to all logged in accounts."
+    "message": "Näita väikest tuttavat ikooni iga kirje kõrval. Kehtib ka sisselogitud kontodele."
   },
   "enableBadgeCounter": {
     "message": "Kuva kirjete arvu"
@@ -1653,8 +1773,11 @@
   "typeIdentity": {
     "message": "Identiteet"
   },
+  "typeSshKey": {
+    "message": "SSH key"
+  },
   "newItemHeader": {
-    "message": "New $TYPE$",
+    "message": "Uus $TYPE$",
     "placeholders": {
       "type": {
         "content": "$1",
@@ -1683,6 +1806,15 @@
   "passwordHistory": {
     "message": "Paroolide ajalugu"
   },
+  "generatorHistory": {
+    "message": "Generator history"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Clear generator history"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "If you continue, all entries will be permanently deleted from generator's history. Are you sure you want to continue?"
+  },
   "back": {
     "message": "Tagasi"
   },
@@ -1690,7 +1822,7 @@
     "message": "Kogumikud"
   },
   "nCollections": {
-    "message": "$COUNT$ collections",
+    "message": "$COUNT$ kogumikku",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -1719,6 +1851,9 @@
   "secureNotes": {
     "message": "Turvalised märkmed"
   },
+  "sshKeys": {
+    "message": "SSH Keys"
+  },
   "clear": {
     "message": "Tühjenda",
     "description": "To clear something out. example: To clear browser history."
@@ -1743,7 +1878,7 @@
     "description": "Domain name. Ex. website.com"
   },
   "baseDomainOptionRecommended": {
-    "message": "Base domain (recommended)",
+    "message": "Serveri nimi [base domain] (soovitatav)",
     "description": "Domain name. Ex. website.com"
   },
   "domainName": {
@@ -1795,6 +1930,15 @@
   },
   "noPasswordsInList": {
     "message": "Puuduvad paroolid, mida kuvada."
+  },
+  "clearHistory": {
+    "message": "Clear history"
+  },
+  "nothingToShow": {
+    "message": "Nothing to show"
+  },
+  "nothingGeneratedRecently": {
+    "message": "You haven't generated anything recently"
   },
   "remove": {
     "message": "Eemalda"
@@ -1854,8 +1998,17 @@
   "unlockWithPin": {
     "message": "Ava PIN-iga"
   },
+  "setYourPinTitle": {
+    "message": "Set PIN"
+  },
+  "setYourPinButton": {
+    "message": "Set PIN"
+  },
   "setYourPinCode": {
     "message": "Määra Bitwardeni lahtilukustamiseks PIN kood. Rakendusest täielikult välja logides nullitakse ka PIN koodi seaded."
+  },
+  "setYourPinCode1": {
+    "message": "Your PIN will be used to unlock Bitwarden instead of your master password. Your PIN will reset if you ever fully log out of Bitwarden."
   },
   "pinRequired": {
     "message": "Nõutakse PIN koodi."
@@ -1864,10 +2017,13 @@
     "message": "Vale PIN kood."
   },
   "tooManyInvalidPinEntryAttemptsLoggingOut": {
-    "message": "Too many invalid PIN entry attempts. Logging out."
+    "message": "Liiga palju ebaõnnestunud katseid. Login välja."
   },
   "unlockWithBiometrics": {
     "message": "Ava biomeetriaga"
+  },
+  "unlockWithMasterPassword": {
+    "message": "Unlock with master password"
   },
   "awaitDesktop": {
     "message": "Kinnituse ootamine töölaua rakenduselt"
@@ -1878,6 +2034,9 @@
   "lockWithMasterPassOnRestart": {
     "message": "Nõua ülemparooli, kui brauser taaskäivitatakse"
   },
+  "lockWithMasterPassOnRestart1": {
+    "message": "Require master password on browser restart"
+  },
   "selectOneCollection": {
     "message": "Pead valima vähemalt ühe kogumiku."
   },
@@ -1887,38 +2046,38 @@
   "clone": {
     "message": "Kloon"
   },
-  "passwordGeneratorPolicyInEffect": {
-    "message": "Organisatsiooni seaded mõjutavad parooli genereerija sätteid."
-  },
   "passwordGenerator": {
-    "message": "Password generator"
+    "message": "Parooli genereerija"
   },
   "usernameGenerator": {
-    "message": "Username generator"
+    "message": "Kasutajanime genereerija"
   },
   "useThisPassword": {
-    "message": "Use this password"
+    "message": "Kasuta seda parooli"
   },
   "useThisUsername": {
-    "message": "Use this username"
+    "message": "Kasuta seda kasutajanime"
   },
   "securePasswordGenerated": {
-    "message": "Secure password generated! Don't forget to also update your password on the website."
+    "message": "Turvaline parool loodud! Ära unusta uuendata seda ka veebisaidil."
   },
   "useGeneratorHelpTextPartOne": {
-    "message": "Use the generator",
+    "message": "Kasuta generaatorit",
     "description": "This will be used as part of a larger sentence, broken up to include the generator icon. The full sentence will read 'Use the generator [GENERATOR_ICON] to create a strong unique password'"
   },
   "useGeneratorHelpTextPartTwo": {
-    "message": "to create a strong unique password",
+    "message": "et luua tugev ja ainulaadne parool",
     "description": "This will be used as part of a larger sentence, broken up to include the generator icon. The full sentence will read 'Use the generator [GENERATOR_ICON] to create a strong unique password'"
   },
   "vaultTimeoutAction": {
     "message": "Hoidla ajalõpu tegevus"
   },
+  "vaultTimeoutAction1": {
+    "message": "Timeout action"
+  },
   "lock": {
     "message": "Lukusta",
-    "description": "Verb form: to make secure or inaccesible by"
+    "description": "Verb form: to make secure or inaccessible by"
   },
   "trash": {
     "message": "Prügikast",
@@ -1943,7 +2102,7 @@
     "message": "Kirje on taastatud"
   },
   "alreadyHaveAccount": {
-    "message": "Already have an account?"
+    "message": "On juba konto?"
   },
   "vaultTimeoutLogOutConfirmation": {
     "message": "Väljalogimine eemaldab hoidlale ligipääsu ning nõuab pärast ajalõpu perioodi uuesti autentimist. Oled kindel, et soovid seda valikut kasutada?"
@@ -1955,7 +2114,7 @@
     "message": "Täida ja salvesta"
   },
   "fillAndSave": {
-    "message": "Fill and save"
+    "message": "Täida ja salvesta"
   },
   "autoFillSuccessAndSavedUri": {
     "message": "Kirje täideti ja URI salvestati"
@@ -2036,19 +2195,19 @@
     "message": "Uus ülemparool ei vasta eeskirjades väljatoodud tingimustele."
   },
   "receiveMarketingEmailsV2": {
-    "message": "Get advice, announcements, and research opportunities from Bitwarden in your inbox."
+    "message": "Soovin saada nõuandeid, uudiseid ja pakkumisi Bitwardenilt oma postkasti."
   },
   "unsubscribe": {
-    "message": "Unsubscribe"
+    "message": "Lõpeta tellimus"
   },
   "atAnyTime": {
-    "message": "at any time."
+    "message": "iga hetk."
   },
   "byContinuingYouAgreeToThe": {
-    "message": "By continuing, you agree to the"
+    "message": "Jätkates nõustud sa"
   },
   "and": {
-    "message": "and"
+    "message": "ja"
   },
   "acceptPolicies": {
     "message": "Märkeruudu markeerimisel nõustud järgnevaga:"
@@ -2069,10 +2228,10 @@
     "message": "Ok"
   },
   "errorRefreshingAccessToken": {
-    "message": "Access Token Refresh Error"
+    "message": "Juurdepääsukoodi Värskendamine Ebaõnnestus"
   },
   "errorRefreshingAccessTokenDesc": {
-    "message": "No refresh token or API keys found. Please try logging out and logging back in."
+    "message": "Ei leidnud värskendamise koodi või API võtit. Palun proovi logida välja ja uuesti sisse."
   },
   "desktopSyncVerificationTitle": {
     "message": "Töölaua sünkroonimise kinnitamine"
@@ -2110,11 +2269,11 @@
   "nativeMessagingWrongUserTitle": {
     "message": "Kontod ei ühti"
   },
-  "nativeMessagingWrongUserKeyDesc": {
-    "message": "Biometric unlock failed. The biometric secret key failed to unlock the vault. Please try to set up biometrics again."
-  },
   "nativeMessagingWrongUserKeyTitle": {
     "message": "Biometric key missmatch"
+  },
+  "nativeMessagingWrongUserKeyDesc": {
+    "message": "Biometric unlock failed. The biometric secret key failed to unlock the vault. Please try to set up biometrics again."
   },
   "biometricsNotEnabledTitle": {
     "message": "Biomeetria ei ole sisse lülitatud"
@@ -2171,6 +2330,9 @@
     "message": "Domains",
     "description": "A category title describing the concept of web domains"
   },
+  "blockedDomains": {
+    "message": "Blocked domains"
+  },
   "excludedDomains": {
     "message": "Väljajäetud domeenid"
   },
@@ -2179,6 +2341,15 @@
   },
   "excludedDomainsDescAlt": {
     "message": "Bitwarden will not ask to save login details for these domains for all logged in accounts. You must refresh the page for changes to take effect."
+  },
+  "blockedDomainsDesc": {
+    "message": "Autofill and other related features will not be offered for these websites. You must refresh the page for changes to take effect."
+  },
+  "autofillBlockedNoticeV2": {
+    "message": "Autofill is blocked for this website."
+  },
+  "autofillBlockedNoticeGuidance": {
+    "message": "Change this in settings"
   },
   "websiteItemLabel": {
     "message": "Website $number$ (URI)",
@@ -2198,23 +2369,42 @@
       }
     }
   },
+  "blockedDomainsSavedSuccess": {
+    "message": "Blocked domain changes saved"
+  },
   "excludedDomainsSavedSuccess": {
     "message": "Excluded domain changes saved"
+  },
+  "limitSendViews": {
+    "message": "Limit views"
+  },
+  "limitSendViewsHint": {
+    "message": "No one can view this Send after the limit is reached.",
+    "description": "Displayed under the limit views field on Send"
+  },
+  "limitSendViewsCount": {
+    "message": "$ACCESSCOUNT$ views left",
+    "description": "Displayed under the limit views field on Send",
+    "placeholders": {
+      "accessCount": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   },
   "send": {
     "message": "Send",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "searchSends": {
-    "message": "Otsi Sende",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "addSend": {
-    "message": "Lisa Send",
+  "sendDetails": {
+    "message": "Send details",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "sendTypeText": {
     "message": "Tekst"
+  },
+  "sendTypeTextToShare": {
+    "message": "Text to share"
   },
   "sendTypeFile": {
     "message": "Fail"
@@ -2223,15 +2413,11 @@
     "message": "Kõik Sendid",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "maxAccessCountReached": {
-    "message": "Maksimaalne ligipääsude arv on saavutatud",
-    "description": "This text will be displayed after a Send has been accessed the maximum amount of times."
+  "hideTextByDefault": {
+    "message": "Hide text by default"
   },
   "expired": {
     "message": "Aegunud"
-  },
-  "pendingDeletion": {
-    "message": "Kustutamise ootel"
   },
   "passwordProtected": {
     "message": "Parooliga kaitstud"
@@ -2274,34 +2460,23 @@
     "message": "Soovid tõesti selle Sendi kustutada?",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
+  "deleteSendPermanentConfirmation": {
+    "message": "Are you sure you want to permanently delete this Send?",
+    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
+  },
   "editSend": {
     "message": "Muuda Sendi",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "sendTypeHeader": {
-    "message": "Mis tüüpi Send see on?",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendNameDesc": {
-    "message": "Sisesta Sendi nimi (kohustuslik).",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendFileDesc": {
-    "message": "Fail, mida soovid saata."
-  },
   "deletionDate": {
     "message": "Kustutamise kuupäev"
   },
-  "deletionDateDesc": {
-    "message": "Send kustutatakse määratud kuupäeval ja kellaajal jäädavalt.",
+  "deletionDateDescV2": {
+    "message": "The Send will be permanently deleted on this date.",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "expirationDate": {
     "message": "Aegumiskuupäev"
-  },
-  "expirationDateDesc": {
-    "message": "Selle valimisel ei pääse sellele Sendile enam pärast määratud kuupäeva ligi.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "oneDay": {
     "message": "1 päev"
@@ -2318,38 +2493,9 @@
   "custom": {
     "message": "Kohandatud"
   },
-  "maximumAccessCount": {
-    "message": "Maksimaalne ligipääsude arv"
-  },
-  "maximumAccessCountDesc": {
-    "message": "Selle valimisel ei saa kasutajad pärast maksimaalse ligipääsude arvu saavutamist sellele Sendile enam ligi.",
+  "sendPasswordDescV3": {
+    "message": "Add an optional password for recipients to access this Send.",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendPasswordDesc": {
-    "message": "Soovi korral nõua parooli, millega Sendile ligi pääseb.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendNotesDesc": {
-    "message": "Privaatne märkus selle Sendi kohta.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendDisableDesc": {
-    "message": "Keela see Send, et keegi ei pääseks sellele ligi.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendShareDesc": {
-    "message": "Kopeeri Sendi salvestamisel link lõikelauale.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendTextDesc": {
-    "message": "Tekst, mida soovid saata."
-  },
-  "sendHideText": {
-    "message": "Vaikeolekus peida selle Sendi tekst.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "currentAccessCount": {
-    "message": "Hetkeline ligipääsude arv"
   },
   "createSend": {
     "message": "Loo uus Send",
@@ -2374,7 +2520,25 @@
     "message": "Send created successfully!",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "sendAvailability": {
+  "sendExpiresInHoursSingle": {
+    "message": "The Send will be available to anyone with the link for the next 1 hour.",
+    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
+  },
+  "sendExpiresInHours": {
+    "message": "The Send will be available to anyone with the link for the next $HOURS$ hours.",
+    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated.",
+    "placeholders": {
+      "hours": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "sendExpiresInDaysSingle": {
+    "message": "The Send will be available to anyone with the link for the next 1 day.",
+    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
+  },
+  "sendExpiresInDays": {
     "message": "The Send will be available to anyone with the link for the next $DAYS$ days.",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated.",
     "placeholders": {
@@ -2392,6 +2556,14 @@
     "message": "Muudetud",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
+  "sendFilePopoutDialogText": {
+    "message": "Pop out extension?",
+    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
+  },
+  "sendFilePopoutDialogDesc": {
+    "message": "To create a file Send, you need to pop out the extension to a new window.",
+    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
+  },
   "sendLinuxChromiumFileWarning": {
     "message": "Faili valimiseks ava rakendus külgribal (kui see on võimalik) või kasuta hüpikakent, klikkides sellel bänneril."
   },
@@ -2401,20 +2573,11 @@
   "sendSafariFileWarning": {
     "message": "Faili valimiseks läbi Safari kasuta Bitwardeni hüpikakent (klikkides sellel bänneril)."
   },
+  "popOut": {
+    "message": "Pop out"
+  },
   "sendFileCalloutHeader": {
     "message": "Enne alustamist"
-  },
-  "sendFirefoxCustomDatePopoutMessage1": {
-    "message": "Kalendri stiilis kuupäeva valimiseks",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read '**To use a calendar style date picker ** click here to pop out your window.'"
-  },
-  "sendFirefoxCustomDatePopoutMessage2": {
-    "message": "kliki siia,",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To use a calendar style date picker **click here** to pop out your window.'"
-  },
-  "sendFirefoxCustomDatePopoutMessage3": {
-    "message": "et avada Bitwarden uues aknas.",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To use a calendar style date picker click here **to pop out your window.**'"
   },
   "expirationDateIsInvalid": {
     "message": "Valitud aegumiskuupäev ei ole õige."
@@ -2431,11 +2594,8 @@
   "dateParsingError": {
     "message": "Kustutamis- ja aegumiskuupäevade salvestamisel ilmnes tõrge."
   },
-  "hideEmail": {
-    "message": "Ära näita saajatele minu e-posti aadressi."
-  },
-  "sendOptionsPolicyInEffect": {
-    "message": "Organisatsiooni seaded mõjutavad sinu Sendi sätteid."
+  "hideYourEmail": {
+    "message": "Hide your email address from viewers."
   },
   "passwordPrompt": {
     "message": "Nõutav on ülemparool"
@@ -2491,6 +2651,15 @@
     "message": "Your organization requires you to set a master password.",
     "description": "Used as a card title description on the set password page to explain why the user is there"
   },
+  "cardMetrics": {
+    "message": "out of $TOTAL$",
+    "placeholders": {
+      "total": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
   "verificationRequired": {
     "message": "Verification required",
     "description": "Default title for the user verification dialog."
@@ -2501,8 +2670,37 @@
   "minutes": {
     "message": "Minutit"
   },
+  "vaultTimeoutPolicyAffectingOptions": {
+    "message": "Enterprise policy requirements have been applied to your timeout options"
+  },
   "vaultTimeoutPolicyInEffect": {
     "message": "Organisatsiooni poliitikad mõjutavad sinu hoidla ajalõppu. Maksimaalne lubatud hoidla ajalõpp on $HOURS$ tund(i) ja $MINUTES$ minut(it)",
+    "placeholders": {
+      "hours": {
+        "content": "$1",
+        "example": "5"
+      },
+      "minutes": {
+        "content": "$2",
+        "example": "5"
+      }
+    }
+  },
+  "vaultTimeoutPolicyInEffect1": {
+    "message": "$HOURS$ hour(s) and $MINUTES$ minute(s) maximum.",
+    "placeholders": {
+      "hours": {
+        "content": "$1",
+        "example": "5"
+      },
+      "minutes": {
+        "content": "$2",
+        "example": "5"
+      }
+    }
+  },
+  "vaultTimeoutPolicyMaximumError": {
+    "message": "Timeout exceeds the restriction set by your organization: $HOURS$ hour(s) and $MINUTES$ minute(s) maximum",
     "placeholders": {
       "hours": {
         "content": "$1",
@@ -2612,14 +2810,59 @@
   "error": {
     "message": "Viga"
   },
-  "regenerateUsername": {
-    "message": "Genereeri kasutajanimi uuesti"
+  "decryptionError": {
+    "message": "Decryption error"
+  },
+  "couldNotDecryptVaultItemsBelow": {
+    "message": "Bitwarden could not decrypt the vault item(s) listed below."
+  },
+  "contactCSToAvoidDataLossPart1": {
+    "message": "Contact customer success",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
+  },
+  "contactCSToAvoidDataLossPart2": {
+    "message": "to avoid additional data loss.",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
   },
   "generateUsername": {
     "message": "Genereeri kasutajanimi"
   },
-  "usernameType": {
-    "message": "Kasutajanime tüüp"
+  "generateEmail": {
+    "message": "Generate email"
+  },
+  "spinboxBoundariesHint": {
+    "message": "Value must be between $MIN$ and $MAX$.",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Use $RECOMMENDED$ characters or more to generate a strong password.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Use $RECOMMENDED$ words or more to generate a strong passphrase.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
   },
   "plusAddressedEmail": {
     "message": "Plussiga e-posti aadress",
@@ -2643,12 +2886,6 @@
   "websiteName": {
     "message": "Veebilehe nimi"
   },
-  "whatWouldYouLikeToGenerate": {
-    "message": "Mida sa soovid genereerida?"
-  },
-  "passwordType": {
-    "message": "Parooli tüüp"
-  },
   "service": {
     "message": "Teenus"
   },
@@ -2657,6 +2894,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Genereeri e-posti alias, kasutades selleks välist teenuspakkujat."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ error: $ERRORMESSAGE$",
@@ -2857,11 +3102,26 @@
   "resendNotification": {
     "message": "Saada märguanne uuesti"
   },
-  "viewAllLoginOptions": {
-    "message": "Vaata kõiki valikuid"
+  "viewAllLogInOptions": {
+    "message": "View all log in options"
+  },
+  "viewAllLoginOptionsV1": {
+    "message": "View all log in options"
   },
   "notificationSentDevice": {
     "message": "Sinu seadmesse saadeti teavitus."
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "A notification was sent to your device"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Make sure your account is unlocked and the fingerprint phrase matches on the other device"
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "You will be notified once the request is approved"
+  },
+  "needAnotherOptionV1": {
+    "message": "Need another option?"
   },
   "loginInitiated": {
     "message": "Sisselogimine on käivitatud"
@@ -2953,14 +3213,20 @@
       }
     }
   },
-  "loggingInOn": {
-    "message": "Sisselogimas kui"
-  },
   "opensInANewWindow": {
     "message": "Avaneb uues aknas"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Remember this device to make future logins seamless"
+  },
   "deviceApprovalRequired": {
     "message": "Nõutav on seadme kinnitamine. Vali kinnitamise meetod alt:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Device approval required"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Select an approval option below"
   },
   "rememberThisDevice": {
     "message": "Mäleta seda seadet"
@@ -3034,6 +3300,9 @@
   },
   "userEmailMissing": {
     "message": "Kasutaja e-post on puudulik"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Active user email not found. Logging you out."
   },
   "deviceTrusted": {
     "message": "Seade on usaldusväärne"
@@ -3162,38 +3431,6 @@
     "message": "Peida",
     "description": "Toggling an expand/collapse state."
   },
-  "filelessImport": {
-    "message": "Impordin andmed Bitwardenisse?",
-    "description": "Default notification title for triggering a fileless import."
-  },
-  "lpFilelessImport": {
-    "message": "Kaitse oma LastPassi andmeid ja impordi need Bitwardenisse?",
-    "description": "LastPass specific notification title for triggering a fileless import."
-  },
-  "lpCancelFilelessImport": {
-    "message": "Salvesta ilma krüpteeringuta failina",
-    "description": "LastPass specific notification button text for cancelling a fileless import."
-  },
-  "startFilelessImport": {
-    "message": "Impordi Bitwardenisse",
-    "description": "Notification button text for starting a fileless import."
-  },
-  "importing": {
-    "message": "Importimine...",
-    "description": "Notification message for when an import is in progress."
-  },
-  "dataSuccessfullyImported": {
-    "message": "Andmed on edukalt imporditud!",
-    "description": "Notification message for when an import has completed successfully."
-  },
-  "dataImportFailed": {
-    "message": "Ilmnes viga. Vaata täpsemaid andmeid konsoolist.",
-    "description": "Notification message for when an import has failed."
-  },
-  "importNetworkError": {
-    "message": "Importimisel ilmnes võrgu viga.",
-    "description": "Notification message for when an import has failed due to a network error."
-  },
   "aliasDomain": {
     "message": "Alias domeen"
   },
@@ -3242,6 +3479,14 @@
   "unlockAccountAria": {
     "message": "Unlock your account, opens in a new window",
     "description": "Screen reader text (aria-label) for unlock account button in overlay"
+  },
+  "totpCodeAria": {
+    "message": "Time-based One-Time Password Verification Code",
+    "description": "Aria label for the totp code displayed in the inline menu for autofill"
+  },
+  "totpSecondsSpanAria": {
+    "message": "Time remaining before current TOTP expires",
+    "description": "Aria label for the totp seconds displayed in the inline menu for autofill"
   },
   "fillCredentialsFor": {
     "message": "Fill credentials for",
@@ -3468,6 +3713,12 @@
   "typePasskey": {
     "message": "Passkey"
   },
+  "accessing": {
+    "message": "Accessing"
+  },
+  "loggedInExclamation": {
+    "message": "Logged in!"
+  },
   "passkeyNotCopied": {
     "message": "Pääsukoodi ei kopeerita"
   },
@@ -3491,6 +3742,9 @@
   },
   "noMatchingLoginsForSite": {
     "message": "No matching logins for this site"
+  },
+  "searchSavePasskeyNewLogin": {
+    "message": "Search or save passkey as new login"
   },
   "confirm": {
     "message": "Confirm"
@@ -3730,6 +3984,9 @@
   "autofillSuggestions": {
     "message": "Autofill suggestions"
   },
+  "itemSuggestions": {
+    "message": "Suggested items"
+  },
   "autofillSuggestionsTip": {
     "message": "Save a login item for this site to autofill"
   },
@@ -3956,6 +4213,21 @@
   "filters": {
     "message": "Filters"
   },
+  "filterVault": {
+    "message": "Filter vault"
+  },
+  "filterApplied": {
+    "message": "One filter applied"
+  },
+  "filterAppliedPlural": {
+    "message": "$COUNT$ filters applied",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "personalDetails": {
     "message": "Personal details"
   },
@@ -4060,6 +4332,9 @@
   },
   "enableAnimations": {
     "message": "Enable animations"
+  },
+  "showAnimations": {
+    "message": "Show animations"
   },
   "addAccount": {
     "message": "Add account"
@@ -4276,17 +4551,17 @@
   "itemLocation": {
     "message": "Item Location"
   },
+  "fileSend": {
+    "message": "File Send"
+  },
   "fileSends": {
     "message": "File Sends"
   },
+  "textSend": {
+    "message": "Text Send"
+  },
   "textSends": {
     "message": "Text Sends"
-  },
-  "bitwardenNewLook": {
-    "message": "Bitwarden has a new look!"
-  },
-  "bitwardenNewLookDesc": {
-    "message": "It's easier and more intuitive than ever to autofill and search from the Vault tab. Take a look around!"
   },
   "accountActions": {
     "message": "Account actions"
@@ -4294,14 +4569,56 @@
   "showNumberOfAutofillSuggestions": {
     "message": "Show number of login autofill suggestions on extension icon"
   },
+  "showQuickCopyActions": {
+    "message": "Show quick copy actions on Vault"
+  },
   "systemDefault": {
     "message": "System default"
   },
   "enterprisePolicyRequirementsApplied": {
     "message": "Enterprise policy requirements have been applied to this setting"
   },
+  "sshPrivateKey": {
+    "message": "Private key"
+  },
+  "sshPublicKey": {
+    "message": "Public key"
+  },
+  "sshFingerprint": {
+    "message": "Fingerprint"
+  },
+  "sshKeyAlgorithm": {
+    "message": "Key type"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
+  "retry": {
+    "message": "Retry"
+  },
+  "vaultCustomTimeoutMinimum": {
+    "message": "Minimum custom timeout is 1 minute."
+  },
   "additionalContentAvailable": {
     "message": "Additional content is available"
+  },
+  "fileSavedToDevice": {
+    "message": "File saved to device. Manage from your device downloads."
+  },
+  "showCharacterCount": {
+    "message": "Show character count"
+  },
+  "hideCharacterCount": {
+    "message": "Hide character count"
   },
   "itemsInTrash": {
     "message": "Items in trash"
@@ -4323,5 +4640,245 @@
   },
   "noEditPermissions": {
     "message": "You don't have permission to edit this item"
+  },
+  "biometricsStatusHelptextUnlockNeeded": {
+    "message": "Biometric unlock is unavailable because PIN or password unlock is required first."
+  },
+  "biometricsStatusHelptextHardwareUnavailable": {
+    "message": "Biometric unlock is currently unavailable."
+  },
+  "biometricsStatusHelptextAutoSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextManualSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextDesktopDisconnected": {
+    "message": "Biometric unlock is unavailable because the Bitwarden desktop app is closed."
+  },
+  "biometricsStatusHelptextNotEnabledInDesktop": {
+    "message": "Biometric unlock is unavailable because it is not enabled for $EMAIL$ in the Bitwarden desktop app.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "mail@example.com"
+      }
+    }
+  },
+  "biometricsStatusHelptextUnavailableReasonUnknown": {
+    "message": "Biometric unlock is currently unavailable for an unknown reason."
+  },
+  "authenticating": {
+    "message": "Authenticating"
+  },
+  "fillGeneratedPassword": {
+    "message": "Fill generated password",
+    "description": "Heading for the password generator within the inline menu"
+  },
+  "passwordRegenerated": {
+    "message": "Password regenerated",
+    "description": "Notification message for when a password has been regenerated"
+  },
+  "saveLoginToBitwarden": {
+    "message": "Save login to Bitwarden?",
+    "description": "Confirmation message for saving a login to Bitwarden"
+  },
+  "spaceCharacterDescriptor": {
+    "message": "Space",
+    "description": "Represents the space key in screen reader content as a readable word"
+  },
+  "tildeCharacterDescriptor": {
+    "message": "Tilde",
+    "description": "Represents the ~ key in screen reader content as a readable word"
+  },
+  "backtickCharacterDescriptor": {
+    "message": "Backtick",
+    "description": "Represents the ` key in screen reader content as a readable word"
+  },
+  "exclamationCharacterDescriptor": {
+    "message": "Exclamation mark",
+    "description": "Represents the ! key in screen reader content as a readable word"
+  },
+  "atSignCharacterDescriptor": {
+    "message": "At sign",
+    "description": "Represents the @ key in screen reader content as a readable word"
+  },
+  "hashSignCharacterDescriptor": {
+    "message": "Hash sign",
+    "description": "Represents the # key in screen reader content as a readable word"
+  },
+  "dollarSignCharacterDescriptor": {
+    "message": "Dollar sign",
+    "description": "Represents the $ key in screen reader content as a readable word"
+  },
+  "percentSignCharacterDescriptor": {
+    "message": "Percent sign",
+    "description": "Represents the % key in screen reader content as a readable word"
+  },
+  "caretCharacterDescriptor": {
+    "message": "Caret",
+    "description": "Represents the ^ key in screen reader content as a readable word"
+  },
+  "ampersandCharacterDescriptor": {
+    "message": "Ampersand",
+    "description": "Represents the & key in screen reader content as a readable word"
+  },
+  "asteriskCharacterDescriptor": {
+    "message": "Asterisk",
+    "description": "Represents the * key in screen reader content as a readable word"
+  },
+  "parenLeftCharacterDescriptor": {
+    "message": "Left parenthesis",
+    "description": "Represents the ( key in screen reader content as a readable word"
+  },
+  "parenRightCharacterDescriptor": {
+    "message": "Right parenthesis",
+    "description": "Represents the ) key in screen reader content as a readable word"
+  },
+  "hyphenCharacterDescriptor": {
+    "message": "Underscore",
+    "description": "Represents the _ key in screen reader content as a readable word"
+  },
+  "underscoreCharacterDescriptor": {
+    "message": "Hyphen",
+    "description": "Represents the - key in screen reader content as a readable word"
+  },
+  "plusCharacterDescriptor": {
+    "message": "Plus",
+    "description": "Represents the + key in screen reader content as a readable word"
+  },
+  "equalsCharacterDescriptor": {
+    "message": "Equals",
+    "description": "Represents the = key in screen reader content as a readable word"
+  },
+  "braceLeftCharacterDescriptor": {
+    "message": "Left brace",
+    "description": "Represents the { key in screen reader content as a readable word"
+  },
+  "braceRightCharacterDescriptor": {
+    "message": "Right brace",
+    "description": "Represents the } key in screen reader content as a readable word"
+  },
+  "bracketLeftCharacterDescriptor": {
+    "message": "Left bracket",
+    "description": "Represents the [ key in screen reader content as a readable word"
+  },
+  "bracketRightCharacterDescriptor": {
+    "message": "Right bracket",
+    "description": "Represents the ] key in screen reader content as a readable word"
+  },
+  "pipeCharacterDescriptor": {
+    "message": "Pipe",
+    "description": "Represents the | key in screen reader content as a readable word"
+  },
+  "backSlashCharacterDescriptor": {
+    "message": "Back slash",
+    "description": "Represents the back slash key in screen reader content as a readable word"
+  },
+  "colonCharacterDescriptor": {
+    "message": "Colon",
+    "description": "Represents the : key in screen reader content as a readable word"
+  },
+  "semicolonCharacterDescriptor": {
+    "message": "Semicolon",
+    "description": "Represents the ; key in screen reader content as a readable word"
+  },
+  "doubleQuoteCharacterDescriptor": {
+    "message": "Double quote",
+    "description": "Represents the double quote key in screen reader content as a readable word"
+  },
+  "singleQuoteCharacterDescriptor": {
+    "message": "Single quote",
+    "description": "Represents the ' key in screen reader content as a readable word"
+  },
+  "lessThanCharacterDescriptor": {
+    "message": "Less than",
+    "description": "Represents the < key in screen reader content as a readable word"
+  },
+  "greaterThanCharacterDescriptor": {
+    "message": "Greater than",
+    "description": "Represents the > key in screen reader content as a readable word"
+  },
+  "commaCharacterDescriptor": {
+    "message": "Comma",
+    "description": "Represents the , key in screen reader content as a readable word"
+  },
+  "periodCharacterDescriptor": {
+    "message": "Period",
+    "description": "Represents the . key in screen reader content as a readable word"
+  },
+  "questionCharacterDescriptor": {
+    "message": "Question mark",
+    "description": "Represents the ? key in screen reader content as a readable word"
+  },
+  "forwardSlashCharacterDescriptor": {
+    "message": "Forward slash",
+    "description": "Represents the / key in screen reader content as a readable word"
+  },
+  "lowercaseAriaLabel": {
+    "message": "Lowercase"
+  },
+  "uppercaseAriaLabel": {
+    "message": "Uppercase"
+  },
+  "generatedPassword": {
+    "message": "Generated password"
+  },
+  "compactMode": {
+    "message": "Compact mode"
+  },
+  "beta": {
+    "message": "Beta"
+  },
+  "importantNotice": {
+    "message": "Important notice"
+  },
+  "setupTwoStepLogin": {
+    "message": "Set up two-step login"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Bitwarden will send a code to your account email to verify logins from new devices starting in February 2025."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "You can set up two-step login as an alternative way to protect your account or change your email to one you can access."
+  },
+  "remindMeLater": {
+    "message": "Remind me later"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Do you have reliable access to your email, $EMAIL$?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "No, I do not"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Yes, I can reliably access my email"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "Turn on two-step login"
+  },
+  "changeAcctEmail": {
+    "message": "Change account email"
+  },
+  "extensionWidth": {
+    "message": "Extension width"
+  },
+  "wide": {
+    "message": "Wide"
+  },
+  "extraWide": {
+    "message": "Extra wide"
+  },
+  "updateDesktopAppOrDisableFingerprintDialogTitle": {
+    "message": "Please update your desktop application"
+  },
+  "updateDesktopAppOrDisableFingerprintDialogMessage": {
+    "message": "To use biometric unlock, please update your desktop application, or disable fingerprint unlock in the desktop settings."
   }
 }

@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { DatePipe } from "@angular/common";
 import {
   ChangeDetectorRef,
@@ -9,7 +11,7 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom, map, Observable } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
@@ -20,13 +22,14 @@ import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abs
 import { EventType } from "@bitwarden/common/enums";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { EncArrayBuffer } from "@bitwarden/common/platform/models/domain/enc-array-buffer";
+import { CollectionId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
@@ -36,7 +39,9 @@ import { Launchable } from "@bitwarden/common/vault/interfaces/launchable";
 import { AttachmentView } from "@bitwarden/common/vault/models/view/attachment.view";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
-import { DialogService } from "@bitwarden/components";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
+import { DialogService, ToastService } from "@bitwarden/components";
+import { KeyService } from "@bitwarden/key-management";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 const BroadcasterSubscriptionId = "ViewComponent";
@@ -44,19 +49,23 @@ const BroadcasterSubscriptionId = "ViewComponent";
 @Directive()
 export class ViewComponent implements OnDestroy, OnInit {
   @Input() cipherId: string;
+  @Input() collectionId: string;
   @Output() onEditCipher = new EventEmitter<CipherView>();
   @Output() onCloneCipher = new EventEmitter<CipherView>();
   @Output() onShareCipher = new EventEmitter<CipherView>();
   @Output() onDeletedCipher = new EventEmitter<CipherView>();
   @Output() onRestoredCipher = new EventEmitter<CipherView>();
 
+  canDeleteCipher$: Observable<boolean>;
   cipher: CipherView;
   showPassword: boolean;
   showPasswordCount: boolean;
   showCardNumber: boolean;
   showCardCode: boolean;
+  showPrivateKey: boolean;
   canAccessPremium: boolean;
   showPremiumRequiredTotp: boolean;
+  showUpgradeRequiredTotp: boolean;
   totpCode: string;
   totpCodeFormatted: string;
   totpDash: number;
@@ -70,6 +79,8 @@ export class ViewComponent implements OnDestroy, OnInit {
   private totpInterval: any;
   private previousCipherId: string;
   private passwordReprompted = false;
+
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   get fido2CredentialCreationDateValue(): string {
     const dateCreated = this.i18nService.t("dateCreated");
@@ -86,7 +97,8 @@ export class ViewComponent implements OnDestroy, OnInit {
     protected totpService: TotpService,
     protected tokenService: TokenService,
     protected i18nService: I18nService,
-    protected cryptoService: CryptoService,
+    protected keyService: KeyService,
+    protected encryptService: EncryptService,
     protected platformUtilsService: PlatformUtilsService,
     protected auditService: AuditService,
     protected win: Window,
@@ -103,6 +115,8 @@ export class ViewComponent implements OnDestroy, OnInit {
     protected datePipe: DatePipe,
     protected accountService: AccountService,
     private billingAccountProfileStateService: BillingAccountProfileStateService,
+    protected toastService: ToastService,
+    private cipherAuthorizationService: CipherAuthorizationService,
   ) {}
 
   ngOnInit() {
@@ -131,29 +145,33 @@ export class ViewComponent implements OnDestroy, OnInit {
     this.cleanUp();
 
     const cipher = await this.cipherService.get(this.cipherId);
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(this.activeUserId$);
     this.cipher = await cipher.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
     );
     this.canAccessPremium = await firstValueFrom(
-      this.billingAccountProfileStateService.hasPremiumFromAnySource$,
+      this.billingAccountProfileStateService.hasPremiumFromAnySource$(activeUserId),
     );
     this.showPremiumRequiredTotp =
-      this.cipher.login.totp && !this.canAccessPremium && !this.cipher.organizationUseTotp;
+      this.cipher.login.totp && !this.canAccessPremium && !this.cipher.organizationId;
+    this.canDeleteCipher$ = this.cipherAuthorizationService.canDeleteCipher$(this.cipher, [
+      this.collectionId as CollectionId,
+    ]);
+
+    this.showUpgradeRequiredTotp =
+      this.cipher.login.totp && this.cipher.organizationId && !this.cipher.organizationUseTotp;
 
     if (this.cipher.folderId) {
       this.folder = await (
-        await firstValueFrom(this.folderService.folderViews$)
+        await firstValueFrom(this.folderService.folderViews$(activeUserId))
       ).find((f) => f.id == this.cipher.folderId);
     }
 
-    if (
-      this.cipher.type === CipherType.Login &&
-      this.cipher.login.totp &&
-      (cipher.organizationUseTotp || this.canAccessPremium)
-    ) {
+    const canGenerateTotp = this.cipher.organizationId
+      ? this.cipher.organizationUseTotp
+      : this.canAccessPremium;
+
+    if (this.cipher.type === CipherType.Login && this.cipher.login.totp && canGenerateTotp) {
       await this.totpUpdateCode();
       const interval = this.totpService.getTimeInterval(this.cipher.login.totp);
       await this.totpTick(interval);
@@ -229,11 +247,13 @@ export class ViewComponent implements OnDestroy, OnInit {
 
     try {
       await this.deleteCipher();
-      this.platformUtilsService.showToast(
-        "success",
-        null,
-        this.i18nService.t(this.cipher.isDeleted ? "permanentlyDeletedItem" : "deletedItem"),
-      );
+      this.toastService.showToast({
+        variant: "success",
+        title: null,
+        message: this.i18nService.t(
+          this.cipher.isDeleted ? "permanentlyDeletedItem" : "deletedItem",
+        ),
+      });
       this.onDeletedCipher.emit(this.cipher);
     } catch (e) {
       this.logService.error(e);
@@ -249,7 +269,11 @@ export class ViewComponent implements OnDestroy, OnInit {
 
     try {
       await this.restoreCipher();
-      this.platformUtilsService.showToast("success", null, this.i18nService.t("restoredItem"));
+      this.toastService.showToast({
+        variant: "success",
+        title: null,
+        message: this.i18nService.t("restoredItem"),
+      });
       this.onRestoredCipher.emit(this.cipher);
     } catch (e) {
       this.logService.error(e);
@@ -315,6 +339,10 @@ export class ViewComponent implements OnDestroy, OnInit {
     }
   }
 
+  togglePrivateKey() {
+    this.showPrivateKey = !this.showPrivateKey;
+  }
+
   async checkPassword() {
     if (
       this.cipher.login == null ||
@@ -328,25 +356,27 @@ export class ViewComponent implements OnDestroy, OnInit {
     const matches = await this.checkPasswordPromise;
 
     if (matches > 0) {
-      this.platformUtilsService.showToast(
-        "warning",
-        null,
-        this.i18nService.t("passwordExposed", matches.toString()),
-      );
+      this.toastService.showToast({
+        variant: "warning",
+        title: null,
+        message: this.i18nService.t("passwordExposed", matches.toString()),
+      });
     } else {
-      this.platformUtilsService.showToast("success", null, this.i18nService.t("passwordSafe"));
+      this.toastService.showToast({
+        variant: "success",
+        title: null,
+        message: this.i18nService.t("passwordSafe"),
+      });
     }
   }
 
-  launch(uri: Launchable, cipherId?: string) {
+  async launch(uri: Launchable, cipherId?: string) {
     if (!uri.canLaunch) {
       return;
     }
 
     if (cipherId) {
-      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.cipherService.updateLastLaunchedDate(cipherId);
+      await this.cipherService.updateLastLaunchedDate(cipherId);
     }
 
     this.platformUtilsService.launchUri(uri.launchUri);
@@ -366,11 +396,11 @@ export class ViewComponent implements OnDestroy, OnInit {
 
     const copyOptions = this.win != null ? { window: this.win } : null;
     this.platformUtilsService.copyToClipboard(value, copyOptions);
-    this.platformUtilsService.showToast(
-      "info",
-      null,
-      this.i18nService.t("valueCopied", this.i18nService.t(typeI18nKey)),
-    );
+    this.toastService.showToast({
+      variant: "info",
+      title: null,
+      message: this.i18nService.t("valueCopied", this.i18nService.t(typeI18nKey)),
+    });
 
     if (typeI18nKey === "password") {
       // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
@@ -403,11 +433,11 @@ export class ViewComponent implements OnDestroy, OnInit {
     }
 
     if (this.cipher.organizationId == null && !this.canAccessPremium) {
-      this.platformUtilsService.showToast(
-        "error",
-        this.i18nService.t("premiumRequired"),
-        this.i18nService.t("premiumRequiredDesc"),
-      );
+      this.toastService.showToast({
+        variant: "error",
+        title: this.i18nService.t("premiumRequired"),
+        message: this.i18nService.t("premiumRequiredDesc"),
+      });
       return;
     }
 
@@ -431,7 +461,11 @@ export class ViewComponent implements OnDestroy, OnInit {
     a.downloading = true;
     const response = await fetch(new Request(url, { cache: "no-store" }));
     if (response.status !== 200) {
-      this.platformUtilsService.showToast("error", null, this.i18nService.t("errorOccurred"));
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("errorOccurred"),
+      });
       a.downloading = false;
       return;
     }
@@ -441,14 +475,20 @@ export class ViewComponent implements OnDestroy, OnInit {
       const key =
         attachment.key != null
           ? attachment.key
-          : await this.cryptoService.getOrgKey(this.cipher.organizationId);
-      const decBuf = await this.cryptoService.decryptFromBytes(encBuf, key);
+          : await this.keyService.getOrgKey(this.cipher.organizationId);
+      const decBuf = await this.encryptService.decryptToBytes(encBuf, key);
       this.fileDownloadService.download({
         fileName: attachment.fileName,
         blobData: decBuf,
       });
+      // FIXME: Remove when updating file. Eslint update
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-      this.platformUtilsService.showToast("error", null, this.i18nService.t("errorOccurred"));
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("errorOccurred"),
+      });
     }
 
     a.downloading = false;

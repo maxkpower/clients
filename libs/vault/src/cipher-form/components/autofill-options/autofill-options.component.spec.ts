@@ -7,6 +7,7 @@ import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/s
 import { DomainSettingsService } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { UriMatchStrategy } from "@bitwarden/common/models/domain/domain-service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
@@ -23,10 +24,14 @@ describe("AutofillOptionsComponent", () => {
   let liveAnnouncer: MockProxy<LiveAnnouncer>;
   let domainSettingsService: MockProxy<DomainSettingsService>;
   let autofillSettingsService: MockProxy<AutofillSettingsServiceAbstraction>;
+  let platformUtilsService: MockProxy<PlatformUtilsService>;
+  const getInitialCipherView = jest.fn(() => null);
 
   beforeEach(async () => {
-    cipherFormContainer = mock<CipherFormContainer>();
+    getInitialCipherView.mockClear();
+    cipherFormContainer = mock<CipherFormContainer>({ getInitialCipherView });
     liveAnnouncer = mock<LiveAnnouncer>();
+    platformUtilsService = mock<PlatformUtilsService>();
     domainSettingsService = mock<DomainSettingsService>();
     domainSettingsService.defaultUriMatchStrategy$ = new BehaviorSubject(null);
 
@@ -45,6 +50,7 @@ describe("AutofillOptionsComponent", () => {
         { provide: LiveAnnouncer, useValue: liveAnnouncer },
         { provide: DomainSettingsService, useValue: domainSettingsService },
         { provide: AutofillSettingsServiceAbstraction, useValue: autofillSettingsService },
+        { provide: PlatformUtilsService, useValue: platformUtilsService },
       ],
     }).compileComponents();
 
@@ -103,11 +109,13 @@ describe("AutofillOptionsComponent", () => {
     existingLogin.uri = "https://example.com";
     existingLogin.match = UriMatchStrategy.Exact;
 
-    (cipherFormContainer.originalCipherView as CipherView) = new CipherView();
-    cipherFormContainer.originalCipherView.login = {
+    const cipher = new CipherView();
+    cipher.login = {
       autofillOnPageLoad: true,
       uris: [existingLogin],
     } as LoginView;
+
+    getInitialCipherView.mockReturnValueOnce(cipher);
 
     fixture.detectChanges();
 
@@ -134,11 +142,13 @@ describe("AutofillOptionsComponent", () => {
     existingLogin.uri = "https://example.com";
     existingLogin.match = UriMatchStrategy.Exact;
 
-    (cipherFormContainer.originalCipherView as CipherView) = new CipherView();
-    cipherFormContainer.originalCipherView.login = {
+    const cipher = new CipherView();
+    cipher.login = {
       autofillOnPageLoad: true,
       uris: [existingLogin],
     } as LoginView;
+
+    getInitialCipherView.mockReturnValueOnce(cipher);
 
     fixture.detectChanges();
 
@@ -155,11 +165,13 @@ describe("AutofillOptionsComponent", () => {
     existingLogin.uri = "https://example.com";
     existingLogin.match = UriMatchStrategy.Exact;
 
-    (cipherFormContainer.originalCipherView as CipherView) = new CipherView();
-    cipherFormContainer.originalCipherView.login = {
+    const cipher = new CipherView();
+    cipher.login = {
       autofillOnPageLoad: true,
       uris: [existingLogin],
     } as LoginView;
+
+    getInitialCipherView.mockReturnValueOnce(cipher);
 
     fixture.detectChanges();
 

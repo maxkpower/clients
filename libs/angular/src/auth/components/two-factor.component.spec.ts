@@ -86,9 +86,12 @@ describe("TwoFactorComponent", () => {
   };
 
   let selectedUserDecryptionOptions: BehaviorSubject<UserDecryptionOptions>;
+  let authenticationSessionTimeoutSubject: BehaviorSubject<boolean>;
 
   beforeEach(() => {
+    authenticationSessionTimeoutSubject = new BehaviorSubject<boolean>(false);
     mockLoginStrategyService = mock<LoginStrategyServiceAbstraction>();
+    mockLoginStrategyService.authenticationSessionTimeout$ = authenticationSessionTimeoutSubject;
     mockRouter = mock<Router>();
     mockI18nService = mock<I18nService>();
     mockApiService = mock<ApiService>();
@@ -150,7 +153,9 @@ describe("TwoFactorComponent", () => {
       }),
     };
 
-    selectedUserDecryptionOptions = new BehaviorSubject<UserDecryptionOptions>(null);
+    selectedUserDecryptionOptions = new BehaviorSubject<UserDecryptionOptions>(
+      mockUserDecryptionOpts.withMasterPassword,
+    );
     mockUserDecryptionOptionsService.userDecryptionOptions$ = selectedUserDecryptionOptions;
 
     TestBed.configureTestingModule({
@@ -491,5 +496,11 @@ describe("TwoFactorComponent", () => {
         });
       });
     });
+  });
+
+  it("navigates to the timeout route when timeout expires", async () => {
+    authenticationSessionTimeoutSubject.next(true);
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(["authentication-timeout"]);
   });
 });

@@ -28,12 +28,12 @@
 
     <button
       slot="end"
-      *ngIf="cipher.edit"
+      *ngIf="canDeleteCipher$ | async"
       [bitAction]="delete"
       type="button"
       buttonType="danger"
       bitIconButton="bwi-trash"
-      [appA11yTitle]="'delete' | i18n"
+      [appA11yTitle]="(cipher.isDeleted ? 'deleteForever' : 'delete') | i18n"
     ></button>
   </popup-footer>
 </popup-page>

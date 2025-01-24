@@ -1,18 +1,24 @@
 use std::path::Path;
 
 use desktop_core::ipc::{MESSAGE_CHANNEL_BUFFER, NATIVE_MESSAGING_BUFFER_SIZE};
-use futures::{SinkExt, StreamExt};
+use futures::{FutureExt, SinkExt, StreamExt};
 use log::*;
 use tokio_util::codec::LengthDelimitedCodec;
 
-fn init_logging(log_path: &Path, level: log::LevelFilter) {
+#[cfg(target_os = "windows")]
+mod windows;
+
+#[cfg(target_os = "macos")]
+embed_plist::embed_info_plist!("../../../resources/info.desktop_proxy.plist");
+
+fn init_logging(log_path: &Path, console_level: LevelFilter, file_level: LevelFilter) {
     use simplelog::{ColorChoice, CombinedLogger, Config, SharedLogger, TermLogger, TerminalMode};
 
     let config = Config::default();
 
     let mut loggers: Vec<Box<dyn SharedLogger>> = Vec::new();
     loggers.push(TermLogger::new(
-        level,
+        console_level,
         config.clone(),
         TerminalMode::Stderr,
         ColorChoice::Auto,
@@ -20,7 +26,7 @@ fn init_logging(log_path: &Path, level: log::LevelFilter) {
 
     match std::fs::File::create(log_path) {
         Ok(file) => {
-            loggers.push(simplelog::WriteLogger::new(level, config, file));
+            loggers.push(simplelog::WriteLogger::new(file_level, config, file));
         }
         Err(e) => {
             eprintln!("Can't create file: {}", e);
@@ -46,6 +52,9 @@ fn init_logging(log_path: &Path, level: log::LevelFilter) {
 ///
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    #[cfg(target_os = "windows")]
+    let should_foreground = windows::allow_foreground();
+
     let sock_path = desktop_core::ipc::path("bitwarden");
 
     let log_path = {
@@ -54,7 +63,12 @@ async fn main() {
         path
     };
 
-    init_logging(&log_path, LevelFilter::Info);
+    let level = std::env::var("PROXY_LOG_LEVEL")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(LevelFilter::Info);
+
+    init_logging(&log_path, level, LevelFilter::Info);
 
     info!("Starting Bitwarden IPC Proxy.");
 
@@ -78,9 +92,10 @@ async fn main() {
     let (in_send, in_recv) = tokio::sync::mpsc::channel(MESSAGE_CHANNEL_BUFFER);
     let (out_send, mut out_recv) = tokio::sync::mpsc::channel(MESSAGE_CHANNEL_BUFFER);
 
-    let mut handle = tokio::spawn(desktop_core::ipc::client::connect(
-        sock_path, out_send, in_recv,
-    ));
+    let mut handle = tokio::spawn(
+        desktop_core::ipc::client::connect(sock_path, out_send, in_recv)
+            .map(|r| r.map_err(|e| e.to_string())),
+    );
 
     // Create a new codec for reading and writing messages from stdin/stdout.
     let mut stdin = LengthDelimitedCodec::builder()
@@ -94,9 +109,27 @@ async fn main() {
 
     loop {
         tokio::select! {
+            // This forces tokio to poll the futures in the order that they are written.
+            // We want the spawn handle to be evaluated first so that we can get any error
+            // results before we get the channel closed message.
+            biased;
+
             // IPC client has finished, so we should exit as well.
-            _ = &mut handle => {
-                break;
+            res = &mut handle => {
+                match res {
+                    Ok(Ok(())) => {
+                        info!("IPC client finished successfully.");
+                        std::process::exit(0);
+                    }
+                    Ok(Err(e)) => {
+                        error!("IPC client connection error: {}", e);
+                        std::process::exit(1);
+                    }
+                    Err(e) => {
+                        error!("IPC client spawn error: {}", e);
+                        std::process::exit(1);
+                    }
+                }
             }
 
             // Receive messages from IPC and print to STDOUT.
@@ -108,13 +141,16 @@ async fn main() {
                     }
                     None => {
                         info!("Channel closed, exiting.");
-                        break;
+                        std::process::exit(0);
                     }
                 }
             },
 
             // Listen to stdin and send messages to ipc processor.
             msg = stdin.next() => {
+                #[cfg(target_os = "windows")]
+                should_foreground.store(true, std::sync::atomic::Ordering::Relaxed);
+
                 match msg {
                     Some(Ok(msg)) => {
                         let m = String::from_utf8(msg.to_vec()).unwrap();
@@ -123,11 +159,11 @@ async fn main() {
                     }
                     Some(Err(e)) => {
                         error!("Error parsing input: {}", e);
-                        break;
+                        std::process::exit(1);
                     }
                     None => {
                         info!("Received EOF, exiting.");
-                        break;
+                        std::process::exit(0);
                     }
                 }
             }

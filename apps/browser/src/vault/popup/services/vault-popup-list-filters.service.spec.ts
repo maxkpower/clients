@@ -2,26 +2,30 @@ import { TestBed } from "@angular/core/testing";
 import { FormBuilder } from "@angular/forms";
 import { BehaviorSubject, skipWhile } from "rxjs";
 
+import { CollectionService, Collection, CollectionView } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { StateProvider } from "@bitwarden/common/platform/state";
+import { mockAccountServiceWith } from "@bitwarden/common/spec";
+import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
-import { Collection } from "@bitwarden/common/vault/models/domain/collection";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
 import { MY_VAULT_ID, VaultPopupListFiltersService } from "./vault-popup-list-filters.service";
 
 describe("VaultPopupListFiltersService", () => {
   let service: VaultPopupListFiltersService;
-  const memberOrganizations$ = new BehaviorSubject<Organization[]>([]);
+  const _memberOrganizations$ = new BehaviorSubject<Organization[]>([]);
+  const memberOrganizations$ = (userId: UserId) => _memberOrganizations$;
+  const organizations$ = new BehaviorSubject<Organization[]>([]);
   const folderViews$ = new BehaviorSubject([]);
   const cipherViews$ = new BehaviorSubject({});
   const decryptedCollections$ = new BehaviorSubject<CollectionView[]>([]);
@@ -33,7 +37,7 @@ describe("VaultPopupListFiltersService", () => {
   } as unknown as CollectionService;
 
   const folderService = {
-    folderViews$,
+    folderViews$: () => folderViews$,
   } as unknown as FolderService;
 
   const cipherService = {
@@ -42,6 +46,7 @@ describe("VaultPopupListFiltersService", () => {
 
   const organizationService = {
     memberOrganizations$,
+    organizations$,
   } as unknown as OrganizationService;
 
   const i18nService = {
@@ -52,11 +57,16 @@ describe("VaultPopupListFiltersService", () => {
     policyAppliesToActiveUser$: jest.fn(() => policyAppliesToActiveUser$),
   };
 
+  const state$ = new BehaviorSubject<boolean>(false);
+  const update = jest.fn().mockResolvedValue(undefined);
+
   beforeEach(() => {
-    memberOrganizations$.next([]);
+    _memberOrganizations$.next([]);
     decryptedCollections$.next([]);
     policyAppliesToActiveUser$.next(false);
     policyService.policyAppliesToActiveUser$.mockClear();
+
+    const accountService = mockAccountServiceWith("userId" as UserId);
 
     collectionService.getAllNested = () => Promise.resolve([]);
     TestBed.configureTestingModule({
@@ -85,7 +95,15 @@ describe("VaultPopupListFiltersService", () => {
           provide: PolicyService,
           useValue: policyService,
         },
+        {
+          provide: StateProvider,
+          useValue: { getGlobal: () => ({ state$, update }) },
+        },
         { provide: FormBuilder, useClass: FormBuilder },
+        {
+          provide: AccountService,
+          useValue: accountService,
+        },
       ],
     });
 
@@ -99,13 +117,28 @@ describe("VaultPopupListFiltersService", () => {
         CipherType.Card,
         CipherType.Identity,
         CipherType.SecureNote,
+        CipherType.SshKey,
       ]);
+    });
+  });
+
+  describe("numberOfAppliedFilters$", () => {
+    it("updates as the form value changes", (done) => {
+      service.numberOfAppliedFilters$.subscribe((number) => {
+        expect(number).toBe(2);
+        done();
+      });
+
+      service.filterForm.patchValue({
+        organization: { id: "1234" } as Organization,
+        folder: { id: "folder11" } as FolderView,
+      });
     });
   });
 
   describe("organizations$", () => {
     it('does not add "myVault" to the list of organizations when there are no organizations', (done) => {
-      memberOrganizations$.next([]);
+      _memberOrganizations$.next([]);
 
       service.organizations$.subscribe((organizations) => {
         expect(organizations.map((o) => o.label)).toEqual([]);
@@ -115,7 +148,7 @@ describe("VaultPopupListFiltersService", () => {
 
     it('adds "myVault" to the list of organizations when there are other organizations', (done) => {
       const orgs = [{ name: "bobby's org", id: "1234-3323-23223" }] as Organization[];
-      memberOrganizations$.next(orgs);
+      _memberOrganizations$.next(orgs);
 
       service.organizations$.subscribe((organizations) => {
         expect(organizations.map((o) => o.label)).toEqual(["myVault", "bobby's org"]);
@@ -128,7 +161,7 @@ describe("VaultPopupListFiltersService", () => {
         { name: "bobby's org", id: "1234-3323-23223" },
         { name: "alice's org", id: "2223-4343-99888" },
       ] as Organization[];
-      memberOrganizations$.next(orgs);
+      _memberOrganizations$.next(orgs);
 
       service.organizations$.subscribe((organizations) => {
         expect(organizations.map((o) => o.label)).toEqual([
@@ -149,7 +182,7 @@ describe("VaultPopupListFiltersService", () => {
 
       it("returns an empty array when the policy applies and there is a single organization", (done) => {
         policyAppliesToActiveUser$.next(true);
-        memberOrganizations$.next([
+        _memberOrganizations$.next([
           { name: "bobby's org", id: "1234-3323-23223" },
         ] as Organization[]);
 
@@ -166,7 +199,7 @@ describe("VaultPopupListFiltersService", () => {
           { name: "alice's org", id: "2223-4343-99888" },
         ] as Organization[];
 
-        memberOrganizations$.next(orgs);
+        _memberOrganizations$.next(orgs);
 
         service.organizations$.subscribe((organizations) => {
           expect(organizations.map((o) => o.label)).toEqual([
@@ -186,7 +219,7 @@ describe("VaultPopupListFiltersService", () => {
           { name: "catherine's org", id: "77733-4343-99888" },
         ] as Organization[];
 
-        memberOrganizations$.next(orgs);
+        _memberOrganizations$.next(orgs);
 
         service.organizations$.subscribe((organizations) => {
           expect(organizations.map((o) => o.label)).toEqual([
@@ -210,7 +243,7 @@ describe("VaultPopupListFiltersService", () => {
           },
         ] as Organization[];
 
-        memberOrganizations$.next(orgs);
+        _memberOrganizations$.next(orgs);
 
         service.organizations$.subscribe((organizations) => {
           expect(organizations.map((o) => o.icon)).toEqual(["bwi-user", "bwi-family"]);
@@ -228,7 +261,7 @@ describe("VaultPopupListFiltersService", () => {
           },
         ] as Organization[];
 
-        memberOrganizations$.next(orgs);
+        _memberOrganizations$.next(orgs);
 
         service.organizations$.subscribe((organizations) => {
           expect(organizations.map((o) => o.icon)).toEqual(["bwi-user", "bwi-family"]);
@@ -246,7 +279,7 @@ describe("VaultPopupListFiltersService", () => {
           },
         ] as Organization[];
 
-        memberOrganizations$.next(orgs);
+        _memberOrganizations$.next(orgs);
 
         service.organizations$.subscribe((organizations) => {
           expect(organizations.map((o) => o.icon)).toEqual([
@@ -450,6 +483,26 @@ describe("VaultPopupListFiltersService", () => {
 
         service.filterForm.patchValue({ organization });
       });
+    });
+  });
+
+  describe("filterVisibilityState", () => {
+    it("exposes stored state through filterVisibilityState$", (done) => {
+      state$.next(true);
+
+      service.filterVisibilityState$.subscribe((filterVisibility) => {
+        expect(filterVisibility).toBe(true);
+        done();
+      });
+    });
+
+    it("updates stored filter state", async () => {
+      await service.updateFilterVisibility(false);
+
+      expect(update).toHaveBeenCalledTimes(1);
+      // Get callback passed to `update`
+      const updateCallback = update.mock.calls[0][0];
+      expect(updateCallback()).toBe(false);
     });
   });
 });

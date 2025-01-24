@@ -4,7 +4,9 @@ import { CdkDragDrop } from "@angular/cdk/drag-drop";
 import { DebugElement } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { mock } from "jest-mock-extended";
 
+import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import {
   CardLinkedId,
@@ -17,6 +19,8 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FieldView } from "@bitwarden/common/vault/models/view/field.view";
 import { DialogService } from "@bitwarden/components";
 
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { BitPasswordInputToggleDirective } from "../../../../../components/src/form-field/password-input-toggle.directive";
 import { CipherFormConfig } from "../../abstractions/cipher-form-config.service";
 import { CipherFormContainer } from "../../cipher-form-container";
@@ -50,13 +54,20 @@ describe("CustomFieldsComponent", () => {
     await TestBed.configureTestingModule({
       imports: [CustomFieldsComponent],
       providers: [
+        { provide: EventCollectionService, useValue: mock<EventCollectionService>() },
         {
           provide: I18nService,
           useValue: { t: (...keys: string[]) => keys.filter(Boolean).join(" ") },
         },
         {
           provide: CipherFormContainer,
-          useValue: { patchCipher, originalCipherView, registerChildForm: jest.fn(), config },
+          useValue: {
+            patchCipher,
+            originalCipherView,
+            registerChildForm: jest.fn(),
+            config,
+            getInitialCipherView: jest.fn(() => originalCipherView),
+          },
         },
         {
           provide: LiveAnnouncer,
@@ -108,7 +119,7 @@ describe("CustomFieldsComponent", () => {
       ]);
     });
 
-    it("forbids a user to view hidden fields when the cipher `viewPassword` is false", () => {
+    it("when `viewPassword` is false the user cannot see the view toggle option", () => {
       originalCipherView.viewPassword = false;
       originalCipherView.fields = mockFieldViews;
 
@@ -118,7 +129,20 @@ describe("CustomFieldsComponent", () => {
 
       const button = fixture.debugElement.query(By.directive(BitPasswordInputToggleDirective));
 
-      expect(button.nativeElement.disabled).toBe(true);
+      expect(button).toBeFalsy();
+    });
+
+    it("when `viewPassword` is true the user can see the view toggle option", () => {
+      originalCipherView.viewPassword = true;
+      originalCipherView.fields = mockFieldViews;
+
+      component.ngOnInit();
+
+      fixture.detectChanges();
+
+      const button = fixture.debugElement.query(By.directive(BitPasswordInputToggleDirective));
+
+      expect(button).toBeTruthy();
     });
 
     describe("linkedFieldOptions", () => {

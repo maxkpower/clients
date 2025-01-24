@@ -1,8 +1,11 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from "@angular/core";
 import { AbstractControl, FormBuilder, Validators } from "@angular/forms";
 import {
   combineLatest,
+  firstValueFrom,
   map,
   Observable,
   of,
@@ -14,23 +17,27 @@ import {
 import { first } from "rxjs/operators";
 
 import {
+  CollectionAccessSelectionView,
+  CollectionAdminService,
+  CollectionAdminView,
   OrganizationUserApiService,
-  OrganizationUserUserDetailsResponse,
+  OrganizationUserUserMiniResponse,
+  CollectionResponse,
+  CollectionView,
 } from "@bitwarden/admin-console/common";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  getOrganizationById,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { CollectionResponse } from "@bitwarden/common/vault/models/response/collection.response";
-import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
-import { BitValidators, DialogService } from "@bitwarden/components";
+import { BitValidators, DialogService, ToastService } from "@bitwarden/components";
 
-import {
-  CollectionAccessSelectionView,
-  GroupService,
-  GroupView,
-} from "../../../admin-console/organizations/core";
+import { GroupApiService, GroupView } from "../../../admin-console/organizations/core";
 import { PermissionMode } from "../../../admin-console/organizations/shared/components/access-selector/access-selector.component";
 import {
   AccessItemType,
@@ -40,8 +47,6 @@ import {
   convertToPermission,
   convertToSelectionView,
 } from "../../../admin-console/organizations/shared/components/access-selector/access-selector.models";
-import { CollectionAdminService } from "../../core/collection-admin.service";
-import { CollectionAdminView } from "../../core/views/collection-admin.view";
 
 export enum CollectionDialogTabType {
   Info = 0,
@@ -104,13 +109,15 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private dialogRef: DialogRef<CollectionDialogResult>,
     private organizationService: OrganizationService,
-    private groupService: GroupService,
+    private groupService: GroupApiService,
     private collectionAdminService: CollectionAdminService,
     private i18nService: I18nService,
     private platformUtilsService: PlatformUtilsService,
     private organizationUserApiService: OrganizationUserApiService,
     private dialogService: DialogService,
     private changeDetectorRef: ChangeDetectorRef,
+    private accountService: AccountService,
+    private toastService: ToastService,
   ) {
     this.tabIndex = params.initialTab ?? CollectionDialogTabType.Info;
   }
@@ -122,7 +129,10 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       this.formGroup.controls.selectedOrg.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((id) => this.loadOrg(id));
-      this.organizations$ = this.organizationService.organizations$.pipe(
+      const userId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      this.organizations$ = this.organizationService.organizations$(userId).pipe(
         first(),
         map((orgs) =>
           orgs
@@ -140,8 +150,10 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
   }
 
   async loadOrg(orgId: string) {
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const organization$ = this.organizationService
-      .get$(orgId)
+      .organizations$(userId)
+      .pipe(getOrganizationById(orgId))
       .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
     const groups$ = organization$.pipe(
       switchMap((organization) => {
@@ -156,15 +168,23 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       organization: organization$,
       collections: this.collectionAdminService.getAll(orgId),
       groups: groups$,
-      // Collection(s) needed to map readonlypermission for (potential) access selector disabled state
-      users: this.organizationUserApiService.getAllUsers(orgId, { includeCollections: true }),
+      users: this.organizationUserApiService.getAllMiniUserDetails(orgId),
     })
       .pipe(takeUntil(this.formGroup.controls.selectedOrg.valueChanges), takeUntil(this.destroy$))
       .subscribe(({ organization, collections: allCollections, groups, users }) => {
         this.organization = organization;
+
+        if (this.params.collectionId) {
+          this.collection = allCollections.find((c) => c.id === this.collectionId);
+
+          if (!this.collection) {
+            throw new Error("Could not find collection to edit.");
+          }
+        }
+
         this.accessItems = [].concat(
-          groups.map((group) => mapGroupToAccessItemView(group, this.collectionId)),
-          users.data.map((user) => mapUserToAccessItemView(user, this.collectionId)),
+          groups.map((group) => mapGroupToAccessItemView(group, this.collection)),
+          users.data.map((user) => mapUserToAccessItemView(user, this.collection)),
         );
 
         // Force change detection to update the access selector's items
@@ -174,14 +194,9 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
           ? allCollections.filter((c) => c.manage)
           : allCollections;
 
-        if (this.params.collectionId) {
-          this.collection = allCollections.find((c) => c.id === this.collectionId);
+        if (this.collection) {
           // Ensure we don't allow nesting the current collection within itself
           this.nestOptions = this.nestOptions.filter((c) => c.id !== this.collectionId);
-
-          if (!this.collection) {
-            throw new Error("Could not find collection to edit.");
-          }
 
           // Parse the name to find its parent name
           const { name, parent: parentName } = parseName(this.collection);
@@ -272,17 +287,20 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       const accessTabError = this.formGroup.controls.access.hasError("managePermissionRequired");
 
       if (this.tabIndex === CollectionDialogTabType.Access && !accessTabError) {
-        this.platformUtilsService.showToast(
-          "error",
-          null,
-          this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("collectionInfo")),
-        );
+        this.toastService.showToast({
+          variant: "error",
+          title: null,
+          message: this.i18nService.t(
+            "fieldOnTabRequiresAttention",
+            this.i18nService.t("collectionInfo"),
+          ),
+        });
       } else if (this.tabIndex === CollectionDialogTabType.Info && accessTabError) {
-        this.platformUtilsService.showToast(
-          "error",
-          null,
-          this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("access")),
-        );
+        this.toastService.showToast({
+          variant: "error",
+          title: null,
+          message: this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("access")),
+        });
       }
       return;
     }
@@ -307,14 +325,14 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
 
     const savedCollection = await this.collectionAdminService.save(collectionView);
 
-    this.platformUtilsService.showToast(
-      "success",
-      null,
-      this.i18nService.t(
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t(
         this.editMode ? "editedCollectionId" : "createdCollectionId",
         collectionView.name,
       ),
-    );
+    });
 
     this.close(CollectionDialogAction.Saved, savedCollection);
   };
@@ -337,11 +355,11 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
 
     await this.collectionAdminService.delete(this.params.organizationId, this.params.collectionId);
 
-    this.platformUtilsService.showToast(
-      "success",
-      null,
-      this.i18nService.t("deletedCollectionId", this.collection?.name),
-    );
+    this.toastService.showToast({
+      variant: "success",
+      title: null,
+      message: this.i18nService.t("deletedCollectionId", this.collection?.name),
+    });
 
     this.close(CollectionDialogAction.Deleted, this.collection);
   };
@@ -423,7 +441,10 @@ function validateCanManagePermission(control: AbstractControl) {
  * @param collectionId Current collection being viewed/edited
  * @returns AccessItemView customized to set a readonlyPermission to be displayed if the access selector is in a disabled state
  */
-function mapGroupToAccessItemView(group: GroupView, collectionId: string): AccessItemView {
+function mapGroupToAccessItemView(
+  group: GroupView,
+  collection: CollectionAdminView,
+): AccessItemView {
   return {
     id: group.id,
     type: AccessItemType.Group,
@@ -431,8 +452,8 @@ function mapGroupToAccessItemView(group: GroupView, collectionId: string): Acces
     labelName: group.name,
     readonly: false,
     readonlyPermission:
-      collectionId != null
-        ? convertToPermission(group.collections.find((gc) => gc.id == collectionId))
+      collection != null
+        ? convertToPermission(collection.groups.find((g) => g.id === group.id))
         : undefined,
   };
 }
@@ -444,8 +465,8 @@ function mapGroupToAccessItemView(group: GroupView, collectionId: string): Acces
  * @returns AccessItemView customized to set a readonlyPermission to be displayed if the access selector is in a disabled state
  */
 function mapUserToAccessItemView(
-  user: OrganizationUserUserDetailsResponse,
-  collectionId: string,
+  user: OrganizationUserUserMiniResponse,
+  collection: CollectionAdminView,
 ): AccessItemView {
   return {
     id: user.id,
@@ -457,9 +478,9 @@ function mapUserToAccessItemView(
     status: user.status,
     readonly: false,
     readonlyPermission:
-      collectionId != null
+      collection != null
         ? convertToPermission(
-            new CollectionAccessSelectionView(user.collections.find((uc) => uc.id == collectionId)),
+            new CollectionAccessSelectionView(collection.users.find((u) => u.id === user.id)),
           )
         : undefined,
   };

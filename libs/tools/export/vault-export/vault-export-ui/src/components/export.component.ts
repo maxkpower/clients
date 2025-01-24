@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import {
   AfterViewInit,
@@ -10,23 +12,38 @@ import {
   ViewChild,
 } from "@angular/core";
 import { ReactiveFormsModule, UntypedFormBuilder, Validators } from "@angular/forms";
-import { combineLatest, map, merge, Observable, startWith, Subject, takeUntil } from "rxjs";
+import {
+  combineLatest,
+  firstValueFrom,
+  map,
+  merge,
+  Observable,
+  startWith,
+  Subject,
+  switchMap,
+  takeUntil,
+} from "rxjs";
 
+import { CollectionService } from "@bitwarden/admin-console/common";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { PasswordStrengthV2Component } from "@bitwarden/angular/tools/password-strength/password-strength-v2.component";
 import { UserVerificationDialogComponent } from "@bitwarden/auth/angular";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  getOrganizationById,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { EventType } from "@bitwarden/common/enums";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import {
   AsyncActionsModule,
   BitSubmitDirective,
@@ -79,8 +96,14 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   @Input() set organizationId(value: string) {
     this._organizationId = value;
-    this.organizationService
-      .get$(this._organizationId)
+    getUserId(this.accountService.activeAccount$)
+      .pipe(
+        switchMap((userId) =>
+          this.organizationService
+            .organizations$(userId)
+            .pipe(getOrganizationById(this._organizationId)),
+        ),
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe((organization) => {
         this._organizationId = organization?.id;
@@ -121,7 +144,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
   encryptedExportType = EncryptedExportType;
   protected showFilePassword: boolean;
 
-  filePasswordValue: string = null;
   private _disabledByPolicy = false;
 
   organizations$: Observable<Organization[]>;
@@ -167,6 +189,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     protected fileDownloadService: FileDownloadService,
     protected dialogService: DialogService,
     protected organizationService: OrganizationService,
+    private accountService: AccountService,
     private collectionService: CollectionService,
   ) {}
 
@@ -193,10 +216,12 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(startWith(0), takeUntil(this.destroy$))
       .subscribe(() => this.adjustValidators());
 
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+
     if (this.organizationId) {
-      this.organizations$ = this.organizationService.memberOrganizations$.pipe(
-        map((orgs) => orgs.filter((org) => org.id == this.organizationId)),
-      );
+      this.organizations$ = this.organizationService
+        .memberOrganizations$(userId)
+        .pipe(map((orgs) => orgs.filter((org) => org.id == this.organizationId)));
       this.exportForm.controls.vaultSelector.patchValue(this.organizationId);
       this.exportForm.controls.vaultSelector.disable();
 
@@ -206,7 +231,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.organizations$ = combineLatest({
       collections: this.collectionService.decryptedCollections$,
-      memberOrganizations: this.organizationService.memberOrganizations$,
+      memberOrganizations: this.organizationService.memberOrganizations$(userId),
     }).pipe(
       map(({ collections, memberOrganizations }) => {
         const managedCollectionsOrgIds = new Set(
@@ -278,18 +303,9 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   generatePassword = async () => {
     const [options] = await this.passwordGenerationService.getOptions();
-    this.filePasswordValue = await this.passwordGenerationService.generatePassword(options);
-    this.exportForm.get("filePassword").setValue(this.filePasswordValue);
-    this.exportForm.get("confirmFilePassword").setValue(this.filePasswordValue);
-  };
-
-  copyPasswordToClipboard = async () => {
-    this.platformUtilsService.copyToClipboard(this.filePasswordValue);
-    this.toastService.showToast({
-      variant: "success",
-      title: null,
-      message: this.i18nService.t("valueCopied", this.i18nService.t("password")),
-    });
+    const generatedPassword = await this.passwordGenerationService.generatePassword(options);
+    this.exportForm.get("filePassword").setValue(generatedPassword);
+    this.exportForm.get("confirmFilePassword").setValue(generatedPassword);
   };
 
   submit = async () => {

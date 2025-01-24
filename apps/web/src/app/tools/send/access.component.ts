@@ -1,13 +1,12 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 
 import { AnonLayoutWrapperDataService } from "@bitwarden/auth/angular";
-import { RegisterRouteService } from "@bitwarden/auth/common";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
-import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
@@ -19,6 +18,7 @@ import { SendAccessView } from "@bitwarden/common/tools/send/models/view/send-ac
 import { SEND_KDF_ITERATIONS } from "@bitwarden/common/tools/send/send-kdf";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
 import { NoItemsModule, ToastService } from "@bitwarden/components";
+import { KeyService } from "@bitwarden/key-management";
 import { ExpiredSendIcon } from "@bitwarden/send-ui";
 
 import { SharedModule } from "../../shared";
@@ -56,21 +56,16 @@ export class AccessComponent implements OnInit {
 
   protected formGroup = this.formBuilder.group({});
 
-  // TODO: remove when email verification flag is removed
-  registerRoute$ = this.registerRouteService.registerRoute$();
-
   private id: string;
   private key: string;
 
   constructor(
     private cryptoFunctionService: CryptoFunctionService,
     private route: ActivatedRoute,
-    private cryptoService: CryptoService,
+    private keyService: KeyService,
     private sendApiService: SendApiService,
     private toastService: ToastService,
     private i18nService: I18nService,
-    private configService: ConfigService,
-    private registerRouteService: RegisterRouteService,
     private layoutWrapperDataService: AnonLayoutWrapperDataService,
     protected formBuilder: FormBuilder,
   ) {}
@@ -126,7 +121,7 @@ export class AccessComponent implements OnInit {
       }
       this.passwordRequired = false;
       const sendAccess = new SendAccess(sendResponse);
-      this.decKey = await this.cryptoService.makeSendKey(keyArray);
+      this.decKey = await this.keyService.makeSendKey(keyArray);
       this.send = await sendAccess.decrypt(this.decKey);
     } catch (e) {
       if (e instanceof ErrorResponse) {
@@ -157,8 +152,8 @@ export class AccessComponent implements OnInit {
     if (this.creatorIdentifier != null) {
       this.layoutWrapperDataService.setAnonLayoutWrapperData({
         pageSubtitle: {
-          subtitle: this.i18nService.t("sendAccessCreatorIdentifier", this.creatorIdentifier),
-          translate: false,
+          key: "sendAccessCreatorIdentifier",
+          placeholders: [this.creatorIdentifier],
         },
       });
     }

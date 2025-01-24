@@ -1,10 +1,16 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 
+import {
+  CollectionAdminService,
+  CollectionAdminView,
+  Unassigned,
+} from "@bitwarden/admin-console/common";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -13,22 +19,19 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 import {
-  DialogService,
-  SimpleDialogOptions,
   BreadcrumbsModule,
+  DialogService,
   MenuModule,
   SearchModule,
+  SimpleDialogOptions,
 } from "@bitwarden/components";
 
 import { HeaderModule } from "../../../layouts/header/header.module";
 import { SharedModule } from "../../../shared";
-import { CollectionAdminView } from "../../../vault/core/views/collection-admin.view";
 import { CollectionDialogTabType } from "../../components/collection-dialog";
-import { CollectionAdminService } from "../../core/collection-admin.service";
 import {
   All,
   RoutedVaultFilterModel,
-  Unassigned,
 } from "../../individual-vault/vault-filter/shared/models/routed-vault-filter.model";
 
 @Component({
@@ -55,7 +58,7 @@ export class VaultHeaderComponent implements OnInit {
    */
   @Input() loading: boolean;
 
-  /** Current active fitler */
+  /** Current active filter */
   @Input() filter: RoutedVaultFilterModel;
 
   /** The organization currently being viewed */
@@ -86,9 +89,6 @@ export class VaultHeaderComponent implements OnInit {
   @Output() searchTextChanged = new EventEmitter<string>();
 
   protected CollectionDialogTabType = CollectionDialogTabType;
-  protected organizations$ = this.organizationService.organizations$;
-
-  protected restrictProviderAccessFlag = false;
 
   /**
    * Whether the extension refresh feature flag is enabled.
@@ -99,7 +99,6 @@ export class VaultHeaderComponent implements OnInit {
   protected CipherType = CipherType;
 
   constructor(
-    private organizationService: OrganizationService,
     private i18nService: I18nService,
     private dialogService: DialogService,
     private collectionAdminService: CollectionAdminService,
@@ -108,9 +107,6 @@ export class VaultHeaderComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.restrictProviderAccessFlag = await this.configService.getFeatureFlag(
-      FeatureFlag.RestrictProviderAccess,
-    );
     this.extensionRefreshEnabled = await this.configService.getFeatureFlag(
       FeatureFlag.ExtensionRefresh,
     );
@@ -127,7 +123,9 @@ export class VaultHeaderComponent implements OnInit {
       return this.i18nService.t("unassigned");
     }
 
-    return `${this.organization?.name} ${headerType}`;
+    return this.organization?.name
+      ? `${this.organization?.name} ${headerType}`
+      : this.i18nService.t("collections");
   }
 
   get icon() {
@@ -245,11 +243,7 @@ export class VaultHeaderComponent implements OnInit {
   }
 
   get canCreateCipher(): boolean {
-    if (
-      this.organization?.isProviderUser &&
-      this.restrictProviderAccessFlag &&
-      !this.organization?.isMember
-    ) {
+    if (this.organization?.isProviderUser && !this.organization?.isMember) {
       return false;
     }
     return true;

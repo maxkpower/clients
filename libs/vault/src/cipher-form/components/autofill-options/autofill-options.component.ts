@@ -1,15 +1,19 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { AsyncPipe, NgForOf, NgIf } from "@angular/common";
 import { Component, OnInit, QueryList, ViewChildren } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
-import { Subject, switchMap, take } from "rxjs";
+import { filter, Subject, switchMap, take } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { DomainSettingsService } from "@bitwarden/common/autofill/services/domain-settings.service";
+import { ClientType } from "@bitwarden/common/enums";
 import { UriMatchStrategySetting } from "@bitwarden/common/models/domain/domain-service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import {
@@ -69,7 +73,10 @@ export class AutofillOptionsComponent implements OnInit {
     return this.autofillOptionsForm.controls.uris.controls;
   }
 
-  protected defaultMatchDetection$ = this.domainSettingsService.defaultUriMatchStrategy$;
+  protected defaultMatchDetection$ = this.domainSettingsService.defaultUriMatchStrategy$.pipe(
+    // The default match detection should only be shown when used on the browser
+    filter(() => this.platformUtilsService.getClientType() == ClientType.Browser),
+  );
   protected autofillOnPageLoadEnabled$ = this.autofillSettingsService.autofillOnPageLoad$;
 
   protected autofillOptions: { label: string; value: boolean | null }[] = [
@@ -90,6 +97,7 @@ export class AutofillOptionsComponent implements OnInit {
     private liveAnnouncer: LiveAnnouncer,
     private domainSettingsService: DomainSettingsService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
+    private platformUtilsService: PlatformUtilsService,
   ) {
     this.cipherFormContainer.registerChildForm("autoFillOptions", this.autofillOptionsForm);
 
@@ -122,8 +130,9 @@ export class AutofillOptionsComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.cipherFormContainer.originalCipherView?.login) {
-      this.initFromExistingCipher(this.cipherFormContainer.originalCipherView.login);
+    const prefillCipher = this.cipherFormContainer.getInitialCipherView();
+    if (prefillCipher) {
+      this.initFromExistingCipher(prefillCipher.login);
     } else {
       this.initNewCipher();
     }
@@ -134,17 +143,29 @@ export class AutofillOptionsComponent implements OnInit {
   }
 
   private initFromExistingCipher(existingLogin: LoginView) {
+    // The `uris` control is a FormArray which needs to dynamically
+    // add controls to the form. Doing this will trigger the `valueChanges` observable on the form
+    // and overwrite the `autofillOnPageLoad` value before it is set in the following `patchValue` call.
+    // Pass `false` to `addUri` to stop events from emitting when adding the URIs.
     existingLogin.uris?.forEach((uri) => {
-      this.addUri({
-        uri: uri.uri,
-        matchDetection: uri.match,
-      });
+      this.addUri(
+        {
+          uri: uri.uri,
+          matchDetection: uri.match,
+        },
+        false,
+        false,
+      );
     });
     this.autofillOptionsForm.patchValue({
       autofillOnPageLoad: existingLogin.autofillOnPageLoad,
     });
 
-    if (this.cipherFormContainer.config.initialValues?.loginUri) {
+    // Only add the initial value when the cipher was not initialized from a cached state
+    if (
+      this.cipherFormContainer.config.initialValues?.loginUri &&
+      !this.cipherFormContainer.initializedWithCachedCipher()
+    ) {
       // Avoid adding the same uri again if it already exists
       if (
         existingLogin.uris?.findIndex(
@@ -189,9 +210,16 @@ export class AutofillOptionsComponent implements OnInit {
    * Adds a new URI input to the form.
    * @param uriFieldValue The initial value for the new URI input.
    * @param focusNewInput If true, the new URI input will be focused after being added.
+   * @param emitEvent When false, prevents the `valueChanges` & `statusChanges` observables from firing.
    */
-  addUri(uriFieldValue: UriField = { uri: null, matchDetection: null }, focusNewInput = false) {
-    this.autofillOptionsForm.controls.uris.push(this.formBuilder.control(uriFieldValue));
+  addUri(
+    uriFieldValue: UriField = { uri: null, matchDetection: null },
+    focusNewInput = false,
+    emitEvent = true,
+  ) {
+    this.autofillOptionsForm.controls.uris.push(this.formBuilder.control(uriFieldValue), {
+      emitEvent,
+    });
 
     if (focusNewInput) {
       this.focusOnNewInput$.next();

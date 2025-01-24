@@ -1,9 +1,17 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { WebauthnUtils } from "../utils/webauthn-utils";
 
 import { MessageType } from "./messaging/message";
 import { Messenger } from "./messaging/messenger";
 
 (function (globalContext) {
+  if (globalContext.document.currentScript) {
+    globalContext.document.currentScript.parentNode.removeChild(
+      globalContext.document.currentScript,
+    );
+  }
+
   const shouldExecuteContentScript =
     globalContext.document.contentType === "text/html" &&
     (globalContext.document.location.protocol === "https:" ||
@@ -131,6 +139,12 @@ import { Messenger } from "./messaging/messenger";
       const internalAbortControllers = [new AbortController(), new AbortController()];
       const bitwardenResponse = async (internalAbortController: AbortController) => {
         try {
+          const abortListener = () =>
+            messenger.request({
+              type: MessageType.AbortRequest,
+              abortedRequestId: abortSignal.toString(),
+            });
+          internalAbortController.signal.addEventListener("abort", abortListener);
           const response = await messenger.request(
             {
               type: MessageType.CredentialGetRequest,
@@ -138,6 +152,7 @@ import { Messenger } from "./messaging/messenger";
             },
             internalAbortController.signal,
           );
+          internalAbortController.signal.removeEventListener("abort", abortListener);
           if (response.type !== MessageType.CredentialGetResponse) {
             throw new Error("Something went wrong.");
           }
@@ -252,6 +267,8 @@ import { Messenger } from "./messaging/messenger";
 
       clearWaitForFocus();
       void messenger.destroy();
+      // FIXME: Remove when updating file. Eslint update
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       /** empty */
     }

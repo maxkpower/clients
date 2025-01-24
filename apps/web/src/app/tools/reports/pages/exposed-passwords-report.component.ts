@@ -3,6 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
@@ -11,18 +12,21 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { CipherReportComponent } from "./cipher-report.component";
+
+type ReportResult = CipherView & { exposedXTimes: number };
+
 @Component({
   selector: "app-exposed-passwords-report",
   templateUrl: "exposed-passwords-report.component.html",
 })
 export class ExposedPasswordsReportComponent extends CipherReportComponent implements OnInit {
-  exposedPasswordMap = new Map<string, number>();
   disabled = true;
 
   constructor(
     protected cipherService: CipherService,
     protected auditService: AuditService,
     protected organizationService: OrganizationService,
+    accountService: AccountService,
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
@@ -33,6 +37,7 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
       modalService,
       passwordRepromptService,
       organizationService,
+      accountService,
       i18nService,
       syncService,
     );
@@ -44,12 +49,12 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
 
   async setCiphers() {
     const allCiphers = await this.getAllCiphers();
-    const exposedPasswordCiphers: CipherView[] = [];
+    const exposedPasswordCiphers: ReportResult[] = [];
     const promises: Promise<void>[] = [];
     this.filterStatus = [0];
 
-    allCiphers.forEach((ciph: any) => {
-      const { type, login, isDeleted, edit, viewPassword, id } = ciph;
+    allCiphers.forEach((ciph) => {
+      const { type, login, isDeleted, edit, viewPassword } = ciph;
       if (
         type !== CipherType.Login ||
         login.password == null ||
@@ -63,8 +68,8 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
 
       const promise = this.auditService.passwordLeaked(login.password).then((exposedCount) => {
         if (exposedCount > 0) {
-          exposedPasswordCiphers.push(ciph);
-          this.exposedPasswordMap.set(id, exposedCount);
+          const row = { ...ciph, exposedXTimes: exposedCount } as ReportResult;
+          exposedPasswordCiphers.push(row);
         }
       });
       promises.push(promise);
@@ -72,6 +77,7 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
     await Promise.all(promises);
 
     this.filterCiphersByOrg(exposedPasswordCiphers);
+    this.dataSource.sort = { column: "exposedXTimes", direction: "desc" };
   }
 
   protected canManageCipher(c: CipherView): boolean {

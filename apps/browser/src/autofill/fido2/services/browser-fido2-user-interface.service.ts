@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import {
   BehaviorSubject,
   EmptyError,
@@ -109,11 +111,15 @@ export type BrowserFido2Message = { sessionId: string } & (
     }
 );
 
+export type BrowserFido2ParentWindowReference = chrome.tabs.Tab;
+
 /**
  * Browser implementation of the {@link Fido2UserInterfaceService}.
  * The user interface is implemented as a popout and the service uses the browser's messaging API to communicate with it.
  */
-export class BrowserFido2UserInterfaceService implements Fido2UserInterfaceServiceAbstraction {
+export class BrowserFido2UserInterfaceService
+  implements Fido2UserInterfaceServiceAbstraction<BrowserFido2ParentWindowReference>
+{
   constructor(private authService: AuthService) {}
 
   async newSession(
@@ -242,12 +248,13 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
     cipherIds,
     userVerification,
     assumeUserPresence,
+    masterPasswordRepromptRequired,
   }: PickCredentialParams): Promise<{ cipherId: string; userVerified: boolean }> {
     // NOTE: For now, we are defaulting to a userVerified status of `true` when the request
     // is for a conditionally mediated authentication. This will allow for mediated conditional
     // authentication to function without requiring user interaction. This is a product
     // decision, rather than a decision based on the expected technical specifications.
-    if (assumeUserPresence && cipherIds.length === 1) {
+    if (assumeUserPresence && cipherIds.length === 1 && !masterPasswordRepromptRequired) {
       return { cipherId: cipherIds[0], userVerified: userVerification };
     }
 

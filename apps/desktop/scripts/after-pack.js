@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires, no-console */
+/* eslint-disable @typescript-eslint/no-require-imports, no-console */
 require("dotenv").config();
 const child_process = require("child_process");
 const path = require("path");
@@ -33,24 +33,71 @@ async function run(context) {
   }
 
   if (["darwin", "mas"].includes(context.electronPlatformName)) {
-    const identities = getIdentities(process.env.CSC_NAME ?? "");
-    if (identities.length === 0) {
-      throw new Error("No valid identities found");
-    }
-    const id = identities[0].id;
+    const is_mas = context.electronPlatformName === "mas";
+    const is_mas_dev = context.targets.some((e) => e.name === "mas-dev");
 
-    console.log("Signing proxy binary before the main bundle, using identity", id);
+    let id;
+
+    // Only use the Bitwarden Identities on CI
+    if (process.env.GITHUB_ACTIONS === "true") {
+      if (is_mas) {
+        id = is_mas_dev
+          ? "E7C9978F6FBCE0553429185C405E61F5380BE8EB"
+          : "3rd Party Mac Developer Application: Bitwarden Inc";
+      } else {
+        id = "Developer ID Application: 8bit Solutions LLC";
+      }
+      // Locally, use the first valid code signing identity, unless CSC_NAME is set
+    } else if (process.env.CSC_NAME) {
+      id = process.env.CSC_NAME;
+    } else {
+      const identities = getIdentities();
+      if (identities.length === 0) {
+        throw new Error("No valid identities found");
+      }
+      id = identities[0].id;
+    }
+
+    console.log(
+      `Signing proxy binary before the main bundle, using identity '${id}', for build ${context.electronPlatformName}`,
+    );
 
     const appName = context.packager.appInfo.productFilename;
     const appPath = `${context.appOutDir}/${appName}.app`;
     const proxyPath = path.join(appPath, "Contents", "MacOS", "desktop_proxy");
+    const inheritProxyPath = path.join(appPath, "Contents", "MacOS", "desktop_proxy.inherit");
 
     const packageId = "com.bitwarden.desktop";
-    const entitlementsName = "entitlements.desktop_proxy.plist";
-    const entitlementsPath = path.join(__dirname, "..", "resources", entitlementsName);
-    child_process.execSync(
-      `codesign -s ${id} -i ${packageId} -f --timestamp --options runtime --entitlements ${entitlementsPath} ${proxyPath}`,
-    );
+
+    if (is_mas) {
+      const entitlementsName = "entitlements.desktop_proxy.plist";
+      const entitlementsPath = path.join(__dirname, "..", "resources", entitlementsName);
+      child_process.execSync(
+        `codesign -s '${id}' -i ${packageId} -f --timestamp --options runtime --entitlements ${entitlementsPath} ${proxyPath}`,
+      );
+
+      const inheritEntitlementsName = "entitlements.desktop_proxy.inherit.plist";
+      const inheritEntitlementsPath = path.join(
+        __dirname,
+        "..",
+        "resources",
+        inheritEntitlementsName,
+      );
+      child_process.execSync(
+        `codesign -s '${id}' -i ${packageId} -f --timestamp --options runtime --entitlements ${inheritEntitlementsPath} ${inheritProxyPath}`,
+      );
+    } else {
+      // For non-Appstore builds, we don't need the inherit binary as they are not sandboxed,
+      // but we sign and include it anyway for consistency. It should be removed once DDG supports the proxy directly.
+      const entitlementsName = "entitlements.mac.plist";
+      const entitlementsPath = path.join(__dirname, "..", "resources", entitlementsName);
+      child_process.execSync(
+        `codesign -s '${id}' -i ${packageId} -f --timestamp --options runtime --entitlements ${entitlementsPath} ${proxyPath}`,
+      );
+      child_process.execSync(
+        `codesign -s '${id}' -i ${packageId} -f --timestamp --options runtime --entitlements ${entitlementsPath} ${inheritProxyPath}`,
+      );
+    }
   }
 }
 
@@ -66,7 +113,7 @@ const appleCertificatePrefixes = [
   "Apple Development:",
 ];
 
-function getIdentities(csc_name) {
+function getIdentities() {
   const ids = child_process
     .execSync("/usr/bin/security find-identity -v -p codesigning")
     .toString();
@@ -81,7 +128,6 @@ function getIdentities(csc_name) {
       }
       return false;
     })
-    .filter((line) => line.includes(csc_name))
     .map((line) => {
       const split = line.trim().split(" ");
       const id = split[1];

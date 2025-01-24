@@ -1,12 +1,16 @@
 import { mock } from "jest-mock-extended";
+import { of } from "rxjs";
 
+import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
+import { KeyService } from "../../../../key-management/src/abstractions/key.service";
 import { FakeAccountService, FakeStateProvider, mockAccountServiceWith } from "../../../spec";
 import { ApiService } from "../../abstractions/api.service";
-import { OrganizationService } from "../../admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationData } from "../../admin-console/models/data/organization.data";
 import { Organization } from "../../admin-console/models/domain/organization";
 import { ProfileOrganizationResponse } from "../../admin-console/models/response/profile-organization.response";
-import { CryptoService } from "../../platform/abstractions/crypto.service";
 import { LogService } from "../../platform/abstractions/log.service";
 import { Utils } from "../../platform/misc/utils";
 import { SymmetricCryptoKey } from "../../platform/models/domain/symmetric-crypto-key";
@@ -27,7 +31,7 @@ import { TokenService } from "./token.service";
 describe("KeyConnectorService", () => {
   let keyConnectorService: KeyConnectorService;
 
-  const cryptoService = mock<CryptoService>();
+  const keyService = mock<KeyService>();
   const apiService = mock<ApiService>();
   const tokenService = mock<TokenService>();
   const logService = mock<LogService>();
@@ -56,7 +60,7 @@ describe("KeyConnectorService", () => {
     keyConnectorService = new KeyConnectorService(
       accountService,
       masterPasswordService,
-      cryptoService,
+      keyService,
       apiService,
       tokenService,
       logService,
@@ -93,7 +97,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, false, "https://key-connector-url.com", 2, false),
         organizationData(true, true, "https://other-url.com", 2, false),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -108,7 +112,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, false, "https://key-connector-url.com", 2, false),
         organizationData(false, false, "https://key-connector-url.com", 2, false),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -123,7 +127,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, true, "https://key-connector-url.com", 0, false),
         organizationData(true, true, "https://key-connector-url.com", 1, false),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -138,7 +142,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, true, "https://key-connector-url.com", 2, true),
         organizationData(false, true, "https://key-connector-url.com", 2, true),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -179,7 +183,7 @@ describe("KeyConnectorService", () => {
 
       // create organization object
       const data = organizationData(true, true, "https://key-connector-url.com", 2, false);
-      organizationService.getAll.mockResolvedValue([data]);
+      organizationService.organizations$.mockReturnValue(of([data]));
 
       // uses KeyConnector
       const state = stateProvider.activeUser.getFake(USES_KEY_CONNECTOR);
@@ -193,7 +197,7 @@ describe("KeyConnectorService", () => {
     it("should return false if the user does not need migration", async () => {
       tokenService.getIsExternal.mockResolvedValue(false);
       const data = organizationData(false, false, "https://key-connector-url.com", 2, false);
-      organizationService.getAll.mockResolvedValue([data]);
+      organizationService.organizations$.mockReturnValue(of([data]));
 
       const state = stateProvider.activeUser.getFake(USES_KEY_CONNECTOR);
       state.nextState(true);
@@ -273,7 +277,7 @@ describe("KeyConnectorService", () => {
       const masterKey = getMockMasterKey();
       const keyConnectorRequest = new KeyConnectorUserKeyRequest(masterKey.encKeyB64);
       const error = new Error("Failed to post user key to key connector");
-      organizationService.getAll.mockResolvedValue([organization]);
+      organizationService.organizations$.mockReturnValue(of([organization]));
 
       masterPasswordService.masterKeySubject.next(masterKey);
       jest.spyOn(keyConnectorService, "getManagingOrganization").mockResolvedValue(organization);
@@ -340,8 +344,6 @@ describe("KeyConnectorService", () => {
             createNewCollections: false,
             editAnyCollection: false,
             deleteAnyCollection: false,
-            editAssignedCollections: false,
-            deleteAssignedCollections: false,
             manageGroups: false,
             managePolicies: false,
             manageSso: false,
@@ -364,7 +366,8 @@ describe("KeyConnectorService", () => {
           familySponsorshipValidUntil: null,
           familySponsorshipToDelete: null,
           accessSecretsManager: false,
-          limitCollectionCreationDeletion: true,
+          limitCollectionCreation: true,
+          limitCollectionDeletion: true,
           allowAdminAccessToAllCollectionItems: true,
           flexibleCollections: false,
           object: "profileOrganization",

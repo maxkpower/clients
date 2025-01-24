@@ -1,15 +1,19 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { ActivatedRoute, Router } from "@angular/router";
 import { mock, MockProxy } from "jest-mock-extended";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 
+import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
+import { EventType } from "@bitwarden/common/enums";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { AddEditCipherInfo } from "@bitwarden/common/vault/types/add-edit-cipher-info";
 import {
   CipherFormConfig,
@@ -38,22 +42,25 @@ describe("AddEditV2Component", () => {
 
   const buildConfigResponse = { originalCipher: {} } as CipherFormConfig;
   const buildConfig = jest.fn((mode: CipherFormMode) =>
-    Promise.resolve({ mode, ...buildConfigResponse }),
+    Promise.resolve({ ...buildConfigResponse, mode }),
   );
   const queryParams$ = new BehaviorSubject({});
   const disable = jest.fn();
   const navigate = jest.fn();
   const back = jest.fn().mockResolvedValue(null);
+  const collect = jest.fn().mockResolvedValue(null);
 
   beforeEach(async () => {
     buildConfig.mockClear();
     disable.mockClear();
     navigate.mockClear();
     back.mockClear();
+    collect.mockClear();
 
-    addEditCipherInfo$ = new BehaviorSubject(null);
+    addEditCipherInfo$ = new BehaviorSubject<AddEditCipherInfo | null>(null);
     cipherServiceMock = mock<CipherService>();
-    cipherServiceMock.addEditCipherInfo$ = addEditCipherInfo$.asObservable();
+    cipherServiceMock.addEditCipherInfo$ =
+      addEditCipherInfo$.asObservable() as Observable<AddEditCipherInfo>;
 
     await TestBed.configureTestingModule({
       imports: [AddEditV2Component],
@@ -66,6 +73,14 @@ describe("AddEditV2Component", () => {
         { provide: ActivatedRoute, useValue: { queryParams: queryParams$ } },
         { provide: I18nService, useValue: { t: (key: string) => key } },
         { provide: CipherService, useValue: cipherServiceMock },
+        { provide: EventCollectionService, useValue: { collect } },
+        { provide: LogService, useValue: mock<LogService>() },
+        {
+          provide: CipherAuthorizationService,
+          useValue: {
+            canDeleteCipher$: jest.fn().mockReturnValue(true),
+          },
+        },
       ],
     })
       .overrideProvider(CipherFormConfigService, {
@@ -87,7 +102,7 @@ describe("AddEditV2Component", () => {
 
         tick();
 
-        expect(buildConfig.mock.lastCall[0]).toBe("add");
+        expect(buildConfig.mock.lastCall![0]).toBe("add");
         expect(component.config.mode).toBe("add");
       }));
 
@@ -96,7 +111,7 @@ describe("AddEditV2Component", () => {
 
         tick();
 
-        expect(buildConfig.mock.lastCall[0]).toBe("clone");
+        expect(buildConfig.mock.lastCall![0]).toBe("clone");
         expect(component.config.mode).toBe("clone");
       }));
 
@@ -106,7 +121,7 @@ describe("AddEditV2Component", () => {
 
         tick();
 
-        expect(buildConfig.mock.lastCall[0]).toBe("edit");
+        expect(buildConfig.mock.lastCall![0]).toBe("edit");
         expect(component.config.mode).toBe("edit");
       }));
 
@@ -116,10 +131,61 @@ describe("AddEditV2Component", () => {
 
         tick();
 
-        expect(buildConfig.mock.lastCall[0]).toBe("edit");
+        expect(buildConfig.mock.lastCall![0]).toBe("edit");
         expect(component.config.mode).toBe("partial-edit");
       }));
     });
+  });
+
+  describe("analytics", () => {
+    it("does not log viewed event when mode is add", fakeAsync(() => {
+      queryParams$.next({});
+
+      tick();
+
+      expect(collect).not.toHaveBeenCalled();
+    }));
+
+    it("does not log viewed event whe mode is clone", fakeAsync(() => {
+      queryParams$.next({ cipherId: "222-333-444-5555", clone: "true" });
+      buildConfigResponse.originalCipher = {} as Cipher;
+
+      tick();
+
+      expect(collect).not.toHaveBeenCalled();
+    }));
+
+    it("logs viewed event when mode is edit", fakeAsync(() => {
+      buildConfigResponse.originalCipher = {
+        edit: true,
+        id: "222-333-444-5555",
+        organizationId: "444-555-666",
+      } as Cipher;
+      queryParams$.next({ cipherId: "222-333-444-5555" });
+
+      tick();
+
+      expect(collect).toHaveBeenCalledWith(
+        EventType.Cipher_ClientViewed,
+        "222-333-444-5555",
+        false,
+        "444-555-666",
+      );
+    }));
+
+    it("logs viewed event whe mode is partial-edit", fakeAsync(() => {
+      buildConfigResponse.originalCipher = { edit: false } as Cipher;
+      queryParams$.next({ cipherId: "222-333-444-5555", orgId: "444-555-666" });
+
+      tick();
+
+      expect(collect).toHaveBeenCalledWith(
+        EventType.Cipher_ClientViewed,
+        "222-333-444-5555",
+        false,
+        "444-555-666",
+      );
+    }));
   });
 
   describe("addEditCipherInfo initialization", () => {
@@ -162,7 +228,7 @@ describe("AddEditV2Component", () => {
 
       tick();
 
-      expect(component.config.initialValues.username).toBe("identity-username");
+      expect(component.config.initialValues!.username).toBe("identity-username");
     }));
 
     it("overrides query params with `addEditCipherInfo` values", fakeAsync(() => {
@@ -175,7 +241,7 @@ describe("AddEditV2Component", () => {
 
       tick();
 
-      expect(component.config.initialValues.name).toBe("AddEditCipherName");
+      expect(component.config.initialValues!.name).toBe("AddEditCipherName");
     }));
 
     it("clears `addEditCipherInfo` after initialization", fakeAsync(() => {
@@ -268,6 +334,32 @@ describe("AddEditV2Component", () => {
       await component.handleBackButton();
 
       expect(back).toHaveBeenCalled();
+    });
+  });
+
+  describe("delete", () => {
+    it("dialogService openSimpleDialog called when deleteBtn is hit", async () => {
+      const dialogSpy = jest
+        .spyOn(component["dialogService"], "openSimpleDialog")
+        .mockResolvedValue(true);
+
+      await component.delete();
+      expect(dialogSpy).toHaveBeenCalled();
+    });
+
+    it("should call deleteCipher when user confirms deletion", async () => {
+      const deleteCipherSpy = jest.spyOn(component as any, "deleteCipher");
+      jest.spyOn(component["dialogService"], "openSimpleDialog").mockResolvedValue(true);
+
+      await component.delete();
+      expect(deleteCipherSpy).toHaveBeenCalled();
+    });
+
+    it("navigates to vault tab after deletion", async () => {
+      jest.spyOn(component["dialogService"], "openSimpleDialog").mockResolvedValue(true);
+      await component.delete();
+
+      expect(navigate).toHaveBeenCalledWith(["/tabs/vault"]);
     });
   });
 });
