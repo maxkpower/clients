@@ -3,7 +3,6 @@ import { firstValueFrom } from "rxjs";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
 import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
 import { DialogService, ToastService } from "@bitwarden/components";
@@ -19,16 +18,10 @@ import { SshImportPromptService } from "./ssh-import-prompt.service";
 export class DefaultSshImportPromptService implements SshImportPromptService {
   constructor(
     private dialogService: DialogService,
-    private sdkService: SdkService,
     private toastService: ToastService,
     private platformUtilsService: PlatformUtilsService,
     private i18nService: I18nService,
   ) {}
-
-  private async importUsingSdk(key: string, password: string): Promise<SshKey> {
-    await firstValueFrom(this.sdkService.client$);
-    return import_ssh_key(key, password);
-  }
 
   async importSshKeyFromClipboard(): Promise<SshKeyData | null> {
     const key = await this.platformUtilsService.readFromClipboard();
@@ -38,7 +31,7 @@ export class DefaultSshImportPromptService implements SshImportPromptService {
     let parsedKey: SshKey | null = null;
 
     try {
-      parsedKey = await this.importUsingSdk(key, "");
+      parsedKey = import_ssh_key(key, "");
     } catch (e) {
       const error = e as SshKeyImportError;
       if (error.variant === "PasswordRequired" || error.variant === "WrongPassword") {
@@ -61,7 +54,7 @@ export class DefaultSshImportPromptService implements SshImportPromptService {
         }
 
         try {
-          parsedKey = await this.importUsingSdk(key, password);
+          parsedKey = import_ssh_key(key, password);
           break;
         } catch (e) {
           const error = e as SshKeyImportError;

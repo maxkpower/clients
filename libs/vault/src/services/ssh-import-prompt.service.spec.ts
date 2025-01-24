@@ -3,7 +3,6 @@ import { BehaviorSubject } from "rxjs";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { SshKeyApi } from "@bitwarden/common/vault/models/api/ssh-key.api";
 import { SshKeyData } from "@bitwarden/common/vault/models/data/ssh-key.data";
 import { DialogService, ToastService } from "@bitwarden/components";
@@ -31,23 +30,18 @@ describe("SshImportPromptService", () => {
   let sshImportPromptService: DefaultSshImportPromptService;
 
   let dialogService: MockProxy<DialogService>;
-  let sdkService: MockProxy<SdkService>;
   let toastService: MockProxy<ToastService>;
   let platformUtilsService: MockProxy<PlatformUtilsService>;
   let i18nService: MockProxy<I18nService>;
 
   beforeEach(() => {
     dialogService = mock<DialogService>();
-    sdkService = mock<SdkService>();
     toastService = mock<ToastService>();
     platformUtilsService = mock<PlatformUtilsService>();
     i18nService = mock<I18nService>();
 
-    sdkService.client$ = new BehaviorSubject(null);
-
     sshImportPromptService = new DefaultSshImportPromptService(
       dialogService,
-      sdkService,
       toastService,
       platformUtilsService,
       i18nService,
