@@ -30,7 +30,6 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
-    accountService: AccountService,
     syncService: SyncService,
   ) {
     super(
@@ -40,7 +39,6 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
       organizationService,
       accountService,
       i18nService,
-      accountService,
       syncService,
     );
   }

@@ -29,7 +29,6 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
-    accountService: AccountService,
     syncService: SyncService,
   ) {
     super(
@@ -39,7 +38,6 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
       organizationService,
       accountService,
       i18nService,
-      accountService,
       syncService,
     );
   }

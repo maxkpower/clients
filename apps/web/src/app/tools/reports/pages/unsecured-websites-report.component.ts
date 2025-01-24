@@ -27,7 +27,6 @@ export class UnsecuredWebsitesReportComponent extends CipherReportComponent impl
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
-    accountService: AccountService,
     syncService: SyncService,
     private collectionService: CollectionService,
   ) {
@@ -38,7 +37,6 @@ export class UnsecuredWebsitesReportComponent extends CipherReportComponent impl
       organizationService,
       accountService,
       i18nService,
-      accountService,
       syncService,
     );
   }

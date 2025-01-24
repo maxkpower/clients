@@ -37,7 +37,6 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
-    accountService: AccountService,
     syncService: SyncService,
   ) {
     super(
@@ -47,7 +46,6 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
       organizationService,
       accountService,
       i18nService,
-      accountService,
       syncService,
     );
   }
