@@ -30,11 +30,6 @@ export abstract class TwoFactorAuthComponentService {
   abstract removePopupWidthExtension?(): void;
 
   /**
-   * Optionally closes the window if the client requires it
-   */
-  abstract closeWindow?(): void;
-
-  /**
    * We used to use the user's master key to encrypt their data. We deprecated that approach
    * and now use a user key. This method should be called if we detect that the user
    * is still using the old master key encryption scheme (server sends down a flag to

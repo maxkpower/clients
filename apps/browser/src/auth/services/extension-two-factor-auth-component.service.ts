@@ -38,12 +38,7 @@ export class ExtensionTwoFactorAuthComponentService
     document.body.classList.remove("linux-webauthn");
   }
 
-  closeWindow(): void {
-    this.window.close();
-  }
-
   async handle2faSuccess(): Promise<void> {
-    // TODO: confirm that moving this from SSO flow only to general flow doesn't introduce any issues
     // Force sidebars (FF && Opera) to reload while exempting current window
     // because we are just going to close the current window if it is in a popout
     // or navigate forward if it is in the popup
