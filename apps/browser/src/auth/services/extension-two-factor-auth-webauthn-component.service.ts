@@ -4,6 +4,7 @@ import {
 } from "@bitwarden/auth/angular";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
+// TODO: add tests
 export class ExtensionTwoFactorAuthWebAuthnComponentService
   extends DefaultTwoFactorAuthWebAuthnComponentService
   implements TwoFactorAuthWebAuthnComponentService

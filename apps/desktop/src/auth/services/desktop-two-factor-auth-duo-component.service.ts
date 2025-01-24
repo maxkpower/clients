@@ -11,6 +11,7 @@ import { CommandDefinition, MessageListener } from "@bitwarden/common/platform/m
 // We should explore consolidating the messaging approach across clients - i.e., we
 // should use the same command definition across all clients. We use duoResult on extension for no real
 // benefit.
+// TODO: add tests
 export const DUO_2FA_RESULT_COMMAND = new CommandDefinition<{ code: string; state: string }>(
   "duoCallback",
 );
