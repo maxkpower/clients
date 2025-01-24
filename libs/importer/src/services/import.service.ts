@@ -222,7 +222,6 @@ export class ImportService implements ImportServiceAbstraction {
           this.cipherService,
           this.pinService,
           this.accountService,
-          this.sdkService,
           promptForPassword_callback,
         );
       case "lastpasscsv":

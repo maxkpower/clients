@@ -4,7 +4,6 @@ import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -32,18 +31,9 @@ export class BitwardenPasswordProtectedImporter extends BitwardenJsonImporter im
     cipherService: CipherService,
     pinService: PinServiceAbstraction,
     accountService: AccountService,
-    sdkService: SdkService,
     private promptForPassword_callback: () => Promise<string>,
   ) {
-    super(
-      keyService,
-      encryptService,
-      i18nService,
-      cipherService,
-      pinService,
-      accountService,
-      sdkService,
-    );
+    super(keyService, encryptService, i18nService, cipherService, pinService, accountService);
   }
 
   async parse(data: string): Promise<ImportResult> {
