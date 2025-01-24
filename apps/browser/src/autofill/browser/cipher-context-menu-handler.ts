@@ -1,8 +1,9 @@
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -39,14 +40,7 @@ export class CipherContextMenuHandler {
       return;
     }
 
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
-
-    if (!activeUserId) {
-      // Show error be thrown here or is it okay to just return?
-      return;
-    }
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     const ciphers = await this.cipherService.getAllDecryptedForUrl(url, activeUserId, [
       CipherType.Card,

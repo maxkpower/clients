@@ -66,12 +66,7 @@ export class ListCommand {
   private async listCiphers(options: Options) {
     let ciphers: CipherView[];
 
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
-    if (activeUserId == null) {
-      return Response.error("No active user id found.");
-    }
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     options.trash = options.trash || false;
     if (options.url != null && options.url.trim() !== "") {
@@ -146,12 +141,7 @@ export class ListCommand {
   }
 
   private async listFolders(options: Options) {
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
-    if (activeUserId == null) {
-      return Response.error("No active user id found.");
-    }
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     let folders = await this.folderService.getAllDecryptedFromState(activeUserId);
 

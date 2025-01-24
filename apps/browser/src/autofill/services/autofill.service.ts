@@ -1,13 +1,14 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { filter, firstValueFrom, merge, Observable, ReplaySubject, scan, startWith } from "rxjs";
-import { map, pairwise } from "rxjs/operators";
+import { pairwise } from "rxjs/operators";
 
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AccountInfo, AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   AutofillOverlayVisibility,
   CardExpiryDateDelimiters,
@@ -66,8 +67,6 @@ export default class AutofillService implements AutofillServiceInterface {
   private openPasswordRepromptPopoutDebounce: number | NodeJS.Timeout;
   private currentlyOpeningPasswordRepromptPopout = false;
   private autofillScriptPortsSet = new Set<chrome.runtime.Port>();
-
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   static searchFieldNamesSet = new Set(AutoFillConstants.SearchFieldNames);
 
@@ -429,7 +428,7 @@ export default class AutofillService implements AutofillServiceInterface {
       options.cipher.login.totp = null;
     }
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     let didAutofill = false;
     await Promise.all(
@@ -533,7 +532,7 @@ export default class AutofillService implements AutofillServiceInterface {
   ): Promise<string | null> {
     let cipher: CipherView;
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     if (fromCommand) {
       cipher = await this.cipherService.getNextCipherForUrl(tab.url, activeUserId);
@@ -638,7 +637,7 @@ export default class AutofillService implements AutofillServiceInterface {
     let cipher: CipherView;
     let cacheKey = "";
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     if (cipherType === CipherType.Card) {
       cacheKey = "cardCiphers";

@@ -179,7 +179,6 @@ export class AssignCollectionsComponent implements OnInit, OnDestroy, AfterViewI
   private get selectedOrgId(): OrganizationId {
     return this.formGroup.getRawValue().selectedOrg || this.params.organizationId;
   }
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -249,7 +248,7 @@ export class AssignCollectionsComponent implements OnInit, OnDestroy, AfterViewI
       .filter((i) => i.organizationId)
       .map((i) => i.id as CipherId);
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     // Move personal items to the organization
     if (this.personalItemsCount > 0) {

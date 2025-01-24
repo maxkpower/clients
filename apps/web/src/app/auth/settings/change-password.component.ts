@@ -94,9 +94,8 @@ export class ChangePasswordComponent
 
   async rotateUserKeyClicked() {
     if (this.rotateUserKey) {
-      const activeUserId = await firstValueFrom(
-        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-      );
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+
       const ciphers = await this.cipherService.getAllDecrypted(activeUserId);
       let hasOldAttachments = false;
       if (ciphers != null) {

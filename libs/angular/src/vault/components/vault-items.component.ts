@@ -1,11 +1,12 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { BehaviorSubject, firstValueFrom, from, Subject, map, switchMap, takeUntil } from "rxjs";
+import { BehaviorSubject, firstValueFrom, from, Subject, switchMap, takeUntil } from "rxjs";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
@@ -119,9 +120,7 @@ export class VaultItemsComponent implements OnInit, OnDestroy {
   protected deletedFilter: (cipher: CipherView) => boolean = (c) => c.isDeleted === this.deleted;
 
   protected async doSearch(indexedCiphers?: CipherView[]) {
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     indexedCiphers = indexedCiphers ?? (await this.cipherService.getAllDecrypted(activeUserId));
 
     const failedCiphers = await firstValueFrom(

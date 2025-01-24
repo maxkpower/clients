@@ -5,13 +5,14 @@ import { Component } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { firstValueFrom, map, Observable, switchMap } from "rxjs";
+import { firstValueFrom, Observable, switchMap } from "rxjs";
 
 import { CollectionView } from "@bitwarden/admin-console/common";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   AUTOFILL_ID,
   COPY_PASSWORD_ID,
@@ -100,8 +101,6 @@ export class ViewV2Component {
   loadAction: LoadAction;
   senderTabId?: number;
 
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -166,7 +165,7 @@ export class ViewV2Component {
   }
 
   async getCipherData(id: string) {
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipher = await this.cipherService.get(id, activeUserId);
     return await cipher.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
@@ -197,7 +196,7 @@ export class ViewV2Component {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.deleteCipher(activeUserId);
     } catch (e) {
       this.logService.error(e);
@@ -217,7 +216,7 @@ export class ViewV2Component {
 
   restore = async (): Promise<void> => {
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.cipherService.restoreWithServer(this.cipher.id, activeUserId);
     } catch (e) {
       this.logService.error(e);

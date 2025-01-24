@@ -1,10 +1,11 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
@@ -38,8 +39,6 @@ export class AttachmentsComponent implements OnInit {
   reuploadPromises: { [id: string]: Promise<any> } = {};
   emergencyAccessId?: string = null;
   protected componentName = "";
-
-  protected activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   constructor(
     protected cipherService: CipherService,
@@ -85,7 +84,7 @@ export class AttachmentsComponent implements OnInit {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       this.formPromise = this.saveCipherAttachment(files[0], activeUserId);
       this.cipherDomain = await this.formPromise;
       this.cipher = await this.cipherDomain.decrypt(
@@ -124,7 +123,7 @@ export class AttachmentsComponent implements OnInit {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       this.deletePromises[attachment.id] = this.deleteCipherAttachment(attachment.id, activeUserId);
       await this.deletePromises[attachment.id];
       this.toastService.showToast({
@@ -219,7 +218,7 @@ export class AttachmentsComponent implements OnInit {
   }
 
   protected async init() {
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     this.cipherDomain = await this.loadCipher(activeUserId);
     this.cipher = await this.cipherDomain.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(this.cipherDomain, activeUserId),
@@ -275,7 +274,7 @@ export class AttachmentsComponent implements OnInit {
               ? attachment.key
               : await this.keyService.getOrgKey(this.cipher.organizationId);
           const decBuf = await this.encryptService.decryptToBytes(encBuf, key);
-          const activeUserId = await firstValueFrom(this.activeUserId$);
+          const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
           this.cipherDomain = await this.cipherService.saveAttachmentRawWithServer(
             this.cipherDomain,
             attachment.fileName,

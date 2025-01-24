@@ -12,6 +12,7 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions";
 import { EventType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -342,10 +343,7 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
       this.formConfig.mode = "edit";
       this.formConfig.initialValues = null;
     }
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
-
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     let cipher = await this.cipherService.get(cipherView.id, activeUserId);
 
     // When the form config is used within the Admin Console, retrieve the cipher from the admin endpoint (if not found in local state)
@@ -461,9 +459,7 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
     if (config.originalCipher == null) {
       return;
     }
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     return await config.originalCipher.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(config.originalCipher, activeUserId),
     );

@@ -12,6 +12,7 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { OrganizationUserStatusType, PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { normalizeExpiryYearFormat } from "@bitwarden/common/autofill/utils";
 import { EventType } from "@bitwarden/common/enums";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -100,8 +101,6 @@ export class AddEditComponent implements OnInit, OnDestroy {
   protected writeableCollections: CollectionView[];
   private personalOwnershipPolicyAppliesToActiveUser: boolean;
   private previousCipherId: string;
-
-  protected activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   get fido2CredentialCreationDateValue(): string {
     const dateCreated = this.i18nService.t("dateCreated");
@@ -263,7 +262,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       this.title = this.i18nService.t("addItem");
     }
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     const loadedAddEditCipherInfo = await this.loadAddEditCipherInfo(activeUserId);
 
@@ -421,7 +420,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       this.cipher.id = null;
     }
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipher = await this.encryptCipher(activeUserId);
     try {
       this.formPromise = this.saveCipher(cipher);
@@ -515,7 +514,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       this.deletePromise = this.deleteCipher(activeUserId);
       await this.deletePromise;
       this.toastService.showToast({
@@ -542,7 +541,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       this.restorePromise = this.restoreCipher(activeUserId);
       await this.restorePromise;
       this.toastService.showToast({

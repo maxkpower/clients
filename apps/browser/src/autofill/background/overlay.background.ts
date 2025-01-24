@@ -16,6 +16,7 @@ import { parse } from "tldts";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   AutofillOverlayVisibility,
   SHOW_AUTOFILL_BUTTON,
@@ -411,9 +412,7 @@ export class OverlayBackground implements OverlayBackgroundInterface {
       return this.getAllCipherTypeViews(currentTab);
     }
 
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipherViews = (
       await this.cipherService.getAllDecryptedForUrl(currentTab.url || "", activeUserId)
     ).sort((a, b) => this.cipherService.sortCiphersByLastUsedThenName(a, b));
@@ -434,9 +433,7 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     }
 
     this.cardAndIdentityCiphers.clear();
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipherViews = (
       await this.cipherService.getAllDecryptedForUrl(currentTab.url || "", activeUserId, [
         CipherType.Card,
@@ -2407,9 +2404,7 @@ export class OverlayBackground implements OverlayBackgroundInterface {
 
     try {
       this.closeInlineMenu(sender);
-      const activeUserId = await firstValueFrom(
-        this.accountService.activeAccount$.pipe(map((a) => a.id)),
-      );
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.cipherService.setAddEditCipherInfo(
         {
           cipher: cipherView,

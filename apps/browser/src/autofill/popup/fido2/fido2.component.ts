@@ -20,6 +20,7 @@ import {
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { DomainSettingsService } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -187,7 +188,7 @@ export class Fido2Component implements OnInit, OnDestroy {
             );
 
             const activeUserId = await firstValueFrom(
-              this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+              getUserId(this.accountService.activeAccount$),
             );
             this.ciphers = (await this.cipherService.getAllDecrypted(activeUserId)).filter(
               (cipher) => cipher.type === CipherType.Login && !cipher.isDeleted,

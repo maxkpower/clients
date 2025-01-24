@@ -13,6 +13,7 @@ import {
 } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { UriMatchStrategy } from "@bitwarden/common/models/domain/domain-service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
@@ -170,14 +171,7 @@ export class DesktopAutofillService implements OnDestroy {
       // TODO: For some reason the credentialId is passed as an empty array in the request, so we need to
       // get it from the cipher. For that we use the recordIdentifier, which is the cipherId.
       if (request.recordIdentifier && request.credentialId.length === 0) {
-        const activeUserId = await firstValueFrom(
-          this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-        );
-        if (!activeUserId) {
-          this.logService.error("listenPasskeyAssertion error", "Active user not found");
-          callback(new Error("Active user not found"), null);
-          return;
-        }
+        const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
         const cipher = await this.cipherService.get(request.recordIdentifier, activeUserId);
         if (!cipher) {

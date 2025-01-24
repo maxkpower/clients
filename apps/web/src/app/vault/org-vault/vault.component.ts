@@ -50,6 +50,7 @@ import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-conso
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { OrganizationBillingServiceAbstraction } from "@bitwarden/common/billing/abstractions";
 import { BillingApiServiceAbstraction } from "@bitwarden/common/billing/abstractions/billing-api.service.abstraction";
 import { EventType } from "@bitwarden/common/enums";
@@ -238,8 +239,6 @@ export class VaultComponent implements OnInit, OnDestroy {
       ),
     ),
   );
-
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   constructor(
     private route: ActivatedRoute,
@@ -1072,7 +1071,7 @@ export class VaultComponent implements OnInit, OnDestroy {
 
     // Allow restore of an Unassigned Item
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       const asAdmin = this.organization?.canEditAnyCollection || c.isUnassigned;
       await this.cipherService.restoreWithServer(c.id, activeUserId, asAdmin);
       this.toastService.showToast({
@@ -1165,7 +1164,7 @@ export class VaultComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.deleteCipherWithServer(c.id, activeUserId, permanent, c.isUnassigned);
       this.toastService.showToast({
         variant: "success",

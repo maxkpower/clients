@@ -52,8 +52,6 @@ import { FolderResponse } from "../vault/models/folder.response";
 import { DownloadCommand } from "./download.command";
 
 export class GetCommand extends DownloadCommand {
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
-
   constructor(
     private cipherService: CipherService,
     private folderService: FolderService,
@@ -114,7 +112,7 @@ export class GetCommand extends DownloadCommand {
 
   private async getCipherView(id: string): Promise<CipherView | CipherView[]> {
     let decCipher: CipherView = null;
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     if (Utils.isGuid(id)) {
       const cipher = await this.cipherService.get(id, activeUserId);
       if (cipher != null) {
@@ -267,7 +265,7 @@ export class GetCommand extends DownloadCommand {
     );
 
     if (!canAccessPremium) {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       const originalCipher = await this.cipherService.get(cipher.id, activeUserId);
       if (
         originalCipher == null ||
@@ -354,7 +352,7 @@ export class GetCommand extends DownloadCommand {
       this.accountProfileService.hasPremiumFromAnySource$(account.id),
     );
     if (!canAccessPremium) {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       const originalCipher = await this.cipherService.get(cipher.id, activeUserId);
       if (originalCipher == null || originalCipher.organizationId == null) {
         return Response.error("Premium status is required to use this feature.");
@@ -387,7 +385,7 @@ export class GetCommand extends DownloadCommand {
 
   private async getFolder(id: string) {
     let decFolder: FolderView = null;
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     if (Utils.isGuid(id)) {
       const folder = await this.folderService.getFromState(id, activeUserId);
       if (folder != null) {
@@ -564,7 +562,7 @@ export class GetCommand extends DownloadCommand {
   private async getFingerprint(id: string) {
     let fingerprint: string[] = null;
     if (id === "me") {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       const publicKey = await firstValueFrom(this.keyService.userPublicKey$(activeUserId));
       fingerprint = await this.keyService.getFingerprint(activeUserId, publicKey);
     } else if (Utils.isGuid(id)) {

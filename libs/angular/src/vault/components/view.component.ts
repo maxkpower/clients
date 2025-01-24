@@ -11,13 +11,14 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { firstValueFrom, map, Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { EventType } from "@bitwarden/common/enums";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
@@ -79,8 +80,6 @@ export class ViewComponent implements OnDestroy, OnInit {
   private totpInterval: any;
   private previousCipherId: string;
   private passwordReprompted = false;
-
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   get fido2CredentialCreationDateValue(): string {
     const dateCreated = this.i18nService.t("dateCreated");
@@ -144,7 +143,7 @@ export class ViewComponent implements OnDestroy, OnInit {
   async load() {
     this.cleanUp();
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipher = await this.cipherService.get(this.cipherId, activeUserId);
     this.cipher = await cipher.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
@@ -246,7 +245,7 @@ export class ViewComponent implements OnDestroy, OnInit {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.deleteCipher(activeUserId);
       this.toastService.showToast({
         variant: "success",
@@ -269,7 +268,7 @@ export class ViewComponent implements OnDestroy, OnInit {
     }
 
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.restoreCipher(activeUserId);
       this.toastService.showToast({
         variant: "success",
@@ -378,7 +377,7 @@ export class ViewComponent implements OnDestroy, OnInit {
     }
 
     if (cipherId) {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       await this.cipherService.updateLastLaunchedDate(cipherId, activeUserId);
     }
 

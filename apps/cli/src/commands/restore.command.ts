@@ -1,6 +1,7 @@
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 
 import { Response } from "../models/response";
@@ -25,12 +26,7 @@ export class RestoreCommand {
   }
 
   private async restoreCipher(id: string) {
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
-    if (activeUserId == null) {
-      return Response.error("No active user id found.");
-    }
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     const cipher = await this.cipherService.get(id, activeUserId);
     if (cipher == null) {

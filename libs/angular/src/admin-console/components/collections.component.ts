@@ -7,6 +7,7 @@ import { CollectionService, CollectionView } from "@bitwarden/admin-console/comm
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -30,8 +31,6 @@ export class CollectionsComponent implements OnInit {
 
   protected cipherDomain: Cipher;
 
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
-
   constructor(
     protected collectionService: CollectionService,
     protected platformUtilsService: PlatformUtilsService,
@@ -48,7 +47,7 @@ export class CollectionsComponent implements OnInit {
   }
 
   async load() {
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     this.cipherDomain = await this.loadCipher(activeUserId);
     this.collectionIds = this.loadCipherCollections();
     this.cipher = await this.cipherDomain.decrypt(
@@ -96,7 +95,7 @@ export class CollectionsComponent implements OnInit {
     }
     this.cipherDomain.collectionIds = selectedCollectionIds;
     try {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       this.formPromise = this.saveCollections(activeUserId);
       await this.formPromise;
       this.onSavedCollections.emit();

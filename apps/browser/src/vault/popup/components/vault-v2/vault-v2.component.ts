@@ -8,7 +8,8 @@ import { filter, map, take } from "rxjs/operators";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { CipherId, CollectionId, OrganizationId, UserId } from "@bitwarden/common/types/guid";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
+import { CipherId, CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { ButtonModule, DialogService, Icons, NoItemsModule } from "@bitwarden/components";
@@ -122,12 +123,7 @@ export class VaultV2Component implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(
-        map((a) => a?.id),
-        filter((userId): userId is UserId => userId != null),
-      ),
-    );
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     this.cipherService
       .failedToDecryptCiphers$(activeUserId)

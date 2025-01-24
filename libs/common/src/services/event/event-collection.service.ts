@@ -6,7 +6,6 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { getUserId } from "@bitwarden/common/auth/services/account.service";
-
 import { UserId } from "@bitwarden/common/types/guid";
 
 import { EventCollectionService as EventCollectionServiceAbstraction } from "../../abstractions/event/event-collection.service";

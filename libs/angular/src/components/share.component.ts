@@ -8,6 +8,7 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { OrganizationUserStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -28,8 +29,6 @@ export class ShareComponent implements OnInit, OnDestroy {
   organizations$: Observable<Organization[]>;
 
   protected writeableCollections: Checkable<CollectionView>[] = [];
-
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   private _destroy = new Subject<void>();
 
@@ -75,7 +74,7 @@ export class ShareComponent implements OnInit, OnDestroy {
       }
     });
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipherDomain = await this.cipherService.get(this.cipherId, activeUserId);
     this.cipher = await cipherDomain.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(cipherDomain, activeUserId),
@@ -104,7 +103,7 @@ export class ShareComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const cipherDomain = await this.cipherService.get(this.cipherId, activeUserId);
     const cipherView = await cipherDomain.decrypt(
       await this.cipherService.getKeyForCipherKeyDecryption(cipherDomain, activeUserId),

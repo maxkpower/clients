@@ -1,12 +1,13 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { firstValueFrom, map } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   ExtensionCommand,
   ExtensionCommandType,
@@ -82,8 +83,6 @@ export default class NotificationBackground {
     bgGetActiveUserServerConfig: () => this.getActiveUserServerConfig(),
     getWebVaultUrlForNotification: () => this.getWebVaultUrl(),
   };
-
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   constructor(
     private autofillService: AutofillService,
@@ -257,7 +256,7 @@ export default class NotificationBackground {
       return;
     }
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const ciphers = await this.cipherService.getAllDecryptedForUrl(loginInfo.url, activeUserId);
     const usernameMatches = ciphers.filter(
       (c) => c.login.username != null && c.login.username.toLowerCase() === normalizedUsername,
@@ -336,7 +335,7 @@ export default class NotificationBackground {
     }
 
     let id: string = null;
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const ciphers = await this.cipherService.getAllDecryptedForUrl(changeData.url, activeUserId);
     if (changeData.currentPassword != null) {
       const passwordMatches = ciphers.filter(
@@ -490,7 +489,7 @@ export default class NotificationBackground {
 
       this.notificationQueue.splice(i, 1);
 
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
       if (queueMessage.type === NotificationQueueMessageType.ChangePassword) {
         const cipherView = await this.getDecryptedCipherById(queueMessage.cipherId, activeUserId);
@@ -555,7 +554,7 @@ export default class NotificationBackground {
   ) {
     cipherView.login.password = newPassword;
 
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     if (edit) {
       await this.editItem(cipherView, activeUserId, tab);
@@ -600,7 +599,7 @@ export default class NotificationBackground {
     if (Utils.isNullOrWhitespace(folderId) || folderId === "null") {
       return false;
     }
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     const folders = await firstValueFrom(this.folderService.folderViews$(activeUserId));
     return folders.some((x) => x.id === folderId);
   }
@@ -608,7 +607,7 @@ export default class NotificationBackground {
   private async getDecryptedCipherById(cipherId: string, userId: UserId) {
     const cipher = await this.cipherService.get(cipherId, userId);
     if (cipher != null && cipher.type === CipherType.Login) {
-      const activeUserId = await firstValueFrom(this.activeUserId$);
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
       return await cipher.decrypt(
         await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
@@ -648,7 +647,7 @@ export default class NotificationBackground {
    * Returns the first value found from the folder service's folderViews$ observable.
    */
   private async getFolderData() {
-    const activeUserId = await firstValueFrom(this.activeUserId$);
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     return await firstValueFrom(this.folderService.folderViews$(activeUserId));
   }
 
