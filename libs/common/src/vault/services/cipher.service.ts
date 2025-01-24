@@ -785,7 +785,7 @@ export class CipherService implements CipherServiceAbstraction {
     organizationId: string,
     collectionIds: string[],
     userId: UserId,
-  ): Promise<any> {
+  ): Promise<Cipher> {
     const attachmentPromises: Promise<any>[] = [];
     if (cipher.attachments != null) {
       cipher.attachments.forEach((attachment) => {
@@ -805,6 +805,7 @@ export class CipherService implements CipherServiceAbstraction {
     const response = await this.apiService.putShareCipher(cipher.id, request);
     const data = new CipherData(response, collectionIds);
     await this.upsert(data);
+    return new Cipher(data, cipher.localData);
   }
 
   async shareManyWithServer(

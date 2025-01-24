@@ -110,7 +110,7 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
     organizationId: string,
     collectionIds: string[],
     userId: UserId,
-  ): Promise<any>;
+  ): Promise<Cipher>;
   abstract shareManyWithServer(
     ciphers: CipherView[],
     organizationId: string,
