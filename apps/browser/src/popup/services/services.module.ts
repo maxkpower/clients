@@ -117,7 +117,7 @@ import {
   KeyService,
 } from "@bitwarden/key-management";
 import { LockComponentService } from "@bitwarden/key-management/angular";
-import { DefaultTaskService, PasswordRepromptService, TaskService } from "@bitwarden/vault";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { ForegroundLockService } from "../../auth/popup/accounts/foreground-lock.service";
 import { ExtensionAnonLayoutWrapperDataService } from "../../auth/popup/extension-anon-layout-wrapper/extension-anon-layout-wrapper-data.service";
@@ -602,11 +602,6 @@ const safeProviders: SafeProvider[] = [
     provide: LoginDecryptionOptionsService,
     useClass: ExtensionLoginDecryptionOptionsService,
     deps: [MessagingServiceAbstraction, Router],
-  }),
-  safeProvider({
-    provide: TaskService,
-    useClass: DefaultTaskService,
-    deps: [StateProvider, ApiService, OrganizationService, ConfigService],
   }),
 ];
 

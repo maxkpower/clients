@@ -4,44 +4,44 @@ import { ErrorHandler, LOCALE_ID, NgModule } from "@angular/core";
 import { Subject } from "rxjs";
 
 import {
-  OrganizationUserApiService,
-  DefaultOrganizationUserApiService,
   CollectionService,
   DefaultCollectionService,
+  DefaultOrganizationUserApiService,
+  OrganizationUserApiService,
 } from "@bitwarden/admin-console/common";
 import {
-  SetPasswordJitService,
-  DefaultSetPasswordJitService,
-  RegistrationFinishService as RegistrationFinishServiceAbstraction,
-  DefaultRegistrationFinishService,
   AnonLayoutWrapperDataService,
   DefaultAnonLayoutWrapperDataService,
-  LoginComponentService,
-  DefaultLoginComponentService,
-  LoginDecryptionOptionsService,
-  DefaultLoginDecryptionOptionsService,
   DefaultLoginApprovalComponentService,
+  DefaultLoginComponentService,
+  DefaultLoginDecryptionOptionsService,
+  DefaultRegistrationFinishService,
+  DefaultSetPasswordJitService,
+  LoginComponentService,
+  LoginDecryptionOptionsService,
+  RegistrationFinishService as RegistrationFinishServiceAbstraction,
+  SetPasswordJitService,
 } from "@bitwarden/auth/angular";
 import {
-  AuthRequestServiceAbstraction,
-  AuthRequestService,
-  PinServiceAbstraction,
-  PinService,
-  LoginStrategyServiceAbstraction,
-  LoginStrategyService,
-  LoginEmailServiceAbstraction,
-  LoginEmailService,
-  InternalUserDecryptionOptionsServiceAbstraction,
-  UserDecryptionOptionsService,
-  UserDecryptionOptionsServiceAbstraction,
-  LogoutReason,
   AuthRequestApiService,
+  AuthRequestService,
+  AuthRequestServiceAbstraction,
   DefaultAuthRequestApiService,
   DefaultLoginSuccessHandlerService,
+  InternalUserDecryptionOptionsServiceAbstraction,
+  LoginApprovalComponentServiceAbstraction,
+  LoginEmailService,
+  LoginEmailServiceAbstraction,
+  LoginStrategyService,
+  LoginStrategyServiceAbstraction,
   LoginSuccessHandlerService,
+  LogoutReason,
   PasswordLoginStrategy,
   PasswordLoginStrategyData,
-  LoginApprovalComponentServiceAbstraction,
+  PinService,
+  PinServiceAbstraction,
+  UserDecryptionOptionsService,
+  UserDecryptionOptionsServiceAbstraction,
 } from "@bitwarden/auth/common";
 import { ApiService as ApiServiceAbstraction } from "@bitwarden/common/abstractions/api.service";
 import { AuditService as AuditServiceAbstraction } from "@bitwarden/common/abstractions/audit.service";
@@ -123,16 +123,16 @@ import { WebAuthnLoginApiService } from "@bitwarden/common/auth/services/webauth
 import { WebAuthnLoginPrfKeyService } from "@bitwarden/common/auth/services/webauthn-login/webauthn-login-prf-key.service";
 import { WebAuthnLoginService } from "@bitwarden/common/auth/services/webauthn-login/webauthn-login.service";
 import {
-  AutofillSettingsServiceAbstraction,
   AutofillSettingsService,
+  AutofillSettingsServiceAbstraction,
 } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import {
-  BadgeSettingsServiceAbstraction,
   BadgeSettingsService,
+  BadgeSettingsServiceAbstraction,
 } from "@bitwarden/common/autofill/services/badge-settings.service";
 import {
-  DomainSettingsService,
   DefaultDomainSettingsService,
+  DomainSettingsService,
 } from "@bitwarden/common/autofill/services/domain-settings.service";
 import {
   BillingApiServiceAbstraction,
@@ -178,8 +178,8 @@ import { devFlagEnabled } from "@bitwarden/common/platform/misc/flags";
 import { Account } from "@bitwarden/common/platform/models/domain/account";
 import { GlobalState } from "@bitwarden/common/platform/models/domain/global-state";
 import {
-  TaskSchedulerService,
   DefaultTaskSchedulerService,
+  TaskSchedulerService,
 } from "@bitwarden/common/platform/scheduling";
 import { AppIdService } from "@bitwarden/common/platform/services/app-id.service";
 import { ConfigApiService } from "@bitwarden/common/platform/services/config/config-api.service";
@@ -203,10 +203,10 @@ import { ValidationService } from "@bitwarden/common/platform/services/validatio
 import { WebCryptoFunctionService } from "@bitwarden/common/platform/services/web-crypto-function.service";
 import {
   ActiveUserStateProvider,
+  DerivedStateProvider,
   GlobalStateProvider,
   SingleUserStateProvider,
   StateProvider,
-  DerivedStateProvider,
 } from "@bitwarden/common/platform/state";
 /* eslint-disable import/no-restricted-paths -- We need the implementations to inject, but generally these should not be accessed */
 import { DefaultActiveUserStateProvider } from "@bitwarden/common/platform/state/implementations/default-active-user-state.provider";
@@ -282,27 +282,27 @@ import {
   ImportServiceAbstraction,
 } from "@bitwarden/importer/core";
 import {
-  KeyService,
-  DefaultKeyService,
+  BiometricsService,
   BiometricStateService,
   DefaultBiometricStateService,
-  BiometricsService,
   DefaultKdfConfigService,
-  KdfConfigService,
-  UserAsymmetricKeysRegenerationService,
-  DefaultUserAsymmetricKeysRegenerationService,
-  UserAsymmetricKeysRegenerationApiService,
+  DefaultKeyService,
   DefaultUserAsymmetricKeysRegenerationApiService,
+  DefaultUserAsymmetricKeysRegenerationService,
+  KdfConfigService,
+  KeyService,
+  UserAsymmetricKeysRegenerationApiService,
+  UserAsymmetricKeysRegenerationService,
 } from "@bitwarden/key-management";
 import { SafeInjectionToken } from "@bitwarden/ui-common";
-import { PasswordRepromptService } from "@bitwarden/vault";
+import { DefaultTaskService, PasswordRepromptService, TaskService } from "@bitwarden/vault";
 import {
-  VaultExportService,
-  VaultExportServiceAbstraction,
-  OrganizationVaultExportService,
-  OrganizationVaultExportServiceAbstraction,
   IndividualVaultExportService,
   IndividualVaultExportServiceAbstraction,
+  OrganizationVaultExportService,
+  OrganizationVaultExportServiceAbstraction,
+  VaultExportService,
+  VaultExportServiceAbstraction,
 } from "@bitwarden/vault-export-core";
 
 // FIXME: remove `src` and fix import
@@ -318,24 +318,24 @@ import { AbstractThemingService } from "../platform/services/theming/theming.ser
 import { safeProvider, SafeProvider } from "../platform/utils/safe-provider";
 
 import {
+  CLIENT_TYPE,
+  DEFAULT_VAULT_TIMEOUT,
+  ENV_ADDITIONAL_REGIONS,
+  INTRAPROCESS_MESSAGING_SUBJECT,
   LOCALES_DIRECTORY,
   LOCKED_CALLBACK,
-  LOGOUT_CALLBACK,
   LOG_MAC_FAILURES,
+  LOGOUT_CALLBACK,
   MEMORY_STORAGE,
   OBSERVABLE_DISK_STORAGE,
   OBSERVABLE_MEMORY_STORAGE,
+  REFRESH_ACCESS_TOKEN_ERROR_CALLBACK,
   SECURE_STORAGE,
   STATE_FACTORY,
   SUPPORTS_SECURE_STORAGE,
   SYSTEM_LANGUAGE,
   SYSTEM_THEME_OBSERVABLE,
   WINDOW,
-  DEFAULT_VAULT_TIMEOUT,
-  INTRAPROCESS_MESSAGING_SUBJECT,
-  CLIENT_TYPE,
-  REFRESH_ACCESS_TOKEN_ERROR_CALLBACK,
-  ENV_ADDITIONAL_REGIONS,
 } from "./injection-tokens";
 import { ModalService } from "./modal.service";
 
@@ -1468,6 +1468,11 @@ const safeProviders: SafeProvider[] = [
     provide: PasswordLoginStrategyData,
     useClass: PasswordLoginStrategyData,
     deps: [],
+  }),
+  safeProvider({
+    provide: TaskService,
+    useClass: DefaultTaskService,
+    deps: [StateProvider, ApiServiceAbstraction, OrganizationServiceAbstraction, ConfigService],
   }),
 ];
 
