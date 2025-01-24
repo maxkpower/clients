@@ -1,7 +1,7 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { ActivatedRoute, Router } from "@angular/router";
 import { mock, MockProxy } from "jest-mock-extended";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
@@ -60,10 +60,10 @@ describe("AddEditV2Component", () => {
     back.mockClear();
     collect.mockClear();
 
-    cipherServiceMock = mock<CipherService>();
-    cipherServiceMock.addEditCipherInfo$.mockReturnValue(
-      addEditCipherInfo$ as Observable<AddEditCipherInfo>,
-    );
+    addEditCipherInfo$ = new BehaviorSubject<AddEditCipherInfo | null>(null);
+    cipherServiceMock = mock<CipherService>({
+      addEditCipherInfo$: jest.fn().mockReturnValue(addEditCipherInfo$),
+    });
 
     await TestBed.configureTestingModule({
       imports: [AddEditV2Component],
