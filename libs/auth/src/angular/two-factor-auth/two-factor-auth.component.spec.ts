@@ -381,10 +381,6 @@ describe("TwoFactorComponent", () => {
       });
 
       describe("Trusted Device Encryption scenarios", () => {
-        beforeEach(() => {
-          mockTwoFactorAuthCompService.closeWindow = undefined;
-        });
-
         describe("Given Trusted Device Encryption is enabled and user needs to set a master password", () => {
           beforeEach(() => {
             selectedUserDecryptionOptions.next(
