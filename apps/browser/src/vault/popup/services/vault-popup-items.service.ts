@@ -25,6 +25,7 @@ import { CollectionService } from "@bitwarden/admin-console/common";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { CollectionId, OrganizationId, UserId } from "@bitwarden/common/types/guid";
@@ -126,10 +127,7 @@ export class VaultPopupItemsService {
    */
   private _hasSearchText$ = combineLatest([
     this._searchText$,
-    this.accountService.activeAccount$.pipe(
-      map((a) => a?.id),
-      filter((userId) => userId != null),
-    ),
+    getUserId(this.accountService.activeAccount$),
   ]).pipe(
     switchMap(([searchText, userId]) => {
       return this.searchService.isSearchable(userId, searchText);
@@ -140,10 +138,7 @@ export class VaultPopupItemsService {
     this._activeCipherList$,
     this._searchText$,
     this.vaultPopupListFiltersService.filterFunction$,
-    this.accountService.activeAccount$.pipe(
-      map((a) => a?.id),
-      filter((userId) => userId != null),
-    ),
+    getUserId(this.accountService.activeAccount$),
   ]).pipe(
     map(([ciphers, searchText, filterFunction, userId]): [CipherView[], string, UserId] => [
       filterFunction(ciphers),

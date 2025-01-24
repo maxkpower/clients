@@ -3,7 +3,6 @@ import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
-  filter,
   from,
   map,
   merge,
@@ -17,9 +16,9 @@ import {
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { SendView } from "@bitwarden/common/tools/send/models/view/send.view";
 import { SendService } from "@bitwarden/common/tools/send/services/send.service.abstraction";
-import { UserId } from "@bitwarden/common/types/guid";
 
 import { SendListFiltersService } from "./send-list-filters.service";
 
@@ -77,10 +76,7 @@ export class SendItemsService {
   hasFilterApplied$ = combineLatest([
     this._searchText$,
     this.sendListFiltersService.filters$,
-    this.accountService.activeAccount$.pipe(
-      map((a) => a?.id),
-      filter((userId): userId is UserId => userId != null),
-    ),
+    getUserId(this.accountService.activeAccount$),
   ]).pipe(
     switchMap(([searchText, filters, activeAcctId]) => {
       return from(this.searchService.isSearchable(activeAcctId, searchText)).pipe(
