@@ -47,6 +47,8 @@ export class BitwardenJsonImporter extends BaseImporter implements Importer {
   }
 
   async parse(data: string): Promise<ImportResult> {
+    // initializes the SDK
+    // FIXME: remove this once the SDK gets initialized automatically
     await firstValueFrom(this.sdkService.client$);
 
     this.result = new ImportResult();
