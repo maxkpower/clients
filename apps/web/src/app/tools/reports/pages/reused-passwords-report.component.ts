@@ -12,8 +12,9 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
-import { CipherReportComponent } from "./cipher-report.component";
 import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+
+import { CipherReportComponent } from "./cipher-report.component";
 
 @Component({
   selector: "app-reused-passwords-report",
@@ -32,8 +33,7 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
-        adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
-    
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     super(
       cipherService,

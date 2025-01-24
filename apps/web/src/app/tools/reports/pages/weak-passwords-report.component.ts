@@ -11,11 +11,12 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { BadgeVariant , DialogService } from "@bitwarden/components";
+import { BadgeVariant, DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
-import { CipherReportComponent } from "./cipher-report.component";
 import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+
+import { CipherReportComponent } from "./cipher-report.component";
 
 type ReportScore = { label: string; badgeVariant: BadgeVariant };
 type ReportResult = CipherView & { score: number; reportValue: ReportScore };
@@ -39,7 +40,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
-     adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     super(
       cipherService,
@@ -50,7 +51,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
       i18nService,
       syncService,
       cipherFormConfigService,
-      adminConsoleCipherFormConfigService
+      adminConsoleCipherFormConfigService,
     );
   }
 

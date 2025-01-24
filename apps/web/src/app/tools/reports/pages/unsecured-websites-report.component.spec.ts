@@ -16,6 +16,10 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
+import { RoutedVaultFilterService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter.service";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+
+import { CipherReportComponent } from "./cipher-report.component";
 import { cipherData } from "./reports-ciphers.mock";
 import { UnsecuredWebsitesReportComponent } from "./unsecured-websites-report.component";
 
@@ -26,15 +30,24 @@ describe("UnsecuredWebsitesReportComponent", () => {
   let syncServiceMock: MockProxy<SyncService>;
   let collectionService: MockProxy<CollectionService>;
   let accountService: FakeAccountService;
+  let cipherReportComponentMock: MockProxy<CipherReportComponent>;
+  let cipherFormConfigServiceMock: MockProxy<CipherFormConfigService>;
+  let routedVaultFilterServiceMock: MockProxy<RoutedVaultFilterService>;
+  let adminConsoleCipherFormConfigServiceMock: MockProxy<AdminConsoleCipherFormConfigService>;
+
   const userId = Utils.newGuid() as UserId;
 
   beforeEach(() => {
-    let cipherFormConfigServiceMock: MockProxy<CipherFormConfigService>;
     organizationService = mock<OrganizationService>();
     organizationService.organizations$.mockReturnValue(of([]));
     syncServiceMock = mock<SyncService>();
     collectionService = mock<CollectionService>();
     accountService = mockAccountServiceWith(userId);
+    cipherReportComponentMock = mock<CipherReportComponent>();
+    cipherFormConfigServiceMock = mock<CipherFormConfigService>();
+    routedVaultFilterServiceMock = mock<RoutedVaultFilterService>();
+    adminConsoleCipherFormConfigServiceMock = mock<AdminConsoleCipherFormConfigService>();
+
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule({
@@ -75,6 +88,15 @@ describe("UnsecuredWebsitesReportComponent", () => {
         {
           provide: CipherFormConfigService,
           useValue: cipherFormConfigServiceMock,
+        },
+        {
+          provide: CipherReportComponent,
+          useClass: cipherReportComponentMock,
+        },
+        { provide: RoutedVaultFilterService, useValue: routedVaultFilterServiceMock },
+        {
+          provide: AdminConsoleCipherFormConfigService,
+          useClass: adminConsoleCipherFormConfigServiceMock, // Ensure this service is provided
         },
       ],
       schemas: [],

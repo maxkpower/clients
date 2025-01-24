@@ -147,8 +147,6 @@ export class CipherReportComponent implements OnDestroy {
       return;
     }
 
-    console.error("here");
-
     if (this.organization) {
       const adminCipherFormConfig = await this.adminConsoleCipherFormConfigService.buildConfig(
         "edit",
@@ -156,7 +154,6 @@ export class CipherReportComponent implements OnDestroy {
         cipher.type,
       );
 
-      console.error("failed");
       await this.openVaultItemDialog("view", adminCipherFormConfig);
     } else {
       const cipherFormConfig = await this.cipherFormConfigService.buildConfig(

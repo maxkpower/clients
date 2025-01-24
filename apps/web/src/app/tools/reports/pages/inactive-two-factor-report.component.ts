@@ -14,8 +14,9 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
-import { CipherReportComponent } from "./cipher-report.component";
 import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+
+import { CipherReportComponent } from "./cipher-report.component";
 
 @Component({
   selector: "app-inactive-two-factor-report",
@@ -36,8 +37,7 @@ export class InactiveTwoFactorReportComponent extends CipherReportComponent impl
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
-    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
-    
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     super(
       cipherService,

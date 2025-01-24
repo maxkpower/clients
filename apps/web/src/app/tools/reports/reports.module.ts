@@ -18,8 +18,10 @@ import { WeakPasswordsReportComponent } from "./pages/weak-passwords-report.comp
 import { ReportsLayoutComponent } from "./reports-layout.component";
 import { ReportsRoutingModule } from "./reports-routing.module";
 import { ReportsSharedModule } from "./shared";
+
 import { AdminConsoleCipherFormConfigService } from "../../vault/org-vault/services/admin-console-cipher-form-config.service";
 import { RoutedVaultFilterService } from "../../vault/individual-vault/vault-filter/services/routed-vault-filter.service";
+import { RoutedVaultFilterBridgeService } from "../../vault/individual-vault/vault-filter/services/routed-vault-filter-bridge.service";
 
 @NgModule({
   imports: [
@@ -47,7 +49,8 @@ import { RoutedVaultFilterService } from "../../vault/individual-vault/vault-fil
       useClass: DefaultCipherFormConfigService,
     },
     RoutedVaultFilterService,
-    AdminConsoleCipherFormConfigService
+    AdminConsoleCipherFormConfigService,
+    RoutedVaultFilterBridgeService,
   ],
 })
 export class ReportsModule {}

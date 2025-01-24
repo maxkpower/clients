@@ -19,11 +19,22 @@ import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { InactiveTwoFactorReportComponent as BaseInactiveTwoFactorReportComponent } from "../../../tools/reports/pages/inactive-two-factor-report.component";
+import { RoutedVaultFilterBridgeService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter-bridge.service";
+import { RoutedVaultFilterService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter.service";
 import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-inactive-two-factor-report",
   templateUrl: "../../../tools/reports/pages/inactive-two-factor-report.component.html",
+  providers: [
+    {
+      provide: CipherFormConfigService,
+      useClass: AdminConsoleCipherFormConfigService,
+    },
+    AdminConsoleCipherFormConfigService,
+    RoutedVaultFilterService,
+    RoutedVaultFilterBridgeService,
+  ],
 })
 // eslint-disable-next-line rxjs-angular/prefer-takeuntil
 export class InactiveTwoFactorReportComponent
@@ -41,7 +52,7 @@ export class InactiveTwoFactorReportComponent
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
-    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     super(
       cipherService,
@@ -53,7 +64,7 @@ export class InactiveTwoFactorReportComponent
       i18nService,
       syncService,
       cipherFormConfigService,
-      adminConsoleCipherFormConfigService
+      adminConsoleCipherFormConfigService,
     );
   }
 

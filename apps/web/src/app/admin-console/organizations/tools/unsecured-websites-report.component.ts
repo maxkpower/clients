@@ -19,11 +19,22 @@ import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { UnsecuredWebsitesReportComponent as BaseUnsecuredWebsitesReportComponent } from "../../../tools/reports/pages/unsecured-websites-report.component";
+import { RoutedVaultFilterBridgeService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter-bridge.service";
+import { RoutedVaultFilterService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter.service";
 import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-unsecured-websites-report",
   templateUrl: "../../../tools/reports/pages/unsecured-websites-report.component.html",
+  providers: [
+    {
+      provide: CipherFormConfigService,
+      useClass: AdminConsoleCipherFormConfigService,
+    },
+    AdminConsoleCipherFormConfigService,
+    RoutedVaultFilterService,
+    RoutedVaultFilterBridgeService,
+  ],
 })
 // eslint-disable-next-line rxjs-angular/prefer-takeuntil
 export class UnsecuredWebsitesReportComponent
@@ -41,7 +52,7 @@ export class UnsecuredWebsitesReportComponent
     syncService: SyncService,
     collectionService: CollectionService,
     cipherFormConfigService: CipherFormConfigService,
-    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService,
   ) {
     super(
       cipherService,
@@ -53,7 +64,7 @@ export class UnsecuredWebsitesReportComponent
       syncService,
       collectionService,
       cipherFormConfigService,
-      adminConsoleCipherFormConfigService
+      adminConsoleCipherFormConfigService,
     );
   }
 
