@@ -454,9 +454,6 @@
   "length": {
     "message": "Kahabaan"
   },
-  "passwordMinLength": {
-    "message": "Minimum password length"
-  },
   "uppercase": {
     "message": "Uppercase (A-Z)",
     "description": "deprecated. Use uppercaseLabel instead."
@@ -527,10 +524,6 @@
   },
   "minSpecial": {
     "message": "Inakamababang espesyal"
-  },
-  "avoidAmbChar": {
-    "message": "Iwasan ang mga hindi malinaw na character",
-    "description": "deprecated. Use avoidAmbiguous instead."
   },
   "avoidAmbiguous": {
     "message": "Avoid ambiguous characters",
@@ -653,6 +646,12 @@
   },
   "verifyIdentity": {
     "message": "I-verify ang pagkakakilanlan"
+  },
+  "weDontRecognizeThisDevice": {
+    "message": "We don't recognize this device. Enter the code sent to your email to verify your identity."
+  },
+  "continueLoggingIn": {
+    "message": "Continue logging in"
   },
   "yourVaultIsLocked": {
     "message": "Naka-lock ang iyong vault. Patunayan ang iyong pagkakakilanlan upang magpatuloy."
@@ -993,8 +992,8 @@
   "addLoginNotificationDescAlt": {
     "message": "Hilingin na magdagdag ng isang item kung ang isa ay hindi mahanap sa iyong vault. Nalalapat sa lahat ng naka-log in na account."
   },
-  "showCardsInVaultView": {
-    "message": "Show cards as Autofill suggestions on Vault view"
+  "showCardsInVaultViewV2": {
+    "message": "Always show cards as Autofill suggestions on Vault view"
   },
   "showCardsCurrentTab": {
     "message": "Ipakita ang mga card sa Tab page"
@@ -1002,14 +1001,17 @@
   "showCardsCurrentTabDesc": {
     "message": "Itala ang mga item ng card sa Tab page para sa madaling auto-fill."
   },
-  "showIdentitiesInVaultView": {
-    "message": "Show identities as Autofill suggestions on Vault view"
+  "showIdentitiesInVaultViewV2": {
+    "message": "Always show identities as Autofill suggestions on Vault view"
   },
   "showIdentitiesCurrentTab": {
     "message": "Ipakita ang mga pagkatao sa Tab page"
   },
   "showIdentitiesCurrentTabDesc": {
     "message": "Itala ang mga item ng pagkatao sa Tab page para sa madaling auto-fill."
+  },
+  "clickToAutofillOnVault": {
+    "message": "Click items to autofill on Vault view"
   },
   "clearClipboard": {
     "message": "Linisin ang clipboard",
@@ -1156,9 +1158,6 @@
   },
   "moveToOrganization": {
     "message": "Lumipat sa organisasyon"
-  },
-  "share": {
-    "message": "I-share"
   },
   "movedItemToOrg": {
     "message": "$ITEMNAME$ lumipat sa $ORGNAME$",
@@ -2047,9 +2046,6 @@
   "clone": {
     "message": "Kopyahin ang item"
   },
-  "passwordGeneratorPolicyInEffect": {
-    "message": "Isang o higit pang patakaran ng organisasyon ay nakakaapekto sa iyong mga setting ng generator."
-  },
   "passwordGenerator": {
     "message": "Password generator"
   },
@@ -2334,6 +2330,9 @@
     "message": "Domains",
     "description": "A category title describing the concept of web domains"
   },
+  "blockedDomains": {
+    "message": "Blocked domains"
+  },
   "excludedDomains": {
     "message": "Inilayo na Domain"
   },
@@ -2342,6 +2341,15 @@
   },
   "excludedDomainsDescAlt": {
     "message": "Bitwarden will not ask to save login details for these domains for all logged in accounts. You must refresh the page for changes to take effect."
+  },
+  "blockedDomainsDesc": {
+    "message": "Autofill and other related features will not be offered for these websites. You must refresh the page for changes to take effect."
+  },
+  "autofillBlockedNoticeV2": {
+    "message": "Autofill is blocked for this website."
+  },
+  "autofillBlockedNoticeGuidance": {
+    "message": "Change this in settings"
   },
   "websiteItemLabel": {
     "message": "Website $number$ (URI)",
@@ -2360,6 +2368,9 @@
         "example": "duckduckgo.com"
       }
     }
+  },
+  "blockedDomainsSavedSuccess": {
+    "message": "Blocked domain changes saved"
   },
   "excludedDomainsSavedSuccess": {
     "message": "Excluded domain changes saved"
@@ -2389,14 +2400,6 @@
     "message": "Send details",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "searchSends": {
-    "message": "Maghanap ng Mga Padala",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "addSend": {
-    "message": "Idagdag ang Padala",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
   "sendTypeText": {
     "message": "Teksto"
   },
@@ -2413,15 +2416,8 @@
   "hideTextByDefault": {
     "message": "Hide text by default"
   },
-  "maxAccessCountReached": {
-    "message": "Ang pinaka-access count ay nakaabot na",
-    "description": "This text will be displayed after a Send has been accessed the maximum amount of times."
-  },
   "expired": {
     "message": "Paso na"
-  },
-  "pendingDeletion": {
-    "message": "Nakabinbing pagbura"
   },
   "passwordProtected": {
     "message": "Protektado ng Password"
@@ -2472,23 +2468,8 @@
     "message": "I-edit ang Ipadala",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
-  "sendTypeHeader": {
-    "message": "Anong uri ng Ipadala ang ito?",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendNameDesc": {
-    "message": "Isang friendly name upang ilarawan ang Ipadala na ito.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendFileDesc": {
-    "message": "Ang file na gusto mong ipadala."
-  },
   "deletionDate": {
     "message": "Petsa ng Pagtanggal"
-  },
-  "deletionDateDesc": {
-    "message": "Ang Ipadala ay tatanggalin nang permanente sa tinukoy na petsa at oras.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "deletionDateDescV2": {
     "message": "The Send will be permanently deleted on this date.",
@@ -2496,10 +2477,6 @@
   },
   "expirationDate": {
     "message": "Petsa ng pag-expire"
-  },
-  "expirationDateDesc": {
-    "message": "Kung nakatakda, ang access sa Send na ito ay mag-expire sa tinukoy na petsa at oras.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "oneDay": {
     "message": "1 araw"
@@ -2516,42 +2493,9 @@
   "custom": {
     "message": "Pasadyang"
   },
-  "maximumAccessCount": {
-    "message": "Pinakamataas na Bilang ng Access"
-  },
-  "maximumAccessCountDesc": {
-    "message": "Kung nakatakda, ang mga user ay hindi na maaaring ma-access ang Send na ito pagkatapos makarating sa maximum access count.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendPasswordDesc": {
-    "message": "Maipapayo na mag-require ng password para sa mga user na ma-access ang Send na ito.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
   "sendPasswordDescV3": {
     "message": "Add an optional password for recipients to access this Send.",
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendNotesDesc": {
-    "message": "Pribadong mga tala tungkol sa Send na ito.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendDisableDesc": {
-    "message": "I-deactivate ang Send na ito para hindi na ito ma-access.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendShareDesc": {
-    "message": "Kopyahin ang link ng Send na ito sa clipboard pagkatapos i-save.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "sendTextDesc": {
-    "message": "Ang teksto na nais mong ipadala."
-  },
-  "sendHideText": {
-    "message": "Itago ang default na teksto ng Send na ito.",
-    "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
-  },
-  "currentAccessCount": {
-    "message": "Kasalukuyang access count"
   },
   "createSend": {
     "message": "Bagong Ipadala",
@@ -2635,18 +2579,6 @@
   "sendFileCalloutHeader": {
     "message": "Bago ka magsimula"
   },
-  "sendFirefoxCustomDatePopoutMessage1": {
-    "message": "Upang gamitin ang isang calendar style date picker",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read '**To use a calendar style date picker ** click here to pop out your window.'"
-  },
-  "sendFirefoxCustomDatePopoutMessage2": {
-    "message": "mag-click dito",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To use a calendar style date picker **click here** to pop out your window.'"
-  },
-  "sendFirefoxCustomDatePopoutMessage3": {
-    "message": "upang bumalik sa iyong window.",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To use a calendar style date picker click here **to pop out your window.**'"
-  },
   "expirationDateIsInvalid": {
     "message": "Ang ibinigay na petsa ng pagpaso ay hindi wasto."
   },
@@ -2662,14 +2594,8 @@
   "dateParsingError": {
     "message": "Nagkaroon ng error sa pag-save ng iyong mga petsa ng pagbura at pagpaso."
   },
-  "hideEmail": {
-    "message": "Itago ang aking email address mula sa mga tatanggap."
-  },
   "hideYourEmail": {
     "message": "Hide your email address from viewers."
-  },
-  "sendOptionsPolicyInEffect": {
-    "message": "Isang o higit pang mga patakaran ng organisasyon ay nakaapekto sa iyong mga pagpipilian sa Pagpadala."
   },
   "passwordPrompt": {
     "message": "Muling pagsusuri sa master password"
@@ -2884,8 +2810,19 @@
   "error": {
     "message": "Mali"
   },
-  "regenerateUsername": {
-    "message": "Muling bumuo ng username"
+  "decryptionError": {
+    "message": "Decryption error"
+  },
+  "couldNotDecryptVaultItemsBelow": {
+    "message": "Bitwarden could not decrypt the vault item(s) listed below."
+  },
+  "contactCSToAvoidDataLossPart1": {
+    "message": "Contact customer success",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
+  },
+  "contactCSToAvoidDataLossPart2": {
+    "message": "to avoid additional data loss.",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
   },
   "generateUsername": {
     "message": "Lumikha ng username"
@@ -2927,9 +2864,6 @@
       }
     }
   },
-  "usernameType": {
-    "message": "Uri ng username"
-  },
   "plusAddressedEmail": {
     "message": "Plus na naka-address na email",
     "description": "Username generator option that appends a random sub-address to the username. For example: address+subaddress@email.com"
@@ -2951,12 +2885,6 @@
   },
   "websiteName": {
     "message": "Pangalan ng website"
-  },
-  "whatWouldYouLikeToGenerate": {
-    "message": "Ano ang nais mong bumuo?"
-  },
-  "passwordType": {
-    "message": "Uri ng Password"
   },
   "service": {
     "message": "Serbisyo"
@@ -3502,38 +3430,6 @@
   "toggleCollapse": {
     "message": "Toggle collapse",
     "description": "Toggling an expand/collapse state."
-  },
-  "filelessImport": {
-    "message": "Import your data to Bitwarden?",
-    "description": "Default notification title for triggering a fileless import."
-  },
-  "lpFilelessImport": {
-    "message": "Protect your LastPass data and import to Bitwarden?",
-    "description": "LastPass specific notification title for triggering a fileless import."
-  },
-  "lpCancelFilelessImport": {
-    "message": "Save as unencrypted file",
-    "description": "LastPass specific notification button text for cancelling a fileless import."
-  },
-  "startFilelessImport": {
-    "message": "Import to Bitwarden",
-    "description": "Notification button text for starting a fileless import."
-  },
-  "importing": {
-    "message": "Importing...",
-    "description": "Notification message for when an import is in progress."
-  },
-  "dataSuccessfullyImported": {
-    "message": "Data successfully imported!",
-    "description": "Notification message for when an import has completed successfully."
-  },
-  "dataImportFailed": {
-    "message": "Error importing. Check console for details.",
-    "description": "Notification message for when an import has failed."
-  },
-  "importNetworkError": {
-    "message": "Network error encountered during import.",
-    "description": "Notification message for when an import has failed due to a network error."
   },
   "aliasDomain": {
     "message": "Alias domain"
@@ -4087,6 +3983,9 @@
   },
   "autofillSuggestions": {
     "message": "Autofill suggestions"
+  },
+  "itemSuggestions": {
+    "message": "Suggested items"
   },
   "autofillSuggestionsTip": {
     "message": "Save a login item for this site to autofill"
@@ -4664,12 +4563,6 @@
   "textSends": {
     "message": "Text Sends"
   },
-  "bitwardenNewLook": {
-    "message": "Bitwarden has a new look!"
-  },
-  "bitwardenNewLookDesc": {
-    "message": "It's easier and more intuitive than ever to autofill and search from the Vault tab. Take a look around!"
-  },
   "accountActions": {
     "message": "Account actions"
   },
@@ -4747,6 +4640,33 @@
   },
   "noEditPermissions": {
     "message": "You don't have permission to edit this item"
+  },
+  "biometricsStatusHelptextUnlockNeeded": {
+    "message": "Biometric unlock is unavailable because PIN or password unlock is required first."
+  },
+  "biometricsStatusHelptextHardwareUnavailable": {
+    "message": "Biometric unlock is currently unavailable."
+  },
+  "biometricsStatusHelptextAutoSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextManualSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextDesktopDisconnected": {
+    "message": "Biometric unlock is unavailable because the Bitwarden desktop app is closed."
+  },
+  "biometricsStatusHelptextNotEnabledInDesktop": {
+    "message": "Biometric unlock is unavailable because it is not enabled for $EMAIL$ in the Bitwarden desktop app.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "mail@example.com"
+      }
+    }
+  },
+  "biometricsStatusHelptextUnavailableReasonUnknown": {
+    "message": "Biometric unlock is currently unavailable for an unknown reason."
   },
   "authenticating": {
     "message": "Authenticating"
@@ -4954,5 +4874,11 @@
   },
   "extraWide": {
     "message": "Extra wide"
+  },
+  "updateDesktopAppOrDisableFingerprintDialogTitle": {
+    "message": "Please update your desktop application"
+  },
+  "updateDesktopAppOrDisableFingerprintDialogMessage": {
+    "message": "To use biometric unlock, please update your desktop application, or disable fingerprint unlock in the desktop settings."
   }
 }

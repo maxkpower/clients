@@ -8,6 +8,7 @@ import { ApiService } from "../../abstractions/api.service";
 import { AccountService } from "../../auth/abstractions/account.service";
 import { AuthService } from "../../auth/abstractions/auth.service";
 import { AuthenticationStatus } from "../../auth/enums/authentication-status";
+import { getUserId } from "../../auth/services/account.service";
 import {
   SyncCipherNotification,
   SyncFolderNotification,
@@ -58,7 +59,7 @@ export abstract class CoreSyncService implements SyncService {
   abstract fullSync(forceSync: boolean, allowThrowOnError?: boolean): Promise<boolean>;
 
   async getLastSync(): Promise<Date> {
-    const userId = await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id)));
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     if (userId == null) {
       return null;
     }
@@ -85,18 +86,25 @@ export abstract class CoreSyncService implements SyncService {
     await this.stateProvider.getUser(userId, LAST_SYNC_DATE).update(() => date);
   }
 
-  async syncUpsertFolder(notification: SyncFolderNotification, isEdit: boolean): Promise<boolean> {
+  async syncUpsertFolder(
+    notification: SyncFolderNotification,
+    isEdit: boolean,
+    userId: UserId,
+  ): Promise<boolean> {
     this.syncStarted();
-    if (await this.stateService.getIsAuthenticated()) {
+
+    const authStatus = await firstValueFrom(this.authService.authStatusFor$(userId));
+
+    if (authStatus >= AuthenticationStatus.Locked) {
       try {
-        const localFolder = await this.folderService.get(notification.id);
+        const localFolder = await this.folderService.get(notification.id, userId);
         if (
           (!isEdit && localFolder == null) ||
           (isEdit && localFolder != null && localFolder.revisionDate < notification.revisionDate)
         ) {
           const remoteFolder = await this.folderApiService.get(notification.id);
           if (remoteFolder != null) {
-            await this.folderService.upsert(new FolderData(remoteFolder));
+            await this.folderService.upsert(new FolderData(remoteFolder), userId);
             this.messageSender.send("syncedUpsertedFolder", { folderId: notification.id });
             return this.syncCompleted(true);
           }
@@ -108,10 +116,13 @@ export abstract class CoreSyncService implements SyncService {
     return this.syncCompleted(false);
   }
 
-  async syncDeleteFolder(notification: SyncFolderNotification): Promise<boolean> {
+  async syncDeleteFolder(notification: SyncFolderNotification, userId: UserId): Promise<boolean> {
     this.syncStarted();
-    if (await this.stateService.getIsAuthenticated()) {
-      await this.folderService.delete(notification.id);
+
+    const authStatus = await firstValueFrom(this.authService.authStatusFor$(userId));
+
+    if (authStatus >= AuthenticationStatus.Locked) {
+      await this.folderService.delete(notification.id, userId);
       this.messageSender.send("syncedDeletedFolder", { folderId: notification.id });
       this.syncCompleted(true);
       return true;

@@ -10,6 +10,7 @@ import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { EventType } from "@bitwarden/common/enums";
 import { CardExport } from "@bitwarden/common/models/export/card.export";
@@ -51,6 +52,8 @@ import { FolderResponse } from "../vault/models/folder.response";
 import { DownloadCommand } from "./download.command";
 
 export class GetCommand extends DownloadCommand {
+  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
+
   constructor(
     private cipherService: CipherService,
     private folderService: FolderService,
@@ -113,10 +116,8 @@ export class GetCommand extends DownloadCommand {
     let decCipher: CipherView = null;
     if (Utils.isGuid(id)) {
       const cipher = await this.cipherService.get(id);
-      const activeUserId = await firstValueFrom(
-        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-      );
       if (cipher != null) {
+        const activeUserId = await firstValueFrom(this.activeUserId$);
         decCipher = await cipher.decrypt(
           await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
         );
@@ -152,11 +153,9 @@ export class GetCommand extends DownloadCommand {
       }
     }
 
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.eventCollectionService.collect(
+    await this.eventCollectionService.collect(
       EventType.Cipher_ClientViewed,
-      id,
+      decCipher.id,
       true,
       decCipher.organizationId,
     );
@@ -262,8 +261,9 @@ export class GetCommand extends DownloadCommand {
       return Response.error("Couldn't generate TOTP code.");
     }
 
+    const account = await firstValueFrom(this.accountService.activeAccount$);
     const canAccessPremium = await firstValueFrom(
-      this.accountProfileService.hasPremiumFromAnySource$,
+      this.accountProfileService.hasPremiumFromAnySource$(account.id),
     );
     if (!canAccessPremium) {
       const originalCipher = await this.cipherService.get(cipher.id);
@@ -347,8 +347,9 @@ export class GetCommand extends DownloadCommand {
       return Response.multipleResults(attachments.map((a) => a.id));
     }
 
+    const account = await firstValueFrom(this.accountService.activeAccount$);
     const canAccessPremium = await firstValueFrom(
-      this.accountProfileService.hasPremiumFromAnySource$,
+      this.accountProfileService.hasPremiumFromAnySource$(account.id),
     );
     if (!canAccessPremium) {
       const originalCipher = await this.cipherService.get(cipher.id);
@@ -383,13 +384,14 @@ export class GetCommand extends DownloadCommand {
 
   private async getFolder(id: string) {
     let decFolder: FolderView = null;
+    const activeUserId = await firstValueFrom(this.activeUserId$);
     if (Utils.isGuid(id)) {
-      const folder = await this.folderService.getFromState(id);
+      const folder = await this.folderService.getFromState(id, activeUserId);
       if (folder != null) {
         decFolder = await folder.decrypt();
       }
     } else if (id.trim() !== "") {
-      let folders = await this.folderService.getAllDecryptedFromState();
+      let folders = await this.folderService.getAllDecryptedFromState(activeUserId);
       folders = CliUtils.searchFolders(folders, id);
       if (folders.length > 1) {
         return Response.multipleResults(folders.map((f) => f.id));
@@ -478,10 +480,18 @@ export class GetCommand extends DownloadCommand {
 
   private async getOrganization(id: string) {
     let org: Organization = null;
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    if (!userId) {
+      return Response.badRequest("No user found.");
+    }
     if (Utils.isGuid(id)) {
-      org = await this.organizationService.getFromState(id);
+      org = await firstValueFrom(
+        this.organizationService
+          .organizations$(userId)
+          .pipe(map((organizations) => organizations.find((o) => o.id === id))),
+      );
     } else if (id.trim() !== "") {
-      let orgs = await firstValueFrom(this.organizationService.organizations$);
+      let orgs = await firstValueFrom(this.organizationService.organizations$(userId));
       orgs = CliUtils.searchOrganizations(orgs, id);
       if (orgs.length > 1) {
         return Response.multipleResults(orgs.map((c) => c.id));
@@ -551,9 +561,7 @@ export class GetCommand extends DownloadCommand {
   private async getFingerprint(id: string) {
     let fingerprint: string[] = null;
     if (id === "me") {
-      const activeUserId = await firstValueFrom(
-        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-      );
+      const activeUserId = await firstValueFrom(this.activeUserId$);
       const publicKey = await firstValueFrom(this.keyService.userPublicKey$(activeUserId));
       fingerprint = await this.keyService.getFingerprint(activeUserId, publicKey);
     } else if (Utils.isGuid(id)) {
