@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ActivatedRoute, convertToParamMap, Router } from "@angular/router";
@@ -27,7 +29,6 @@ import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/maste
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
-import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { SyncService } from "@bitwarden/common/platform/sync";
@@ -68,7 +69,6 @@ describe("TwoFactorComponent", () => {
   let mockToastService: MockProxy<ToastService>;
   let mockTwoFactorAuthCompService: MockProxy<TwoFactorAuthComponentService>;
   let mockSyncService: MockProxy<SyncService>;
-  let mockMessagingService: MockProxy<MessagingService>;
 
   let mockUserDecryptionOpts: {
     noMasterPassword: UserDecryptionOptions;
@@ -103,8 +103,9 @@ describe("TwoFactorComponent", () => {
     mockDialogService = mock<DialogService>();
     mockToastService = mock<ToastService>();
     mockTwoFactorAuthCompService = mock<TwoFactorAuthComponentService>();
+    mockTwoFactorAuthCompService.handle2faSuccess = undefined;
+
     mockSyncService = mock<SyncService>();
-    mockMessagingService = mock<MessagingService>();
 
     mockUserDecryptionOpts = {
       noMasterPassword: new UserDecryptionOptions({
@@ -149,7 +150,7 @@ describe("TwoFactorComponent", () => {
       }),
     };
 
-    selectedUserDecryptionOptions = new BehaviorSubject<UserDecryptionOptions>(null);
+    selectedUserDecryptionOptions = new BehaviorSubject<UserDecryptionOptions>(undefined);
     mockUserDecryptionOptionsService.userDecryptionOptions$ = selectedUserDecryptionOptions;
 
     TestBed.configureTestingModule({
@@ -186,7 +187,6 @@ describe("TwoFactorComponent", () => {
         { provide: ToastService, useValue: mockToastService },
         { provide: TwoFactorAuthComponentService, useValue: mockTwoFactorAuthCompService },
         { provide: SyncService, useValue: mockSyncService },
-        { provide: MessagingService, useValue: mockMessagingService },
       ],
     });
 
@@ -260,7 +260,6 @@ describe("TwoFactorComponent", () => {
         // Assert
         expect(mockLoginStrategyService.logInTwoFactor).toHaveBeenCalledWith(
           new TokenTwoFactorRequest(component.selectedProviderType, token, remember),
-          null, // captcha token not supported
         );
       });
 

@@ -26,7 +26,6 @@ import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/ide
 import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
-import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import {
@@ -134,7 +133,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
     private syncService: SyncService,
-    private messagingService: MessagingService,
     private destroyRef: DestroyRef,
   ) {}
 
