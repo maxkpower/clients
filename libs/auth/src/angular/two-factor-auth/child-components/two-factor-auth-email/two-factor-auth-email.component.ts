@@ -45,8 +45,8 @@ import { TwoFactorAuthEmailComponentService } from "./two-factor-auth-email-comp
 export class TwoFactorAuthEmailComponent implements OnInit {
   @Output() token = new EventEmitter<string>();
 
-  twoFactorEmail: string = null;
-  emailPromise: Promise<any>;
+  twoFactorEmail: string | undefined = undefined;
+  emailPromise: Promise<any> | undefined = undefined;
   tokenValue: string = "";
 
   constructor(
@@ -64,22 +64,35 @@ export class TwoFactorAuthEmailComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.twoFactorAuthEmailComponentService.openPopoutIfApprovedForEmail2fa?.();
 
-    const providerData = await this.twoFactorService.getProviders().then((providers) => {
-      return providers.get(TwoFactorProviderType.Email);
-    });
-    this.twoFactorEmail = providerData.Email;
+    const providers = await this.twoFactorService.getProviders();
 
-    if ((await this.twoFactorService.getProviders()).size > 1) {
+    if (!providers) {
+      throw new Error("User has no 2FA Providers");
+    }
+
+    const email2faProviderData = providers.get(TwoFactorProviderType.Email);
+
+    if (!email2faProviderData) {
+      throw new Error("Unable to retrieve email 2FA provider data");
+    }
+
+    this.twoFactorEmail = email2faProviderData.Email;
+
+    if (providers.size > 1) {
       await this.sendEmail(false);
     }
   }
 
   async sendEmail(doToast: boolean) {
-    if (this.emailPromise != null) {
+    if (this.emailPromise !== undefined) {
       return;
     }
 
-    if ((await this.loginStrategyService.getEmail()) == null) {
+    // TODO: PM-17545 - consider building a method on the login strategy service to get a mostly
+    // initialized TwoFactorEmailRequest in 1 call instead of 5 like we do today.
+    const email = await this.loginStrategyService.getEmail();
+
+    if (email == null) {
       this.toastService.showToast({
         variant: "error",
         title: this.i18nService.t("errorOccurred"),
@@ -90,19 +103,20 @@ export class TwoFactorAuthEmailComponent implements OnInit {
 
     try {
       const request = new TwoFactorEmailRequest();
-      request.email = await this.loginStrategyService.getEmail();
-      request.masterPasswordHash = await this.loginStrategyService.getMasterPasswordHash();
+      request.email = email;
+
+      request.masterPasswordHash = (await this.loginStrategyService.getMasterPasswordHash()) ?? "";
       request.ssoEmail2FaSessionToken =
-        await this.loginStrategyService.getSsoEmail2FaSessionToken();
+        (await this.loginStrategyService.getSsoEmail2FaSessionToken()) ?? "";
       request.deviceIdentifier = await this.appIdService.getAppId();
-      request.authRequestAccessCode = await this.loginStrategyService.getAccessCode();
-      request.authRequestId = await this.loginStrategyService.getAuthRequestId();
+      request.authRequestAccessCode = (await this.loginStrategyService.getAccessCode()) ?? "";
+      request.authRequestId = (await this.loginStrategyService.getAuthRequestId()) ?? "";
       this.emailPromise = this.apiService.postTwoFactorEmail(request);
       await this.emailPromise;
       if (doToast) {
         this.toastService.showToast({
           variant: "success",
-          title: null,
+          title: "",
           message: this.i18nService.t("verificationCodeEmailSent", this.twoFactorEmail),
         });
       }
@@ -110,6 +124,6 @@ export class TwoFactorAuthEmailComponent implements OnInit {
       this.logService.error(e);
     }
 
-    this.emailPromise = null;
+    this.emailPromise = undefined;
   }
 }

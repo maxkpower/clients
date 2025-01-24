@@ -43,7 +43,7 @@ export class TwoFactorAuthDuoComponent implements OnInit {
   @Output() token = new EventEmitter<string>();
   @Input() providerData: any;
 
-  duoFramelessUrl: string = null;
+  duoFramelessUrl: string | undefined = undefined;
 
   constructor(
     protected i18nService: I18nService,
@@ -67,10 +67,10 @@ export class TwoFactorAuthDuoComponent implements OnInit {
 
   // Called via parent two-factor-auth component.
   async launchDuoFrameless(): Promise<void> {
-    if (this.duoFramelessUrl === null) {
+    if (this.duoFramelessUrl === null || this.duoFramelessUrl === undefined) {
       this.toastService.showToast({
         variant: "error",
-        title: null,
+        title: "",
         message: this.i18nService.t("duoHealthCheckResultsInNullAuthUrlError"),
       });
       return;
