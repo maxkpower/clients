@@ -3,9 +3,9 @@
 import { firstValueFrom } from "rxjs";
 
 import {
-  CollectionRequest,
   CollectionAccessDetailsResponse,
   CollectionDetailsResponse,
+  CollectionRequest,
   CollectionResponse,
 } from "@bitwarden/admin-console/common";
 import { LogoutReason } from "@bitwarden/auth/common";
@@ -78,6 +78,7 @@ import { ApiKeyResponse } from "../auth/models/response/api-key.response";
 import { AuthRequestResponse } from "../auth/models/response/auth-request.response";
 import { DeviceVerificationResponse } from "../auth/models/response/device-verification.response";
 import { IdentityCaptchaResponse } from "../auth/models/response/identity-captcha.response";
+import { IdentityDeviceVerificationResponse } from "../auth/models/response/identity-device-verification.response";
 import { IdentityTokenResponse } from "../auth/models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "../auth/models/response/identity-two-factor.response";
 import { KeyConnectorUserKeyResponse } from "../auth/models/response/key-connector-user-key.response";
@@ -158,6 +159,12 @@ export class ApiService implements ApiServiceAbstraction {
   private isWebClient = false;
   private isDesktopClient = false;
 
+  /**
+   * The message (responseJson.ErrorModel.Message) that comes back from the server when a new device verification is required.
+   */
+  private static readonly NEW_DEVICE_VERIFICATION_REQUIRED_MESSAGE =
+    "new device verification required";
+
   constructor(
     private tokenService: TokenService,
     private platformUtilsService: PlatformUtilsService,
@@ -197,7 +204,12 @@ export class ApiService implements ApiServiceAbstraction {
       | PasswordTokenRequest
       | SsoTokenRequest
       | WebAuthnLoginTokenRequest,
-  ): Promise<IdentityTokenResponse | IdentityTwoFactorResponse | IdentityCaptchaResponse> {
+  ): Promise<
+    | IdentityTokenResponse
+    | IdentityTwoFactorResponse
+    | IdentityCaptchaResponse
+    | IdentityDeviceVerificationResponse
+  > {
     const headers = new Headers({
       "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
       Accept: "application/json",
@@ -245,6 +257,11 @@ export class ApiService implements ApiServiceAbstraction {
         Object.keys(responseJson.HCaptcha_SiteKey).length
       ) {
         return new IdentityCaptchaResponse(responseJson);
+      } else if (
+        response.status === 400 &&
+        responseJson?.ErrorModel?.Message === ApiService.NEW_DEVICE_VERIFICATION_REQUIRED_MESSAGE
+      ) {
+        return new IdentityDeviceVerificationResponse(responseJson);
       }
     }
 
@@ -1829,7 +1846,7 @@ export class ApiService implements ApiServiceAbstraction {
   }
 
   async send(
-    method: "GET" | "POST" | "PUT" | "DELETE",
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
     path: string,
     body: any,
     authed: boolean,
@@ -1869,7 +1886,7 @@ export class ApiService implements ApiServiceAbstraction {
       return responseJson;
     } else if (hasResponse && response.status === 200 && responseIsCsv) {
       return await response.text();
-    } else if (response.status !== 200) {
+    } else if (response.status !== 200 && response.status !== 204) {
       const error = await this.handleError(response, false, authed);
       return Promise.reject(error);
     }

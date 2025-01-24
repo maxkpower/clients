@@ -9,6 +9,7 @@ import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -24,14 +25,14 @@ describe("ExposedPasswordsReportComponent", () => {
   let auditService: MockProxy<AuditService>;
   let organizationService: MockProxy<OrganizationService>;
   let syncServiceMock: MockProxy<SyncService>;
-
-  const accountService: FakeAccountService = mockAccountServiceWith("userid-1" as UserId);
+  const userId = Utils.newGuid() as UserId;
+  const accountService: FakeAccountService = mockAccountServiceWith(userId);
 
   beforeEach(() => {
     syncServiceMock = mock<SyncService>();
     auditService = mock<AuditService>();
     organizationService = mock<OrganizationService>();
-    organizationService.organizations$ = of([]);
+    organizationService.organizations$.mockReturnValue(of([]));
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule({
@@ -50,6 +51,10 @@ describe("ExposedPasswordsReportComponent", () => {
           useValue: organizationService,
         },
         {
+          provide: AccountService,
+          useValue: accountService,
+        },
+        {
           provide: ModalService,
           useValue: mock<ModalService>(),
         },
@@ -64,10 +69,6 @@ describe("ExposedPasswordsReportComponent", () => {
         {
           provide: I18nService,
           useValue: mock<I18nService>(),
-        },
-        {
-          provide: AccountService,
-          useValue: accountService,
         },
       ],
       schemas: [],

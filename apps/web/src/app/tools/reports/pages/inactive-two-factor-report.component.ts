@@ -28,6 +28,7 @@ export class InactiveTwoFactorReportComponent extends CipherReportComponent impl
   constructor(
     protected cipherService: CipherService,
     protected organizationService: OrganizationService,
+    accountService: AccountService,
     modalService: ModalService,
     private logService: LogService,
     passwordRepromptService: PasswordRepromptService,
@@ -40,6 +41,7 @@ export class InactiveTwoFactorReportComponent extends CipherReportComponent impl
       modalService,
       passwordRepromptService,
       organizationService,
+      accountService,
       i18nService,
       accountService,
       syncService,

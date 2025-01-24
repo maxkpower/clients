@@ -1,7 +1,15 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { Directive, ViewChild, ViewContainerRef, OnDestroy } from "@angular/core";
-import { BehaviorSubject, Observable, Subject, firstValueFrom, map, takeUntil } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  firstValueFrom,
+  map,
+  switchMap,
+  takeUntil,
+} from "rxjs";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
@@ -47,11 +55,13 @@ export class CipherReportComponent implements OnDestroy {
     private modalService: ModalService,
     protected passwordRepromptService: PasswordRepromptService,
     protected organizationService: OrganizationService,
-    protected i18nService: I18nService,
     protected accountService: AccountService,
+    protected i18nService: I18nService,
     private syncService: SyncService,
   ) {
-    this.organizations$ = this.organizationService.organizations$;
+    this.organizations$ = this.activeUserId$.pipe(
+      switchMap((userId) => this.organizationService.organizations$(userId)),
+    );
     this.organizations$.pipe(takeUntil(this.destroyed$)).subscribe((orgs) => {
       this.organizations = orgs;
     });

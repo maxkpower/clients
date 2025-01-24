@@ -52,8 +52,7 @@ describe("AdminConsoleCipherFormConfigService", () => {
     readOnly: false,
   } as CollectionAdminView;
 
-  const organization$ = new BehaviorSubject<Organization>(testOrg as Organization);
-  const organizations$ = new BehaviorSubject<Organization[]>([testOrg, testOrg2] as Organization[]);
+  const orgs$ = new BehaviorSubject<Organization[]>([testOrg, testOrg2] as Organization[]);
   const getCipherAdmin = jest.fn().mockResolvedValue(null);
   const getCipher = jest.fn().mockResolvedValue(null);
 
@@ -67,7 +66,7 @@ describe("AdminConsoleCipherFormConfigService", () => {
     TestBed.configureTestingModule({
       providers: [
         AdminConsoleCipherFormConfigService,
-        { provide: OrganizationService, useValue: { get$: () => organization$, organizations$ } },
+        { provide: OrganizationService, useValue: { organizations$: () => orgs$ } },
         {
           provide: CollectionAdminService,
           useValue: { getAll: () => Promise.resolve([collection, collection2]) },

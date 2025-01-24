@@ -46,7 +46,7 @@ export class DefaultCipherFormConfigService implements CipherFormConfigService {
     const [organizations, collections, allowPersonalOwnership, folders, cipher] =
       await firstValueFrom(
         combineLatest([
-          this.organizations$,
+          this.organizations$(activeUserId),
           this.collectionService.encryptedCollections$.pipe(
             switchMap((c) =>
               this.collectionService.decryptedCollections$.pipe(
@@ -78,13 +78,17 @@ export class DefaultCipherFormConfigService implements CipherFormConfigService {
     };
   }
 
-  private organizations$ = this.organizationService.organizations$.pipe(
-    map((orgs) =>
-      orgs.filter(
-        (o) => o.isMember && o.enabled && o.status === OrganizationUserStatusType.Confirmed,
-      ),
-    ),
-  );
+  organizations$(userId: UserId) {
+    return this.organizationService
+      .organizations$(userId)
+      .pipe(
+        map((orgs) =>
+          orgs.filter(
+            (o) => o.isMember && o.enabled && o.status === OrganizationUserStatusType.Confirmed,
+          ),
+        ),
+      );
+  }
 
   private allowPersonalOwnership$ = this.policyService
     .policyAppliesToActiveUser$(PolicyType.PersonalOwnership)

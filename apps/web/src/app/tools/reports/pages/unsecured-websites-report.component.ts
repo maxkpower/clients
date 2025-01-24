@@ -23,6 +23,7 @@ export class UnsecuredWebsitesReportComponent extends CipherReportComponent impl
   constructor(
     protected cipherService: CipherService,
     protected organizationService: OrganizationService,
+    accountService: AccountService,
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
@@ -35,6 +36,7 @@ export class UnsecuredWebsitesReportComponent extends CipherReportComponent impl
       modalService,
       passwordRepromptService,
       organizationService,
+      accountService,
       i18nService,
       accountService,
       syncService,

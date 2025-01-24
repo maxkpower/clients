@@ -43,12 +43,16 @@ export class AdminConsoleCipherFormConfigService implements CipherFormConfigServ
     filter((filter) => filter !== undefined),
   );
 
-  private allOrganizations$ = this.organizationService.organizations$.pipe(
-    map((orgs) => {
-      return orgs.filter(
-        (o) => o.isMember && o.enabled && o.status === OrganizationUserStatusType.Confirmed,
-      );
-    }),
+  private allOrganizations$ = this.accountService.activeAccount$.pipe(
+    switchMap((account) =>
+      this.organizationService.organizations$(account?.id).pipe(
+        map((orgs) => {
+          return orgs.filter(
+            (o) => o.isMember && o.enabled && o.status === OrganizationUserStatusType.Confirmed,
+          );
+        }),
+      ),
+    ),
   );
 
   private organization$ = combineLatest([this.allOrganizations$, this.organizationId$]).pipe(

@@ -9,6 +9,7 @@ import { CollectionView } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -105,8 +106,17 @@ export class ViewComponent implements OnInit {
     this.cipher = this.params.cipher;
     this.collections = this.params.collections;
     this.cipherTypeString = this.getCipherViewTypeString();
+
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+
     if (this.cipher.organizationId) {
-      this.organization = await this.organizationService.get(this.cipher.organizationId);
+      this.organization = await firstValueFrom(
+        this.organizationService
+          .organizations$(userId)
+          .pipe(
+            map((organizations) => organizations.find((o) => o.id === this.cipher.organizationId)),
+          ),
+      );
     }
 
     this.canDeleteCipher$ = this.cipherAuthorizationService.canDeleteCipher$(this.cipher, [
@@ -155,14 +165,11 @@ export class ViewComponent implements OnInit {
    */
   protected async deleteCipher(): Promise<void> {
     const asAdmin = this.organization?.canEditAllCiphers;
-    const activeUserId = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.id)),
-    );
-
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     if (this.cipher.isDeleted) {
-      await this.cipherService.deleteWithServer(this.cipher.id, activeUserId, asAdmin);
+      await this.cipherService.deleteWithServer(this.cipher.id, userId, asAdmin);
     } else {
-      await this.cipherService.softDeleteWithServer(this.cipher.id, activeUserId, asAdmin);
+      await this.cipherService.softDeleteWithServer(this.cipher.id, userId, asAdmin);
     }
   }
 

@@ -25,6 +25,7 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
   constructor(
     protected cipherService: CipherService,
     protected organizationService: OrganizationService,
+    accountService: AccountService,
     modalService: ModalService,
     passwordRepromptService: PasswordRepromptService,
     i18nService: I18nService,
@@ -36,6 +37,7 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
       modalService,
       passwordRepromptService,
       organizationService,
+      accountService,
       i18nService,
       accountService,
       syncService,

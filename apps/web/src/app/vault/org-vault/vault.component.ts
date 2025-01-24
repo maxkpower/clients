@@ -214,19 +214,24 @@ export class VaultComponent implements OnInit, OnDestroy {
   private resellerManagedOrgAlert: boolean;
   private vaultItemDialogRef?: DialogRef<VaultItemDialogResult> | undefined;
 
-  private readonly unpaidSubscriptionDialog$ = this.organizationService.organizations$.pipe(
-    filter((organizations) => organizations.length === 1),
-    map(([organization]) => organization),
-    switchMap((organization) =>
-      from(this.billingApiService.getOrganizationBillingMetadata(organization.id)).pipe(
-        tap((organizationMetaData) => {
-          this.hasSubscription$.next(organizationMetaData.hasSubscription);
-        }),
-        switchMap((organizationMetaData) =>
-          from(
-            this.trialFlowService.handleUnpaidSubscriptionDialog(
-              organization,
-              organizationMetaData,
+  private readonly unpaidSubscriptionDialog$ = this.accountService.activeAccount$.pipe(
+    map((account) => account?.id),
+    switchMap((id) =>
+      this.organizationService.organizations$(id).pipe(
+        filter((organizations) => organizations.length === 1),
+        map(([organization]) => organization),
+        switchMap((organization) =>
+          from(this.billingApiService.getOrganizationBillingMetadata(organization.id)).pipe(
+            tap((organizationMetaData) => {
+              this.hasSubscription$.next(organizationMetaData.hasSubscription);
+            }),
+            switchMap((organizationMetaData) =>
+              from(
+                this.trialFlowService.handleUnpaidSubscriptionDialog(
+                  organization,
+                  organizationMetaData,
+                ),
+              ),
             ),
           ),
         ),
@@ -296,10 +301,19 @@ export class VaultComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
     );
 
-    const organization$ = organizationId$.pipe(
-      switchMap((organizationId) => this.organizationService.get$(organizationId)),
-      takeUntil(this.destroy$),
-      shareReplay({ refCount: false, bufferSize: 1 }),
+    const organization$ = this.accountService.activeAccount$.pipe(
+      map((account) => account?.id),
+      switchMap((id) =>
+        organizationId$.pipe(
+          switchMap((organizationId) =>
+            this.organizationService
+              .organizations$(id)
+              .pipe(map((organizations) => organizations.find((org) => org.id === organizationId))),
+          ),
+          takeUntil(this.destroy$),
+          shareReplay({ refCount: false, bufferSize: 1 }),
+        ),
+      ),
     );
 
     const firstSetup$ = combineLatest([organization$, this.route.queryParams]).pipe(
