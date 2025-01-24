@@ -61,7 +61,7 @@ describe("AtRiskPasswordsComponent", () => {
 
   let mockTasks$: BehaviorSubject<SecurityTask[]>;
   let mockCiphers$: BehaviorSubject<CipherView[]>;
-  let mockOrg$: BehaviorSubject<Organization>;
+  let mockOrgs$: BehaviorSubject<Organization[]>;
   let mockAutofillOnPageLoad$: BehaviorSubject<boolean>;
   const setAutofillOnPageLoad = jest.fn();
   const mockToastService = mock<ToastService>();
@@ -87,10 +87,12 @@ describe("AtRiskPasswordsComponent", () => {
         name: "Item 2",
       } as CipherView,
     ]);
-    mockOrg$ = new BehaviorSubject<Organization>({
-      id: "org",
-      name: "Org 1",
-    } as Organization);
+    mockOrgs$ = new BehaviorSubject<Organization[]>([
+      {
+        id: "org",
+        name: "Org 1",
+      } as Organization,
+    ]);
 
     mockAutofillOnPageLoad$ = new BehaviorSubject<boolean>(false);
     setAutofillOnPageLoad.mockClear();
@@ -108,7 +110,7 @@ describe("AtRiskPasswordsComponent", () => {
         {
           provide: OrganizationService,
           useValue: {
-            get$: () => mockOrg$,
+            organizations$: () => mockOrgs$,
           },
         },
         {
