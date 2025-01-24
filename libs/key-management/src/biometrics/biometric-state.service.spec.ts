@@ -7,11 +7,9 @@ import {
   FakeStateProvider,
   FakeGlobalState,
   FakeSingleUserState,
-} from "@bitwarden/common/spec";
-import {
   FakeAccountService,
   mockAccountServiceWith,
-} from "@bitwarden/common/spec/fake-account-service";
+} from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 
 import { BiometricStateService, DefaultBiometricStateService } from "./biometric-state.service";
