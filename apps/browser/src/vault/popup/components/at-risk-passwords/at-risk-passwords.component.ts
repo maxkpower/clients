@@ -4,7 +4,10 @@ import { Router } from "@angular/router";
 import { combineLatest, map, of, shareReplay, startWith, switchMap } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  getOrganizationById,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -58,11 +61,13 @@ export class AtRiskPasswordsComponent {
           filterOutNullish(),
           map((ciphers) => Object.fromEntries(ciphers.map((c) => [c.id, c]))),
         ),
+        of(user),
       ]),
     ),
-    map(([tasks, ciphers]) => ({
+    map(([tasks, ciphers, user]) => ({
       tasks,
       ciphers,
+      userId: user.id,
     })),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
@@ -86,17 +91,14 @@ export class AtRiskPasswordsComponent {
   );
 
   protected pageDescription$ = this.activeUserData$.pipe(
-    switchMap(({ tasks }) => {
+    switchMap(({ tasks, userId }) => {
       const orgIds = new Set(tasks.map((t) => t.organizationId));
       if (orgIds.size === 1) {
         const [orgId] = orgIds;
-        return this.organizationService
-          .get$(orgId)
-          .pipe(
-            map((org) =>
-              this.i18nService.t("atRiskPasswordsDescSingleOrg", org?.name, tasks.length),
-            ),
-          );
+        return this.organizationService.organizations$(userId).pipe(
+          getOrganizationById(orgId),
+          map((org) => this.i18nService.t("atRiskPasswordsDescSingleOrg", org?.name, tasks.length)),
+        );
       }
 
       return of(this.i18nService.t("atRiskPasswordsDescMultiOrg", tasks.length));
