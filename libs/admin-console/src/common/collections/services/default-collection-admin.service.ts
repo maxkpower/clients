@@ -30,6 +30,8 @@ export class DefaultCollectionAdminService implements CollectionAdminService {
     const collectionResponse =
       await this.apiService.getManyCollectionsWithAccessDetails(organizationId);
 
+      console.log("COLLECTIONRESPONSE {0}", collectionResponse);
+      
     if (collectionResponse?.data == null || collectionResponse.data.length === 0) {
       return [];
     }

@@ -19,6 +19,7 @@ import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { InactiveTwoFactorReportComponent as BaseInactiveTwoFactorReportComponent } from "../../../tools/reports/pages/inactive-two-factor-report.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-inactive-two-factor-report",
@@ -40,6 +41,7 @@ export class InactiveTwoFactorReportComponent
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
   ) {
     super(
       cipherService,
@@ -51,6 +53,7 @@ export class InactiveTwoFactorReportComponent
       i18nService,
       syncService,
       cipherFormConfigService,
+      adminConsoleCipherFormConfigService
     );
   }
 

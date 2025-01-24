@@ -12,6 +12,7 @@ import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
 import { CipherReportComponent } from "./cipher-report.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 type ReportResult = CipherView & { exposedXTimes: number };
 
@@ -32,6 +33,7 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
   ) {
     super(
       cipherService,
@@ -42,6 +44,7 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
       i18nService,
       syncService,
       cipherFormConfigService,
+      adminConsoleCipherFormConfigService,
     );
   }
 

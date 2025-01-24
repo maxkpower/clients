@@ -20,6 +20,7 @@ import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { WeakPasswordsReportComponent as BaseWeakPasswordsReportComponent } from "../../../tools/reports/pages/weak-passwords-report.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-weak-passwords-report",
@@ -43,6 +44,7 @@ export class WeakPasswordsReportComponent
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
     protected accountService: AccountService,
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
   ) {
     super(
       cipherService,
@@ -54,6 +56,7 @@ export class WeakPasswordsReportComponent
       i18nService,
       syncService,
       cipherFormConfigService,
+      adminConsoleCipherFormConfigService
     );
   }
 

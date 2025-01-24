@@ -25,6 +25,7 @@ import {
   VaultItemDialogMode,
   VaultItemDialogResult,
 } from "../../../vault/components/vault-item-dialog/vault-item-dialog.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Directive()
 export class CipherReportComponent implements OnDestroy {
@@ -58,6 +59,7 @@ export class CipherReportComponent implements OnDestroy {
     protected i18nService: I18nService,
     private syncService: SyncService,
     private cipherFormConfigService: CipherFormConfigService,
+    private adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
   ) {
     this.organizations$ = this.accountService.activeAccount$.pipe(
       switchMap((account) => this.organizationService.organizations$(account?.id)),
@@ -144,14 +146,26 @@ export class CipherReportComponent implements OnDestroy {
     if (!(await this.repromptCipher(cipher))) {
       return;
     }
+    
+      console.error("here");
 
-    const cipherFormConfig = await this.cipherFormConfigService.buildConfig(
-      "edit",
-      cipher.id as CipherId,
-      cipher.type,
-    );
-
-    await this.openVaultItemDialog("view", cipherFormConfig);
+      if(this.organization){
+        const adminCipherFormConfig = await this.adminConsoleCipherFormConfigService.buildConfig(
+          "edit",
+          cipher.id as CipherId,
+          cipher.type,
+        );
+  
+        console.error("failed");
+        await this.openVaultItemDialog("view", adminCipherFormConfig);
+      } else {
+        const cipherFormConfig = await this.cipherFormConfigService.buildConfig(
+          "edit",
+          cipher.id as CipherId,
+          cipher.type,
+        );
+        await this.openVaultItemDialog("view", cipherFormConfig);
+      }
   }
 
   /**

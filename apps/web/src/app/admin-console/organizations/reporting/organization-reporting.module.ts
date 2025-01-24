@@ -8,6 +8,9 @@ import { ReportsSharedModule } from "../../../tools/reports";
 
 import { OrganizationReportingRoutingModule } from "./organization-reporting-routing.module";
 import { ReportsHomeComponent } from "./reports-home.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+import { RoutedVaultFilterService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter.service";
+import { RoutedVaultFilterBridgeService } from "../../../vault/individual-vault/vault-filter/services/routed-vault-filter-bridge.service";
 
 @NgModule({
   imports: [
@@ -20,8 +23,11 @@ import { ReportsHomeComponent } from "./reports-home.component";
   providers: [
     {
       provide: CipherFormConfigService,
-      useClass: DefaultCipherFormConfigService,
+      useClass: AdminConsoleCipherFormConfigService,
     },
+    AdminConsoleCipherFormConfigService,
+    RoutedVaultFilterService,
+    RoutedVaultFilterBridgeService,
   ],
 })
 export class OrganizationReportingModule {}

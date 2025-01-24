@@ -25,6 +25,7 @@ export class RoutedVaultFilterService implements OnDestroy {
   filter$: Observable<RoutedVaultFilterModel>;
 
   constructor(activatedRoute: ActivatedRoute) {
+    console.log("constructor for routed vault filter service {0} {1} ", activatedRoute.paramMap, activatedRoute.queryParamMap);
     this.filter$ = combineLatest([activatedRoute.paramMap, activatedRoute.queryParamMap]).pipe(
       map(([params, queryParams]) => {
         const unsafeType = queryParams.get("type");

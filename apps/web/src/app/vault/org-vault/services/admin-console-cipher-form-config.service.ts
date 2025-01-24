@@ -22,6 +22,7 @@ import {
   CipherFormMode,
 } from "../../../../../../../libs/vault/src/cipher-form/abstractions/cipher-form-config.service";
 import { RoutedVaultFilterService } from "../../individual-vault/vault-filter/services/routed-vault-filter.service";
+import { RoutedVaultFilterBridgeService } from "../../individual-vault/vault-filter/services/routed-vault-filter-bridge.service";
 
 /** Admin Console implementation of the `CipherFormConfigService`. */
 @Injectable()
@@ -33,13 +34,18 @@ export class AdminConsoleCipherFormConfigService implements CipherFormConfigServ
   private cipherService: CipherService = inject(CipherService);
   private apiService: ApiService = inject(ApiService);
   private accountService: AccountService = inject(AccountService);
+  private routedVaultFilterBridgeService: RoutedVaultFilterBridgeService = inject(RoutedVaultFilterBridgeService);
 
   private allowPersonalOwnership$ = this.policyService
     .policyAppliesToActiveUser$(PolicyType.PersonalOwnership)
     .pipe(map((p) => !p));
 
   private organizationId$ = this.routedVaultFilterService.filter$.pipe(
-    map((filter) => filter.organizationId),
+    map((filter) => {
+      filter.organizationId
+      console.log("filter {0}", filter);
+      return filter.organizationId
+    }),
     filter((filter) => filter !== undefined),
   );
 
@@ -68,6 +74,12 @@ export class AdminConsoleCipherFormConfigService implements CipherFormConfigServ
     cipherId?: CipherId,
     cipherType?: CipherType,
   ): Promise<CipherFormConfig> {
+
+    this.organization$.subscribe(value => console.log("1 organization$ emitted:", value));
+    this.allowPersonalOwnership$.subscribe(value => console.log("2 allowPersonalOwnership$ emitted:", value));
+    this.allOrganizations$.subscribe(value => console.log("3 allOrganizations$ emitted:", value));
+    this.allCollections$.subscribe(value => console.log("4 allCollections$ emitted:", value));
+    
     const [organization, allowPersonalOwnership, allOrganizations, allCollections] =
       await firstValueFrom(
         combineLatest([
@@ -78,6 +90,8 @@ export class AdminConsoleCipherFormConfigService implements CipherFormConfigServ
         ]),
       );
 
+      console.log("Building config with mode:", mode, "cipherId:", cipherId, "cipherType:", cipherType);
+
     // When cloning from within the Admin Console, all organizations should be available.
     // Otherwise only the one in context should be
     const organizations = mode === "clone" ? allOrganizations : [organization];
@@ -85,6 +99,7 @@ export class AdminConsoleCipherFormConfigService implements CipherFormConfigServ
     // the policies are enabled for it.
     const allowPersonalOwnershipOnlyForClone = mode === "clone" ? allowPersonalOwnership : false;
     const cipher = await this.getCipher(cipherId, organization);
+    console.error("cipher");
     return {
       mode,
       cipherType: cipher?.type ?? cipherType ?? CipherType.Login,

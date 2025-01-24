@@ -19,6 +19,7 @@ import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { ReusedPasswordsReportComponent as BaseReusedPasswordsReportComponent } from "../../../tools/reports/pages/reused-passwords-report.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-reused-passwords-report",
@@ -41,6 +42,7 @@ export class ReusedPasswordsReportComponent
     i18nService: I18nService,
     syncService: SyncService,
     cipherFormConfigService: CipherFormConfigService,
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
   ) {
     super(
       cipherService,
@@ -51,6 +53,7 @@ export class ReusedPasswordsReportComponent
       i18nService,
       syncService,
       cipherFormConfigService,
+      adminConsoleCipherFormConfigService,
     );
   }
 

@@ -19,6 +19,7 @@ import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vau
 
 // eslint-disable-next-line no-restricted-imports
 import { UnsecuredWebsitesReportComponent as BaseUnsecuredWebsitesReportComponent } from "../../../tools/reports/pages/unsecured-websites-report.component";
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
 
 @Component({
   selector: "app-unsecured-websites-report",
@@ -40,6 +41,7 @@ export class UnsecuredWebsitesReportComponent
     syncService: SyncService,
     collectionService: CollectionService,
     cipherFormConfigService: CipherFormConfigService,
+    adminConsoleCipherFormConfigService: AdminConsoleCipherFormConfigService
   ) {
     super(
       cipherService,
@@ -51,6 +53,7 @@ export class UnsecuredWebsitesReportComponent
       syncService,
       collectionService,
       cipherFormConfigService,
+      adminConsoleCipherFormConfigService
     );
   }
 
