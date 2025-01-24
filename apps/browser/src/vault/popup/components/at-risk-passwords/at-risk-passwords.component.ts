@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { combineLatest, map, of, shareReplay, startWith, switchMap } from "rxjs";
 
@@ -9,11 +9,19 @@ import {
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { BadgeComponent, ItemModule, TypographyModule } from "@bitwarden/components";
+import {
+  BadgeComponent,
+  ButtonModule,
+  CalloutModule,
+  ItemModule,
+  ToastService,
+  TypographyModule,
+} from "@bitwarden/components";
 import {
   filterOutNullish,
   OrgIconDirective,
@@ -39,6 +47,8 @@ import { PopupPageComponent } from "../../../../platform/popup/layout/popup-page
     BadgeComponent,
     TypographyModule,
     OrgIconDirective,
+    CalloutModule,
+    ButtonModule,
   ],
   templateUrl: "./at-risk-passwords.component.html",
 })
@@ -51,6 +61,8 @@ export class AtRiskPasswordsComponent {
   private platformUtilsService = inject(PlatformUtilsService);
   private passwordRepromptService = inject(PasswordRepromptService);
   private router = inject(Router);
+  private autofillSettingsService = inject(AutofillSettingsServiceAbstraction);
+  private toastService = inject(ToastService);
 
   private activeUserData$ = this.accountService.activeAccount$.pipe(
     filterOutNullish(),
@@ -76,6 +88,9 @@ export class AtRiskPasswordsComponent {
     map(() => false),
     startWith(true),
   );
+
+  protected autofillOnPageLoad$ = this.autofillSettingsService.autofillOnPageLoad$;
+  protected calloutDismissed = signal(false);
 
   protected atRiskItems$ = this.activeUserData$.pipe(
     map(({ tasks, ciphers }) =>
@@ -119,5 +134,14 @@ export class AtRiskPasswordsComponent {
     if (cipher.login?.uri) {
       this.platformUtilsService.launchUri(cipher.login.uri);
     }
+  }
+
+  async activateAutofillOnPageLoad() {
+    await this.autofillSettingsService.setAutofillOnPageLoad(true);
+    this.toastService.showToast({
+      variant: "success",
+      message: this.i18nService.t("turnedOnAutofill"),
+      title: "",
+    });
   }
 }
