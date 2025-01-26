@@ -13,7 +13,6 @@ import {
   closeTwoFactorAuthWebAuthnPopout,
 } from "../popup/utils/auth-popout-window";
 
-// TODO: add tests
 export class ExtensionTwoFactorAuthComponentService
   extends DefaultTwoFactorAuthComponentService
   implements TwoFactorAuthComponentService
