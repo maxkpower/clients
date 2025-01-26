@@ -65,7 +65,7 @@ describe("VaultOnboardingComponent", () => {
         { provide: VaultOnboardingServiceAbstraction, useValue: mockVaultOnboardingService },
         { provide: I18nService, useValue: mockI18nService },
         { provide: ApiService, useValue: mockApiService },
-        { provide: StateProvider, useValue: mockStateProvider },
+        { provide: StateProvider, useValue: fakeStateProvider },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: AccountService, useValue: mockAccountService },
       ],
