@@ -8,11 +8,7 @@ import { TotpService as TotpServiceAbstraction } from "../abstractions/totp.serv
 export class TotpService implements TotpServiceAbstraction {
   constructor(private sdkService: SdkService) {}
 
-  async getCode(key: string | undefined): Promise<TotpResponse | undefined> {
-    if (!key) {
-      return undefined;
-    }
-
+  async getCode(key: string): Promise<TotpResponse> {
     return await firstValueFrom(
       this.sdkService.client$.pipe(
         map((sdk) => {
