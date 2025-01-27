@@ -16,9 +16,6 @@ export class TotpService implements TotpServiceAbstraction {
     return await firstValueFrom(
       this.sdkService.client$.pipe(
         map((sdk) => {
-          if (sdk === undefined) {
-            throw new Error("SDK is undefined");
-          }
           return sdk.vault().totp().generate_totp(key);
         }),
       ),
