@@ -1,10 +1,11 @@
 import { mock } from "jest-mock-extended";
+import { of } from "rxjs";
 
+import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { KeyService } from "@bitwarden/key-management";
 
 import { FakeAccountService, FakeStateProvider, mockAccountServiceWith } from "../../../spec";
 import { ApiService } from "../../abstractions/api.service";
-import { OrganizationService } from "../../admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationData } from "../../admin-console/models/data/organization.data";
 import { Organization } from "../../admin-console/models/domain/organization";
 import { ProfileOrganizationResponse } from "../../admin-console/models/response/profile-organization.response";
@@ -94,7 +95,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, false, "https://key-connector-url.com", 2, false),
         organizationData(true, true, "https://other-url.com", 2, false),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -109,7 +110,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, false, "https://key-connector-url.com", 2, false),
         organizationData(false, false, "https://key-connector-url.com", 2, false),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -124,7 +125,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, true, "https://key-connector-url.com", 0, false),
         organizationData(true, true, "https://key-connector-url.com", 1, false),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -139,7 +140,7 @@ describe("KeyConnectorService", () => {
         organizationData(true, true, "https://key-connector-url.com", 2, true),
         organizationData(false, true, "https://key-connector-url.com", 2, true),
       ];
-      organizationService.getAll.mockResolvedValue(orgs);
+      organizationService.organizations$.mockReturnValue(of(orgs));
 
       // Act
       const result = await keyConnectorService.getManagingOrganization();
@@ -180,7 +181,7 @@ describe("KeyConnectorService", () => {
 
       // create organization object
       const data = organizationData(true, true, "https://key-connector-url.com", 2, false);
-      organizationService.getAll.mockResolvedValue([data]);
+      organizationService.organizations$.mockReturnValue(of([data]));
 
       // uses KeyConnector
       const state = stateProvider.activeUser.getFake(USES_KEY_CONNECTOR);
@@ -194,7 +195,7 @@ describe("KeyConnectorService", () => {
     it("should return false if the user does not need migration", async () => {
       tokenService.getIsExternal.mockResolvedValue(false);
       const data = organizationData(false, false, "https://key-connector-url.com", 2, false);
-      organizationService.getAll.mockResolvedValue([data]);
+      organizationService.organizations$.mockReturnValue(of([data]));
 
       const state = stateProvider.activeUser.getFake(USES_KEY_CONNECTOR);
       state.nextState(true);
@@ -274,7 +275,7 @@ describe("KeyConnectorService", () => {
       const masterKey = getMockMasterKey();
       const keyConnectorRequest = new KeyConnectorUserKeyRequest(masterKey.encKeyB64);
       const error = new Error("Failed to post user key to key connector");
-      organizationService.getAll.mockResolvedValue([organization]);
+      organizationService.organizations$.mockReturnValue(of([organization]));
 
       masterPasswordService.masterKeySubject.next(masterKey);
       jest.spyOn(keyConnectorService, "getManagingOrganization").mockResolvedValue(organization);
