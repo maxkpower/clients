@@ -7,9 +7,7 @@
       // TODO: Remove once circular dependencies in admin-console, auth and key-management are resolved
       "@bitwarden/common/*": ["../common/src/*"],
       "@bitwarden/key-management": ["../key-management/src"],
-      "@bitwarden/platform": ["../platform/src"],
-      // TODO: Remove once billing stops depending on components
-      "@bitwarden/ui-common": ["../ui/common/src"]
+      "@bitwarden/platform": ["../platform/src"]
     }
   },
   "include": ["src", "spec", "./custom-matchers.d.ts", "../key-management/src/index.ts"],
