@@ -4,7 +4,6 @@ import { By } from "@angular/platform-browser";
 import { mock } from "jest-mock-extended";
 import { BehaviorSubject } from "rxjs";
 
-import { CopyClickDirective } from "@bitwarden/angular/directives/copy-click.directive";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions";
@@ -18,8 +17,12 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { Fido2CredentialView } from "@bitwarden/common/vault/models/view/fido2-credential.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
-import { BitFormFieldComponent, ToastService } from "@bitwarden/components";
+import { CopyClickDirective, BitFormFieldComponent, ToastService } from "@bitwarden/components";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { ColorPasswordComponent } from "@bitwarden/components/src/color-password/color-password.component";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { BitPasswordInputToggleDirective } from "@bitwarden/components/src/form-field/password-input-toggle.directive";
 
 import { LoginCredentialsViewComponent } from "./login-credentials-view.component";
