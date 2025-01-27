@@ -25,7 +25,7 @@ describe("BillingNotificationService", () => {
       expect(logService.error).toHaveBeenCalledWith(error);
       expect(toastService.showToast).toHaveBeenCalledWith({
         variant: "error",
-        title: null,
+        title: "",
         message: error.getSingleMessage(),
       });
     });
@@ -46,7 +46,7 @@ describe("BillingNotificationService", () => {
 
       expect(toastService.showToast).toHaveBeenCalledWith({
         variant: "success",
-        title: null,
+        title: "",
         message,
       });
     });
