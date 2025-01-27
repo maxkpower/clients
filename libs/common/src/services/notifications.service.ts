@@ -87,22 +87,34 @@ export class NotificationsService implements NotificationsServiceAbstraction {
         transport: signalR.HttpTransportType.WebSockets,
       })
       .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol() as signalR.IHubProtocol)
-      // .configureLogging(signalR.LogLevel.Trace)
+      .configureLogging(signalR.LogLevel.Debug)
       .build();
 
-    this.signalrConnection.on("ReceiveMessage", (data: any) =>
-      this.processNotification(new NotificationResponse(data)),
-    );
-    // eslint-disable-next-line
-    this.signalrConnection.on("Heartbeat", (data: any) => {
-      /*console.log('Heartbeat!');*/
+    this.signalrConnection.on("ReceiveMessage", (data: any) => {
+      this.logService.info("SignalR - Received message:", data);
+      void this.processNotification(new NotificationResponse(data));
     });
-    this.signalrConnection.onclose(() => {
+
+    this.signalrConnection.on("Heartbeat", (data: any) => {
+      this.logService.info("SignalR - Heartbeat received:", data);
+    });
+
+    this.signalrConnection.onclose((error?: Error) => {
+      this.logService.info("SignalR - Connection closed", error ? error : "");
       this.connected = false;
       // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this.reconnect(true);
     });
+
+    this.signalrConnection.onreconnecting((error?: Error) => {
+      this.logService.info("SignalR - Attempting to reconnect", error ? error : "");
+    });
+
+    this.signalrConnection.onreconnected((connectionId?: string) => {
+      this.logService.info("SignalR - Reconnected with connection ID:", connectionId);
+    });
+
     this.inited = true;
     if (await this.isAuthedAndUnlocked()) {
       await this.reconnect(false);
