@@ -2,18 +2,15 @@
 // @ts-strict-ignore
 import {
   BehaviorSubject,
-  combineLatest,
   concatMap,
   distinctUntilChanged,
   endWith,
   filter,
-  first,
   firstValueFrom,
   ignoreElements,
   map,
   Observable,
   ReplaySubject,
-  share,
   switchMap,
   takeUntil,
   withLatestFrom,
@@ -32,9 +29,9 @@ import {
   SingleUserDependency,
   UserDependency,
 } from "@bitwarden/common/tools/dependencies";
-import { IntegrationId, IntegrationMetadata } from "@bitwarden/common/tools/integration";
+import { IntegrationMetadata } from "@bitwarden/common/tools/integration";
 import { RestClient } from "@bitwarden/common/tools/integration/rpc";
-import { anyComplete } from "@bitwarden/common/tools/rx";
+import { anyComplete, withLatestReady } from "@bitwarden/common/tools/rx";
 import { UserStateSubject } from "@bitwarden/common/tools/state/user-state-subject";
 import { UserId } from "@bitwarden/common/types/guid";
 
@@ -55,6 +52,7 @@ import {
   CredentialPreference,
   isForwarderIntegration,
   ForwarderIntegration,
+  GenerateRequest,
 } from "../types";
 import {
   CredentialGeneratorConfiguration as Configuration,
@@ -67,19 +65,7 @@ import { PREFERENCES } from "./credential-preferences";
 
 type Policy$Dependencies = UserDependency;
 type Settings$Dependencies = Partial<UserDependency>;
-type Generate$Dependencies = Simplify<Partial<OnDependency> & Partial<UserDependency>> & {
-  /** Emits the active website when subscribed.
-   *
-   *  The generator does not respond to emissions of this interface;
-   *  If it is provided, the generator blocks until a value becomes available.
-   *  When `website$` is omitted, the generator uses the empty string instead.
-   *  When `website$` completes, the generator completes.
-   *  When `website$` errors, the generator forwards the error.
-   */
-  website$?: Observable<string>;
-
-  integration$?: Observable<IntegrationId>;
-};
+type Generate$Dependencies = Simplify<OnDependency<GenerateRequest> & Partial<UserDependency>>;
 
 type Algorithms$Dependencies = Partial<UserDependency>;
 
@@ -109,34 +95,20 @@ export class CredentialGeneratorService {
 
   /** Generates a stream of credentials
    * @param configuration determines which generator's settings are loaded
-   * @param dependencies.on$ when specified, a new credential is emitted when
-   *   this emits. Otherwise, a new credential is emitted when the settings
-   *   update.
+   * @param dependencies.on$ Required. A new credential is emitted when this emits.
    */
   generate$<Settings extends object, Policy>(
     configuration: Readonly<Configuration<Settings, Policy>>,
-    dependencies?: Generate$Dependencies,
+    dependencies: Generate$Dependencies,
   ) {
-    // instantiate the engine
     const engine = configuration.engine.create(this.getDependencyProvider());
-
-    // stream blocks until all of these values are received
     const settings$ = this.settings$(configuration, dependencies);
 
-    // Handle the on$ emissions which now include the website data
-    const on$ =
-      dependencies?.on$ ?? new BehaviorSubject<{ website: string | null }>({ website: null });
-    // Ensure that settings are loaded before proceeding
-    const ready$ = combineLatest([settings$, on$]).pipe(first(), share());
-
-    // Generation logic
-    const generate$ = ready$.pipe(
-      withLatestFrom(on$, settings$),
-      concatMap(([, { website }, settings]) => {
-        const request = { website };
-        return engine.generate(request, settings);
-      }),
-      takeUntil(anyComplete([on$, settings$])),
+    // generation proper
+    const generate$ = dependencies.on$.pipe(
+      withLatestReady(settings$),
+      concatMap(([request, settings]) => engine.generate(request, settings)),
+      takeUntil(anyComplete([settings$])),
     );
 
     return generate$;
@@ -245,7 +217,8 @@ export class CredentialGeneratorService {
       category: generator.category,
       name: integration ? integration.name : this.i18nService.t(generator.nameKey),
       generate: this.i18nService.t(generator.generateKey),
-      generatedValue: this.i18nService.t(generator.generatedValueKey),
+      onGeneratedMessage: this.i18nService.t(generator.onGeneratedMessageKey),
+      credentialType: this.i18nService.t(generator.credentialTypeKey),
       copy: this.i18nService.t(generator.copyKey),
       useGeneratedValue: this.i18nService.t(generator.useGeneratedValueKey),
       onlyOnRequest: generator.onlyOnRequest,
