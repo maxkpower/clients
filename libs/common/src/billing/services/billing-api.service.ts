@@ -5,7 +5,6 @@ import { ApiService } from "../../abstractions/api.service";
 import { OrganizationCreateRequest } from "../../admin-console/models/request/organization-create.request";
 import { ProviderOrganizationOrganizationDetailsResponse } from "../../admin-console/models/response/provider/provider-organization.response";
 import { ListResponse } from "../../models/response/list.response";
-import { LogService } from "../../platform/abstractions/log.service";
 import { BillingApiServiceAbstraction } from "../abstractions";
 import { PaymentMethodType } from "../enums";
 import { CreateClientOrganizationRequest } from "../models/request/create-client-organization.request";
@@ -21,10 +20,7 @@ import { PlanResponse } from "../models/response/plan.response";
 import { ProviderSubscriptionResponse } from "../models/response/provider-subscription-response";
 
 export class BillingApiService implements BillingApiServiceAbstraction {
-  constructor(
-    private apiService: ApiService,
-    private logService: LogService,
-  ) {}
+  constructor(private apiService: ApiService) {}
 
   cancelOrganizationSubscription(
     organizationId: string,
