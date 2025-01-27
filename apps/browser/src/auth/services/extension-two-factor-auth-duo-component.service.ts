@@ -12,7 +12,6 @@ interface Message {
   code: string;
   state: string;
 }
-// TODO: add tests
 
 export class ExtensionTwoFactorAuthDuoComponentService implements TwoFactorAuthDuoComponentService {
   constructor(
