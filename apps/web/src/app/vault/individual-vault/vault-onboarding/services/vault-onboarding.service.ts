@@ -27,15 +27,18 @@ const VAULT_ONBOARDING_KEY = new UserKeyDefinition<VaultOnboardingTasks>(
 );
 @Injectable()
 export class VaultOnboardingService implements VaultOnboardingServiceAbstraction {
-  vaultOnboardingTasksState: SingleUserState<VaultOnboardingTasks> | null = null;
   constructor(private stateProvider: StateProvider) {}
 
-  vaultOnboardingState$(userId: UserId): Observable<VaultOnboardingTasks | null> {
-    this.vaultOnboardingTasksState = this.stateProvider.getUser(userId, VAULT_ONBOARDING_KEY);
-    return this.vaultOnboardingTasksState.state$;
+  private vaultOnboardingState(userId: UserId): SingleUserState<VaultOnboardingTasks> {
+    return this.stateProvider.getUser(userId, VAULT_ONBOARDING_KEY);
   }
 
-  async setVaultOnboardingTasks(newState: VaultOnboardingTasks): Promise<void> {
-    await this.vaultOnboardingTasksState?.update(() => ({ ...newState }));
+  vaultOnboardingState$(userId: UserId): Observable<VaultOnboardingTasks | null> {
+    return this.vaultOnboardingState(userId).state$;
+  }
+
+  async setVaultOnboardingTasks(userId: UserId, newState: VaultOnboardingTasks): Promise<void> {
+    const state = this.vaultOnboardingState(userId);
+    await state.update(() => ({ ...newState }));
   }
 }

@@ -13,7 +13,11 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { StateProvider } from "@bitwarden/common/platform/state";
-import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
+import {
+  FakeAccountService,
+  FakeStateProvider,
+  mockAccountServiceWith,
+} from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { VaultOnboardingMessages } from "@bitwarden/common/vault/enums/vault-onboarding.enum";
@@ -29,11 +33,11 @@ describe("VaultOnboardingComponent", () => {
   let mockPolicyService: MockProxy<PolicyService>;
   let mockI18nService: MockProxy<I18nService>;
   let mockVaultOnboardingService: MockProxy<VaultOnboardingServiceAbstraction>;
-  let mockStateProvider: Partial<StateProvider>;
   let setInstallExtLinkSpy: any;
   let individualVaultPolicyCheckSpy: any;
   let mockConfigService: MockProxy<ConfigService>;
   const mockAccountService: FakeAccountService = mockAccountServiceWith(Utils.newGuid() as UserId);
+  const fakeStateProvider = new FakeStateProvider(mockAccountService);
 
   beforeEach(() => {
     mockPolicyService = mock<PolicyService>();
@@ -43,16 +47,6 @@ describe("VaultOnboardingComponent", () => {
       getProfile: jest.fn(),
     };
     mockVaultOnboardingService = mock<VaultOnboardingServiceAbstraction>();
-    mockStateProvider = {
-      activeUserId$: of(Utils.newGuid() as UserId),
-      getUser: jest.fn().mockReturnValue(
-        of({
-          createAccount: true,
-          importData: false,
-          installExtension: false,
-        }),
-      ),
-    };
     mockConfigService = mock<ConfigService>();
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises

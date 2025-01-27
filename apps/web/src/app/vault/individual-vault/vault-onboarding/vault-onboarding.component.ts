@@ -11,7 +11,7 @@ import {
   SimpleChanges,
   OnChanges,
 } from "@angular/core";
-import { Subject, takeUntil, Observable, firstValueFrom, fromEvent, switchMap, map } from "rxjs";
+import { Subject, takeUntil, Observable, firstValueFrom, fromEvent } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -19,9 +19,11 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { UserId } from "@bitwarden/common/types/guid";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { VaultOnboardingMessages } from "@bitwarden/common/vault/enums/vault-onboarding.enum";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -61,8 +63,7 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
   protected showOnboarding = false;
   protected extensionRefreshEnabled = false;
 
-  private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
-
+  private activeId: UserId;
   constructor(
     protected platformUtilsService: PlatformUtilsService,
     protected policyService: PolicyService,
@@ -73,9 +74,8 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    this.onboardingTasks$ = this.activeUserId$.pipe(
-      switchMap((userId) => this.vaultOnboardingService.vaultOnboardingState$(userId)),
-    );
+    this.activeId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    this.onboardingTasks$ = this.vaultOnboardingService.vaultOnboardingState$(this.activeId);
 
     await this.setOnboardingTasks();
     this.setInstallExtLink();
@@ -94,7 +94,7 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
         importData: this.ciphers.length > 0,
         installExtension: currentTasks.installExtension,
       };
-      await this.vaultOnboardingService.setVaultOnboardingTasks(updatedTasks);
+      await this.vaultOnboardingService.setVaultOnboardingTasks(this.activeId, updatedTasks);
     }
   }
 
@@ -123,7 +123,7 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
         importData: currentTasks.importData,
         installExtension: true,
       };
-      await this.vaultOnboardingService.setVaultOnboardingTasks(updatedTasks);
+      await this.vaultOnboardingService.setVaultOnboardingTasks(this.activeId, updatedTasks);
     }
   }
 
@@ -166,7 +166,7 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
 
   private async saveCompletedTasks(vaultTasks: VaultOnboardingTasks) {
     this.showOnboarding = Object.values(vaultTasks).includes(false);
-    await this.vaultOnboardingService.setVaultOnboardingTasks(vaultTasks);
+    await this.vaultOnboardingService.setVaultOnboardingTasks(this.activeId, vaultTasks);
   }
 
   individualVaultPolicyCheck() {
