@@ -8,8 +8,6 @@ import { openTwoFactorAuthEmailPopout } from "../../auth/popup/utils/auth-popout
 import BrowserPopupUtils from "../../platform/popup/browser-popup-utils";
 
 // TODO: popup state persistence should eventually remove the need for this service
-// TODO: add tests
-
 export class ExtensionTwoFactorAuthEmailComponentService
   extends DefaultTwoFactorAuthEmailComponentService
   implements TwoFactorAuthEmailComponentService
