@@ -15,6 +15,8 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+
 import { cipherData } from "./reports-ciphers.mock";
 import { ReusedPasswordsReportComponent } from "./reused-passwords-report.component";
 
@@ -24,6 +26,7 @@ describe("ReusedPasswordsReportComponent", () => {
   let organizationService: MockProxy<OrganizationService>;
   let syncServiceMock: MockProxy<SyncService>;
   let accountService: FakeAccountService;
+  let adminConsoleCipherFormConfigServiceMock: MockProxy<AdminConsoleCipherFormConfigService>;
   const userId = Utils.newGuid() as UserId;
 
   beforeEach(() => {
@@ -69,6 +72,10 @@ describe("ReusedPasswordsReportComponent", () => {
         {
           provide: CipherFormConfigService,
           useValue: cipherFormConfigServiceMock,
+        },
+        {
+          provide: AdminConsoleCipherFormConfigService,
+          useValue: adminConsoleCipherFormConfigServiceMock,
         },
       ],
       schemas: [],

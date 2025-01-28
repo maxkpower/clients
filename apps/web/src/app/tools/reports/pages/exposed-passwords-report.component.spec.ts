@@ -16,6 +16,8 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { DialogService } from "@bitwarden/components";
 import { CipherFormConfigService, PasswordRepromptService } from "@bitwarden/vault";
 
+import { AdminConsoleCipherFormConfigService } from "../../../vault/org-vault/services/admin-console-cipher-form-config.service";
+
 import { ExposedPasswordsReportComponent } from "./exposed-passwords-report.component";
 import { cipherData } from "./reports-ciphers.mock";
 
@@ -26,6 +28,7 @@ describe("ExposedPasswordsReportComponent", () => {
   let organizationService: MockProxy<OrganizationService>;
   let syncServiceMock: MockProxy<SyncService>;
   let accountService: FakeAccountService;
+  let adminConsoleCipherFormConfigServiceMock: MockProxy<AdminConsoleCipherFormConfigService>;
   const userId = Utils.newGuid() as UserId;
 
   beforeEach(() => {
@@ -75,6 +78,10 @@ describe("ExposedPasswordsReportComponent", () => {
         {
           provide: CipherFormConfigService,
           useValue: cipherFormConfigServiceMock,
+        },
+        {
+          provide: AdminConsoleCipherFormConfigService,
+          useValue: adminConsoleCipherFormConfigServiceMock,
         },
       ],
       schemas: [],
