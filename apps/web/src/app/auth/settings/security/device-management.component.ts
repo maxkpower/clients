@@ -1,19 +1,9 @@
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-  catchError,
-  combineLatest,
-  firstValueFrom,
-  interval,
-  of,
-  retry,
-  share,
-  startWith,
-  switchMap,
-} from "rxjs";
+import { combineLatest, firstValueFrom } from "rxjs";
 
 import { LoginApprovalComponent } from "@bitwarden/auth/angular";
+import { AuthRequestApiService } from "@bitwarden/auth/common";
 import { DevicesServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices/devices.service.abstraction";
 import {
   DevicePendingAuthRequest,
@@ -21,6 +11,7 @@ import {
 } from "@bitwarden/common/auth/abstractions/devices/responses/device.response";
 import { DeviceView } from "@bitwarden/common/auth/abstractions/devices/views/device.view";
 import { DeviceType, DeviceTypeMetadata } from "@bitwarden/common/enums";
+import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
 import {
@@ -63,64 +54,80 @@ export class DeviceManagementComponent {
   loading = true;
   asyncActionLoading = false;
 
-  /** Interval in milliseconds between auto-refresh cycles */
-  private readonly REFRESH_INTERVAL = 10000; // 10 seconds
-  /** Maximum number of retry attempts for failed requests */
-  private readonly MAX_RETRIES = 3;
-
   constructor(
     private i18nService: I18nService,
     private devicesService: DevicesServiceAbstraction,
     private dialogService: DialogService,
     private toastService: ToastService,
     private validationService: ValidationService,
+    private broadcasterService: BroadcasterService,
+    private authRequestApiService: AuthRequestApiService,
   ) {
-    this.initializeAutoRefresh();
+    this.initializeDeviceUpdates();
   }
 
   /**
-   * Initialize real-time updates for device status via an interval
+   * Initialize real-time updates for device status via SignalR
    */
-  private initializeAutoRefresh(): void {
-    const deviceUpdates$ = interval(this.REFRESH_INTERVAL).pipe(
-      // Start emitting immediately, then every REFRESH_INTERVAL ms
-      startWith(0),
-      switchMap(() =>
-        // Combine current device and all devices into a single stream
-        combineLatest([
-          this.devicesService.getCurrentDevice$(),
-          this.devicesService.getDevices$(),
-        ]).pipe(
-          // Retry failed requests up to MAX_RETRIES times
-          retry(this.MAX_RETRIES),
-          // Handle any errors after retries are exhausted
-          catchError((error: unknown) => {
-            this.validationService.showError(error);
-            this.loading = false;
-            // Return default empty values on error
-            return of([null, []] as [DeviceResponse | null, DeviceView[]]);
-          }),
-          // Share the subscription with multiple subscribers
-          share(),
-        ),
-      ),
-    );
+  private initializeDeviceUpdates(): void {
+    // Initial load of devices
+    this.loadDevices().catch((error) => this.validationService.showError(error));
 
-    deviceUpdates$.pipe(takeUntilDestroyed()).subscribe({
-      next: ([currentDevice, devices]: [DeviceResponse | null, DeviceView[]]) => {
-        if (!currentDevice) {
-          this.loading = false;
+    // Listen for auth request notifications
+    this.broadcasterService.subscribe("openLoginApproval", async (message: any) => {
+      try {
+        const requestId = message?.notificationId;
+        if (!requestId) {
           return;
         }
 
-        this.currentDevice = new DeviceView(currentDevice);
-        this.updateDeviceTable(devices);
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
+        const authRequestResponse = await this.authRequestApiService.getAuthRequest(requestId);
+        if (!authRequestResponse) {
+          return;
+        }
+
+        // Add new device to the table
+        const newDevice: DeviceTableData = {
+          id: authRequestResponse.id,
+          type: authRequestResponse.requestDeviceTypeValue,
+          displayName: this.getHumanReadableDeviceType(authRequestResponse.requestDeviceTypeValue),
+          loginStatus: this.i18nService.t("requestPending"),
+          firstLogin: new Date(authRequestResponse.creationDate),
+          trusted: false,
+          devicePendingAuthRequest: {
+            id: authRequestResponse.id,
+            creationDate: authRequestResponse.creationDate,
+          },
+          hasPendingAuthRequest: true,
+        };
+        this.dataSource.data = [newDevice, ...this.dataSource.data];
+      } catch (error) {
+        this.validationService.showError(error);
+      }
     });
+  }
+
+  /**
+   * Load current device and all devices
+   */
+  private async loadDevices(): Promise<void> {
+    try {
+      const [currentDevice, devices] = await firstValueFrom(
+        combineLatest([this.devicesService.getCurrentDevice$(), this.devicesService.getDevices$()]),
+      );
+
+      if (!currentDevice) {
+        this.loading = false;
+        return;
+      }
+
+      this.currentDevice = new DeviceView(currentDevice);
+      this.updateDeviceTable(devices);
+    } catch (error) {
+      this.validationService.showError(error);
+    } finally {
+      this.loading = false;
+    }
   }
 
   /**
@@ -129,6 +136,9 @@ export class DeviceManagementComponent {
    */
   private updateDeviceTable(devices: Array<DeviceView>): void {
     this.dataSource.data = devices.map((device: DeviceView): DeviceTableData => {
+      const hasPendingRequest = device?.response
+        ? this.hasPendingAuthRequest(device.response)
+        : false;
       return {
         id: device.id,
         type: device.type,
@@ -137,9 +147,7 @@ export class DeviceManagementComponent {
         firstLogin: new Date(device.creationDate),
         trusted: device?.response?.isTrusted ?? false,
         devicePendingAuthRequest: device?.response?.devicePendingAuthRequest ?? null,
-        hasPendingAuthRequest: device?.response
-          ? this.hasPendingAuthRequest(device.response)
-          : false,
+        hasPendingAuthRequest: hasPendingRequest,
       };
     });
   }
