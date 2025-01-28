@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject, signal } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Router } from "@angular/router";
-import { combineLatest, map, of, shareReplay, startWith, switchMap } from "rxjs";
+import { combineLatest, firstValueFrom, map, of, shareReplay, startWith, switchMap } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import {
@@ -35,6 +35,8 @@ import { PopOutComponent } from "../../../../platform/popup/components/pop-out.c
 import { PopupHeaderComponent } from "../../../../platform/popup/layout/popup-header.component";
 import { PopupPageComponent } from "../../../../platform/popup/layout/popup-page.component";
 
+import { AtRiskPasswordPageService } from "./at-risk-password-page.service";
+
 @Component({
   selector: "vault-at-risk-passwords",
   standalone: true,
@@ -51,6 +53,7 @@ import { PopupPageComponent } from "../../../../platform/popup/layout/popup-page
     CalloutModule,
     ButtonModule,
   ],
+  providers: [AtRiskPasswordPageService],
   templateUrl: "./at-risk-passwords.component.html",
 })
 export class AtRiskPasswordsComponent {
@@ -64,6 +67,7 @@ export class AtRiskPasswordsComponent {
   private router = inject(Router);
   private autofillSettingsService = inject(AutofillSettingsServiceAbstraction);
   private toastService = inject(ToastService);
+  private atRiskPasswordPageService = inject(AtRiskPasswordPageService);
 
   private activeUserData$ = this.accountService.activeAccount$.pipe(
     filterOutNullish(),
@@ -90,10 +94,13 @@ export class AtRiskPasswordsComponent {
     startWith(true),
   );
 
+  protected calloutDismissed$ = this.activeUserData$.pipe(
+    switchMap(({ userId }) => this.atRiskPasswordPageService.isCalloutDismissed(userId)),
+  );
+
   protected inlineAutofillSettingEnabled$ = this.autofillSettingsService.inlineMenuVisibility$.pipe(
     map((setting) => setting !== AutofillOverlayVisibility.Off),
   );
-  protected calloutDismissed = signal(false);
 
   protected atRiskItems$ = this.activeUserData$.pipe(
     map(({ tasks, ciphers }) =>
@@ -148,5 +155,10 @@ export class AtRiskPasswordsComponent {
       message: this.i18nService.t("turnedOnAutofill"),
       title: "",
     });
+  }
+
+  async dismissCallout() {
+    const { userId } = await firstValueFrom(this.activeUserData$);
+    await this.atRiskPasswordPageService.dismissCallout(userId);
   }
 }
