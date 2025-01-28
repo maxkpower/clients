@@ -1,17 +1,26 @@
-<bit-form-field>
+<bit-form-field class="!tw-mb-0">
   <bit-label>{{ "verificationCode" | i18n }}</bit-label>
-  <!-- TODO: convert this to use reactive forms to get required styling -->
+  <!-- TODO: consider reactive forms implementation for future -->
   <input
     bitInput
     type="text"
     appAutofocus
     appInputVerbatim
+    required
     [(ngModel)]="tokenValue"
     (input)="token.emit(tokenValue)"
   />
-  <bit-hint>
-    <a bitLink href="#" appStopClick (click)="sendEmail(true)">
-      {{ "resendCode" | i18n }}
-    </a></bit-hint
-  >
 </bit-form-field>
+
+<div class="tw-mb-4">
+  <a
+    bitTypography="helper"
+    class="tw-text-main"
+    bitLink
+    href="#"
+    appStopClick
+    (click)="sendEmail(true)"
+  >
+    {{ "resendCode" | i18n }}
+  </a>
+</div>
