@@ -147,7 +147,7 @@ export class DefaultCipherAuthorizationService implements CipherAuthorizationSer
     }
 
     if (cipher.organizationId) {
-      return this.organizationService.get$(cipher.organizationId).pipe(
+      return this.organization$(cipher).pipe(
         switchMap((org) => {
           if (
             org?.permissions.editAnyCollection ||
