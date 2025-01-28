@@ -24,6 +24,7 @@ import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.service";
+import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -136,6 +137,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private syncService: SyncService,
     private destroyRef: DestroyRef,
     private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
+    private environmentService: EnvironmentService,
   ) {}
 
   async ngOnInit() {
@@ -466,10 +468,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async use2faRecoveryCode() {
-    // TODO: should this just directly navigate on web? probably
-    // const env = await firstValueFrom(this.environmentService.environment$);
-    // const webVault = env.getWebVaultUrl();
-    // this.platformUtilsService.launchUri(webVault + "/#/recover-2fa");
+    // TODO: eventually we should have a consolidated recover-2fa component as a follow up
+    // so that we don't have to always open a new tab for non-web clients.
+    const env = await firstValueFrom(this.environmentService.environment$);
+    const webVault = env.getWebVaultUrl();
+    this.platformUtilsService.launchUri(webVault + "/#/recover-2fa");
   }
 
   async ngOnDestroy() {
