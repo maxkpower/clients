@@ -39,6 +39,8 @@ import {
   DefaultAuthRequestApiService,
   DefaultLoginSuccessHandlerService,
   LoginSuccessHandlerService,
+  PasswordLoginStrategy,
+  PasswordLoginStrategyData,
   LoginApprovalComponentServiceAbstraction,
 } from "@bitwarden/auth/common";
 import { ApiService as ApiServiceAbstraction } from "@bitwarden/common/abstractions/api.service";
@@ -1234,7 +1236,6 @@ const safeProviders: SafeProvider[] = [
     deps: [
       ApiServiceAbstraction,
       BillingApiServiceAbstraction,
-      ConfigService,
       KeyService,
       EncryptService,
       I18nServiceAbstraction,
@@ -1435,6 +1436,37 @@ const safeProviders: SafeProvider[] = [
     provide: LoginSuccessHandlerService,
     useClass: DefaultLoginSuccessHandlerService,
     deps: [SyncService, UserAsymmetricKeysRegenerationService],
+  }),
+  safeProvider({
+    provide: PasswordLoginStrategy,
+    useClass: PasswordLoginStrategy,
+    deps: [
+      PasswordLoginStrategyData,
+      PasswordStrengthServiceAbstraction,
+      PolicyServiceAbstraction,
+      LoginStrategyServiceAbstraction,
+      AccountServiceAbstraction,
+      InternalMasterPasswordServiceAbstraction,
+      KeyService,
+      EncryptService,
+      ApiServiceAbstraction,
+      TokenServiceAbstraction,
+      AppIdServiceAbstraction,
+      PlatformUtilsServiceAbstraction,
+      MessagingServiceAbstraction,
+      LogService,
+      StateServiceAbstraction,
+      TwoFactorServiceAbstraction,
+      InternalUserDecryptionOptionsServiceAbstraction,
+      BillingAccountProfileStateService,
+      VaultTimeoutSettingsServiceAbstraction,
+      KdfConfigService,
+    ],
+  }),
+  safeProvider({
+    provide: PasswordLoginStrategyData,
+    useClass: PasswordLoginStrategyData,
+    deps: [],
   }),
 ];
 
