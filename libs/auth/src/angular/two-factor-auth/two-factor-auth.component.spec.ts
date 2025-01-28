@@ -27,6 +27,7 @@ import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/for
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/master-password/fake-master-password.service";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
+import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -35,6 +36,8 @@ import { SyncService } from "@bitwarden/common/platform/sync";
 import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 import { DialogService, ToastService } from "@bitwarden/components";
+
+import { AnonLayoutWrapperDataService } from "../anon-layout/anon-layout-wrapper-data.service";
 
 import { TwoFactorAuthComponentService } from "./two-factor-auth-component.service";
 import { TwoFactorAuthComponent } from "./two-factor-auth.component";
@@ -69,6 +72,8 @@ describe("TwoFactorComponent", () => {
   let mockToastService: MockProxy<ToastService>;
   let mockTwoFactorAuthCompService: MockProxy<TwoFactorAuthComponentService>;
   let mockSyncService: MockProxy<SyncService>;
+  let anonLayoutWrapperDataService: MockProxy<AnonLayoutWrapperDataService>;
+  let mockEnvService: MockProxy<EnvironmentService>;
 
   let mockUserDecryptionOpts: {
     noMasterPassword: UserDecryptionOptions;
@@ -106,6 +111,9 @@ describe("TwoFactorComponent", () => {
     mockTwoFactorAuthCompService.handle2faSuccess = undefined;
 
     mockSyncService = mock<SyncService>();
+
+    mockEnvService = mock<EnvironmentService>();
+    anonLayoutWrapperDataService = mock<AnonLayoutWrapperDataService>();
 
     mockUserDecryptionOpts = {
       noMasterPassword: new UserDecryptionOptions({
@@ -187,6 +195,8 @@ describe("TwoFactorComponent", () => {
         { provide: ToastService, useValue: mockToastService },
         { provide: TwoFactorAuthComponentService, useValue: mockTwoFactorAuthCompService },
         { provide: SyncService, useValue: mockSyncService },
+        { provide: EnvironmentService, useValue: mockEnvService },
+        { provide: AnonLayoutWrapperDataService, useValue: anonLayoutWrapperDataService },
       ],
     });
 
