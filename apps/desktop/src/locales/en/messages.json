@@ -655,6 +655,12 @@
   "enterTheCodeSentToYourEmail": {
     "message": "Enter the code sent to your email"
   },
+  "enterTheCodeFromYourAuthenticatorApp": {
+    "message": "Enter the code from your authenticator app"
+  },
+  "pressYourYubiKeyToAuthenticate": {
+    "message": "Press your YubiKey to authenticate"
+  },
   "logInWithPasskey": {
     "message": "Log in with passkey"
   },
@@ -3179,6 +3185,9 @@
   },
   "duoRequiredByOrgForAccount": {
     "message": "Duo two-step login is required for your account."
+  },
+  "duoTwoFactorRequiredPageSubtitle": {
+    "message": "Duo two-step login is required for your account. Launch Duo and follow the steps to finish logging in."
   },
   "launchDuo": {
     "message": "Launch Duo in Browser"

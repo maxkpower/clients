@@ -863,6 +863,15 @@
   "enterTheCodeSentToYourEmail": {
     "message": "Enter the code sent to your email"
   },
+  "enterTheCodeFromYourAuthenticatorApp": {
+    "message": "Enter the code from your authenticator app"
+  },
+  "pressYourYubiKeyToAuthenticate": {
+    "message": "Press your YubiKey to authenticate"
+  },
+  "duoTwoFactorRequiredPageSubtitle": {
+    "message": "Duo two-step login is required for your account. Popout the extension to complete login."
+  },
   "restartRegistration": {
     "message": "Restart registration"
   },

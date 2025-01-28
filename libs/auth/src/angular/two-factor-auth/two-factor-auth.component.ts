@@ -39,7 +39,11 @@ import {
 } from "@bitwarden/components";
 
 import { AnonLayoutWrapperDataService } from "../anon-layout/anon-layout-wrapper-data.service";
-import { TwoFactorAuthEmailIcon } from "../icons/two-factor-auth";
+import {
+  TwoFactorAuthAuthenticatorIcon,
+  TwoFactorAuthEmailIcon,
+  TwoFactorAuthYubikeyIcon,
+} from "../icons/two-factor-auth";
 
 import { TwoFactorAuthAuthenticatorComponent } from "./child-components/two-factor-auth-authenticator.component";
 import { TwoFactorAuthDuoComponent } from "./child-components/two-factor-auth-duo/two-factor-auth-duo.component";
@@ -299,18 +303,30 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async setAnonLayoutDataByTwoFactorProviderType() {
+    // TODO: finish adding all provider types
     switch (this.selectedProviderType) {
-      // case TwoFactorProviderType.Authenticator:
-      //   this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
-      //     pageTitle: this.i18nService.t("ADD ME"),
-      //     pageSubtitle: this.i18nService.t("twoFactorAuthenticatorSubtitle"),
-      //     pageIcon: TwoFactorAuthAuthenticatorIcon,
-      //   });
-      //   break;
+      case TwoFactorProviderType.Authenticator:
+        this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
+          pageSubtitle: this.i18nService.t("enterTheCodeFromYourAuthenticatorApp"),
+          pageIcon: TwoFactorAuthAuthenticatorIcon,
+        });
+        break;
       case TwoFactorProviderType.Email:
         this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
           pageSubtitle: this.i18nService.t("enterTheCodeSentToYourEmail"),
           pageIcon: TwoFactorAuthEmailIcon,
+        });
+        break;
+      case TwoFactorProviderType.Duo:
+        this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
+          pageSubtitle: this.i18nService.t("duoTwoFactorRequiredPageSubtitle"),
+          pageIcon: TwoFactorAuthAuthenticatorIcon,
+        });
+        break;
+      case TwoFactorProviderType.Yubikey:
+        this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
+          pageSubtitle: this.i18nService.t("pressYourYubiKeyToAuthenticate"),
+          pageIcon: TwoFactorAuthYubikeyIcon,
         });
         break;
 
