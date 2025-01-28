@@ -32,7 +32,7 @@
       #duoComponent
     />
     <bit-form-control>
-      <bit-label>{{ "rememberMe" | i18n }}</bit-label>
+      <bit-label>{{ "dontAskAgainOnThisDeviceFor30Days" | i18n }}</bit-label>
       <input type="checkbox" bitCheckbox formControlName="remember" />
     </bit-form-control>
     <ng-container *ngIf="selectedProviderType == null">
@@ -40,7 +40,7 @@
       <p bitTypography="body1">{{ "noTwoStepProviders2" | i18n }}</p>
     </ng-container>
     <!-- Buttons -->
-    <div class="tw-flex tw-flex-col tw-space-y-2.5 tw-mb-3">
+    <div class="tw-flex tw-flex-col tw-space-y-3 tw-mb-3">
       <button
         type="submit"
         buttonType="primary"
@@ -48,8 +48,9 @@
         bitFormButton
         *ngIf="showContinueButton()"
       >
-        <span> <i class="bwi bwi-sign-in" aria-hidden="true"></i> {{ "continue" | i18n }} </span>
+        <span> {{ "continueLoggingIn" | i18n }} </span>
       </button>
+
       <button
         type="button"
         buttonType="primary"
@@ -63,14 +64,27 @@
         <span> <i class="bwi bwi-sign-in" aria-hidden="true"></i> {{ "launchDuo" | i18n }}</span>
       </button>
 
-      <a routerLink="/login" bitButton buttonType="secondary">
-        {{ "cancel" | i18n }}
-      </a>
-    </div>
-    <div class="text-center">
-      <a bitLink href="#" appStopClick (click)="selectOtherTwofactorMethod()">{{
-        "useAnotherTwoStepMethod" | i18n
-      }}</a>
+      <p class="tw-text-center">{{ "or" | i18n }}</p>
+
+      <button
+        type="button"
+        buttonType="secondary"
+        bitButton
+        bitFormButton
+        (click)="selectOtherTwofactorMethod()"
+      >
+        <span> {{ "selectAnotherMethod" | i18n }} </span>
+      </button>
+
+      <button
+        type="button"
+        buttonType="secondary"
+        bitButton
+        bitFormButton
+        (click)="use2faRecoveryCode()"
+      >
+        <span> {{ "useYourRecoveryCode" | i18n }} </span>
+      </button>
     </div>
   </form>
 </ng-container>

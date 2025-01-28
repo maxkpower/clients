@@ -465,6 +465,13 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     );
   }
 
+  async use2faRecoveryCode() {
+    // TODO: should this just directly navigate on web? probably
+    // const env = await firstValueFrom(this.environmentService.environment$);
+    // const webVault = env.getWebVaultUrl();
+    // this.platformUtilsService.launchUri(webVault + "/#/recover-2fa");
+  }
+
   async ngOnDestroy() {
     this.twoFactorAuthComponentService.removePopupWidthExtension?.();
   }
