@@ -87,7 +87,7 @@ import {
 
 import { BillingNotificationService } from "../../billing/services/billing-notification.service";
 import { TrialFlowService } from "../../billing/services/trial-flow.service";
-import { FreeTrial } from "../../core/types/free-trial";
+import { FreeTrial } from "../../billing/types/free-trial";
 import { SharedModule } from "../../shared/shared.module";
 import { AssignCollectionsWebComponent } from "../components/assign-collections";
 import {

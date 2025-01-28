@@ -23,7 +23,6 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { DialogService, ToastService } from "@bitwarden/components";
 
-import { FreeTrial } from "../../../core/types/free-trial";
 import { BillingNotificationService } from "../../services/billing-notification.service";
 import { TrialFlowService } from "../../services/trial-flow.service";
 import {
@@ -34,6 +33,7 @@ import {
   AdjustPaymentDialogComponent,
   AdjustPaymentDialogResultType,
 } from "../../shared/adjust-payment-dialog/adjust-payment-dialog.component";
+import { FreeTrial } from "../../types/free-trial";
 
 @Component({
   templateUrl: "./organization-payment-method.component.html",

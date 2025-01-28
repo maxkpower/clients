@@ -36,7 +36,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { DialogService } from "@bitwarden/components";
 import { BillingNotificationService } from "@bitwarden/web-vault/app/billing/services/billing-notification.service";
 import { TrialFlowService } from "@bitwarden/web-vault/app/billing/services/trial-flow.service";
-import { FreeTrial } from "@bitwarden/web-vault/app/core/types/free-trial";
+import { FreeTrial } from "@bitwarden/web-vault/app/billing/types/free-trial";
 
 import { OrganizationCounts } from "../models/view/counts.view";
 import { ProjectListView } from "../models/view/project-list.view";
