@@ -1792,7 +1792,7 @@
   },
   "requestPending": {
     "message": "Request pending"
-  },  
+  },
   "logBackInOthersToo": {
     "message": "Please log back in. If you are using other Bitwarden applications log out and back in to those as well."
   },
@@ -9973,8 +9973,8 @@
     "message": "Include special characters",
     "description": "Full description for the password generator special characters checkbox"
   },
-  "specialCharactersLabel": {
-    "message": "!@#$%^&*",
+  "specialCharactersLabelV2": {
+    "message": "!@#$$%^&*",
     "description": "Label for the password generator special characters checkbox"
   },
   "addAttachment": {
