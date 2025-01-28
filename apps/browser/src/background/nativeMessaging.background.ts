@@ -77,7 +77,7 @@ export class NativeMessagingBackground {
   private port?: browser.runtime.Port | chrome.runtime.Port;
   private appId?: string;
 
-  private secure?: SecureChannel;
+  private secureChannel?: SecureChannel;
 
   private messageId = 0;
   private callbacks = new Map<number, Callback>();
@@ -161,13 +161,13 @@ export class NativeMessagingBackground {
 
             if (message.sharedSecret == null) {
               this.logService.info(
-                "[Native Messaging IPC] Unable to create secure channel, no shared secret",
+                "[Native Messaging IPC] Unable to create secureChannel channel, no shared secret",
               );
               return;
             }
-            if (this.secure == null) {
+            if (this.secureChannel == null) {
               this.logService.info(
-                "[Native Messaging IPC] Unable to create secure channel, no secure communication setup",
+                "[Native Messaging IPC] Unable to create secureChannel channel, no secureChannel communication setup",
               );
               return;
             }
@@ -175,11 +175,11 @@ export class NativeMessagingBackground {
             const encrypted = Utils.fromB64ToArray(message.sharedSecret);
             const decrypted = await this.cryptoFunctionService.rsaDecrypt(
               encrypted,
-              this.secure.privateKey,
+              this.secureChannel.privateKey,
               HashAlgorithmForEncryption,
             );
 
-            this.secure.sharedSecret = new SymmetricCryptoKey(decrypted);
+            this.secureChannel.sharedSecret = new SymmetricCryptoKey(decrypted);
             this.logService.info("[Native Messaging IPC] Secure channel established");
 
             if ("messageId" in message) {
@@ -190,7 +190,7 @@ export class NativeMessagingBackground {
               this.isConnectedToOutdatedDesktopClient = true;
             }
 
-            this.secure.setupResolve();
+            this.secureChannel.setupResolve();
             break;
           }
           case "invalidateEncryption":
@@ -202,7 +202,7 @@ export class NativeMessagingBackground {
               "[Native Messaging IPC] Secure channel encountered an error; disconnecting and wiping keys...",
             );
 
-            this.secure = undefined;
+            this.secureChannel = undefined;
             this.connected = false;
 
             if (message.messageId != null) {
@@ -235,7 +235,7 @@ export class NativeMessagingBackground {
             break;
           }
           case "wrongUserId":
-            if (message.messageId) {
+            if (message.messageId != null) {
               if (this.callbacks.has(message.messageId)) {
                 this.callbacks.get(message.messageId)?.rejecter({
                   message: "wrongUserId",
@@ -265,7 +265,7 @@ export class NativeMessagingBackground {
           error = chrome.runtime.lastError?.message;
         }
 
-        this.secure = undefined;
+        this.secureChannel = undefined;
         this.connected = false;
 
         this.logService.error("NativeMessaging port disconnected because of error: " + error);
@@ -346,11 +346,14 @@ export class NativeMessagingBackground {
   }
 
   async encryptMessage(message: Message) {
-    if (this.secure?.sharedSecret == null) {
+    if (this.secureChannel?.sharedSecret == null) {
       await this.secureCommunication();
     }
 
-    return await this.encryptService.encrypt(JSON.stringify(message), this.secure!.sharedSecret!);
+    return await this.encryptService.encrypt(
+      JSON.stringify(message),
+      this.secureChannel!.sharedSecret!,
+    );
   }
 
   private postMessage(message: OuterMessage, messageId?: number) {
@@ -375,7 +378,7 @@ export class NativeMessagingBackground {
         "[Native Messaging IPC] Disconnected from Bitwarden Desktop app because of the native port disconnecting.",
       );
 
-      this.secure = undefined;
+      this.secureChannel = undefined;
       this.connected = false;
 
       if (messageId != null && this.callbacks.has(messageId)) {
@@ -387,13 +390,13 @@ export class NativeMessagingBackground {
   private async onMessage(rawMessage: ReceiveMessage | EncString) {
     let message: ReceiveMessage;
     if (!this.platformUtilsService.isSafari()) {
-      if (this.secure?.sharedSecret == null) {
+      if (this.secureChannel?.sharedSecret == null) {
         return;
       }
       message = JSON.parse(
         await this.encryptService.decryptToUtf8(
           rawMessage as EncString,
-          this.secure.sharedSecret,
+          this.secureChannel.sharedSecret,
           "ipc-desktop-ipc-channel-key",
         ),
       );
@@ -445,7 +448,7 @@ export class NativeMessagingBackground {
     });
 
     return new Promise((resolve) => {
-      this.secure = {
+      this.secureChannel = {
         publicKey,
         privateKey,
         setupResolve: resolve,
@@ -464,10 +467,13 @@ export class NativeMessagingBackground {
   }
 
   private async showFingerprintDialog() {
-    if (this.secure?.publicKey == null) {
+    if (this.secureChannel?.publicKey == null) {
       return;
     }
-    const fingerprint = await this.keyService.getFingerprint(this.appId!, this.secure.publicKey);
+    const fingerprint = await this.keyService.getFingerprint(
+      this.appId!,
+      this.secureChannel.publicKey,
+    );
 
     this.messagingService.send("showNativeMessagingFingerprintDialog", {
       fingerprint: fingerprint,
