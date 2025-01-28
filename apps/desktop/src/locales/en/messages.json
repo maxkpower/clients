@@ -652,6 +652,9 @@
   "logInToBitwarden": {
     "message": "Log in to Bitwarden"
   },
+  "enterTheCodeSentToYourEmail": {
+    "message": "Enter the code sent to your email"
+  },
   "logInWithPasskey": {
     "message": "Log in with passkey"
   },

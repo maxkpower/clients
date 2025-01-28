@@ -860,6 +860,9 @@
   "logInToBitwarden": {
     "message": "Log in to Bitwarden"
   },
+  "enterTheCodeSentToYourEmail": {
+    "message": "Enter the code sent to your email"
+  },
   "restartRegistration": {
     "message": "Restart registration"
   },

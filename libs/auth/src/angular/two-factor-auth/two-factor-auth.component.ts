@@ -37,6 +37,9 @@ import {
   ToastService,
 } from "@bitwarden/components";
 
+import { AnonLayoutWrapperDataService } from "../anon-layout/anon-layout-wrapper-data.service";
+import { TwoFactorAuthEmailIcon } from "../icons/two-factor-auth";
+
 import { TwoFactorAuthAuthenticatorComponent } from "./child-components/two-factor-auth-authenticator.component";
 import { TwoFactorAuthDuoComponent } from "./child-components/two-factor-auth-duo/two-factor-auth-duo.component";
 import { TwoFactorAuthEmailComponent } from "./child-components/two-factor-auth-email/two-factor-auth-email.component";
@@ -104,8 +107,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     remember: [false],
   });
 
-  title = "";
-
   formPromise: Promise<any> | undefined;
 
   submitForm = async () => {
@@ -134,6 +135,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
     private syncService: SyncService,
     private destroyRef: DestroyRef,
+    private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
   ) {}
 
   async ngOnInit() {
@@ -146,7 +148,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
 
     await this.setSelected2faProviderType();
     await this.set2faProviderData();
-    await this.setTitleByTwoFactorProviderType();
+    await this.setAnonLayoutDataByTwoFactorProviderType();
 
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
       if (value.token) {
@@ -261,7 +263,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       });
       this.providerData = providerData;
       this.selectedProviderType = response.type;
-      await this.setTitleByTwoFactorProviderType();
+      await this.setAnonLayoutDataByTwoFactorProviderType();
     }
   }
 
@@ -294,13 +296,25 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  async setTitleByTwoFactorProviderType() {
-    if (this.selectedProviderType == null) {
-      this.title = this.i18nService.t("loginUnavailable");
-      return;
-    }
+  async setAnonLayoutDataByTwoFactorProviderType() {
+    switch (this.selectedProviderType) {
+      // case TwoFactorProviderType.Authenticator:
+      //   this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
+      //     pageTitle: this.i18nService.t("ADD ME"),
+      //     pageSubtitle: this.i18nService.t("twoFactorAuthenticatorSubtitle"),
+      //     pageIcon: TwoFactorAuthAuthenticatorIcon,
+      //   });
+      //   break;
+      case TwoFactorProviderType.Email:
+        this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
+          pageSubtitle: this.i18nService.t("enterTheCodeSentToYourEmail"),
+          pageIcon: TwoFactorAuthEmailIcon,
+        });
+        break;
 
-    this.title = (TwoFactorProviders as any)[this.selectedProviderType].name;
+      default:
+        break;
+    }
   }
 
   private async handleAuthResult(authResult: AuthResult) {
