@@ -23,7 +23,6 @@ import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { UserId } from "@bitwarden/common/types/guid";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { VaultOnboardingMessages } from "@bitwarden/common/vault/enums/vault-onboarding.enum";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -63,7 +62,6 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
   protected showOnboarding = false;
   protected extensionRefreshEnabled = false;
 
-  private activeId: UserId;
   constructor(
     protected platformUtilsService: PlatformUtilsService,
     protected policyService: PolicyService,
@@ -74,8 +72,8 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    this.activeId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-    this.onboardingTasks$ = this.vaultOnboardingService.vaultOnboardingState$(this.activeId);
+    const activeId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    this.onboardingTasks$ = this.vaultOnboardingService.vaultOnboardingState$(activeId);
 
     await this.setOnboardingTasks();
     this.setInstallExtLink();
@@ -88,13 +86,14 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
 
   async ngOnChanges(changes: SimpleChanges) {
     if (this.showOnboarding && changes?.ciphers) {
+      const activeId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       const currentTasks = await firstValueFrom(this.onboardingTasks$);
       const updatedTasks = {
         createAccount: true,
         importData: this.ciphers.length > 0,
         installExtension: currentTasks.installExtension,
       };
-      await this.vaultOnboardingService.setVaultOnboardingTasks(this.activeId, updatedTasks);
+      await this.vaultOnboardingService.setVaultOnboardingTasks(activeId, updatedTasks);
     }
   }
 
@@ -117,13 +116,14 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
 
   async getMessages(event: any) {
     if (event.data.command === VaultOnboardingMessages.HasBwInstalled && this.showOnboarding) {
+      const activeId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       const currentTasks = await firstValueFrom(this.onboardingTasks$);
       const updatedTasks = {
         createAccount: currentTasks.createAccount,
         importData: currentTasks.importData,
         installExtension: true,
       };
-      await this.vaultOnboardingService.setVaultOnboardingTasks(this.activeId, updatedTasks);
+      await this.vaultOnboardingService.setVaultOnboardingTasks(activeId, updatedTasks);
     }
   }
 
@@ -166,7 +166,8 @@ export class VaultOnboardingComponent implements OnInit, OnChanges, OnDestroy {
 
   private async saveCompletedTasks(vaultTasks: VaultOnboardingTasks) {
     this.showOnboarding = Object.values(vaultTasks).includes(false);
-    await this.vaultOnboardingService.setVaultOnboardingTasks(this.activeId, vaultTasks);
+    const activeId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    await this.vaultOnboardingService.setVaultOnboardingTasks(activeId, vaultTasks);
   }
 
   individualVaultPolicyCheck() {
