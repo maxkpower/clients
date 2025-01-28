@@ -1,8 +1,6 @@
-<p bitTypography="body1">
-  {{ "enterVerificationCodeEmail" | i18n: twoFactorEmail }}
-</p>
 <bit-form-field>
   <bit-label>{{ "verificationCode" | i18n }}</bit-label>
+  <!-- TODO: convert this to use reactive forms to get required styling -->
   <input
     bitInput
     type="text"
@@ -13,7 +11,7 @@
   />
   <bit-hint>
     <a bitLink href="#" appStopClick (click)="sendEmail(true)">
-      {{ "sendVerificationCodeEmailAgain" | i18n }}
+      {{ "resendCode" | i18n }}
     </a></bit-hint
   >
 </bit-form-field>
