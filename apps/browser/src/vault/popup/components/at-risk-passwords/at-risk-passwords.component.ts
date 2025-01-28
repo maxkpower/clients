@@ -9,6 +9,7 @@ import {
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { AutofillOverlayVisibility } from "@bitwarden/common/autofill/constants";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -89,7 +90,9 @@ export class AtRiskPasswordsComponent {
     startWith(true),
   );
 
-  protected autofillOnPageLoad$ = this.autofillSettingsService.autofillOnPageLoad$;
+  protected inlineAutofillSettingEnabled$ = this.autofillSettingsService.inlineMenuVisibility$.pipe(
+    map((setting) => setting !== AutofillOverlayVisibility.Off),
+  );
   protected calloutDismissed = signal(false);
 
   protected atRiskItems$ = this.activeUserData$.pipe(
@@ -136,8 +139,10 @@ export class AtRiskPasswordsComponent {
     }
   }
 
-  async activateAutofillOnPageLoad() {
-    await this.autofillSettingsService.setAutofillOnPageLoad(true);
+  async activateInlineAutofillMenuVisibility() {
+    await this.autofillSettingsService.setInlineMenuVisibility(
+      AutofillOverlayVisibility.OnButtonClick,
+    );
     this.toastService.showToast({
       variant: "success",
       message: this.i18nService.t("turnedOnAutofill"),

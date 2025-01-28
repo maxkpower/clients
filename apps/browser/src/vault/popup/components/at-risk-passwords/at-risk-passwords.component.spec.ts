@@ -9,7 +9,9 @@ import { IconComponent } from "@bitwarden/angular/vault/components/icon.componen
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { AutofillOverlayVisibility } from "@bitwarden/common/autofill/constants";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
+import { InlineMenuVisibilitySetting } from "@bitwarden/common/autofill/types";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -62,8 +64,8 @@ describe("AtRiskPasswordsComponent", () => {
   let mockTasks$: BehaviorSubject<SecurityTask[]>;
   let mockCiphers$: BehaviorSubject<CipherView[]>;
   let mockOrgs$: BehaviorSubject<Organization[]>;
-  let mockAutofillOnPageLoad$: BehaviorSubject<boolean>;
-  const setAutofillOnPageLoad = jest.fn();
+  let mockInlineMenuVisibility$: BehaviorSubject<InlineMenuVisibilitySetting>;
+  const setInlineMenuVisibility = jest.fn();
   const mockToastService = mock<ToastService>();
 
   beforeEach(async () => {
@@ -94,8 +96,10 @@ describe("AtRiskPasswordsComponent", () => {
       } as Organization,
     ]);
 
-    mockAutofillOnPageLoad$ = new BehaviorSubject<boolean>(false);
-    setAutofillOnPageLoad.mockClear();
+    mockInlineMenuVisibility$ = new BehaviorSubject<InlineMenuVisibilitySetting>(
+      AutofillOverlayVisibility.Off,
+    );
+    setInlineMenuVisibility.mockClear();
     mockToastService.showToast.mockClear();
 
     await TestBed.configureTestingModule({
@@ -126,8 +130,8 @@ describe("AtRiskPasswordsComponent", () => {
         {
           provide: AutofillSettingsServiceAbstraction,
           useValue: {
-            autofillOnPageLoad$: mockAutofillOnPageLoad$,
-            setAutofillOnPageLoad,
+            inlineMenuVisibility$: mockInlineMenuVisibility$,
+            setInlineMenuVisibility: setInlineMenuVisibility,
           },
         },
         { provide: ToastService, useValue: mockToastService },
@@ -197,16 +201,16 @@ describe("AtRiskPasswordsComponent", () => {
   });
 
   describe("autofill callout", () => {
-    it("should show the callout if autofill is disabled", async () => {
-      mockAutofillOnPageLoad$.next(false);
+    it("should show the callout if inline autofill is disabled", async () => {
+      mockInlineMenuVisibility$.next(AutofillOverlayVisibility.Off);
       fixture.detectChanges();
       const callout = fixture.debugElement.query(By.css('[data-testid="autofill-callout"]'));
 
       expect(callout).toBeTruthy();
     });
 
-    it("should hide the callout if autofill is enabled", async () => {
-      mockAutofillOnPageLoad$.next(true);
+    it("should hide the callout if inline autofill is enabled", async () => {
+      mockInlineMenuVisibility$.next(AutofillOverlayVisibility.OnButtonClick);
       fixture.detectChanges();
       const callout = fixture.debugElement.query(By.css('[data-testid="autofill-callout"]'));
 
@@ -214,13 +218,15 @@ describe("AtRiskPasswordsComponent", () => {
     });
 
     describe("turn on autofill button", () => {
-      it("should call the service to turn on autofill and show a toast", () => {
+      it("should call the service to turn on inline autofill and show a toast", () => {
         const button = fixture.debugElement.query(
           By.css('[data-testid="turn-on-autofill-button"]'),
         );
         button.nativeElement.click();
 
-        expect(setAutofillOnPageLoad).toHaveBeenCalledWith(true);
+        expect(setInlineMenuVisibility).toHaveBeenCalledWith(
+          AutofillOverlayVisibility.OnButtonClick,
+        );
         expect(mockToastService.showToast).toHaveBeenCalled();
       });
     });
