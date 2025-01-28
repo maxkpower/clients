@@ -4,7 +4,6 @@ import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { ClientType } from "@bitwarden/common/enums";
@@ -12,6 +11,8 @@ import { EnvironmentService } from "@bitwarden/common/platform/abstractions/envi
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { ButtonModule, DialogModule, DialogService, TypographyModule } from "@bitwarden/components";
 
+// TODO: rename all other options components to v1.
+// TODO: deprecate recovery code approach per design
 export enum TwoFactorOptionsDialogResult {
   Provider = "Provider selected",
   Recover = "Recover selected",
@@ -27,7 +28,7 @@ export type TwoFactorOptionsDialogResultType = {
   selector: "app-two-factor-options",
   templateUrl: "two-factor-options.component.html",
   imports: [CommonModule, JslibModule, DialogModule, ButtonModule, TypographyModule],
-  providers: [I18nPipe],
+  providers: [],
 })
 export class TwoFactorOptionsComponent implements OnInit {
   @Output() onProviderSelected = new EventEmitter<TwoFactorProviderType>();
