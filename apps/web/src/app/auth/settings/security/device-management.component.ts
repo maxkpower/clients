@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
-import { combineLatest, firstValueFrom } from "rxjs";
+import { Component, OnDestroy } from "@angular/core";
+import { combineLatest, firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { LoginApprovalComponent } from "@bitwarden/auth/angular";
 import { AuthRequestApiService } from "@bitwarden/auth/common";
@@ -11,9 +11,9 @@ import {
 } from "@bitwarden/common/auth/abstractions/devices/responses/device.response";
 import { DeviceView } from "@bitwarden/common/auth/abstractions/devices/views/device.view";
 import { DeviceType, DeviceTypeMetadata } from "@bitwarden/common/enums";
-import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
+import { MessageListener } from "@bitwarden/common/platform/messaging";
 import {
   DialogService,
   ToastService,
@@ -47,12 +47,13 @@ interface DeviceTableData {
   standalone: true,
   imports: [CommonModule, SharedModule, TableModule, PopoverModule],
 })
-export class DeviceManagementComponent {
+export class DeviceManagementComponent implements OnDestroy {
   readonly tableId = "device-management-table";
   dataSource = new TableDataSource<DeviceTableData>();
   currentDevice: DeviceView | undefined;
   loading = true;
   asyncActionLoading = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private i18nService: I18nService,
@@ -60,51 +61,64 @@ export class DeviceManagementComponent {
     private dialogService: DialogService,
     private toastService: ToastService,
     private validationService: ValidationService,
-    private broadcasterService: BroadcasterService,
+    private messageListener: MessageListener,
     private authRequestApiService: AuthRequestApiService,
   ) {
     this.initializeDeviceUpdates();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
    * Initialize real-time updates for device status via SignalR
    */
   private initializeDeviceUpdates(): void {
-    // Initial load of devices
     this.loadDevices().catch((error) => this.validationService.showError(error));
 
-    // Listen for auth request notifications
-    this.broadcasterService.subscribe("openLoginApproval", async (message: any) => {
-      try {
-        const requestId = message?.notificationId;
-        if (!requestId) {
-          return;
-        }
-
-        const authRequestResponse = await this.authRequestApiService.getAuthRequest(requestId);
-        if (!authRequestResponse) {
-          return;
-        }
-
-        // Add new device to the table
-        const newDevice: DeviceTableData = {
-          id: authRequestResponse.id,
-          type: authRequestResponse.requestDeviceTypeValue,
-          displayName: this.getHumanReadableDeviceType(authRequestResponse.requestDeviceTypeValue),
-          loginStatus: this.i18nService.t("requestPending"),
-          firstLogin: new Date(authRequestResponse.creationDate),
-          trusted: false,
-          devicePendingAuthRequest: {
-            id: authRequestResponse.id,
-            creationDate: authRequestResponse.creationDate,
-          },
-          hasPendingAuthRequest: true,
-        };
-        this.dataSource.data = [newDevice, ...this.dataSource.data];
-      } catch (error) {
-        this.validationService.showError(error);
+    this.messageListener.allMessages$.pipe(takeUntil(this.destroy$)).subscribe((message) => {
+      if (message.command !== "openLoginApproval") {
+        return;
       }
+
+      // Handle auth request in a separate async function
+      this.handleAuthRequest(message as { command: string; notificationId: string }).catch(
+        (error) => this.validationService.showError(error),
+      );
     });
+  }
+
+  private async handleAuthRequest(message: {
+    command: string;
+    notificationId: string;
+  }): Promise<void> {
+    const requestId = message.notificationId;
+    if (!requestId) {
+      return;
+    }
+
+    const authRequestResponse = await this.authRequestApiService.getAuthRequest(requestId);
+    if (!authRequestResponse) {
+      return;
+    }
+
+    // Add new device to the table
+    const newDevice: DeviceTableData = {
+      id: authRequestResponse.id,
+      type: authRequestResponse.requestDeviceTypeValue,
+      displayName: this.getHumanReadableDeviceType(authRequestResponse.requestDeviceTypeValue),
+      loginStatus: this.i18nService.t("requestPending"),
+      firstLogin: new Date(authRequestResponse.creationDate),
+      trusted: false,
+      devicePendingAuthRequest: {
+        id: authRequestResponse.id,
+        creationDate: authRequestResponse.creationDate,
+      },
+      hasPendingAuthRequest: true,
+    };
+    this.dataSource.data = [newDevice, ...this.dataSource.data];
   }
 
   /**
