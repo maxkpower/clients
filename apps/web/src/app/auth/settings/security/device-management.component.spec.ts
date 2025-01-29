@@ -117,7 +117,6 @@ describe("DeviceManagementComponent", () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeviceManagementComponent);
-    fixture.detectChanges();
 
     vaultBannersService = TestBed.inject(VaultBannersService);
   });
@@ -133,7 +132,6 @@ describe("DeviceManagementComponent", () => {
         notificationId: "test-id",
       };
       messageSubject.next(message);
-      fixture.detectChanges();
       await fixture.whenStable();
 
       const tableData = fixture.componentInstance.dataSource.data;
@@ -146,7 +144,6 @@ describe("DeviceManagementComponent", () => {
       const initialDataLength = fixture.componentInstance.dataSource.data.length;
       const message: Message = { command: "other", notificationId: "test-id" };
       messageSubject.next(message);
-      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(fixture.componentInstance.dataSource.data.length).toBe(initialDataLength);

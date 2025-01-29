@@ -1,8 +1,9 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
-import { firstValueFrom, map, Observable, switchMap, Subject, filter, takeUntil } from "rxjs";
+import { firstValueFrom, map, Observable, switchMap, filter } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -22,13 +23,12 @@ import { VaultBannersService, VisibleVaultBanner } from "./services/vault-banner
   imports: [VerifyEmailComponent, SharedModule, BannerModule],
   providers: [VaultBannersService],
 })
-export class VaultBannersComponent implements OnInit, OnDestroy {
+export class VaultBannersComponent implements OnInit {
   visibleBanners: VisibleVaultBanner[] = [];
   premiumBannerVisible$: Observable<boolean>;
   VisibleVaultBanner = VisibleVaultBanner;
   @Input() organizationsPaymentStatus: FreeTrial[] = [];
 
-  private destroy$ = new Subject<void>();
   private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   constructor(
@@ -46,18 +46,13 @@ export class VaultBannersComponent implements OnInit, OnDestroy {
     this.messageListener.allMessages$
       .pipe(
         filter((message: { command: string }) => message.command === "openLoginApproval"),
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(),
       )
       .subscribe(() => {
         if (!this.visibleBanners.includes(VisibleVaultBanner.PendingAuthRequest)) {
           this.visibleBanners = [...this.visibleBanners, VisibleVaultBanner.PendingAuthRequest];
         }
       });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   async ngOnInit(): Promise<void> {

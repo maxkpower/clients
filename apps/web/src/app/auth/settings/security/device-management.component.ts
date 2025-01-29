@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnDestroy } from "@angular/core";
-import { combineLatest, firstValueFrom, Subject, takeUntil } from "rxjs";
+import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { combineLatest, firstValueFrom } from "rxjs";
 
 import { LoginApprovalComponent } from "@bitwarden/auth/angular";
 import { AuthRequestApiService } from "@bitwarden/auth/common";
@@ -47,13 +48,12 @@ interface DeviceTableData {
   standalone: true,
   imports: [CommonModule, SharedModule, TableModule, PopoverModule],
 })
-export class DeviceManagementComponent implements OnDestroy {
+export class DeviceManagementComponent {
   readonly tableId = "device-management-table";
   dataSource = new TableDataSource<DeviceTableData>();
   currentDevice: DeviceView | undefined;
   loading = true;
   asyncActionLoading = false;
-  private destroy$ = new Subject<void>();
 
   constructor(
     private i18nService: I18nService,
@@ -67,18 +67,13 @@ export class DeviceManagementComponent implements OnDestroy {
     this.initializeDeviceUpdates();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   /**
    * Initialize real-time updates for device status via SignalR
    */
   private initializeDeviceUpdates(): void {
     this.loadDevices().catch((error) => this.validationService.showError(error));
 
-    this.messageListener.allMessages$.pipe(takeUntil(this.destroy$)).subscribe((message) => {
+    this.messageListener.allMessages$.pipe(takeUntilDestroyed()).subscribe((message) => {
       if (message.command !== "openLoginApproval") {
         return;
       }
@@ -149,21 +144,28 @@ export class DeviceManagementComponent implements OnDestroy {
    * @param devices - Array of device views to display in the table
    */
   private updateDeviceTable(devices: Array<DeviceView>): void {
-    this.dataSource.data = devices.map((device: DeviceView): DeviceTableData => {
-      const hasPendingRequest = device?.response
-        ? this.hasPendingAuthRequest(device.response)
-        : false;
-      return {
-        id: device.id,
-        type: device.type,
-        displayName: this.getHumanReadableDeviceType(device.type),
-        loginStatus: this.getLoginStatus(device),
-        firstLogin: new Date(device.creationDate),
-        trusted: device?.response?.isTrusted ?? false,
-        devicePendingAuthRequest: device?.response?.devicePendingAuthRequest ?? null,
-        hasPendingAuthRequest: hasPendingRequest,
-      };
-    });
+    this.dataSource.data = devices
+      .map((device: DeviceView): DeviceTableData | null => {
+        if (!device.id || !device.type || !device.creationDate) {
+          this.validationService.showError(new Error("Invalid device data"));
+          return null;
+        }
+
+        const hasPendingRequest = device?.response
+          ? this.hasPendingAuthRequest(device.response)
+          : false;
+        return {
+          id: device.id,
+          type: device.type,
+          displayName: this.getHumanReadableDeviceType(device.type),
+          loginStatus: this.getLoginStatus(device),
+          firstLogin: new Date(device.creationDate),
+          trusted: device?.response?.isTrusted ?? false,
+          devicePendingAuthRequest: device?.response?.devicePendingAuthRequest ?? null,
+          hasPendingAuthRequest: hasPendingRequest,
+        };
+      })
+      .filter((device): device is DeviceTableData => device !== null);
   }
 
   /**
