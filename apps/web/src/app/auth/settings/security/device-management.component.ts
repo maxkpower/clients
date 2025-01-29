@@ -64,27 +64,25 @@ export class DeviceManagementComponent {
     private messageListener: MessageListener,
     private authRequestApiService: AuthRequestApiService,
   ) {
-    this.initializeDeviceUpdates();
-  }
-
-  /**
-   * Initialize real-time updates for device status
-   */
-  private initializeDeviceUpdates(): void {
+    // Load devices
     this.loadDevices().catch((error) => this.validationService.showError(error));
 
+    // Listen for auth request messages
     this.messageListener.allMessages$.pipe(takeUntilDestroyed()).subscribe((message) => {
       if (message.command !== "openLoginApproval") {
         return;
       }
-
-      // Handle auth request in a separate async function
+      // Handle inserting a new device when an auth request is received
       this.handleAuthRequest(message as { command: string; notificationId: string }).catch(
         (error) => this.validationService.showError(error),
       );
     });
   }
 
+  /**
+   * Handle inserting a new device when an auth request is received
+   * @param message - The auth request message
+   */
   private async handleAuthRequest(message: {
     command: string;
     notificationId: string;

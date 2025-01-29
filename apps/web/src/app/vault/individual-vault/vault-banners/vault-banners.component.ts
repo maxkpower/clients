@@ -61,8 +61,10 @@ export class VaultBannersComponent implements OnInit {
 
   async dismissBanner(banner: VisibleVaultBanner): Promise<void> {
     const activeUserId = await firstValueFrom(this.activeUserId$);
+    if (!activeUserId) {
+      return;
+    }
     await this.vaultBannerService.dismissBanner(activeUserId, banner);
-
     await this.determineVisibleBanners();
   }
 
