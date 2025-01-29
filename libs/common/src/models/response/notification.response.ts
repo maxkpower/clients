@@ -31,6 +31,7 @@ export class NotificationResponse extends BaseResponse {
       case NotificationType.SyncOrgKeys:
       case NotificationType.SyncSettings:
       case NotificationType.LogOut:
+      case NotificationType.SyncNotification:
         this.payload = new UserNotification(payload);
         break;
       case NotificationType.SyncSendCreate:
