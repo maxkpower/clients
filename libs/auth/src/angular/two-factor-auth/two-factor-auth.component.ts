@@ -332,7 +332,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
         });
         break;
       case TwoFactorProviderType.WebAuthn:
-        // TODO: figure out browser extension title implementation.
         this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
           pageSubtitle: this.i18nService.t("followTheStepsBelowToFinishLoggingIn"),
           pageIcon: TwoFactorAuthWebAuthnIcon,
