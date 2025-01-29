@@ -113,7 +113,6 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
     this._plan = plan;
     this.formGroup?.controls?.plan?.setValue(plan);
   }
-
   @Input() enableSecretsManagerByDefault: boolean;
 
   private _plan = PlanType.Free;
