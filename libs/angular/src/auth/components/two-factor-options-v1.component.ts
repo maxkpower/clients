@@ -12,7 +12,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 @Directive()
-export class TwoFactorOptionsComponent implements OnInit {
+export class TwoFactorOptionsComponentV1 implements OnInit {
   @Output() onProviderSelected = new EventEmitter<TwoFactorProviderType>();
   @Output() onRecoverSelected = new EventEmitter();
 

@@ -29,7 +29,7 @@ import { StateService } from "@bitwarden/common/platform/abstractions/state.serv
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { ToastService } from "@bitwarden/components";
 
-import { TwoFactorOptionsComponent } from "./two-factor-options.component";
+import { TwoFactorOptionsComponentV1 } from "./two-factor-options-v1.component";
 
 const BroadcasterSubscriptionId = "TwoFactorComponent";
 
@@ -106,7 +106,7 @@ export class TwoFactorComponentV1 extends BaseTwoFactorComponent implements OnDe
 
   async anotherMethod() {
     const [modal, childComponent] = await this.modalService.openViewRef(
-      TwoFactorOptionsComponent,
+      TwoFactorOptionsComponentV1,
       this.twoFactorOptionsModal,
     );
 

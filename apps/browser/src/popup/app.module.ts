@@ -32,7 +32,7 @@ import { SetPasswordComponent } from "../auth/popup/set-password.component";
 import { AccountSecurityComponent } from "../auth/popup/settings/account-security.component";
 import { VaultTimeoutInputComponent } from "../auth/popup/settings/vault-timeout-input.component";
 import { SsoComponentV1 } from "../auth/popup/sso-v1.component";
-import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
+import { TwoFactorOptionsComponentV1 } from "../auth/popup/two-factor-options-v1.component";
 import { TwoFactorComponentV1 } from "../auth/popup/two-factor-v1.component";
 import { UpdateTempPasswordComponent } from "../auth/popup/update-temp-password.component";
 import { AutofillComponent } from "../autofill/popup/settings/autofill.component";
@@ -108,7 +108,7 @@ import "../platform/popup/locales";
     SsoComponentV1,
     TabsV2Component,
     TwoFactorComponentV1,
-    TwoFactorOptionsComponent,
+    TwoFactorOptionsComponentV1,
     UpdateTempPasswordComponent,
     UserVerificationComponent,
     VaultTimeoutInputComponent,

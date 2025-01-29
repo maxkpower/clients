@@ -29,7 +29,7 @@ import { DialogService, ToastService } from "@bitwarden/components";
 
 import {
   TwoFactorOptionsDialogResult,
-  TwoFactorOptionsComponent,
+  TwoFactorOptionsComponentV1,
   TwoFactorOptionsDialogResultType,
 } from "./two-factor-options.component";
 
@@ -110,7 +110,7 @@ export class TwoFactorComponentV1 extends BaseTwoFactorComponent implements OnIn
   };
 
   async anotherMethod() {
-    const dialogRef = TwoFactorOptionsComponent.open(this.dialogService);
+    const dialogRef = TwoFactorOptionsComponentV1.open(this.dialogService);
     const response: TwoFactorOptionsDialogResultType = await lastValueFrom(dialogRef.closed);
     if (response.result === TwoFactorOptionsDialogResult.Provider) {
       this.selectedProviderType = response.type;
