@@ -58,6 +58,7 @@ libs/admin-console @bitwarden/team-admin-console-dev
 
 ## Billing team files ##
 apps/browser/src/billing @bitwarden/team-billing-dev
+apps/desktop/src/billing @bitwarden/team-billing-dev
 apps/web/src/app/billing @bitwarden/team-billing-dev
 libs/angular/src/billing @bitwarden/team-billing-dev
 libs/common/src/billing @bitwarden/team-billing-dev
@@ -162,3 +163,7 @@ apps/web/src/locales/en/messages.json
 **/*.Dockerfile
 **/.dockerignore
 **/entrypoint.sh
+
+## Overrides
+# tsconfig files are potentially dangerous and will be reviewed by platform to prevent misconfigurations
+**/tsconfig.json @bitwarden/team-platform-dev

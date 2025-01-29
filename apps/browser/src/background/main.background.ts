@@ -18,7 +18,6 @@ import { ApiService as ApiServiceAbstraction } from "@bitwarden/common/abstracti
 import { AuditService as AuditServiceAbstraction } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService as EventCollectionServiceAbstraction } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { EventUploadService as EventUploadServiceAbstraction } from "@bitwarden/common/abstractions/event/event-upload.service";
-import { NotificationsService as NotificationsServiceAbstraction } from "@bitwarden/common/abstractions/notifications.service";
 import { SearchService as SearchServiceAbstraction } from "@bitwarden/common/abstractions/search.service";
 import { VaultTimeoutSettingsService as VaultTimeoutSettingsServiceAbstraction } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
 import { InternalOrganizationServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
@@ -92,6 +91,7 @@ import { I18nService as I18nServiceAbstraction } from "@bitwarden/common/platfor
 import { KeyGenerationService as KeyGenerationServiceAbstraction } from "@bitwarden/common/platform/abstractions/key-generation.service";
 import { LogService as LogServiceAbstraction } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService as PlatformUtilsServiceAbstraction } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { SdkLoadService } from "@bitwarden/common/platform/abstractions/sdk/sdk-load.service";
 import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { StateService as StateServiceAbstraction } from "@bitwarden/common/platform/abstractions/state.service";
 import {
@@ -108,6 +108,15 @@ import { clearCaches } from "@bitwarden/common/platform/misc/sequentialize";
 import { Account } from "@bitwarden/common/platform/models/domain/account";
 import { GlobalState } from "@bitwarden/common/platform/models/domain/global-state";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { NotificationsService } from "@bitwarden/common/platform/notifications";
+// eslint-disable-next-line no-restricted-imports -- Needed for service creation
+import {
+  DefaultNotificationsService,
+  WorkerWebPushConnectionService,
+  SignalRConnectionService,
+  UnsupportedWebPushConnectionService,
+  WebPushNotificationsApiService,
+} from "@bitwarden/common/platform/notifications/internal";
 import { ScheduledTaskNames } from "@bitwarden/common/platform/scheduling";
 import { AppIdService } from "@bitwarden/common/platform/services/app-id.service";
 import { ConfigApiService } from "@bitwarden/common/platform/services/config/config-api.service";
@@ -125,6 +134,7 @@ import { FileUploadService } from "@bitwarden/common/platform/services/file-uplo
 import { KeyGenerationService } from "@bitwarden/common/platform/services/key-generation.service";
 import { MigrationBuilderService } from "@bitwarden/common/platform/services/migration-builder.service";
 import { MigrationRunner } from "@bitwarden/common/platform/services/migration-runner";
+import { DefaultSdkClientFactory } from "@bitwarden/common/platform/services/sdk/default-sdk-client-factory";
 import { DefaultSdkService } from "@bitwarden/common/platform/services/sdk/default-sdk.service";
 import { NoopSdkClientFactory } from "@bitwarden/common/platform/services/sdk/noop-sdk-client-factory";
 import { StateService } from "@bitwarden/common/platform/services/state.service";
@@ -157,7 +167,6 @@ import { ApiService } from "@bitwarden/common/services/api.service";
 import { AuditService } from "@bitwarden/common/services/audit.service";
 import { EventCollectionService } from "@bitwarden/common/services/event/event-collection.service";
 import { EventUploadService } from "@bitwarden/common/services/event/event-upload.service";
-import { NotificationsService } from "@bitwarden/common/services/notifications.service";
 import { SearchService } from "@bitwarden/common/services/search.service";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/services/vault-timeout/vault-timeout-settings.service";
 import {
@@ -260,7 +269,7 @@ import { LocalBackedSessionStorageService } from "../platform/services/local-bac
 import { BackgroundPlatformUtilsService } from "../platform/services/platform-utils/background-platform-utils.service";
 import { BrowserPlatformUtilsService } from "../platform/services/platform-utils/browser-platform-utils.service";
 import { PopupViewCacheBackgroundService } from "../platform/services/popup-view-cache-background.service";
-import { BrowserSdkClientFactory } from "../platform/services/sdk/browser-sdk-client-factory";
+import { BrowserSdkLoadService } from "../platform/services/sdk/browser-sdk-load.service";
 import { BackgroundTaskSchedulerService } from "../platform/services/task-scheduler/background-task-scheduler.service";
 import { BackgroundMemoryStorageService } from "../platform/storage/background-memory-storage.service";
 import { BrowserStorageServiceProvider } from "../platform/storage/browser-storage-service.provider";
@@ -312,7 +321,7 @@ export default class MainBackground {
   importService: ImportServiceAbstraction;
   exportService: VaultExportServiceAbstraction;
   searchService: SearchServiceAbstraction;
-  notificationsService: NotificationsServiceAbstraction;
+  notificationsService: NotificationsService;
   stateService: StateServiceAbstraction;
   userNotificationSettingsService: UserNotificationSettingsServiceAbstraction;
   autofillSettingsService: AutofillSettingsServiceAbstraction;
@@ -376,9 +385,12 @@ export default class MainBackground {
   kdfConfigService: KdfConfigService;
   offscreenDocumentService: OffscreenDocumentService;
   syncServiceListener: SyncServiceListener;
+
+  webPushConnectionService: WorkerWebPushConnectionService | UnsupportedWebPushConnectionService;
   themeStateService: DefaultThemeStateService;
   autoSubmitLoginBackground: AutoSubmitLoginBackground;
   sdkService: SdkService;
+  sdkLoadService: SdkLoadService;
   cipherAuthorizationService: CipherAuthorizationService;
   inlineMenuFieldQualificationService: InlineMenuFieldQualificationService;
 
@@ -405,11 +417,6 @@ export default class MainBackground {
   constructor() {
     // Services
     const lockedCallback = async (userId?: string) => {
-      if (this.notificationsService != null) {
-        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.notificationsService.updateConnection(false);
-      }
       await this.refreshBadge();
       await this.refreshMenu(true);
       if (this.systemService != null) {
@@ -554,6 +561,7 @@ export default class MainBackground {
       this.messagingService,
       this.logService,
       this.globalStateProvider,
+      this.singleUserStateProvider,
     );
     this.activeUserStateProvider = new DefaultActiveUserStateProvider(
       this.accountService,
@@ -730,8 +738,9 @@ export default class MainBackground {
     );
 
     const sdkClientFactory = flagEnabled("sdk")
-      ? new BrowserSdkClientFactory(this.logService)
+      ? new DefaultSdkClientFactory()
       : new NoopSdkClientFactory();
+    this.sdkLoadService = new BrowserSdkLoadService(this.logService);
     this.sdkService = new DefaultSdkService(
       sdkClientFactory,
       this.environmentService,
@@ -1030,17 +1039,34 @@ export default class MainBackground {
       this.organizationVaultExportService,
     );
 
-    this.notificationsService = new NotificationsService(
-      this.logService,
+    if (BrowserApi.isManifestVersion(3)) {
+      const registration = (self as unknown as { registration: ServiceWorkerRegistration })
+        ?.registration;
+
+      if (registration != null) {
+        this.webPushConnectionService = new WorkerWebPushConnectionService(
+          this.configService,
+          new WebPushNotificationsApiService(this.apiService, this.appIdService),
+          registration,
+        );
+      } else {
+        this.webPushConnectionService = new UnsupportedWebPushConnectionService();
+      }
+    } else {
+      this.webPushConnectionService = new UnsupportedWebPushConnectionService();
+    }
+
+    this.notificationsService = new DefaultNotificationsService(
       this.syncService,
       this.appIdService,
-      this.apiService,
       this.environmentService,
       logoutCallback,
-      this.stateService,
-      this.authService,
       this.messagingService,
-      this.taskSchedulerService,
+      this.accountService,
+      new SignalRConnectionService(this.apiService, this.logService),
+      this.authService,
+      this.webPushConnectionService,
+      this.logService,
     );
 
     this.fido2UserInterfaceService = new BrowserFido2UserInterfaceService(this.authService);
@@ -1255,8 +1281,12 @@ export default class MainBackground {
   }
 
   async bootstrap() {
+    if (this.webPushConnectionService instanceof WorkerWebPushConnectionService) {
+      this.webPushConnectionService.start();
+    }
     this.containerService.attachToGlobal(self);
 
+    await this.sdkLoadService.load();
     // Only the "true" background should run migrations
     await this.stateService.init({ runMigrations: true });
 
@@ -1319,12 +1349,7 @@ export default class MainBackground {
       setTimeout(async () => {
         await this.refreshBadge();
         await this.fullSync(false);
-        this.taskSchedulerService.setInterval(
-          ScheduledTaskNames.scheduleNextSyncInterval,
-          5 * 60 * 1000, // check every 5 minutes
-        );
-        setTimeout(() => this.notificationsService.init(), 2500);
-        await this.taskSchedulerService.verifyAlarmsState();
+        this.notificationsService.startListening();
         resolve();
       }, 500);
     });
@@ -1403,7 +1428,6 @@ export default class MainBackground {
         ForceSetPasswordReason.None;
 
       await this.systemService.clearPendingClipboard();
-      await this.notificationsService.updateConnection(false);
 
       if (nextAccountStatus === AuthenticationStatus.LoggedOut) {
         this.messagingService.send("goHome");
@@ -1507,7 +1531,6 @@ export default class MainBackground {
     }
     await this.refreshBadge();
     await this.mainContextMenuHandler?.noAccess();
-    await this.notificationsService.updateConnection(false);
     await this.systemService.clearPendingClipboard();
     await this.processReloadService.startProcessReload(this.authService);
   }
