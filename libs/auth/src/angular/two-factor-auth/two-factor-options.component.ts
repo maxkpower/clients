@@ -5,7 +5,22 @@ import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
-import { ButtonModule, DialogModule, DialogService, TypographyModule } from "@bitwarden/components";
+import {
+  ButtonModule,
+  DialogModule,
+  DialogService,
+  IconModule,
+  ItemModule,
+  TypographyModule,
+} from "@bitwarden/components";
+
+import {
+  TwoFactorAuthAuthenticatorIcon,
+  TwoFactorAuthDuoIcon,
+  TwoFactorAuthEmailIcon,
+  TwoFactorAuthWebAuthnIcon,
+  TwoFactorAuthYubicoIcon,
+} from "../icons/two-factor-auth";
 
 export enum TwoFactorOptionsDialogResult {
   Provider = "Provider selected",
@@ -21,7 +36,15 @@ export type TwoFactorOptionsDialogResultType = {
   standalone: true,
   selector: "app-two-factor-options",
   templateUrl: "two-factor-options.component.html",
-  imports: [CommonModule, JslibModule, DialogModule, ButtonModule, TypographyModule],
+  imports: [
+    CommonModule,
+    JslibModule,
+    DialogModule,
+    ButtonModule,
+    TypographyModule,
+    ItemModule,
+    IconModule,
+  ],
   providers: [],
 })
 export class TwoFactorOptionsComponent implements OnInit {
@@ -29,6 +52,15 @@ export class TwoFactorOptionsComponent implements OnInit {
   @Output() onRecoverSelected = new EventEmitter();
 
   providers: any[] = [];
+  TwoFactorProviderType = TwoFactorProviderType;
+
+  readonly Icons = {
+    TwoFactorAuthAuthenticatorIcon,
+    TwoFactorAuthEmailIcon,
+    TwoFactorAuthDuoIcon,
+    TwoFactorAuthYubicoIcon,
+    TwoFactorAuthWebAuthnIcon,
+  };
 
   constructor(
     private twoFactorService: TwoFactorService,

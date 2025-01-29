@@ -937,6 +937,9 @@
   "twoStepOptions": {
     "message": "Two-step login options"
   },
+  "selectTwoStepLoginMethod": {
+    "message": "Select two-step login method"
+  },
   "selfHostedEnvironment": {
     "message": "Self-hosted environment"
   },
