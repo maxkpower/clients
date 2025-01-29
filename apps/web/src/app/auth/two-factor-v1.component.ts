@@ -31,7 +31,7 @@ import {
   TwoFactorOptionsDialogResult,
   TwoFactorOptionsComponentV1,
   TwoFactorOptionsDialogResultType,
-} from "./two-factor-options.component";
+} from "./two-factor-options-v1.component";
 
 @Component({
   selector: "app-two-factor",

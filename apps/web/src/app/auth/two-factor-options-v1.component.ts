@@ -22,7 +22,7 @@ export type TwoFactorOptionsDialogResultType = {
 
 @Component({
   selector: "app-two-factor-options",
-  templateUrl: "two-factor-options.component.html",
+  templateUrl: "two-factor-options-v1.component.html",
 })
 export class TwoFactorOptionsComponentV1 extends BaseTwoFactorOptionsComponentV1 {
   constructor(
