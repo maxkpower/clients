@@ -30,6 +30,17 @@ describe("BillingNotificationService", () => {
       });
     });
 
+    it("should use provided title", () => {
+      const error = new ErrorResponse(["test error"], 400);
+
+      expect(() => service.handleError(error, "Test Title")).toThrow();
+      expect(toastService.showToast).toHaveBeenCalledWith({
+        variant: "error",
+        title: "Test Title",
+        message: error.getSingleMessage(),
+      });
+    });
+
     it("should only log error for non-ErrorResponse", () => {
       const error = new Error("test error");
 
@@ -40,13 +51,24 @@ describe("BillingNotificationService", () => {
   });
 
   describe("showSuccess", () => {
-    it("should show success toast", () => {
+    it("should show success toast with default title", () => {
       const message = "test message";
       service.showSuccess(message);
 
       expect(toastService.showToast).toHaveBeenCalledWith({
         variant: "success",
         title: "",
+        message,
+      });
+    });
+
+    it("should show success toast with custom title", () => {
+      const message = "test message";
+      service.showSuccess(message, "Success Title");
+
+      expect(toastService.showToast).toHaveBeenCalledWith({
+        variant: "success",
+        title: "Success Title",
         message,
       });
     });

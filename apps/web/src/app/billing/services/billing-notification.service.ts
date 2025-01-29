@@ -13,22 +13,22 @@ export class BillingNotificationService {
     private toastService: ToastService,
   ) {}
 
-  handleError(error: unknown) {
+  handleError(error: unknown, title: string = "") {
     this.logService.error(error);
     if (error instanceof ErrorResponse) {
       this.toastService.showToast({
         variant: "error",
-        title: "",
+        title: title,
         message: error.getSingleMessage(),
       });
     }
     throw error;
   }
 
-  showSuccess(message: string) {
+  showSuccess(message: string, title: string = "") {
     this.toastService.showToast({
       variant: "success",
-      title: "",
+      title: title,
       message: message,
     });
   }
