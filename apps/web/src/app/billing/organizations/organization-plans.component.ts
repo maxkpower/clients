@@ -114,6 +114,8 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
     this.formGroup?.controls?.plan?.setValue(plan);
   }
 
+  @Input() enableSecretsManagerByDefault: boolean;
+
   private _plan = PlanType.Free;
   @Input() providerId?: string;
   @Input() preSelectedProductTier?: ProductTierType;
@@ -277,6 +279,14 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.refreshSalesTax();
       });
+
+    if (this.enableSecretsManagerByDefault && this.selectedSecretsManagerPlan) {
+      this.secretsManagerSubscription.patchValue({
+        enabled: true,
+        userSeats: 1,
+        additionalServiceAccounts: 0,
+      });
+    }
   }
 
   ngOnDestroy() {
