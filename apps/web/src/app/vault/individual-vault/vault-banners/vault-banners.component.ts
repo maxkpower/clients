@@ -1,11 +1,12 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
-import { firstValueFrom, map, Observable, switchMap } from "rxjs";
+import { firstValueFrom, map, Observable, switchMap, Subject, filter, takeUntil } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { MessageListener } from "@bitwarden/common/platform/messaging";
 import { BannerModule } from "@bitwarden/components";
 
 import { VerifyEmailComponent } from "../../../auth/settings/verify-email.component";
@@ -21,12 +22,13 @@ import { VaultBannersService, VisibleVaultBanner } from "./services/vault-banner
   imports: [VerifyEmailComponent, SharedModule, BannerModule],
   providers: [VaultBannersService],
 })
-export class VaultBannersComponent implements OnInit {
+export class VaultBannersComponent implements OnInit, OnDestroy {
   visibleBanners: VisibleVaultBanner[] = [];
   premiumBannerVisible$: Observable<boolean>;
   VisibleVaultBanner = VisibleVaultBanner;
   @Input() organizationsPaymentStatus: FreeTrial[] = [];
 
+  private destroy$ = new Subject<void>();
   private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
   constructor(
@@ -34,10 +36,28 @@ export class VaultBannersComponent implements OnInit {
     private router: Router,
     private i18nService: I18nService,
     private accountService: AccountService,
+    private messageListener: MessageListener,
   ) {
     this.premiumBannerVisible$ = this.activeUserId$.pipe(
       switchMap((userId) => this.vaultBannerService.shouldShowPremiumBanner$(userId)),
     );
+
+    // Listen for auth request messages and show banner immediately
+    this.messageListener.allMessages$
+      .pipe(
+        filter((message: { command: string }) => message.command === "openLoginApproval"),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => {
+        if (!this.visibleBanners.includes(VisibleVaultBanner.PendingAuthRequest)) {
+          this.visibleBanners = [...this.visibleBanners, VisibleVaultBanner.PendingAuthRequest];
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async ngOnInit(): Promise<void> {
@@ -70,9 +90,8 @@ export class VaultBannersComponent implements OnInit {
       await this.vaultBannerService.shouldShowUpdateBrowserBanner(activeUserId);
     const showVerifyEmail = await this.vaultBannerService.shouldShowVerifyEmailBanner(activeUserId);
     const showLowKdf = await this.vaultBannerService.shouldShowLowKDFBanner(activeUserId);
-    const showPendingAuthRequest = await firstValueFrom(
-      this.vaultBannerService.shouldShowPendingAuthRequestBanner$(activeUserId),
-    );
+    const showPendingAuthRequest =
+      await this.vaultBannerService.shouldShowPendingAuthRequestBanner(activeUserId);
 
     this.visibleBanners = [
       showBrowserOutdated ? VisibleVaultBanner.OutdatedBrowser : null,
