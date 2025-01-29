@@ -44,6 +44,7 @@ import {
   TwoFactorAuthEmailIcon,
   TwoFactorAuthWebAuthnIcon,
   TwoFactorAuthYubikeyIcon,
+  TwoFactorAuthDuoIcon,
 } from "../icons/two-factor-auth";
 
 import { TwoFactorAuthAuthenticatorComponent } from "./child-components/two-factor-auth-authenticator.component";
@@ -321,8 +322,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       case TwoFactorProviderType.OrganizationDuo:
         this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
           pageSubtitle: this.i18nService.t("duoTwoFactorRequiredPageSubtitle"),
-          // TODO: figure out logo
-          // pageIcon: ,
+          pageIcon: TwoFactorAuthDuoIcon,
         });
         break;
       case TwoFactorProviderType.Yubikey:
