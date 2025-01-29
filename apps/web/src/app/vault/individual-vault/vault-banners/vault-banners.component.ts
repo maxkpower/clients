@@ -6,6 +6,7 @@ import { firstValueFrom, map, Observable, switchMap, filter } from "rxjs";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessageListener } from "@bitwarden/common/platform/messaging";
+import { UserId } from "@bitwarden/common/types/guid";
 import { BannerModule } from "@bitwarden/components";
 
 import { VerifyEmailComponent } from "../../../auth/settings/verify-email.component";
@@ -37,6 +38,7 @@ export class VaultBannersComponent implements OnInit {
     private messageListener: MessageListener,
   ) {
     this.premiumBannerVisible$ = this.activeUserId$.pipe(
+      filter((userId): userId is UserId => userId != null),
       switchMap((userId) => this.vaultBannerService.shouldShowPremiumBanner$(userId)),
     );
 
