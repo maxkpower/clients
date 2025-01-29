@@ -1,7 +1,6 @@
 import { DialogRef } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
-import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
@@ -11,8 +10,6 @@ import { EnvironmentService } from "@bitwarden/common/platform/abstractions/envi
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { ButtonModule, DialogModule, DialogService, TypographyModule } from "@bitwarden/components";
 
-// TODO: rename all other options components to v1.
-// TODO: deprecate recovery code approach per design
 export enum TwoFactorOptionsDialogResult {
   Provider = "Provider selected",
   Recover = "Recover selected",
@@ -59,14 +56,6 @@ export class TwoFactorOptionsComponent implements OnInit {
   async choose(p: any) {
     this.onProviderSelected.emit(p.type);
     this.dialogRef.close({ result: TwoFactorOptionsDialogResult.Provider, type: p.type });
-  }
-
-  async recover() {
-    const env = await firstValueFrom(this.environmentService.environment$);
-    const webVault = env.getWebVaultUrl();
-    this.platformUtilsService.launchUri(webVault + "/#/recover-2fa");
-    this.onRecoverSelected.emit();
-    this.dialogRef.close({ result: TwoFactorOptionsDialogResult.Recover });
   }
 
   static open(dialogService: DialogService) {
