@@ -69,7 +69,7 @@ export class VaultBannersService {
   async shouldShowPendingAuthRequestBanner(userId: UserId): Promise<boolean> {
     const devices = await firstValueFrom(this.devicesService.getDevices$());
     const hasPendingRequest = devices.some(
-      (device) => device.response?.devicePendingAuthRequest !== null,
+      (device) => device.response?.devicePendingAuthRequest != null,
     );
 
     const alreadyDismissed = (await this.getBannerDismissedState(userId)).includes(

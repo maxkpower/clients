@@ -7,8 +7,10 @@ import {
 } from "@bitwarden/auth/common";
 import { AccountInfo, AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { DevicesServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices/devices.service.abstraction";
+import { DeviceResponse } from "@bitwarden/common/auth/abstractions/devices/responses/device.response";
 import { DeviceView } from "@bitwarden/common/auth/abstractions/devices/views/device.view";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
+import { DeviceType } from "@bitwarden/common/enums";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { StateProvider } from "@bitwarden/common/platform/state";
@@ -283,44 +285,61 @@ describe("VaultBannersService", () => {
   });
 
   describe("PendingAuthRequest", () => {
-    beforeEach(async () => {
-      devices$.next([
-        {
-          id: "device1",
-          response: {
-            devicePendingAuthRequest: {
-              id: "auth1",
-              creationDate: new Date().toISOString(),
-            },
-          },
-        } as DeviceView,
-      ]);
-    });
+    const now = new Date();
+    let deviceResponse: DeviceResponse;
 
-    it("shows pending auth request banner", async () => {
-      service = TestBed.inject(VaultBannersService);
-      const result = await firstValueFrom(service.shouldShowPendingAuthRequestBanner$(userId));
-      expect(result).toBe(true);
-    });
-
-    it("does not show banner when no pending requests exist", async () => {
+    beforeEach(() => {
+      deviceResponse = new DeviceResponse({
+        Id: "device1",
+        UserId: userId,
+        Name: "Test Device",
+        Identifier: "test-device",
+        Type: DeviceType.Android,
+        CreationDate: now.toISOString(),
+        RevisionDate: now.toISOString(),
+        IsTrusted: false,
+      });
+      // Reset devices list, single user state, and active user state before each test
       devices$.next([]);
+      fakeStateProvider.singleUser.states.clear();
+      fakeStateProvider.activeUser.states.clear();
+    });
+
+    it("shows pending auth request banner when there is a pending request", async () => {
+      deviceResponse.devicePendingAuthRequest = {
+        id: "123",
+        creationDate: now.toISOString(),
+      };
+      devices$.next([new DeviceView(deviceResponse)]);
+
       service = TestBed.inject(VaultBannersService);
-      const result = await firstValueFrom(service.shouldShowPendingAuthRequestBanner$(userId));
-      expect(result).toBe(false);
+
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(true);
+    });
+
+    it("does not show pending auth request banner when there are no pending requests", async () => {
+      deviceResponse.devicePendingAuthRequest = null;
+      devices$.next([new DeviceView(deviceResponse)]);
+
+      service = TestBed.inject(VaultBannersService);
+
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(false);
     });
 
     it("dismisses pending auth request banner", async () => {
+      deviceResponse.devicePendingAuthRequest = {
+        id: "123",
+        creationDate: now.toISOString(),
+      };
+      devices$.next([new DeviceView(deviceResponse)]);
+
       service = TestBed.inject(VaultBannersService);
-      const result = await firstValueFrom(service.shouldShowPendingAuthRequestBanner$(userId));
-      expect(result).toBe(true);
+
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(true);
 
       await service.dismissBanner(userId, VisibleVaultBanner.PendingAuthRequest);
-      devices$.next([]);
-      const afterDismiss = await firstValueFrom(
-        service.shouldShowPendingAuthRequestBanner$(userId),
-      );
-      expect(afterDismiss).toBe(false);
+
+      expect(await service.shouldShowPendingAuthRequestBanner(userId)).toBe(false);
     });
   });
 });
