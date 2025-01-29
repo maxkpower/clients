@@ -2,17 +2,7 @@
 // @ts-strict-ignore
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { coerceBooleanProperty } from "@angular/cdk/coercion";
-import {
-  Component,
-  EventEmitter,
-  Input,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  Output,
-  SimpleChanges,
-  OnChanges,
-} from "@angular/core";
+import { Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import {
   BehaviorSubject,
@@ -61,7 +51,7 @@ const NONE_SELECTED = "none";
   selector: "tools-username-generator",
   templateUrl: "username-generator.component.html",
 })
-export class UsernameGeneratorComponent implements OnInit, OnDestroy, OnChanges {
+export class UsernameGeneratorComponent implements OnInit, OnDestroy {
   /** Instantiates the username generator
    *  @param generatorService generates credentials; stores preferences
    *  @param i18nService localizes generator algorithm descriptions
@@ -352,14 +342,6 @@ export class UsernameGeneratorComponent implements OnInit, OnDestroy, OnChanges 
         }
       });
     });
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.website && changes.website.currentValue !== changes.website.previousValue) {
-      // Update the website in the BehaviorSubject when the input changes
-      this.website = changes.website.currentValue;
-      this.generate$.next({ source: "websiteChange", website: this.website });
-    }
   }
 
   private typeToGenerator$(type: CredentialAlgorithm) {

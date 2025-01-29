@@ -5,13 +5,12 @@ import { CommonModule } from "@angular/common";
 import { Component, Inject } from "@angular/core";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { ButtonModule, DialogModule, DialogService } from "@bitwarden/components";
 import { CipherFormGeneratorComponent } from "@bitwarden/vault";
 
 export interface WebVaultGeneratorDialogParams {
   type: "password" | "username";
-  cipher?: CipherView;
+  uri?: string;
 }
 
 export interface WebVaultGeneratorDialogResult {
@@ -50,14 +49,14 @@ export class WebVaultGeneratorDialogComponent {
    */
   protected generatedValue: string = "";
 
-  protected cipher: CipherView;
+  protected uri: string;
 
   constructor(
     @Inject(DIALOG_DATA) protected params: WebVaultGeneratorDialogParams,
     private dialogRef: DialogRef<WebVaultGeneratorDialogResult>,
     private i18nService: I18nService,
   ) {
-    this.cipher = params.cipher;
+    this.uri = params.uri;
   }
 
   /**

@@ -51,6 +51,9 @@ export abstract class CipherFormContainer {
     group: Exclude<CipherForm[K], undefined>,
   ): void;
 
+  /**
+   * Returns the current cipherView
+   */
   abstract get getCipherView(): CipherView | null;
 
   /**
