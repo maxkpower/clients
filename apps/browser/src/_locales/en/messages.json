@@ -870,7 +870,7 @@
     "message": "Press your YubiKey to authenticate"
   },
   "duoTwoFactorRequiredPageSubtitle": {
-    "message": "Duo two-step login is required for your account. Popout the extension to complete login."
+    "message": "Duo two-step login is required for your account. Popout the extension to finish logging in."
   },
   "restartRegistration": {
     "message": "Restart registration"
