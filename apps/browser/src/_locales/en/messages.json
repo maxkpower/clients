@@ -872,6 +872,9 @@
   "duoTwoFactorRequiredPageSubtitle": {
     "message": "Duo two-step login is required for your account. Popout the extension to finish logging in."
   },
+  "followTheStepsBelowToFinishLoggingIn": {
+    "message": "Follow the steps below to finish logging in."
+  },
   "restartRegistration": {
     "message": "Restart registration"
   },

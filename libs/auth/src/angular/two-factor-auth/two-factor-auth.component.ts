@@ -42,6 +42,7 @@ import { AnonLayoutWrapperDataService } from "../anon-layout/anon-layout-wrapper
 import {
   TwoFactorAuthAuthenticatorIcon,
   TwoFactorAuthEmailIcon,
+  TwoFactorAuthWebAuthnIcon,
   TwoFactorAuthYubikeyIcon,
 } from "../icons/two-factor-auth";
 
@@ -303,7 +304,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   }
 
   async setAnonLayoutDataByTwoFactorProviderType() {
-    // TODO: finish adding all provider types
     switch (this.selectedProviderType) {
       case TwoFactorProviderType.Authenticator:
         this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
@@ -318,9 +318,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
         });
         break;
       case TwoFactorProviderType.Duo:
+      case TwoFactorProviderType.OrganizationDuo:
         this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
           pageSubtitle: this.i18nService.t("duoTwoFactorRequiredPageSubtitle"),
-          pageIcon: TwoFactorAuthAuthenticatorIcon,
+          // TODO: figure out logo
+          // pageIcon: ,
         });
         break;
       case TwoFactorProviderType.Yubikey:
@@ -329,8 +331,18 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
           pageIcon: TwoFactorAuthYubikeyIcon,
         });
         break;
-
+      case TwoFactorProviderType.WebAuthn:
+        // TODO: figure out browser extension title implementation.
+        this.anonLayoutWrapperDataService.setAnonLayoutWrapperData({
+          pageSubtitle: this.i18nService.t("followTheStepsBelowToFinishLoggingIn"),
+          pageIcon: TwoFactorAuthWebAuthnIcon,
+        });
+        break;
       default:
+        this.logService.error(
+          "setAnonLayoutDataByTwoFactorProviderType: Unhandled 2FA provider type",
+          this.selectedProviderType,
+        );
         break;
     }
   }
