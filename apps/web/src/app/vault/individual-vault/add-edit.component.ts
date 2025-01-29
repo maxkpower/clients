@@ -135,7 +135,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
 
     if (this.showTotp()) {
       await this.totpUpdateCode();
-      const totpResponse = await this.totpService.getCode(this.cipher.login.totp);
+      const totpResponse = await firstValueFrom(this.totpService.getCode$(this.cipher.login.totp));
       if (totpResponse) {
         const interval = totpResponse.period;
         await this.totpTick(interval);
@@ -280,7 +280,7 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
       return;
     }
 
-    this.totpCode = (await this.totpService.getCode(this.cipher.login.totp))?.code;
+    this.totpCode = (await firstValueFrom(this.totpService.getCode$(this.cipher.login.totp))).code;
     if (this.totpCode != null) {
       if (this.totpCode.length > 4) {
         const half = Math.floor(this.totpCode.length / 2);

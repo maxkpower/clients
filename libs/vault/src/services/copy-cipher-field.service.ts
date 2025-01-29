@@ -124,7 +124,7 @@ export class CopyCipherFieldService {
       if (!(await this.totpAllowed(cipher))) {
         return false;
       }
-      const totpResponse = await this.totpService.getCode(valueToCopy);
+      const totpResponse = await firstValueFrom(this.totpService.getCode$(valueToCopy));
       if (!totpResponse?.code) {
         return false;
       }

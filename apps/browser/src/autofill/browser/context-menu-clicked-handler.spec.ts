@@ -1,4 +1,5 @@
 import { mock, MockProxy } from "jest-mock-extended";
+import { of } from "rxjs";
 
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
@@ -157,15 +158,15 @@ describe("ContextMenuClickedHandler", () => {
     it("copies totp code to clipboard", async () => {
       cipherService.getAllDecrypted.mockResolvedValue([createCipher({ totp: "TEST_TOTP_SEED" })]);
 
-      totpService.getCode.mockImplementation((seed) => {
+      jest.spyOn(totpService, "getCode$").mockImplementation((seed: string) => {
         if (seed === "TEST_TOTP_SEED") {
-          return Promise.resolve({
+          return of({
             code: "123456",
             period: 30,
           });
         }
 
-        return Promise.resolve({
+        return of({
           code: "654321",
           period: 30,
         });
@@ -175,7 +176,7 @@ describe("ContextMenuClickedHandler", () => {
         url: "https://test.com",
       } as any);
 
-      expect(totpService.getCode).toHaveBeenCalledTimes(1);
+      expect(totpService.getCode$).toHaveBeenCalledTimes(1);
 
       expect(copyToClipboard).toHaveBeenCalledWith({
         text: "123456",

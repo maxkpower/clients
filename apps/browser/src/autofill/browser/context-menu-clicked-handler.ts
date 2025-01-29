@@ -199,13 +199,11 @@ export class ContextMenuClickedHandler {
             action: COPY_VERIFICATION_CODE_ID,
           });
         } else {
-          const totpResponse = await this.totpService.getCode(cipher.login.totp);
-          if (totpResponse?.code) {
-            this.copyToClipboard({
-              text: totpResponse.code,
-              tab: tab,
-            });
-          }
+          const totpResponse = await firstValueFrom(this.totpService.getCode$(cipher.login.totp));
+          this.copyToClipboard({
+            text: totpResponse.code,
+            tab: tab,
+          });
         }
 
         break;

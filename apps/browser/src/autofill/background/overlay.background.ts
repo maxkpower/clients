@@ -692,7 +692,10 @@ export class OverlayBackground implements OverlayBackgroundInterface {
     };
 
     if (cipher.type === CipherType.Login) {
-      const totpResponse = await this.totpService.getCode(cipher.login?.totp);
+      const totpResponse = cipher.login?.totp
+        ? await firstValueFrom(this.totpService.getCode$(cipher.login.totp))
+        : undefined;
+
       inlineMenuData.login = {
         username: cipher.login.username,
         totp: totpResponse?.code,
@@ -1115,10 +1118,8 @@ export class OverlayBackground implements OverlayBackgroundInterface {
       this.updateLastUsedInlineMenuCipher(inlineMenuCipherId, cipher);
 
       if (cipher.login?.totp) {
-        const totpResponse = await this.totpService.getCode(cipher.login.totp);
-        if (totpResponse) {
-          this.platformUtilsService.copyToClipboard(totpResponse.code);
-        }
+        const totpResponse = await firstValueFrom(this.totpService.getCode$(cipher.login.totp));
+        this.platformUtilsService.copyToClipboard(totpResponse.code);
       }
       return;
     }
