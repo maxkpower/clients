@@ -5,7 +5,7 @@ import {
   ElementRef,
   OnDestroy,
   AfterViewInit,
-  ViewChildren, OnInit,
+  ViewChildren,
 } from "@angular/core";
 import {
   FormsModule,
@@ -66,7 +66,7 @@ import { PopupPageComponent } from "../../../platform/popup/layout/popup-page.co
     TypographyModule,
   ],
 })
-export class ExcludedDomainsComponent implements AfterViewInit, OnDestroy, OnInit {
+export class ExcludedDomainsComponent implements AfterViewInit, OnDestroy {
   @ViewChildren("uriInput") uriInputElements: QueryList<ElementRef<HTMLInputElement>> =
     new QueryList();
 
@@ -75,7 +75,11 @@ export class ExcludedDomainsComponent implements AfterViewInit, OnDestroy, OnIni
   isLoading = false;
   excludedDomainsState: string[] = [];
   storedExcludedDomains: string[] = [];
-  domainListForm: FormGroup;
+
+  protected domainListForm = new FormGroup({
+    domains: this.formBuilder.array([]),
+  });
+
   // How many fields should be non-editable before editable fields
   fieldsEditThreshold: number = 0;
 
@@ -88,12 +92,6 @@ export class ExcludedDomainsComponent implements AfterViewInit, OnDestroy, OnIni
     private formBuilder: FormBuilder,
   ) {
     this.accountSwitcherEnabled = enableAccountSwitching();
-  }
-
-  ngOnInit() {
-    this.domainListForm = this.formBuilder.group({
-      domains: this.formBuilder.array([]),
-    });
   }
 
   get domainForms() {

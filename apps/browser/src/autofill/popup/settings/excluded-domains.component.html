@@ -40,7 +40,7 @@
           formArrayName="domains"
           *ngFor="let domain of domainForms.controls; let i = index"
         >
-          <bit-form-field>
+          <bit-form-field disableMargin>
             <bit-label>{{ "websiteItemLabel" | i18n: i + fieldsEditThreshold + 1 }}</bit-label>
             <input
               bitInput
