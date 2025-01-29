@@ -47,9 +47,9 @@
               #uriInput
               appInputVerbatim
               bitInput
-              id="excludedDomain{{ i }}"
+              id="excludedDomain{{ i + fieldsEditThreshold }}"
               inputmode="url"
-              name="excludedDomain{{ i }}"
+              name="excludedDomain{{ i + fieldsEditThreshold }}"
               type="text"
               (change)="fieldChange()"
               formControlName="{{ i }}"
