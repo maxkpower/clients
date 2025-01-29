@@ -1,6 +1,6 @@
 import { svgIcon } from "@bitwarden/components";
 
-export const TwoFactorAuthYubikeyIcon = svgIcon`
+export const TwoFactorAuthSecurityKeyIcon = svgIcon`
 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 120 100">
     <g clip-path="url(#a)">
         <path class="tw-fill-art-primary" fill-rule="evenodd"
