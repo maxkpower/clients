@@ -76,8 +76,12 @@ export class VaultBannersComponent implements OnInit {
   }
 
   /** Determine which banners should be present */
-  async determineVisibleBanners(): Promise<void> {
+  private async determineVisibleBanners(): Promise<void> {
     const activeUserId = await firstValueFrom(this.activeUserId$);
+
+    if (!activeUserId) {
+      return;
+    }
 
     const showBrowserOutdated =
       await this.vaultBannerService.shouldShowUpdateBrowserBanner(activeUserId);
@@ -91,7 +95,7 @@ export class VaultBannersComponent implements OnInit {
       showVerifyEmail ? VisibleVaultBanner.VerifyEmail : null,
       showLowKdf ? VisibleVaultBanner.KDFSettings : null,
       showPendingAuthRequest ? VisibleVaultBanner.PendingAuthRequest : null,
-    ].filter(Boolean); // remove all falsy values, i.e. null
+    ].filter((banner): banner is VisibleVaultBanner => banner !== null); // ensures the filtered array contains only VisibleVaultBanner values
   }
 
   freeTrialMessage(organization: FreeTrial) {
