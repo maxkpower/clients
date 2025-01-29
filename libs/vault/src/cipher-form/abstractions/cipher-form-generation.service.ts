@@ -1,3 +1,4 @@
+import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 /**
  * Service responsible for generating random passwords and usernames.
  */
@@ -10,5 +11,5 @@ export abstract class CipherFormGenerationService {
   /**
    * Generates a random username. Called when the user clicks the "Generate Username" button in the UI.
    */
-  abstract generateUsername(): Promise<string | null>;
+  abstract generateUsername(cipher: CipherView): Promise<string | null>;
 }

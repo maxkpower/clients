@@ -8,6 +8,7 @@
 
   <vault-cipher-form-generator
     [type]="params.type"
+    [uri]="cipher.login.uris[0]?.uri"
     (valueGenerated)="onValueGenerated($event)"
   ></vault-cipher-form-generator>
 

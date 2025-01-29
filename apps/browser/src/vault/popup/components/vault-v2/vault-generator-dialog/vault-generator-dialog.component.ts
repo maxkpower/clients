@@ -6,6 +6,7 @@ import { CommonModule } from "@angular/common";
 import { Component, Inject } from "@angular/core";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { ButtonModule, DialogService } from "@bitwarden/components";
 import { CipherFormGeneratorComponent } from "@bitwarden/vault";
 
@@ -15,6 +16,7 @@ import { PopupPageComponent } from "../../../../../platform/popup/layout/popup-p
 
 export interface GeneratorDialogParams {
   type: "password" | "username";
+  cipher?: CipherView;
 }
 
 export interface GeneratorDialogResult {
@@ -60,11 +62,15 @@ export class VaultGeneratorDialogComponent {
    */
   protected generatedValue: string = "";
 
+  protected cipher: CipherView;
+
   constructor(
     @Inject(DIALOG_DATA) protected params: GeneratorDialogParams,
     private dialogRef: DialogRef<GeneratorDialogResult>,
     private i18nService: I18nService,
-  ) {}
+  ) {
+    this.cipher = params.cipher;
+  }
 
   /**
    * Close the dialog without selecting a value.
