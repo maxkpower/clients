@@ -2,7 +2,7 @@ import { DialogRef } from "@angular/cdk/dialog";
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { TwoFactorOptionsComponentV1 as BaseTwoFactorOptionsComponentV1 } from "@bitwarden/angular/auth/components/two-factor-options.component";
+import { TwoFactorOptionsComponentV1 as BaseTwoFactorOptionsComponentV1 } from "@bitwarden/angular/auth/components/two-factor-options-v1.component";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
