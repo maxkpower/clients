@@ -76,7 +76,7 @@ export class VaultBannersComponent implements OnInit {
   }
 
   /** Determine which banners should be present */
-  private async determineVisibleBanners(): Promise<void> {
+  async determineVisibleBanners(): Promise<void> {
     const activeUserId = await firstValueFrom(this.activeUserId$);
 
     if (!activeUserId) {
