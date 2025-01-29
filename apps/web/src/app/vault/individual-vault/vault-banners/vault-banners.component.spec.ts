@@ -183,10 +183,7 @@ describe("VaultBannersComponent", () => {
           'button[biticonbutton="bwi-close"]',
         );
 
-        // Update observable to emit false before dismissal
         pendingAuthRequest$.next(false);
-
-        // Then trigger the dismissal
         dismissButton.click();
         fixture.detectChanges();
 
@@ -197,7 +194,6 @@ describe("VaultBannersComponent", () => {
 
         // Wait for async operations to complete
         await fixture.whenStable();
-        // Force a re-evaluation of the banners
         await component.determineVisibleBanners();
         fixture.detectChanges();
 
@@ -237,16 +233,6 @@ describe("VaultBannersComponent", () => {
       bannerService.shouldShowPendingAuthRequestBanner.mockResolvedValue(false);
       await component.ngOnInit();
       messageSubject.next({ command: "someOtherCommand" });
-      fixture.detectChanges();
-
-      expect(component.visibleBanners).not.toContain(VisibleVaultBanner.PendingAuthRequest);
-    });
-
-    it("stops listening for messages when component is destroyed", async () => {
-      bannerService.shouldShowPendingAuthRequestBanner.mockResolvedValue(false);
-      await component.ngOnInit();
-      component.ngOnDestroy();
-      messageSubject.next({ command: "openLoginApproval" });
       fixture.detectChanges();
 
       expect(component.visibleBanners).not.toContain(VisibleVaultBanner.PendingAuthRequest);

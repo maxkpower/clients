@@ -68,7 +68,7 @@ export class DeviceManagementComponent {
   }
 
   /**
-   * Initialize real-time updates for device status via SignalR
+   * Initialize real-time updates for device status
    */
   private initializeDeviceUpdates(): void {
     this.loadDevices().catch((error) => this.validationService.showError(error));
