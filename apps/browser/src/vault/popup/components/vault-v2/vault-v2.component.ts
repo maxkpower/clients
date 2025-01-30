@@ -1,15 +1,16 @@
-import { ScrollingModule } from "@angular/cdk/scrolling";
+import { CdkVirtualScrollableElement, ScrollingModule } from "@angular/cdk/scrolling";
 import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
-import { combineLatest, Observable, shareReplay, switchMap } from "rxjs";
+import { combineLatest, filter, map, Observable, shareReplay, switchMap, take } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
+import { CipherId, CollectionId, OrganizationId } from "@bitwarden/common/types/guid";
+import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
-import { ButtonModule, Icons, NoItemsModule } from "@bitwarden/components";
-import { VaultIcons } from "@bitwarden/vault";
+import { ButtonModule, DialogService, Icons, NoItemsModule } from "@bitwarden/components";
+import { DecryptionFailureDialogComponent, VaultIcons } from "@bitwarden/vault";
 
 import { CurrentAccountComponent } from "../../../../auth/popup/account-switching/current-account.component";
 import { PopOutComponent } from "../../../../platform/popup/components/pop-out.component";
@@ -17,8 +18,9 @@ import { PopupHeaderComponent } from "../../../../platform/popup/layout/popup-he
 import { PopupPageComponent } from "../../../../platform/popup/layout/popup-page.component";
 import { VaultPopupItemsService } from "../../services/vault-popup-items.service";
 import { VaultPopupListFiltersService } from "../../services/vault-popup-list-filters.service";
-import { VaultUiOnboardingService } from "../../services/vault-ui-onboarding.service";
+import { VaultPopupScrollPositionService } from "../../services/vault-popup-scroll-position.service";
 
+import { BlockedInjectionBanner } from "./blocked-injection-banner/blocked-injection-banner.component";
 import {
   NewItemDropdownV2Component,
   NewItemInitialValues,
@@ -38,6 +40,7 @@ enum VaultState {
   templateUrl: "vault-v2.component.html",
   standalone: true,
   imports: [
+    BlockedInjectionBanner,
     PopupPageComponent,
     PopupHeaderComponent,
     PopOutComponent,
@@ -52,10 +55,12 @@ enum VaultState {
     NewItemDropdownV2Component,
     ScrollingModule,
     VaultHeaderV2Component,
+    DecryptionFailureDialogComponent,
   ],
-  providers: [VaultUiOnboardingService],
 })
-export class VaultV2Component implements OnInit, OnDestroy {
+export class VaultV2Component implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild(CdkVirtualScrollableElement) virtualScrollElement?: CdkVirtualScrollableElement;
+
   cipherType = CipherType;
 
   protected favoriteCiphers$ = this.vaultPopupItemsService.favoriteCiphers$;
@@ -85,10 +90,15 @@ export class VaultV2Component implements OnInit, OnDestroy {
 
   protected VaultStateEnum = VaultState;
 
+  private allFilters$ = this.vaultPopupListFiltersService.allFilters$;
+
   constructor(
     private vaultPopupItemsService: VaultPopupItemsService,
     private vaultPopupListFiltersService: VaultPopupListFiltersService,
-    private vaultUiOnboardingService: VaultUiOnboardingService,
+    private vaultScrollPositionService: VaultPopupScrollPositionService,
+    private destroyRef: DestroyRef,
+    private cipherService: CipherService,
+    private dialogService: DialogService,
   ) {
     combineLatest([
       this.vaultPopupItemsService.emptyVault$,
@@ -114,9 +124,33 @@ export class VaultV2Component implements OnInit, OnDestroy {
       });
   }
 
-  async ngOnInit() {
-    await this.vaultUiOnboardingService.showOnboardingDialog();
+  ngAfterViewInit(): void {
+    if (this.virtualScrollElement) {
+      // The filters component can cause the size of the virtual scroll element to change,
+      // which can cause the scroll position to be land in the wrong spot. To fix this,
+      // wait until all filters are populated before restoring the scroll position.
+      this.allFilters$.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.vaultScrollPositionService.start(this.virtualScrollElement!);
+      });
+    }
   }
 
-  ngOnDestroy(): void {}
+  async ngOnInit() {
+    this.cipherService.failedToDecryptCiphers$
+      .pipe(
+        map((ciphers) => ciphers.filter((c) => !c.isDeleted)),
+        filter((ciphers) => ciphers.length > 0),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((ciphers) => {
+        DecryptionFailureDialogComponent.open(this.dialogService, {
+          cipherIds: ciphers.map((c) => c.id as CipherId),
+        });
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.vaultScrollPositionService.stop();
+  }
 }

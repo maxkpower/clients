@@ -4,7 +4,7 @@ import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
-import { firstValueFrom, Observable, Subject, switchMap } from "rxjs";
+import { firstValueFrom, Subject, switchMap } from "rxjs";
 import { map } from "rxjs/operators";
 
 import { CollectionView } from "@bitwarden/admin-console/common";
@@ -36,10 +36,12 @@ import {
 } from "@bitwarden/components";
 import {
   CipherAttachmentsComponent,
+  CipherFormComponent,
   CipherFormConfig,
   CipherFormGenerationService,
   CipherFormModule,
   CipherViewComponent,
+  DecryptionFailureDialogComponent,
 } from "@bitwarden/vault";
 
 import { SharedModule } from "../../../shared/shared.module";
@@ -48,6 +50,8 @@ import {
   AttachmentDialogResult,
   AttachmentsV2Component,
 } from "../../individual-vault/attachments-v2.component";
+import { RoutedVaultFilterService } from "../../individual-vault/vault-filter/services/routed-vault-filter.service";
+import { RoutedVaultFilterModel } from "../../individual-vault/vault-filter/shared/models/routed-vault-filter.model";
 import { WebCipherFormGenerationService } from "../../services/web-cipher-form-generation.service";
 import { WebVaultPremiumUpgradePromptService } from "../../services/web-premium-upgrade-prompt.service";
 import { WebViewPasswordHistoryService } from "../../services/web-view-password-history.service";
@@ -81,6 +85,11 @@ export interface VaultItemDialogParams {
    * If true, the dialog is being opened from the admin console.
    */
   isAdminConsoleAction?: boolean;
+
+  /**
+   * Function to restore a cipher from the trash.
+   */
+  restore: (c: CipherView) => Promise<boolean>;
 }
 
 export enum VaultItemDialogResult {
@@ -98,6 +107,11 @@ export enum VaultItemDialogResult {
    * The dialog was closed to navigate the user the premium upgrade page.
    */
   PremiumUpgrade = "premiumUpgrade",
+
+  /**
+   * A cipher was restored
+   */
+  Restored = "restored",
 }
 
 @Component({
@@ -114,11 +128,13 @@ export enum VaultItemDialogResult {
     CipherAttachmentsComponent,
     AsyncActionsModule,
     ItemModule,
+    DecryptionFailureDialogComponent,
   ],
   providers: [
     { provide: PremiumUpgradePromptService, useClass: WebVaultPremiumUpgradePromptService },
     { provide: ViewPasswordHistoryService, useClass: WebViewPasswordHistoryService },
     { provide: CipherFormGenerationService, useClass: WebCipherFormGenerationService },
+    RoutedVaultFilterService,
   ],
 })
 export class VaultItemDialogComponent implements OnInit, OnDestroy {
@@ -128,6 +144,8 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
    */
   @ViewChild("dialogContent")
   protected dialogContent: ElementRef<HTMLElement>;
+
+  @ViewChild(CipherFormComponent) cipherFormComponent!: CipherFormComponent;
 
   /**
    * Tracks if the cipher was ever modified while the dialog was open. Used to ensure the dialog emits the correct result
@@ -189,6 +207,28 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
     ),
   );
 
+  protected get isTrashFilter() {
+    return this.filter?.type === "trash";
+  }
+
+  protected get showCancel() {
+    return !this.isTrashFilter && !this.showCipherView;
+  }
+
+  protected get showClose() {
+    return this.isTrashFilter && !this.showRestore;
+  }
+
+  /**
+   * Determines if the user may restore the item.
+   * A user may restore items if they have delete permissions and the item is in the trash.
+   */
+  protected async canUserRestore() {
+    return this.isTrashFilter && this.cipher?.isDeleted && this.canDelete;
+  }
+
+  protected showRestore: boolean;
+
   protected get loadingForm() {
     return this.loadForm && !this.formReady;
   }
@@ -197,8 +237,8 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
     return this.params.disableForm;
   }
 
-  protected get canDelete() {
-    return this.cipher?.edit ?? false;
+  protected get showEdit() {
+    return this.showCipherView && !this.isTrashFilter && !this.showRestore;
   }
 
   protected get showDelete() {
@@ -226,7 +266,9 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
 
   protected formConfig: CipherFormConfig = this.params.formConfig;
 
-  protected canDeleteCipher$: Observable<boolean>;
+  protected filter: RoutedVaultFilterModel;
+
+  protected canDelete = false;
 
   constructor(
     @Inject(DIALOG_DATA) protected params: VaultItemDialogParams,
@@ -244,6 +286,7 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
     private cipherAuthorizationService: CipherAuthorizationService,
     private apiService: ApiService,
     private eventCollectionService: EventCollectionService,
+    private routedVaultFilterService: RoutedVaultFilterService,
   ) {
     this.updateTitle();
   }
@@ -252,6 +295,14 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
     this.cipher = await this.getDecryptedCipherView(this.formConfig);
 
     if (this.cipher) {
+      if (this.cipher.decryptionFailure) {
+        this.dialogService.open(DecryptionFailureDialogComponent, {
+          data: { cipherIds: [this.cipher.id] },
+        });
+        this.dialogRef.close();
+        return;
+      }
+
       this.collections = this.formConfig.collections.filter((c) =>
         this.cipher.collectionIds?.includes(c.id),
       );
@@ -259,10 +310,12 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
         (o) => o.id === this.cipher.organizationId,
       );
 
-      this.canDeleteCipher$ = this.cipherAuthorizationService.canDeleteCipher$(
-        this.cipher,
-        [this.params.activeCollectionId],
-        this.params.isAdminConsoleAction,
+      this.canDelete = await firstValueFrom(
+        this.cipherAuthorizationService.canDeleteCipher$(
+          this.cipher,
+          [this.params.activeCollectionId],
+          this.params.isAdminConsoleAction,
+        ),
       );
 
       await this.eventCollectionService.collect(
@@ -273,6 +326,9 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
       );
     }
 
+    this.filter = await firstValueFrom(this.routedVaultFilterService.filter$);
+
+    this.showRestore = await this.canUserRestore();
     this.performingInitialLoad = false;
   }
 
@@ -325,6 +381,11 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
     this.formReady = true;
     this._formReadySubject.next();
   }
+
+  restore = async () => {
+    await this.params.restore(this.cipher);
+    this.dialogRef.close(VaultItemDialogResult.Restored);
+  };
 
   delete = async () => {
     if (!this.cipher) {
@@ -384,6 +445,22 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
       result.action === AttachmentDialogResult.Removed ||
       result.action === AttachmentDialogResult.Uploaded
     ) {
+      const updatedCipher = await this.cipherService.get(this.formConfig.originalCipher?.id);
+      const activeUserId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+
+      const updatedCipherView = await updatedCipher.decrypt(
+        await this.cipherService.getKeyForCipherKeyDecryption(updatedCipher, activeUserId),
+      );
+
+      this.cipherFormComponent.patchCipher((currentCipher) => {
+        currentCipher.attachments = updatedCipherView.attachments;
+        currentCipher.revisionDate = updatedCipherView.revisionDate;
+
+        return currentCipher;
+      });
+
       this._cipherModified = true;
     }
   };

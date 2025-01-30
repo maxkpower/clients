@@ -14,6 +14,7 @@ import {
   CredentialGeneratorHistoryDialogComponent,
   GeneratorModule,
 } from "@bitwarden/generator-components";
+import { AlgorithmInfo } from "@bitwarden/generator-core";
 import { CipherFormGeneratorComponent } from "@bitwarden/vault";
 
 type CredentialGeneratorParams = {
@@ -38,11 +39,22 @@ type CredentialGeneratorParams = {
 })
 export class CredentialGeneratorDialogComponent {
   credentialValue?: string;
+  buttonLabel?: string;
 
   constructor(
     @Inject(DIALOG_DATA) protected data: CredentialGeneratorParams,
     private dialogService: DialogService,
   ) {}
+
+  onAlgorithmSelected = (selected?: AlgorithmInfo) => {
+    if (selected) {
+      this.buttonLabel = selected.useGeneratedValue;
+    } else {
+      // clear the credential value when the user is
+      // selecting the credential generation algorithm
+      this.credentialValue = undefined;
+    }
+  };
 
   applyCredentials = () => {
     this.data.onCredentialGenerated(this.credentialValue);

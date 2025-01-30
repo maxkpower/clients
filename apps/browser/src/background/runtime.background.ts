@@ -3,7 +3,6 @@
 import { firstValueFrom, map, mergeMap } from "rxjs";
 
 import { LockService } from "@bitwarden/auth/common";
-import { NotificationsService } from "@bitwarden/common/abstractions/notifications.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AutofillOverlayVisibility, ExtensionCommand } from "@bitwarden/common/autofill/constants";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
@@ -16,13 +15,14 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { MessageListener, isExternalMessage } from "@bitwarden/common/platform/messaging";
 import { devFlagEnabled } from "@bitwarden/common/platform/misc/flags";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { NotificationsService } from "@bitwarden/common/platform/notifications";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { BiometricsCommands } from "@bitwarden/key-management";
 
 import {
   closeUnlockPopout,
   openSsoAuthResultPopout,
-  openTwoFactorAuthPopout,
+  openTwoFactorAuthWebAuthnPopout,
 } from "../auth/popup/utils/auth-popout-window";
 import { LockedVaultPendingNotificationsData } from "../autofill/background/abstractions/notification.background";
 import { AutofillService } from "../autofill/services/abstractions/autofill.service";
@@ -240,7 +240,6 @@ export default class RuntimeBackground {
           await closeUnlockPopout();
         }
 
-        await this.notificationsService.updateConnection(msg.command === "loggedIn");
         this.processReloadSerivce.cancelProcessReload();
 
         if (item) {
@@ -259,9 +258,7 @@ export default class RuntimeBackground {
         await this.main.refreshBadge();
         await this.main.refreshMenu(false);
 
-        if (await this.configService.getFeatureFlag(FeatureFlag.ExtensionRefresh)) {
-          await this.autofillService.setAutoFillOnPageLoadOrgPolicy();
-        }
+        await this.autofillService.setAutoFillOnPageLoadOrgPolicy();
         break;
       }
       case "addToLockedVaultPendingNotifications":
@@ -288,9 +285,7 @@ export default class RuntimeBackground {
           await this.configService.ensureConfigFetched();
           await this.main.updateOverlayCiphers();
 
-          if (await this.configService.getFeatureFlag(FeatureFlag.ExtensionRefresh)) {
-            await this.autofillService.setAutoFillOnPageLoadOrgPolicy();
-          }
+          await this.autofillService.setAutoFillOnPageLoadOrgPolicy();
         }
         break;
       case "openPopup":
@@ -337,7 +332,7 @@ export default class RuntimeBackground {
           return;
         }
 
-        await openTwoFactorAuthPopout(msg);
+        await openTwoFactorAuthWebAuthnPopout(msg);
         break;
       }
       case "reloadPopup":
