@@ -436,9 +436,12 @@ export class VaultItemDialogComponent implements OnInit, OnDestroy {
       result.action === AttachmentDialogResult.Removed ||
       result.action === AttachmentDialogResult.Uploaded
     ) {
-      const updatedCipher = await this.cipherService.get(this.formConfig.originalCipher?.id);
       const activeUserId = await firstValueFrom(
         this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      const updatedCipher = await this.cipherService.get(
+        this.formConfig.originalCipher?.id,
+        activeUserId,
       );
 
       const updatedCipherView = await updatedCipher.decrypt(
