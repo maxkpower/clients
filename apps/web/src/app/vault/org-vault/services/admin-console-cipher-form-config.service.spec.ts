@@ -27,6 +27,7 @@ describe("AdminConsoleCipherFormConfigService", () => {
     isMember: true,
     enabled: true,
     status: OrganizationUserStatusType.Confirmed,
+    userId: "UserId",
   };
   const testOrg2 = {
     id: "333-999-888",
@@ -35,6 +36,7 @@ describe("AdminConsoleCipherFormConfigService", () => {
     isMember: true,
     enabled: true,
     status: OrganizationUserStatusType.Confirmed,
+    userId: "UserId",
   };
   const policyAppliesToActiveUser$ = new BehaviorSubject<boolean>(true);
   const collection = {

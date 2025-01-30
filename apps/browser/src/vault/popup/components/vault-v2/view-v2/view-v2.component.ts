@@ -94,6 +94,8 @@ type LoadAction =
   ],
 })
 export class ViewV2Component {
+  private activeUserId: UserId;
+
   headerText: string;
   cipher: CipherView;
   organization$: Observable<Organization>;
@@ -124,14 +126,18 @@ export class ViewV2Component {
   subscribeToParams(): void {
     this.route.queryParams
       .pipe(
-        switchMap(async (params): Promise<CipherView> => {
+        switchMap(async (params) => {
           this.loadAction = params.action;
           this.senderTabId = params.senderTabId ? parseInt(params.senderTabId, 10) : undefined;
-          return await this.getCipherData(params.cipherId);
+
+          const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+          const cipher = await this.getCipherData(params.cipherId, activeUserId);
+          return { activeUserId, cipher };
         }),
-        switchMap(async (cipher) => {
+        switchMap(async ({ activeUserId, cipher }) => {
           this.cipher = cipher;
           this.headerText = this.setHeader(cipher.type);
+          this.activeUserId = activeUserId;
 
           if (this.loadAction) {
             await this._handleLoadAction(this.loadAction, this.senderTabId);
@@ -166,11 +172,10 @@ export class ViewV2Component {
     }
   }
 
-  async getCipherData(id: string) {
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-    const cipher = await this.cipherService.get(id, activeUserId);
+  async getCipherData(id: string, userId: UserId) {
+    const cipher = await this.cipherService.get(id, userId);
     return await cipher.decrypt(
-      await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
+      await this.cipherService.getKeyForCipherKeyDecryption(cipher, userId),
     );
   }
 
@@ -198,8 +203,7 @@ export class ViewV2Component {
     }
 
     try {
-      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-      await this.deleteCipher(activeUserId);
+      await this.deleteCipher();
     } catch (e) {
       this.logService.error(e);
       return false;
@@ -219,8 +223,7 @@ export class ViewV2Component {
 
   restore = async (): Promise<void> => {
     try {
-      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-      await this.cipherService.restoreWithServer(this.cipher.id, activeUserId);
+      await this.cipherService.restoreWithServer(this.cipher.id, this.activeUserId);
     } catch (e) {
       this.logService.error(e);
     }
@@ -233,10 +236,10 @@ export class ViewV2Component {
     });
   };
 
-  protected deleteCipher(userId: UserId) {
+  protected deleteCipher() {
     return this.cipher.isDeleted
-      ? this.cipherService.deleteWithServer(this.cipher.id, userId)
-      : this.cipherService.softDeleteWithServer(this.cipher.id, userId);
+      ? this.cipherService.deleteWithServer(this.cipher.id, this.activeUserId)
+      : this.cipherService.softDeleteWithServer(this.cipher.id, this.activeUserId);
   }
 
   protected showFooter(): boolean {
