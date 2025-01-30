@@ -825,6 +825,7 @@ describe("NotificationBackground", () => {
             queueMessage.newPassword,
             message.edit,
             sender.tab,
+            "testId",
           );
           expect(updateWithServerSpy).toHaveBeenCalled();
           expect(tabSendMessageSpy).toHaveBeenCalledWith(sender.tab, {
@@ -862,6 +863,7 @@ describe("NotificationBackground", () => {
             queueMessage.password,
             message.edit,
             sender.tab,
+            "testId",
           );
           expect(editItemSpy).not.toHaveBeenCalled();
           expect(createWithServerSpy).not.toHaveBeenCalled();
@@ -895,6 +897,7 @@ describe("NotificationBackground", () => {
             queueMessage.newPassword,
             message.edit,
             sender.tab,
+            "testId",
           );
           expect(editItemSpy).toHaveBeenCalled();
           expect(updateWithServerSpy).not.toHaveBeenCalled();

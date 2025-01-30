@@ -7,7 +7,7 @@ import { AccountService } from "@bitwarden/common/auth/abstractions/account.serv
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
+import { getOptionalUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   AUTOFILL_CARD_ID,
   AUTOFILL_ID,
@@ -106,7 +106,12 @@ export class ContextMenuClickedHandler {
       menuItemId as string,
     );
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
+    if (activeUserId == null) {
+      return;
+    }
 
     if (isCreateCipherAction) {
       // pass; defer to logic below

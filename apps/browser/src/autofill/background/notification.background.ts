@@ -7,7 +7,7 @@ import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
+import { getOptionalUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   ExtensionCommand,
   ExtensionCommandType,
@@ -267,7 +267,13 @@ export default class NotificationBackground {
       return;
     }
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
+    if (activeUserId == null) {
+      return;
+    }
+
     const ciphers = await this.cipherService.getAllDecryptedForUrl(loginInfo.url, activeUserId);
     const usernameMatches = ciphers.filter(
       (c) => c.login.username != null && c.login.username.toLowerCase() === normalizedUsername,
@@ -346,7 +352,13 @@ export default class NotificationBackground {
     }
 
     let id: string = null;
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
+    if (activeUserId == null) {
+      return;
+    }
+
     const ciphers = await this.cipherService.getAllDecryptedForUrl(changeData.url, activeUserId);
     if (changeData.currentPassword != null) {
       const passwordMatches = ciphers.filter(
@@ -500,11 +512,13 @@ export default class NotificationBackground {
 
       this.notificationQueue.splice(i, 1);
 
-      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+      const activeUserId = await firstValueFrom(
+        getOptionalUserId(this.accountService.activeAccount$),
+      );
 
       if (queueMessage.type === NotificationQueueMessageType.ChangePassword) {
         const cipherView = await this.getDecryptedCipherById(queueMessage.cipherId, activeUserId);
-        await this.updatePassword(cipherView, queueMessage.newPassword, edit, tab);
+        await this.updatePassword(cipherView, queueMessage.newPassword, edit, tab, activeUserId);
         return;
       }
 
@@ -520,12 +534,12 @@ export default class NotificationBackground {
         );
 
         if (existingCipher != null) {
-          await this.updatePassword(existingCipher, queueMessage.password, edit, tab);
+          await this.updatePassword(existingCipher, queueMessage.password, edit, tab, activeUserId);
           return;
         }
       }
 
-      folderId = (await this.folderExists(folderId)) ? folderId : null;
+      folderId = (await this.folderExists(folderId, activeUserId)) ? folderId : null;
       const newCipher = this.convertAddLoginQueueMessageToCipherView(queueMessage, folderId);
 
       if (edit) {
@@ -556,25 +570,25 @@ export default class NotificationBackground {
    * @param newPassword - The new password to update the cipher with
    * @param edit - Identifies if the cipher should be edited or simply updated
    * @param tab - The tab that the message was sent from
+   * @param userId - The active account user ID
    */
   private async updatePassword(
     cipherView: CipherView,
     newPassword: string,
     edit: boolean,
     tab: chrome.tabs.Tab,
+    userId: UserId,
   ) {
     cipherView.login.password = newPassword;
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-
     if (edit) {
-      await this.editItem(cipherView, activeUserId, tab);
+      await this.editItem(cipherView, userId, tab);
       await BrowserApi.tabSendMessage(tab, { command: "closeNotificationBar" });
       await BrowserApi.tabSendMessage(tab, { command: "editedCipher" });
       return;
     }
 
-    const cipher = await this.cipherService.encrypt(cipherView, activeUserId);
+    const cipher = await this.cipherService.encrypt(cipherView, userId);
     try {
       // We've only updated the password, no need to broadcast editedCipher message
       await this.cipherService.updateWithServer(cipher);
@@ -606,22 +620,19 @@ export default class NotificationBackground {
     await this.openAddEditVaultItemPopout(senderTab, { cipherId: cipherView.id });
   }
 
-  private async folderExists(folderId: string) {
+  private async folderExists(folderId: string, userId: UserId) {
     if (Utils.isNullOrWhitespace(folderId) || folderId === "null") {
       return false;
     }
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-    const folders = await firstValueFrom(this.folderService.folderViews$(activeUserId));
+    const folders = await firstValueFrom(this.folderService.folderViews$(userId));
     return folders.some((x) => x.id === folderId);
   }
 
   private async getDecryptedCipherById(cipherId: string, userId: UserId) {
     const cipher = await this.cipherService.get(cipherId, userId);
     if (cipher != null && cipher.type === CipherType.Login) {
-      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-
       return await cipher.decrypt(
-        await this.cipherService.getKeyForCipherKeyDecryption(cipher, activeUserId),
+        await this.cipherService.getKeyForCipherKeyDecryption(cipher, userId),
       );
     }
     return null;
@@ -658,7 +669,9 @@ export default class NotificationBackground {
    * Returns the first value found from the folder service's folderViews$ observable.
    */
   private async getFolderData() {
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
     return await firstValueFrom(this.folderService.folderViews$(activeUserId));
   }
 

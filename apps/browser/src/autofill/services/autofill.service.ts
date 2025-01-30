@@ -8,7 +8,7 @@ import { AccountInfo, AccountService } from "@bitwarden/common/auth/abstractions
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
+import { getOptionalUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   AutofillOverlayVisibility,
   CardExpiryDateDelimiters,
@@ -428,8 +428,6 @@ export default class AutofillService implements AutofillServiceInterface {
       options.cipher.login.totp = null;
     }
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
-
     let didAutofill = false;
     await Promise.all(
       options.pageDetails.map(async (pd) => {
@@ -468,7 +466,7 @@ export default class AutofillService implements AutofillServiceInterface {
 
         didAutofill = true;
         if (!options.skipLastUsed) {
-          await this.cipherService.updateLastUsedDate(options.cipher.id, activeUserId);
+          await this.cipherService.updateLastUsedDate(options.cipher.id, activeAccount.id);
         }
 
         // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
@@ -532,7 +530,12 @@ export default class AutofillService implements AutofillServiceInterface {
   ): Promise<string | null> {
     let cipher: CipherView;
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
+    if (activeUserId == null) {
+      return null;
+    }
 
     if (fromCommand) {
       cipher = await this.cipherService.getNextCipherForUrl(tab.url, activeUserId);
@@ -637,7 +640,12 @@ export default class AutofillService implements AutofillServiceInterface {
     let cipher: CipherView;
     let cacheKey = "";
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
+    if (activeUserId == null) {
+      return null;
+    }
 
     if (cipherType === CipherType.Card) {
       cacheKey = "cardCiphers";

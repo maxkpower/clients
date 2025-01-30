@@ -5,7 +5,7 @@ import { firstValueFrom } from "rxjs";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { getUserId } from "@bitwarden/common/auth/services/account.service";
+import { getOptionalUserId } from "@bitwarden/common/auth/services/account.service";
 import { BadgeSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/badge-settings.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -91,7 +91,13 @@ export class UpdateBadge {
       return;
     }
 
-    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const activeUserId = await firstValueFrom(
+      getOptionalUserId(this.accountService.activeAccount$),
+    );
+    if (!activeUserId) {
+      return;
+    }
+
     const ciphers = await this.cipherService.getAllDecryptedForUrl(opts?.tab?.url, activeUserId);
     let countText = ciphers.length == 0 ? "" : ciphers.length.toString();
     if (ciphers.length > 9) {
