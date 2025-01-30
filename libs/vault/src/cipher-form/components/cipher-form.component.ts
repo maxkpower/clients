@@ -131,10 +131,10 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
    * by child components via the `patchCipher` method.
    * @protected
    */
-  protected updatedCipherView: CipherView | null;
+  protected updatedCipherView: CipherView | null = new CipherView();
 
   get getCipherView(): CipherView | null {
-    return this.updatedCipherView;
+    return this.updatedCipherView ?? new CipherView();
   }
 
   protected loading: boolean = true;

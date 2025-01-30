@@ -53,6 +53,7 @@ export abstract class CipherFormContainer {
 
   /**
    * Returns the current cipherView
+   * If config.originalCipher is not settled before getCipherView(), it returns null
    */
   abstract get getCipherView(): CipherView | null;
 
