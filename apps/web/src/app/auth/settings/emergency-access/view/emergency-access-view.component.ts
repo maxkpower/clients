@@ -62,6 +62,7 @@ export class EmergencyAccessViewComponent implements OnInit {
     this.loaded = true;
   }
 
+  // FIXME PM-17747: This will also need to be replaced with the new AttachmentViewDialog
   async viewAttachments(cipher: CipherView) {
     await this.modalService.openViewRef(
       EmergencyAccessAttachmentsComponent,
