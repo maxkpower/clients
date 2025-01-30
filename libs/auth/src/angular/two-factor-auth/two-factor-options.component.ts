@@ -68,7 +68,9 @@ export class TwoFactorOptionsComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.providers = await this.twoFactorService.getSupportedProviders(window);
+    const providers = await this.twoFactorService.getSupportedProviders(window);
+    providers.sort((a: any, b: any) => a.sort - b.sort);
+    this.providers = providers;
   }
 
   async choose(p: any) {
