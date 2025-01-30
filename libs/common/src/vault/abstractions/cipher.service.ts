@@ -174,12 +174,17 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
   abstract delete(id: string | string[], userId: UserId): Promise<any>;
   abstract deleteWithServer(id: string, userId: UserId, asAdmin?: boolean): Promise<any>;
   abstract deleteManyWithServer(ids: string[], userId: UserId, asAdmin?: boolean): Promise<any>;
-  abstract deleteAttachment(id: string, attachmentId: string, userId: UserId): Promise<void>;
+  abstract deleteAttachment(
+    id: string,
+    revisionDate: string,
+    attachmentId: string,
+    userId: UserId,
+  ): Promise<CipherData>;
   abstract deleteAttachmentWithServer(
     id: string,
     attachmentId: string,
     userId: UserId,
-  ): Promise<void>;
+  ): Promise<CipherData>;
   abstract sortCiphersByLastUsed(a: CipherView, b: CipherView): number;
   abstract sortCiphersByLastUsedThenName(a: CipherView, b: CipherView): number;
   abstract getLocaleSortingFunction(): (a: CipherView, b: CipherView) => number;
