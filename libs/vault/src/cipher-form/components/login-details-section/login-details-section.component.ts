@@ -244,7 +244,7 @@ export class LoginDetailsSectionComponent implements OnInit {
    */
   generateUsername = async () => {
     const cipherView = this.cipherFormContainer.getCipherView;
-    const uri = cipherView?.login?.uris?.[0]?.uri ?? "";
+    const uri = cipherView?.login.uris[0]?.uri;
     const newUsername = await this.generationService.generateUsername(uri);
     if (newUsername) {
       this.loginDetailsForm.controls.username.patchValue(newUsername);
