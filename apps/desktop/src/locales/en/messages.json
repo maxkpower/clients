@@ -2269,6 +2269,9 @@
   "webAuthnAuthenticate": {
     "message": "Authenticate WebAuthn"
   },
+  "readSecurityKey": {
+    "message": "Read security key"
+  },
   "hideEmail": {
     "message": "Hide my email address from recipients."
   },

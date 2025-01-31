@@ -1395,6 +1395,9 @@
   "webAuthnAuthenticate": {
     "message": "Authenticate WebAuthn"
   },
+  "readSecurityKey": {
+    "message": "Read security key"
+  },
   "loginUnavailable": {
     "message": "Login unavailable"
   },
