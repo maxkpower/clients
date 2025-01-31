@@ -51,6 +51,12 @@ describe("CipherFormComponent", () => {
       expect(component.getCipherView).toBeNull();
     });
 
+    it("should return null if updatedCipherView.login is null", () => {
+      component["updatedCipherView"] = new CipherView();
+      component["updatedCipherView"].login = null as any;
+      expect(component.getCipherView).toBeNull();
+    });
+
     it("should return null if updatedCipherView.login.uris is null", () => {
       component["updatedCipherView"] = new CipherView();
       component["updatedCipherView"].login = { uris: null } as any;
