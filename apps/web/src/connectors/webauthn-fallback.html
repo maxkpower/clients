@@ -1,12 +1,15 @@
 <!doctype html>
-<html class="theme_light">
+<html class="theme_light tw-h-full">
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Bitwarden WebAuthn Connector</title>
   </head>
 
-  <body class="layout_frontend">
-    <div class="container">
+  <body class="tw-min-h-full !tw-min-w-0 tw-text-center !tw-bg-background-alt">
+    <!-- <div class="container">
       <div class="row justify-content-center mt-5">
         <div class="col-5">
           <img src="../images/logo-dark@2x.png" class="mb-4 logo" alt="Bitwarden" />
@@ -34,6 +37,42 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
+
+    <main class="tw-flex tw-w-full tw-mx-auto tw-flex-col tw-px-6 tw-pt-6 tw-pb-4 tw-text-main">
+      <a class="tw-w-[128px] tw-block tw-mb-12 [&>*]:tw-align-top">
+        <img class="new-logo-themed tw-m-8" alt="Bitwarden" />
+      </a>
+
+      <div class="tw-text-center tw-mb-6 tw-max-w-md tw-mx-auto">
+        <div class="tw-mx-auto tw-max-w-28 sm:tw-max-w-32">
+          icon goes here
+          <!-- <bit-icon [icon]="icon"></bit-icon> -->
+        </div>
+
+        <div>
+          <!-- Small screens -->
+          <h1 bitTypography="h3" class="tw-mt-2 sm:tw-hidden">Title</h1>
+          <!-- Medium to Larger screens -->
+          <h1 bitTypography="h2" class="tw-mt-2 tw-hidden sm:tw-block">Title</h1>
+        </div>
+
+        <div class="tw-text-sm sm:tw-text-base">subtitle</div>
+      </div>
+
+      <div
+        class="tw-grow tw-w-full tw-max-w-md tw-mx-auto tw-flex tw-flex-col tw-items-center sm:tw-min-w-[28rem]"
+      >
+        <div
+          class="tw-rounded-2xl tw-mb-10 tw-mx-auto tw-w-full sm:tw-bg-background sm:tw-border sm:tw-border-solid sm:tw-border-secondary-300 sm:tw-p-8"
+        >
+          <button
+            type="button"
+            id="webauthn-button"
+            class="!tw-text-contrast disabled:!tw-text-muted disabled:hover:!tw-text-muted disabled:hover:tw-bg-secondary-300 disabled:hover:tw-border-secondary-300 disabled:hover:tw-no-underline disabled:tw-bg-secondary-300 disabled:tw-border-secondary-300 disabled:tw-cursor-not-allowed focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-primary-600 focus-visible:tw-z-10 focus:tw-outline-none hover:tw-bg-primary-700 hover:tw-border-primary-700 hover:tw-no-underline tw-bg-primary-600 tw-block tw-border-2 tw-border-primary-600 tw-border-solid tw-font-semibold tw-no-underline tw-px-3 tw-py-1.5 tw-rounded-full tw-text-center tw-transition tw-w-full"
+          ></button>
+        </div>
+      </div>
+    </main>
   </body>
 </html>

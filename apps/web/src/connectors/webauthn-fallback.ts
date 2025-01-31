@@ -159,7 +159,7 @@ function success(message: string) {
 }
 
 function resetMsgBox(el: HTMLElement) {
-  el.classList.remove("alert");
-  el.classList.remove("alert-danger");
-  el.classList.remove("alert-success");
+  el?.classList?.remove("alert");
+  el?.classList?.remove("alert-danger");
+  el?.classList?.remove("alert-success");
 }
