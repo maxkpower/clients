@@ -51,9 +51,21 @@ describe("CipherFormComponent", () => {
       expect(component.getCipherView).toBeNull();
     });
 
+    it("should return null if updatedCipherView.login is undefined", () => {
+      component["updatedCipherView"] = new CipherView();
+      delete component["updatedCipherView"].login; // Simulating undefined login
+      expect(component.getCipherView).toBeNull();
+    });
+
     it("should return null if updatedCipherView.login is null", () => {
       component["updatedCipherView"] = new CipherView();
       component["updatedCipherView"].login = null as any;
+      expect(component.getCipherView).toBeNull();
+    });
+
+    it("should return null if updatedCipherView.login.uris is undefined", () => {
+      component["updatedCipherView"] = new CipherView();
+      component["updatedCipherView"].login = {} as any; // login exists but uris is undefined
       expect(component.getCipherView).toBeNull();
     });
 
