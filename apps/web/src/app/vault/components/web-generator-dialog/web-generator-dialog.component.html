@@ -1,12 +1,11 @@
 <bit-dialog dialogSize="default" background="alt">
   <span bitDialogTitle>
-    {{ titleKey | i18n }}
+    {{ title }}
   </span>
   <ng-container bitDialogContent>
     <vault-cipher-form-generator
       [type]="params.type"
       (valueGenerated)="onValueGenerated($event)"
-      [onAlgorithmSelected]="onAlgorithmSelected"
       disableMargin
     ></vault-cipher-form-generator>
   </ng-container>
@@ -17,9 +16,8 @@
       buttonType="primary"
       (click)="selectValue()"
       data-testid="select-button"
-      [disabled]="!(buttonLabel && generatedValue)"
     >
-      {{ buttonLabel }}
+      {{ selectButtonText }}
     </button>
   </ng-container>
 </bit-dialog>

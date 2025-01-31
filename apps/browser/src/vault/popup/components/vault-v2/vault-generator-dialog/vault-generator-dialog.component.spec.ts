@@ -60,7 +60,7 @@ describe("VaultGeneratorDialogComponent", () => {
   });
 
   it("should use the appropriate text based on generator type", () => {
-    expect(component["titleKey"]).toBe("passwordGenerator");
+    expect(component["title"]).toBe("passwordGenerator");
     expect(component["selectButtonText"]).toBe("useThisPassword");
 
     dialogData.type = "username";
@@ -68,7 +68,7 @@ describe("VaultGeneratorDialogComponent", () => {
     fixture = TestBed.createComponent(VaultGeneratorDialogComponent);
     component = fixture.componentInstance;
 
-    expect(component["titleKey"]).toBe("usernameGenerator");
+    expect(component["title"]).toBe("usernameGenerator");
     expect(component["selectButtonText"]).toBe("useThisUsername");
   });
 
