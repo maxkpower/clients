@@ -77,6 +77,9 @@ export class UsernameGeneratorComponent implements OnInit, OnDestroy {
   @Input()
   userId: UserId | null;
 
+  /**
+   * The website associated with the credential generation request.
+   */
   @Input()
   website: string | null = null;
 
