@@ -24,7 +24,7 @@ import {
 })
 class MockCipherFormGenerator {
   @Input() type: "password" | "username";
-  @Input() algorithmSelected: (selected: any) => void;
+  @Input() onAlgorithmSelected: (selected: any) => void;
   @Output() valueGenerated = new EventEmitter<string>();
 }
 

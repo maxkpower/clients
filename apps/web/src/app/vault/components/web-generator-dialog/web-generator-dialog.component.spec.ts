@@ -23,7 +23,7 @@ import {
 })
 class MockCipherFormGenerator {
   @Input() type: "password" | "username";
-  @Input() algorithmSelected: (selected: AlgorithmInfo) => void;
+  @Input() onAlgorithmSelected: (selected: AlgorithmInfo) => void;
   @Output() valueGenerated = new EventEmitter<string>();
 }
 
@@ -68,7 +68,7 @@ describe("WebVaultGeneratorDialogComponent", () => {
     ).componentInstance;
 
     // Simulate algorithm selection and value generation
-    generator.algorithmSelected({ useGeneratedValue: "Use Password" } as any);
+    generator.onAlgorithmSelected({ useGeneratedValue: "Use Password" } as any);
     generator.valueGenerated.emit("test-password");
     fixture.detectChanges();
 
@@ -84,7 +84,7 @@ describe("WebVaultGeneratorDialogComponent", () => {
     const generator = fixture.debugElement.query(
       By.css("vault-cipher-form-generator"),
     ).componentInstance;
-    generator.algorithmSelected({ useGeneratedValue: "Use Password" } as any);
+    generator.onAlgorithmSelected({ useGeneratedValue: "Use Password" } as any);
     generator.valueGenerated.emit("test-password");
     fixture.detectChanges();
 
