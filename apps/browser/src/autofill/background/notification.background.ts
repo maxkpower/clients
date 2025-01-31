@@ -136,8 +136,12 @@ export default class NotificationBackground {
   }
 
   /**
-   * Retrieves decrypted ciphers for the current tab's URL.
-   * Returns an empty array if no tab is found or the URL is missing.
+   *
+   * Gets the current active tab and retrieves all decrypted ciphers
+   * for the tab's URL. It constructs and returns an array of `NotificationCipherData` objects.
+   * If no active tab or URL is found, it returns an empty array.
+   *
+   * @returns {Promise<NotificationCipherData[]>}
    */
 
   async getNotificationCipherData(): Promise<NotificationCipherData[]> {
