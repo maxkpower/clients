@@ -29,16 +29,22 @@ export class CreateOrganizationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.route.queryParams.pipe(first(), takeUntil(this.destroy$)).subscribe((qParams) => {
-      if (qParams.productTier == ProductTierType.Families) {
+      if (qParams.plan === "families" || qParams.productTier == ProductTierType.Families) {
         this.plan = PlanType.FamiliesAnnually;
         this.productTier = ProductTierType.Families;
-      } else if (qParams.productTier == ProductTierType.Teams) {
+      } else if (qParams.plan === "teams" || qParams.productTier == ProductTierType.Teams) {
         this.plan = PlanType.TeamsAnnually;
         this.productTier = ProductTierType.Teams;
-      } else if (qParams.productTier == ProductTierType.TeamsStarter) {
+      } else if (
+        qParams.plan === "teamsStarter" ||
+        qParams.productTier == ProductTierType.TeamsStarter
+      ) {
         this.plan = PlanType.TeamsStarter;
         this.productTier = ProductTierType.TeamsStarter;
-      } else if (qParams.productTier == ProductTierType.Enterprise) {
+      } else if (
+        qParams.plan === "enterprise" ||
+        qParams.productTier == ProductTierType.Enterprise
+      ) {
         this.plan = PlanType.EnterpriseAnnually;
         this.productTier = ProductTierType.Enterprise;
       }
