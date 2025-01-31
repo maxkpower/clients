@@ -33,17 +33,15 @@ describe("VaultGeneratorDialogComponent", () => {
   let fixture: ComponentFixture<VaultGeneratorDialogComponent>;
   let mockDialogRef: MockProxy<DialogRef<GeneratorDialogResult>>;
   let dialogData: GeneratorDialogParams;
-  let i18nService: I18nService;
 
   beforeEach(async () => {
     mockDialogRef = mock<DialogRef<GeneratorDialogResult>>();
     dialogData = { type: "password" };
-    i18nService = { t: (key: string) => key };
 
     await TestBed.configureTestingModule({
       imports: [VaultGeneratorDialogComponent, NoopAnimationsModule],
       providers: [
-        { provide: I18nService, useValue: i18nService },
+        { provide: I18nService, useValue: { t: (key: string) => key } },
         { provide: DIALOG_DATA, useValue: dialogData },
         { provide: DialogRef, useValue: mockDialogRef },
         { provide: PopupRouterCacheService, useValue: mock<PopupRouterCacheService>() },
