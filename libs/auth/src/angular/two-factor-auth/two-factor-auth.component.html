@@ -18,10 +18,7 @@
       (token)="token = $event"
       *ngIf="selectedProviderType === providerType.Yubikey"
     />
-    <app-two-factor-auth-webauthn
-      (webAuthnResultEmitter)="processWebAuthnResult($event)"
-      *ngIf="selectedProviderType === providerType.WebAuthn"
-    />
+
     <app-two-factor-auth-duo
       (token)="token = $event; submitForm()"
       [providerData]="providerData"
@@ -35,6 +32,12 @@
       <bit-label>{{ "dontAskAgainOnThisDeviceFor30Days" | i18n }}</bit-label>
       <input type="checkbox" bitCheckbox formControlName="remember" />
     </bit-form-control>
+
+    <app-two-factor-auth-webauthn
+      (webAuthnResultEmitter)="processWebAuthnResult($event)"
+      *ngIf="selectedProviderType === providerType.WebAuthn"
+    />
+
     <ng-container *ngIf="selectedProviderType == null">
       <p bitTypography="body1">{{ "noTwoStepProviders" | i18n }}</p>
       <p bitTypography="body1">{{ "noTwoStepProviders2" | i18n }}</p>
@@ -64,7 +67,7 @@
         <span> {{ "launchDuo" | i18n }}</span>
       </button>
 
-      <p class="tw-text-center">{{ "or" | i18n }}</p>
+      <p class="tw-text-center tw-mb-0">{{ "or" | i18n }}</p>
 
       <button
         type="button"
