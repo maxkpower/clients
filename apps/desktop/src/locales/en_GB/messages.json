@@ -889,7 +889,7 @@
     "message": "Verify your Identity"
   },
   "weDontRecognizeThisDevice": {
-    "message": "We don't recognize this device. Enter the code sent to your email to verify your identity."
+    "message": "We don't recognise this device. Enter the code sent to your email to verify your identity."
   },
   "continueLoggingIn": {
     "message": "Continue logging in"
@@ -1387,9 +1387,6 @@
   },
   "premiumPurchase": {
     "message": "Purchase Premium"
-  },
-  "premiumPurchaseAlert": {
-    "message": "You can purchase premium membership on the bitwarden.com web vault. Do you want to visit the website now?"
   },
   "premiumPurchaseAlertV2": {
     "message": "You can purchase Premium from your account settings on the Bitwarden web app."
@@ -2552,6 +2549,9 @@
   },
   "catchallEmailDesc": {
     "message": "Use your domain's configured catch-all inbox."
+  },
+  "useThisEmail": {
+    "message": "Use this email"
   },
   "random": {
     "message": "Random"
