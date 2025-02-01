@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { EnpassJsonFile } from "../../enpass/types/enpass-json-type";
 
 import { login } from "./login";
