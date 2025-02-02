@@ -50,10 +50,7 @@ import {
 import { TwoFactorAuthAuthenticatorComponent } from "./child-components/two-factor-auth-authenticator.component";
 import { TwoFactorAuthDuoComponent } from "./child-components/two-factor-auth-duo/two-factor-auth-duo.component";
 import { TwoFactorAuthEmailComponent } from "./child-components/two-factor-auth-email/two-factor-auth-email.component";
-import {
-  TwoFactorAuthWebAuthnComponent,
-  WebAuthnResult,
-} from "./child-components/two-factor-auth-webauthn/two-factor-auth-webauthn.component";
+import { TwoFactorAuthWebAuthnComponent } from "./child-components/two-factor-auth-webauthn/two-factor-auth-webauthn.component";
 import { TwoFactorAuthYubikeyComponent } from "./child-components/two-factor-auth-yubikey.component";
 import {
   LegacyKeyMigrationAction,
@@ -90,8 +87,6 @@ import {
 export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   loading = true;
 
-  token: string | undefined = undefined;
-  remember = false;
   orgSsoIdentifier: string | undefined = undefined;
   inSsoFlow = false;
 
@@ -114,11 +109,15 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     remember: [false],
   });
 
-  formPromise: Promise<any> | undefined;
+  get tokenFormControl() {
+    return this.form.controls.token;
+  }
 
-  submitForm = async () => {
-    await this.submit();
-  };
+  get rememberFormControl() {
+    return this.form.controls.remember;
+  }
+
+  formPromise: Promise<any> | undefined;
 
   private authenticationSessionTimeoutRoute = "authentication-timeout";
 
@@ -157,16 +156,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     await this.setSelected2faProviderType();
     await this.set2faProviderData();
     await this.setAnonLayoutDataByTwoFactorProviderType();
-
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      if (value.token) {
-        this.token = value.token;
-      }
-
-      if (value.remember) {
-        this.remember = value.remember;
-      }
-    });
 
     await this.twoFactorAuthComponentService.extendPopupWidthIfRequired?.(
       this.selectedProviderType,
@@ -219,27 +208,47 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       });
   }
 
-  async processWebAuthnResult(webAuthnResponse: WebAuthnResult) {
-    this.token = webAuthnResponse.token;
-    if (webAuthnResponse.remember) {
-      this.remember = webAuthnResponse.remember;
-    }
-    await this.submit();
-  }
+  submit = async (token?: string, remember?: boolean) => {
+    // 2FA submission either comes via programmatic submission for flows like
+    // WebAuthn or Duo, or via the form submission for other 2FA providers.
+    // So, we have to figure out whether we need to validate the form or not.
+    let tokenValue: string;
+    if (token !== undefined) {
+      if (token === "" || token === null) {
+        this.toastService.showToast({
+          variant: "error",
+          title: this.i18nService.t("errorOccurred"),
+          message: this.i18nService.t("verificationCodeRequired"),
+        });
+        return;
+      }
 
-  async submit() {
-    if (this.token == null || this.token === "") {
-      this.toastService.showToast({
-        variant: "error",
-        title: this.i18nService.t("errorOccurred"),
-        message: this.i18nService.t("verificationCodeRequired"),
-      });
-      return;
+      // Token has been passed in so no need to validate the form
+      tokenValue = token;
+    } else {
+      // Token has not been passed in ensure form is valid before proceeding.
+      if (this.form.invalid) {
+        // returning as form validation will show the relevant errors.
+        return;
+      }
+
+      // This shouldn't be possible w/ the required form validation, but
+      // to satisfy strict TS checks, have to check for null here.
+      const tokenFormValue = this.tokenFormControl.value;
+
+      if (!tokenFormValue) {
+        return;
+      }
+
+      tokenValue = tokenFormValue;
     }
+
+    // In all flows but WebAuthn, the remember value is taken from the form.
+    const rememberValue = remember ?? this.rememberFormControl.value ?? false;
 
     try {
       this.formPromise = this.loginStrategyService.logInTwoFactor(
-        new TokenTwoFactorRequest(this.selectedProviderType, this.token, this.remember),
+        new TokenTwoFactorRequest(this.selectedProviderType, tokenValue, rememberValue),
         "", // TODO: PM-15162 - deprecate captchaResponse
       );
       const authResult: AuthResult = await this.formPromise;
@@ -253,7 +262,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
         message: this.i18nService.t("invalidVerificationCode"),
       });
     }
-  }
+  };
 
   async selectOtherTwofactorMethod() {
     const dialogRef = TwoFactorOptionsComponent.open(this.dialogService);
@@ -272,6 +281,9 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       this.providerData = providerData;
       this.selectedProviderType = response.type;
       await this.setAnonLayoutDataByTwoFactorProviderType();
+
+      this.form.reset();
+      this.form.updateValueAndValidity();
     }
   }
 

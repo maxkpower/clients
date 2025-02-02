@@ -42,7 +42,7 @@ import { AnonLayoutWrapperDataService } from "../anon-layout/anon-layout-wrapper
 import { TwoFactorAuthComponentService } from "./two-factor-auth-component.service";
 import { TwoFactorAuthComponent } from "./two-factor-auth.component";
 
-// test component that extends the TwoFactorAuthComponent
+// TODO: get tests passing
 @Component({})
 class TestTwoFactorComponent extends TwoFactorAuthComponent {}
 

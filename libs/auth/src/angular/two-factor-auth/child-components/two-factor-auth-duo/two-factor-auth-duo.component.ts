@@ -40,7 +40,7 @@ import {
   providers: [],
 })
 export class TwoFactorAuthDuoComponent implements OnInit {
-  @Output() token = new EventEmitter<string>();
+  @Output() tokenEmitter = new EventEmitter<string>();
   @Input() providerData: any;
 
   duoFramelessUrl: string | undefined = undefined;
@@ -58,7 +58,7 @@ export class TwoFactorAuthDuoComponent implements OnInit {
       .listenForDuo2faResult$()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((duo2faResult: Duo2faResult) => {
-        this.token.emit(duo2faResult.token);
+        this.tokenEmitter.emit(duo2faResult.token);
       });
 
     // flow must be launched by user so they can choose to remember the device or not.

@@ -1,7 +1,7 @@
 import { DialogModule } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, OnInit, Output } from "@angular/core";
-import { ReactiveFormsModule, FormsModule } from "@angular/forms";
+import { Component, Input, OnInit } from "@angular/core";
+import { ReactiveFormsModule, FormsModule, FormControl } from "@angular/forms";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { LoginStrategyServiceAbstraction } from "@bitwarden/auth/common";
@@ -43,7 +43,7 @@ import { TwoFactorAuthEmailComponentService } from "./two-factor-auth-email-comp
   providers: [],
 })
 export class TwoFactorAuthEmailComponent implements OnInit {
-  @Output() token = new EventEmitter<string>();
+  @Input() tokenFormControl: FormControl | undefined = undefined;
 
   twoFactorEmail: string | undefined = undefined;
   emailPromise: Promise<any> | undefined = undefined;

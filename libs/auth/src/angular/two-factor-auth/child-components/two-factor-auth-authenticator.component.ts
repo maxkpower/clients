@@ -1,12 +1,9 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { DialogModule } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, Output } from "@angular/core";
-import { ReactiveFormsModule, FormsModule } from "@angular/forms";
+import { Component, Input } from "@angular/core";
+import { ReactiveFormsModule, FormsModule, FormControl } from "@angular/forms";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
 import {
   ButtonModule,
   LinkModule,
@@ -31,9 +28,8 @@ import {
     AsyncActionsModule,
     FormsModule,
   ],
-  providers: [I18nPipe],
+  providers: [],
 })
 export class TwoFactorAuthAuthenticatorComponent {
-  tokenValue: string;
-  @Output() token = new EventEmitter<string>();
+  @Input() tokenFormControl: FormControl | undefined = undefined;
 }

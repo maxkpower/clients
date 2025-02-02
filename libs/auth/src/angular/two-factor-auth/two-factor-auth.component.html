@@ -5,22 +5,23 @@
 </ng-container>
 
 <ng-container *ngIf="!loading">
-  <form [bitSubmit]="submitForm" [formGroup]="form" autocomplete="off">
+  <form [bitSubmit]="submit" [formGroup]="form" autocomplete="off">
     <app-two-factor-auth-email
-      (token)="token = $event"
+      [tokenFormControl]="tokenFormControl"
       *ngIf="selectedProviderType === providerType.Email"
     />
+
     <app-two-factor-auth-authenticator
-      (token)="token = $event"
+      [tokenFormControl]="tokenFormControl"
       *ngIf="selectedProviderType === providerType.Authenticator"
     />
     <app-two-factor-auth-yubikey
-      (token)="token = $event"
+      [tokenFormControl]="tokenFormControl"
       *ngIf="selectedProviderType === providerType.Yubikey"
     />
 
     <app-two-factor-auth-duo
-      (token)="token = $event; submitForm()"
+      (tokenEmitter)="submit($event)"
       [providerData]="providerData"
       *ngIf="
         selectedProviderType === providerType.OrganizationDuo ||
@@ -34,7 +35,7 @@
     </bit-form-control>
 
     <app-two-factor-auth-webauthn
-      (webAuthnResultEmitter)="processWebAuthnResult($event)"
+      (webAuthnResultEmitter)="submit($event.token, $event.remember)"
       *ngIf="selectedProviderType === providerType.WebAuthn"
     />
 
@@ -42,6 +43,7 @@
       <p bitTypography="body1">{{ "noTwoStepProviders" | i18n }}</p>
       <p bitTypography="body1">{{ "noTwoStepProviders2" | i18n }}</p>
     </ng-container>
+
     <!-- Buttons -->
     <div class="tw-flex tw-flex-col tw-space-y-3 tw-mb-3">
       <button
