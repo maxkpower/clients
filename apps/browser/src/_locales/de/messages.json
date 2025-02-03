@@ -445,6 +445,18 @@
   "generatePassphrase": {
     "message": "Passphrase generieren"
   },
+  "passwordGenerated": {
+    "message": "Passwort generiert"
+  },
+  "passphraseGenerated": {
+    "message": "Passphrase generiert"
+  },
+  "usernameGenerated": {
+    "message": "Benutzername generiert"
+  },
+  "emailGenerated": {
+    "message": "E-Mail-Adresse generiert"
+  },
   "regeneratePassword": {
     "message": "Passwort neu generieren"
   },
@@ -993,7 +1005,7 @@
     "message": "Nach dem Hinzufügen eines Eintrags fragen, wenn er nicht in deinem Tresor gefunden wurde. Gilt für alle angemeldeten Konten."
   },
   "showCardsInVaultViewV2": {
-    "message": "Always show cards as Autofill suggestions on Vault view"
+    "message": "Karten immer als Auto-Ausfüllen-Vorschläge in der Tresor-Ansicht anzeigen"
   },
   "showCardsCurrentTab": {
     "message": "Karten auf Tab Seite anzeigen"
@@ -1002,7 +1014,7 @@
     "message": "Karten-Einträge auf der Tab Seite anzeigen, um das Auto-Ausfüllen zu vereinfachen."
   },
   "showIdentitiesInVaultViewV2": {
-    "message": "Always show identities as Autofill suggestions on Vault view"
+    "message": "Identitäten immer als Auto-Ausfüllen-Vorschläge in der Tresor-Ansicht anzeigen"
   },
   "showIdentitiesCurrentTab": {
     "message": "Identitäten auf Tab Seite anzeigen"
@@ -1267,9 +1279,6 @@
   },
   "premiumPurchase": {
     "message": "Premium-Mitgliedschaft kaufen"
-  },
-  "premiumPurchaseAlert": {
-    "message": "Du kannst deine Premium-Mitgliedschaft im Bitwarden.com Web-Tresor kaufen. Möchtest du die Website jetzt besuchen?"
   },
   "premiumPurchaseAlertV2": {
     "message": "Du kannst Premium über deine Kontoeinstellungen in der Bitwarden Web-App kaufen."
@@ -2051,6 +2060,9 @@
   },
   "usernameGenerator": {
     "message": "Benutzernamen-Generator"
+  },
+  "useThisEmail": {
+    "message": "Diese E-Mail-Adresse verwenden"
   },
   "useThisPassword": {
     "message": "Dieses Passwort verwenden"
@@ -3933,7 +3945,7 @@
     "description": "Dialog title facilitating the ability to override a chrome browser's default autofill behavior"
   },
   "overrideDefaultBrowserAutofillDescription": {
-    "message": "Das Ignorieren dieser Option kann zu Konflikten zwischen dem Bitwarden Auto-Ausfüllen Menü und dem Browser führen.",
+    "message": "Das Ignorieren dieser Option kann zu Konflikten zwischen den Bitwarden Vorschlägen zum Auto-Ausfüllen und denen deines Browsers führen.",
     "description": "Dialog message facilitating the ability to override a chrome browser's default autofill behavior"
   },
   "overrideDefaultBrowserAutoFillSettings": {
@@ -3988,7 +4000,7 @@
     "message": "Vorgeschlagene Einträge"
   },
   "autofillSuggestionsTip": {
-    "message": "Speichere einen Login-Eintrag für diese Seite zum automatischen Ausfüllen"
+    "message": "Speichere einen Zugangsdaten-Eintrag für diese Seite zum automatischen Ausfüllen"
   },
   "yourVaultIsEmpty": {
     "message": "Dein Tresor hat keine Einträge"
