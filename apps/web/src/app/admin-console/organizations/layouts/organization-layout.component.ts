@@ -3,7 +3,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, RouterModule } from "@angular/router";
-import { combineLatest, filter, map, Observable, switchMap } from "rxjs";
+import { combineLatest, filter, firstValueFrom, map, Observable, switchMap } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import {
@@ -20,10 +20,10 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { PolicyType, ProviderStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
-import { ProductTierType } from "@bitwarden/common/billing/enums";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
-import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { getById } from "@bitwarden/common/platform/misc";
 import { BannerModule, IconModule } from "@bitwarden/components";
@@ -59,7 +59,6 @@ export class OrganizationLayoutComponent implements OnInit {
   showPaymentAndHistory$: Observable<boolean>;
   hideNewOrgButton$: Observable<boolean>;
   organizationIsUnmanaged$: Observable<boolean>;
-  isAccessIntelligenceFeatureEnabled = false;
   enterpriseOrganization$: Observable<boolean>;
 
   constructor(
@@ -69,22 +68,20 @@ export class OrganizationLayoutComponent implements OnInit {
     private configService: ConfigService,
     private policyService: PolicyService,
     private providerService: ProviderService,
-    private i18nService: I18nService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit() {
     document.body.classList.remove("layout_frontend");
 
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     this.organization$ = this.route.params.pipe(
       map((p) => p.organizationId),
-      switchMap((id) => this.organizationService.organizations$.pipe(getById(id))),
+      switchMap((id) => this.organizationService.organizations$(userId).pipe(getById(id))),
       filter((org) => org != null),
     );
 
-    this.canAccessExport$ = combineLatest([
-      this.organization$,
-      this.configService.getFeatureFlag$(FeatureFlag.PM11360RemoveProviderExportPermission),
-    ]).pipe(map(([org, removeProviderExport]) => org.canAccessExport(removeProviderExport)));
+    this.canAccessExport$ = this.organization$.pipe(map((org) => org.canAccessExport));
 
     this.showPaymentAndHistory$ = this.organization$.pipe(
       map(
@@ -113,12 +110,7 @@ export class OrganizationLayoutComponent implements OnInit {
     this.integrationPageEnabled$ = combineLatest(
       this.organization$,
       this.configService.getFeatureFlag$(FeatureFlag.PM14505AdminConsoleIntegrationPage),
-    ).pipe(
-      map(
-        ([org, featureFlagEnabled]) =>
-          org.productTierType === ProductTierType.Enterprise && featureFlagEnabled,
-      ),
-    );
+    ).pipe(map(([org, featureFlagEnabled]) => featureFlagEnabled && org.canAccessIntegrations));
 
     this.domainVerificationNavigationTextKey = (await this.configService.getFeatureFlag(
       FeatureFlag.AccountDeprovisioning,

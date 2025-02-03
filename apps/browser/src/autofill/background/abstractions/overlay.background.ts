@@ -57,6 +57,17 @@ export type InlineMenuElementPosition = {
   height: number;
 };
 
+export type FieldRect = {
+  bottom: number;
+  height: number;
+  left: number;
+  right: number;
+  top: number;
+  width: number;
+  x: number;
+  y: number;
+};
+
 export type InlineMenuPosition = {
   button?: InlineMenuElementPosition;
   list?: InlineMenuElementPosition;
@@ -134,6 +145,7 @@ export type OverlayBackgroundExtensionMessage = {
   isFieldCurrentlyFilling?: boolean;
   subFrameData?: SubFrameOffsetData;
   focusedFieldData?: FocusedFieldData;
+  allFieldsRect?: any;
   isOpeningFullInlineMenu?: boolean;
   styles?: Partial<CSSStyleDeclaration>;
   data?: LockedVaultPendingNotificationsData;
@@ -160,6 +172,9 @@ export type InlineMenuCipherData = {
   icon: WebsiteIconData;
   accountCreationFieldType?: string;
   login?: {
+    totp?: string;
+    totpField?: boolean;
+    totpCodeTimeInterval?: number;
     username: string;
     passkey: {
       rpName: string;
@@ -262,6 +277,7 @@ export type InlineMenuListPortMessageHandlers = {
   updateAutofillInlineMenuListHeight: ({ message, port }: PortOnMessageHandlerParams) => void;
   refreshGeneratedPassword: () => Promise<void>;
   fillGeneratedPassword: ({ port }: PortConnectionParam) => Promise<void>;
+  refreshOverlayCiphers: () => Promise<void>;
 };
 
 export interface OverlayBackground {

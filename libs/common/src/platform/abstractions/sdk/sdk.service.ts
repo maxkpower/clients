@@ -1,27 +1,21 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { Observable } from "rxjs";
 
 import { BitwardenClient } from "@bitwarden/sdk-internal";
 
 import { UserId } from "../../../types/guid";
+import { Rc } from "../../misc/reference-counting/rc";
 
 export abstract class SdkService {
   /**
-   * Check if the SDK is supported in the current environment.
-   */
-  supported$: Observable<boolean>;
-
-  /**
    * Retrieve the version of the SDK.
    */
-  version$: Observable<string>;
+  abstract version$: Observable<string>;
 
   /**
    * Retrieve a client initialized without a user.
    * This client can only be used for operations that don't require a user context.
    */
-  client$: Observable<BitwardenClient | undefined>;
+  abstract client$: Observable<BitwardenClient>;
 
   /**
    * Retrieve a client initialized for a specific user.
@@ -34,7 +28,5 @@ export abstract class SdkService {
    *
    * @param userId
    */
-  abstract userClient$(userId: UserId): Observable<BitwardenClient>;
-
-  abstract failedToInitialize(category: string, error?: Error): Promise<void>;
+  abstract userClient$(userId: UserId): Observable<Rc<BitwardenClient> | undefined>;
 }

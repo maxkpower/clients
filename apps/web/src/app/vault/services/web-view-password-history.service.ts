@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 
-import { CipherId } from "@bitwarden/common/types/guid";
+import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { DialogService } from "@bitwarden/components";
 
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { ViewPasswordHistoryService } from "../../../../../../libs/common/src/vault/abstractions/view-password-history.service";
 import { openPasswordHistoryDialog } from "../individual-vault/password-history.component";
 
@@ -17,7 +19,7 @@ export class WebViewPasswordHistoryService implements ViewPasswordHistoryService
    * Opens the password history dialog for the given cipher ID.
    * @param cipherId The ID of the cipher to view the password history for.
    */
-  async viewPasswordHistory(cipherId: CipherId) {
-    openPasswordHistoryDialog(this.dialogService, { data: { cipherId } });
+  async viewPasswordHistory(cipher: CipherView) {
+    openPasswordHistoryDialog(this.dialogService, { data: { cipher } });
   }
 }
