@@ -13,7 +13,7 @@ import { Organization } from "../../models/domain/organization";
 import { Policy } from "../../models/domain/policy";
 import { ResetPasswordPolicyOptions } from "../../models/domain/reset-password-policy-options";
 
-import { POLICIES } from "./vNext-policy-state";
+import { POLICIES } from "./vnext-policy-state";
 
 const policyRecordToArray = (policiesMap: { [id: string]: PolicyData }) =>
   Object.values(policiesMap || {}).map((f) => new Policy(f));
