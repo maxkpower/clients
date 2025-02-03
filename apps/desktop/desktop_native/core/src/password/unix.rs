@@ -11,7 +11,7 @@ pub async fn get_password(service: &str, account: &str) -> Result<String> {
 
 async fn get_password_new(service: &str, account: &str) -> Result<String> {
     let keyring = oo7::Keyring::new().await?;
-    try_prompt(&keyring).await?;
+    let _ = try_prompt(&keyring).await;
     let attributes = HashMap::from([("service", service), ("account", account)]);
     let results = keyring.search_items(&attributes).await?;
     let res = results.first();
@@ -30,7 +30,7 @@ async fn get_password_legacy(service: &str, account: &str) -> Result<String> {
     let svc = dbus::Service::new().await?;
     let collection = svc.default_collection().await?;
     let keyring = oo7::Keyring::DBus(collection);
-    try_prompt(&keyring).await?;
+    let _ = try_prompt(&keyring).await;
     let attributes = HashMap::from([("service", service), ("account", account)]);
     let results = keyring.search_items(&attributes).await?;
     let res = results.first();
@@ -52,7 +52,7 @@ async fn get_password_legacy(service: &str, account: &str) -> Result<String> {
 
 pub async fn set_password(service: &str, account: &str, password: &str) -> Result<()> {
     let keyring = oo7::Keyring::new().await?;
-    try_prompt(&keyring).await?;
+    let _ = try_prompt(&keyring).await;
     let attributes = HashMap::from([("service", service), ("account", account)]);
     keyring
         .create_item(
@@ -88,11 +88,8 @@ pub async fn delete_password(service: &str, account: &str) -> Result<()> {
 
 /// Sends an OS notification prompt for the user to unlock/allow the application
 /// to read and write keys.
-async fn try_prompt(keyring: &oo7::Keyring) -> Result<bool> {
-    match keyring.unlock().await {
-        Ok(_) => Ok(true),
-        _ => Ok(false),
-    }
+async fn try_prompt(keyring: &oo7::Keyring) -> bool {
+    keyring.unlock().await.is_ok()
 }
 
 /// Keyrings on Linux cannnot be assumed to be unlocked while the user is
