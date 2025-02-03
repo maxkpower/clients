@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import {
   combineLatest,
   filter,
@@ -5,26 +7,28 @@ import {
   map,
   merge,
   Observable,
+  of,
   shareReplay,
   Subject,
   switchMap,
 } from "rxjs";
 import { SemVer } from "semver";
 
-import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
-import { BulkEncryptService } from "@bitwarden/common/platform/abstractions/bulk-encrypt.service";
-
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
+import { KeyService } from "../../../../key-management/src/abstractions/key.service";
 import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
+import { AccountService } from "../../auth/abstractions/account.service";
 import { AutofillSettingsServiceAbstraction } from "../../autofill/services/autofill-settings.service";
 import { DomainSettingsService } from "../../autofill/services/domain-settings.service";
+import { FeatureFlag } from "../../enums/feature-flag.enum";
 import { UriMatchStrategySetting } from "../../models/domain/domain-service";
 import { ErrorResponse } from "../../models/response/error.response";
 import { ListResponse } from "../../models/response/list.response";
 import { View } from "../../models/view/view";
+import { BulkEncryptService } from "../../platform/abstractions/bulk-encrypt.service";
 import { ConfigService } from "../../platform/abstractions/config/config.service";
-import { CryptoService } from "../../platform/abstractions/crypto.service";
 import { EncryptService } from "../../platform/abstractions/encrypt.service";
 import { I18nService } from "../../platform/abstractions/i18n.service";
 import { StateService } from "../../platform/abstractions/state.service";
@@ -54,6 +58,7 @@ import { LoginUri } from "../models/domain/login-uri";
 import { Password } from "../models/domain/password";
 import { SecureNote } from "../models/domain/secure-note";
 import { SortedCiphersCache } from "../models/domain/sorted-ciphers-cache";
+import { SshKey } from "../models/domain/ssh-key";
 import { CipherBulkDeleteRequest } from "../models/request/cipher-bulk-delete.request";
 import { CipherBulkMoveRequest } from "../models/request/cipher-bulk-move.request";
 import { CipherBulkRestoreRequest } from "../models/request/cipher-bulk-restore.request";
@@ -76,6 +81,7 @@ import {
   ADD_EDIT_CIPHER_INFO_KEY,
   DECRYPTED_CIPHERS,
   ENCRYPTED_CIPHERS,
+  FAILED_DECRYPTED_CIPHERS,
   LOCAL_DATA_KEY,
 } from "./key-state/ciphers.state";
 
@@ -106,13 +112,21 @@ export class CipherService implements CipherServiceAbstraction {
   cipherViews$: Observable<CipherView[] | null>;
   addEditCipherInfo$: Observable<AddEditCipherInfo>;
 
+  /**
+   * Observable that emits an array of cipherViews that failed to decrypt. Does not emit until decryption has completed.
+   *
+   * An empty array indicates that all ciphers were successfully decrypted.
+   */
+  failedToDecryptCiphers$: Observable<CipherView[]>;
+
   private localDataState: ActiveUserState<Record<CipherId, LocalData>>;
   private encryptedCiphersState: ActiveUserState<Record<CipherId, CipherData>>;
   private decryptedCiphersState: ActiveUserState<Record<CipherId, CipherView>>;
+  private failedToDecryptCiphersState: ActiveUserState<CipherView[]>;
   private addEditCipherInfoState: ActiveUserState<AddEditCipherInfo>;
 
   constructor(
-    private cryptoService: CryptoService,
+    private keyService: KeyService,
     private domainSettingsService: DomainSettingsService,
     private apiService: ApiService,
     private i18nService: I18nService,
@@ -129,6 +143,7 @@ export class CipherService implements CipherServiceAbstraction {
     this.localDataState = this.stateProvider.getActive(LOCAL_DATA_KEY);
     this.encryptedCiphersState = this.stateProvider.getActive(ENCRYPTED_CIPHERS);
     this.decryptedCiphersState = this.stateProvider.getActive(DECRYPTED_CIPHERS);
+    this.failedToDecryptCiphersState = this.stateProvider.getActive(FAILED_DECRYPTED_CIPHERS);
     this.addEditCipherInfoState = this.stateProvider.getActive(ADD_EDIT_CIPHER_INFO_KEY);
 
     this.localData$ = this.localDataState.state$.pipe(map((data) => data ?? {}));
@@ -140,6 +155,13 @@ export class CipherService implements CipherServiceAbstraction {
       switchMap(() => merge(this.forceCipherViews$, this.getAllDecrypted())),
       shareReplay({ bufferSize: 1, refCount: true }),
     );
+
+    this.failedToDecryptCiphers$ = this.failedToDecryptCiphersState.state$.pipe(
+      filter((ciphers) => ciphers != null),
+      switchMap((ciphers) => merge(this.forceCipherViews$, of(ciphers))),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
+
     this.addEditCipherInfo$ = this.addEditCipherInfoState.state$;
   }
 
@@ -157,6 +179,10 @@ export class CipherService implements CipherServiceAbstraction {
         await this.searchService.indexCiphers(value);
       }
     }
+  }
+
+  async setFailedDecryptedCiphers(cipherViews: CipherView[], userId: UserId) {
+    await this.stateProvider.setUserState(FAILED_DECRYPTED_CIPHERS, cipherViews, userId);
   }
 
   private async setDecryptedCiphers(value: CipherView[], userId: UserId) {
@@ -375,7 +401,7 @@ export class CipherService implements CipherServiceAbstraction {
    */
   @sequentialize(() => "getAllDecrypted")
   async getAllDecrypted(): Promise<CipherView[]> {
-    let decCiphers = await this.getDecryptedCiphers();
+    const decCiphers = await this.getDecryptedCiphers();
     if (decCiphers != null && decCiphers.length !== 0) {
       await this.reindexCiphers();
       return await this.getDecryptedCiphers();
@@ -387,10 +413,15 @@ export class CipherService implements CipherServiceAbstraction {
       return [];
     }
 
-    decCiphers = await this.decryptCiphers(await this.getAll(), activeUserId);
+    const [newDecCiphers, failedCiphers] = await this.decryptCiphers(
+      await this.getAll(),
+      activeUserId,
+    );
 
-    await this.setDecryptedCipherCache(decCiphers, activeUserId);
-    return decCiphers;
+    await this.setDecryptedCipherCache(newDecCiphers, activeUserId);
+    await this.setFailedDecryptedCiphers(failedCiphers, activeUserId);
+
+    return newDecCiphers;
   }
 
   private async getDecryptedCiphers() {
@@ -399,8 +430,18 @@ export class CipherService implements CipherServiceAbstraction {
     );
   }
 
-  private async decryptCiphers(ciphers: Cipher[], userId: UserId) {
-    const keys = await firstValueFrom(this.cryptoService.cipherDecryptionKeys$(userId, true));
+  /**
+   * Decrypts the provided ciphers using the provided user's keys.
+   * @param ciphers
+   * @param userId
+   * @returns Two cipher arrays, the first containing successfully decrypted ciphers and the second containing ciphers that failed to decrypt.
+   * @private
+   */
+  private async decryptCiphers(
+    ciphers: Cipher[],
+    userId: UserId,
+  ): Promise<[CipherView[], CipherView[]]> {
+    const keys = await firstValueFrom(this.keyService.cipherDecryptionKeys$(userId, true));
 
     if (keys == null || (keys.userKey == null && Object.keys(keys.orgKeys).length === 0)) {
       // return early if there are no keys to decrypt with
@@ -417,7 +458,7 @@ export class CipherService implements CipherServiceAbstraction {
       {} as Record<string, Cipher[]>,
     );
 
-    const decCiphers = (
+    const allCipherViews = (
       await Promise.all(
         Object.entries(grouped).map(async ([orgId, groupedCiphers]) => {
           if (await this.configService.getFeatureFlag(FeatureFlag.PM4154_BulkEncryptionService)) {
@@ -437,7 +478,18 @@ export class CipherService implements CipherServiceAbstraction {
       .flat()
       .sort(this.getLocaleSortingFunction());
 
-    return decCiphers;
+    // Split ciphers into two arrays, one for successfully decrypted ciphers and one for ciphers that failed to decrypt
+    return allCipherViews.reduce(
+      (acc, c) => {
+        if (c.decryptionFailure) {
+          acc[1].push(c);
+        } else {
+          acc[0].push(c);
+        }
+        return acc;
+      },
+      [[], []] as [CipherView[], CipherView[]],
+    );
   }
 
   private async reindexCiphers() {
@@ -550,7 +602,7 @@ export class CipherService implements CipherServiceAbstraction {
     }
 
     const ciphers = response.data.map((cr) => new Cipher(new CipherData(cr)));
-    const key = await this.cryptoService.getOrgKey(organizationId);
+    const key = await this.keyService.getOrgKey(organizationId);
     let decCiphers: CipherView[] = [];
     if (await this.configService.getFeatureFlag(FeatureFlag.PM4154_BulkEncryptionService)) {
       decCiphers = await this.bulkEncryptService.decryptItems(ciphers, key);
@@ -650,14 +702,11 @@ export class CipherService implements CipherServiceAbstraction {
       ciphersLocalData = {};
     }
 
-    const cipherId = id as CipherId;
-    if (ciphersLocalData[cipherId]) {
-      ciphersLocalData[cipherId].lastLaunched = new Date().getTime();
-    } else {
-      ciphersLocalData[cipherId] = {
-        lastUsedDate: new Date().getTime(),
-      };
-    }
+    const currentTime = new Date().getTime();
+    ciphersLocalData[id as CipherId] = {
+      lastLaunched: currentTime,
+      lastUsedDate: currentTime,
+    };
 
     await this.localDataState.update(() => ciphersLocalData);
 
@@ -711,13 +760,9 @@ export class CipherService implements CipherServiceAbstraction {
     return new Cipher(updated[cipher.id as CipherId]);
   }
 
-  async updateWithServer(
-    cipher: Cipher,
-    orgAdmin?: boolean,
-    isNotClone?: boolean,
-  ): Promise<Cipher> {
+  async updateWithServer(cipher: Cipher, orgAdmin?: boolean): Promise<Cipher> {
     let response: CipherResponse;
-    if (orgAdmin && isNotClone) {
+    if (orgAdmin) {
       const request = new CipherRequest(cipher);
       response = await this.apiService.putCipherAdmin(cipher.id, request);
       const data = new CipherData(response, cipher.collectionIds);
@@ -741,7 +786,7 @@ export class CipherService implements CipherServiceAbstraction {
     organizationId: string,
     collectionIds: string[],
     userId: UserId,
-  ): Promise<any> {
+  ): Promise<Cipher> {
     const attachmentPromises: Promise<any>[] = [];
     if (cipher.attachments != null) {
       cipher.attachments.forEach((attachment) => {
@@ -761,6 +806,7 @@ export class CipherService implements CipherServiceAbstraction {
     const response = await this.apiService.putShareCipher(cipher.id, request);
     const data = new CipherData(response, collectionIds);
     await this.upsert(data);
+    return new Cipher(data, cipher.localData);
   }
 
   async shareManyWithServer(
@@ -851,7 +897,7 @@ export class CipherService implements CipherServiceAbstraction {
 
     const encFileName = await this.encryptService.encrypt(filename, cipherEncKey);
 
-    const dataEncKey = await this.cryptoService.makeDataEncKey(cipherEncKey);
+    const dataEncKey = await this.keyService.makeDataEncKey(cipherEncKey);
     const encData = await this.encryptService.encryptToBytes(new Uint8Array(data), dataEncKey[0]);
 
     const response = await this.cipherFileUploadService.upload(
@@ -883,9 +929,11 @@ export class CipherService implements CipherServiceAbstraction {
     return new Cipher(updated[cipher.id as CipherId], cipher.localData);
   }
 
-  async saveCollectionsWithServerAdmin(cipher: Cipher): Promise<void> {
+  async saveCollectionsWithServerAdmin(cipher: Cipher): Promise<Cipher> {
     const request = new CipherCollectionsRequest(cipher.collectionIds);
-    await this.apiService.putCipherCollectionsAdmin(cipher.id, request);
+    const response = await this.apiService.putCipherCollectionsAdmin(cipher.id, request);
+    const data = new CipherData(response);
+    return new Cipher(data);
   }
 
   /**
@@ -1030,7 +1078,11 @@ export class CipherService implements CipherServiceAbstraction {
     await this.delete(ids);
   }
 
-  async deleteAttachment(id: string, attachmentId: string): Promise<void> {
+  async deleteAttachment(
+    id: string,
+    revisionDate: string,
+    attachmentId: string,
+  ): Promise<CipherData> {
     let ciphers = await firstValueFrom(this.ciphers$);
     const cipherId = id as CipherId;
     // eslint-disable-next-line
@@ -1044,6 +1096,10 @@ export class CipherService implements CipherServiceAbstraction {
       }
     }
 
+    // Deleting the cipher updates the revision date on the server,
+    // Update the stored `revisionDate` to match
+    ciphers[cipherId].revisionDate = revisionDate;
+
     await this.clearCache();
     await this.encryptedCiphersState.update(() => {
       if (ciphers == null) {
@@ -1051,15 +1107,20 @@ export class CipherService implements CipherServiceAbstraction {
       }
       return ciphers;
     });
+
+    return ciphers[cipherId];
   }
 
-  async deleteAttachmentWithServer(id: string, attachmentId: string): Promise<void> {
+  async deleteAttachmentWithServer(id: string, attachmentId: string): Promise<CipherData> {
+    let cipherResponse = null;
     try {
-      await this.apiService.deleteCipherAttachment(id, attachmentId);
+      cipherResponse = await this.apiService.deleteCipherAttachment(id, attachmentId);
     } catch (e) {
       return Promise.reject((e as ErrorResponse).getSingleMessage());
     }
-    await this.deleteAttachment(id, attachmentId);
+    const cipherData = CipherData.fromJSON(cipherResponse?.cipher);
+
+    return await this.deleteAttachment(id, cipherData.revisionDate, attachmentId);
   }
 
   sortCiphersByLastUsed(a: CipherView, b: CipherView): number {
@@ -1248,8 +1309,8 @@ export class CipherService implements CipherServiceAbstraction {
 
   async getKeyForCipherKeyDecryption(cipher: Cipher, userId: UserId): Promise<UserKey | OrgKey> {
     return (
-      (await this.cryptoService.getOrgKey(cipher.organizationId)) ||
-      ((await this.cryptoService.getUserKeyWithLegacySupport(userId)) as UserKey)
+      (await this.keyService.getOrgKey(cipher.organizationId)) ||
+      ((await this.keyService.getUserKeyWithLegacySupport(userId)) as UserKey)
     );
   }
 
@@ -1274,8 +1335,13 @@ export class CipherService implements CipherServiceAbstraction {
     let encryptedCiphers: CipherWithIdRequest[] = [];
 
     const ciphers = await firstValueFrom(this.cipherViews$);
+    const failedCiphers = await firstValueFrom(this.failedToDecryptCiphers$);
     if (!ciphers) {
       return encryptedCiphers;
+    }
+
+    if (failedCiphers.length > 0) {
+      throw new Error("Cannot rotate ciphers when decryption failures are present");
     }
 
     const userCiphers = ciphers.filter((c) => c.organizationId == null);
@@ -1297,7 +1363,7 @@ export class CipherService implements CipherServiceAbstraction {
   // In the case of a cipher that is being shared with an organization, we want to decrypt the
   // cipher key with the user's key and then re-encrypt it with the organization's key.
   private async encryptSharedCipher(model: CipherView, userId: UserId): Promise<Cipher> {
-    const keyForCipherKeyDecryption = await this.cryptoService.getUserKeyWithLegacySupport(userId);
+    const keyForCipherKeyDecryption = await this.keyService.getUserKeyWithLegacySupport(userId);
     return await this.encrypt(model, userId, null, keyForCipherKeyDecryption);
   }
 
@@ -1374,14 +1440,14 @@ export class CipherService implements CipherServiceAbstraction {
 
     const encBuf = await EncArrayBuffer.fromResponse(attachmentResponse);
     const activeUserId = await firstValueFrom(this.accountService.activeAccount$);
-    const userKey = await this.cryptoService.getUserKeyWithLegacySupport(activeUserId.id);
+    const userKey = await this.keyService.getUserKeyWithLegacySupport(activeUserId.id);
     const decBuf = await this.encryptService.decryptToBytes(encBuf, userKey);
 
     let encKey: UserKey | OrgKey;
-    encKey = await this.cryptoService.getOrgKey(organizationId);
-    encKey ||= (await this.cryptoService.getUserKeyWithLegacySupport()) as UserKey;
+    encKey = await this.keyService.getOrgKey(organizationId);
+    encKey ||= (await this.keyService.getUserKeyWithLegacySupport()) as UserKey;
 
-    const dataEncKey = await this.cryptoService.makeDataEncKey(encKey);
+    const dataEncKey = await this.keyService.makeDataEncKey(encKey);
 
     const encFileName = await this.encryptService.encrypt(attachmentView.fileName, encKey);
     const encData = await this.encryptService.encryptToBytes(new Uint8Array(decBuf), dataEncKey[0]);
@@ -1571,6 +1637,19 @@ export class CipherService implements CipherServiceAbstraction {
           key,
         );
         return;
+      case CipherType.SshKey:
+        cipher.sshKey = new SshKey();
+        await this.encryptObjProperty(
+          model.sshKey,
+          cipher.sshKey,
+          {
+            privateKey: null,
+            publicKey: null,
+            keyFingerprint: null,
+          },
+          key,
+        );
+        return;
       default:
         throw new Error("Unknown cipher type.");
     }
@@ -1625,6 +1704,7 @@ export class CipherService implements CipherServiceAbstraction {
 
   private async clearDecryptedCiphersState(userId: UserId) {
     await this.setDecryptedCiphers(null, userId);
+    await this.setFailedDecryptedCiphers(null, userId);
     this.clearSortedCiphers();
   }
 
@@ -1682,7 +1762,7 @@ export class CipherService implements CipherServiceAbstraction {
     // First, we get the key for cipher key encryption, in its decrypted form
     let decryptedCipherKey: SymmetricCryptoKey;
     if (cipher.key == null) {
-      decryptedCipherKey = await this.cryptoService.makeCipherKey();
+      decryptedCipherKey = await this.keyService.makeCipherKey();
     } else {
       decryptedCipherKey = new SymmetricCryptoKey(
         await this.encryptService.decryptToBytes(cipher.key, keyForCipherKeyDecryption),

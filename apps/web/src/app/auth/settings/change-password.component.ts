@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { firstValueFrom, map } from "rxjs";
@@ -7,15 +9,13 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { PasswordRequest } from "@bitwarden/common/auth/models/request/password.request";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { HashPurpose } from "@bitwarden/common/platform/enums";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { UserId } from "@bitwarden/common/types/guid";
@@ -23,9 +23,9 @@ import { MasterKey, UserKey } from "@bitwarden/common/types/key";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { DialogService, ToastService } from "@bitwarden/components";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { KdfConfigService, KeyService } from "@bitwarden/key-management";
 
-import { UserKeyRotationService } from "../key-rotation/user-key-rotation.service";
+import { UserKeyRotationService } from "../../key-management/key-rotation/user-key-rotation.service";
 
 @Component({
   selector: "app-change-password",
@@ -43,10 +43,8 @@ export class ChangePasswordComponent
 
   constructor(
     i18nService: I18nService,
-    cryptoService: CryptoService,
+    keyService: KeyService,
     messagingService: MessagingService,
-    stateService: StateService,
-    passwordGenerationService: PasswordGenerationServiceAbstraction,
     platformUtilsService: PlatformUtilsService,
     policyService: PolicyService,
     private auditService: AuditService,
@@ -64,12 +62,10 @@ export class ChangePasswordComponent
   ) {
     super(
       i18nService,
-      cryptoService,
+      keyService,
       messagingService,
-      passwordGenerationService,
       platformUtilsService,
       policyService,
-      stateService,
       dialogService,
       kdfConfigService,
       masterPasswordService,
@@ -181,20 +177,20 @@ export class ChangePasswordComponent
     newMasterKey: MasterKey,
     newUserKey: [UserKey, EncString],
   ) {
-    const masterKey = await this.cryptoService.makeMasterKey(
+    const masterKey = await this.keyService.makeMasterKey(
       this.currentMasterPassword,
       await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.email))),
       await this.kdfConfigService.getKdfConfig(),
     );
 
-    const userId = await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id)));
-    const newLocalKeyHash = await this.cryptoService.hashMasterKey(
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const newLocalKeyHash = await this.keyService.hashMasterKey(
       this.masterPassword,
       newMasterKey,
       HashPurpose.LocalAuthorization,
     );
 
-    const userKey = await this.masterPasswordService.decryptUserKeyWithMasterKey(masterKey);
+    const userKey = await this.masterPasswordService.decryptUserKeyWithMasterKey(masterKey, userId);
     if (userKey == null) {
       this.toastService.showToast({
         variant: "error",
@@ -205,7 +201,7 @@ export class ChangePasswordComponent
     }
 
     const request = new PasswordRequest();
-    request.masterPasswordHash = await this.cryptoService.hashMasterKey(
+    request.masterPasswordHash = await this.keyService.hashMasterKey(
       this.currentMasterPassword,
       masterKey,
     );

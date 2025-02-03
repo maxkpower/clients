@@ -1,122 +1,114 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import {
   BehaviorSubject,
-  combineLatest,
-  concat,
   concatMap,
   distinctUntilChanged,
   endWith,
   filter,
-  first,
   firstValueFrom,
   ignoreElements,
   map,
   Observable,
-  race,
-  share,
-  skipUntil,
+  ReplaySubject,
   switchMap,
   takeUntil,
   withLatestFrom,
 } from "rxjs";
 import { Simplify } from "type-fest";
 
+import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { StateProvider } from "@bitwarden/common/platform/state";
+import { LegacyEncryptorProvider } from "@bitwarden/common/tools/cryptography/legacy-encryptor-provider";
 import {
   OnDependency,
   SingleUserDependency,
   UserDependency,
 } from "@bitwarden/common/tools/dependencies";
-import { isDynamic } from "@bitwarden/common/tools/state/state-constraints-dependency";
+import { IntegrationMetadata } from "@bitwarden/common/tools/integration";
+import { RestClient } from "@bitwarden/common/tools/integration/rpc";
+import { anyComplete, withLatestReady } from "@bitwarden/common/tools/rx";
 import { UserStateSubject } from "@bitwarden/common/tools/state/user-state-subject";
+import { UserId } from "@bitwarden/common/types/guid";
 
 import { Randomizer } from "../abstractions";
-import { Generators } from "../data";
+import {
+  Generators,
+  getForwarderConfiguration,
+  Integrations,
+  toCredentialGeneratorConfiguration,
+} from "../data";
 import { availableAlgorithms } from "../policies/available-algorithms-policy";
 import { mapPolicyToConstraints } from "../rx";
 import {
   CredentialAlgorithm,
   CredentialCategories,
   CredentialCategory,
-  CredentialGeneratorInfo,
+  AlgorithmInfo,
   CredentialPreference,
+  isForwarderIntegration,
+  ForwarderIntegration,
+  GenerateRequest,
 } from "../types";
-import { CredentialGeneratorConfiguration as Configuration } from "../types/credential-generator-configuration";
+import {
+  CredentialGeneratorConfiguration as Configuration,
+  CredentialGeneratorInfo,
+  GeneratorDependencyProvider,
+} from "../types/credential-generator-configuration";
 import { GeneratorConstraints } from "../types/generator-constraints";
 
 import { PREFERENCES } from "./credential-preferences";
 
 type Policy$Dependencies = UserDependency;
 type Settings$Dependencies = Partial<UserDependency>;
-type Generate$Dependencies = Simplify<Partial<OnDependency> & Partial<UserDependency>> & {
-  /** Emits the active website when subscribed.
-   *
-   *  The generator does not respond to emissions of this interface;
-   *  If it is provided, the generator blocks until a value becomes available.
-   *  When `website$` is omitted, the generator uses the empty string instead.
-   *  When `website$` completes, the generator completes.
-   *  When `website$` errors, the generator forwards the error.
-   */
-  website$?: Observable<string>;
-};
+type Generate$Dependencies = Simplify<OnDependency<GenerateRequest> & Partial<UserDependency>>;
 
 type Algorithms$Dependencies = Partial<UserDependency>;
 
+const OPTIONS_FRAME_SIZE = 512;
+
 export class CredentialGeneratorService {
   constructor(
-    private randomizer: Randomizer,
-    private stateProvider: StateProvider,
-    private policyService: PolicyService,
+    private readonly randomizer: Randomizer,
+    private readonly stateProvider: StateProvider,
+    private readonly policyService: PolicyService,
+    private readonly apiService: ApiService,
+    private readonly i18nService: I18nService,
+    private readonly encryptorProvider: LegacyEncryptorProvider,
+    private readonly accountService: AccountService,
   ) {}
+
+  private getDependencyProvider(): GeneratorDependencyProvider {
+    return {
+      client: new RestClient(this.apiService, this.i18nService),
+      i18nService: this.i18nService,
+      randomizer: this.randomizer,
+    };
+  }
 
   // FIXME: the rxjs methods of this service can be a lot more resilient if
   // `Subjects` are introduced where sharing occurs
 
   /** Generates a stream of credentials
    * @param configuration determines which generator's settings are loaded
-   * @param dependencies.on$ when specified, a new credential is emitted when
-   *   this emits. Otherwise, a new credential is emitted when the settings
-   *   update.
+   * @param dependencies.on$ Required. A new credential is emitted when this emits.
    */
   generate$<Settings extends object, Policy>(
     configuration: Readonly<Configuration<Settings, Policy>>,
-    dependencies?: Generate$Dependencies,
+    dependencies: Generate$Dependencies,
   ) {
-    // instantiate the engine
-    const engine = configuration.engine.create(this.randomizer);
-
-    // stream blocks until all of these values are received
-    const website$ = dependencies?.website$ ?? new BehaviorSubject<string>(null);
-    const request$ = website$.pipe(map((website) => ({ website })));
+    const engine = configuration.engine.create(this.getDependencyProvider());
     const settings$ = this.settings$(configuration, dependencies);
 
-    // monitor completion
-    const requestComplete$ = request$.pipe(ignoreElements(), endWith(true));
-    const settingsComplete$ = request$.pipe(ignoreElements(), endWith(true));
-    const complete$ = race(requestComplete$, settingsComplete$);
-
-    // if on$ triggers before settings are loaded, trigger as soon
-    // as they become available.
-    let readyOn$: Observable<any> = null;
-    if (dependencies?.on$) {
-      const NO_EMISSIONS = {};
-      const ready$ = combineLatest([settings$, request$]).pipe(
-        first(null, NO_EMISSIONS),
-        filter((value) => value !== NO_EMISSIONS),
-        share(),
-      );
-      readyOn$ = concat(
-        dependencies.on$?.pipe(switchMap(() => ready$)),
-        dependencies.on$.pipe(skipUntil(ready$)),
-      );
-    }
-
     // generation proper
-    const generate$ = (readyOn$ ?? settings$).pipe(
-      withLatestFrom(request$, settings$),
-      concatMap(([, request, settings]) => engine.generate(request, settings)),
-      takeUntil(complete$),
+    const generate$ = dependencies.on$.pipe(
+      withLatestReady(settings$),
+      concatMap(([request, settings]) => engine.generate(request, settings)),
+      takeUntil(anyComplete([settings$])),
     );
 
     return generate$;
@@ -132,11 +124,11 @@ export class CredentialGeneratorService {
   algorithms$(
     category: CredentialCategory,
     dependencies?: Algorithms$Dependencies,
-  ): Observable<CredentialGeneratorInfo[]>;
+  ): Observable<AlgorithmInfo[]>;
   algorithms$(
     category: CredentialCategory[],
     dependencies?: Algorithms$Dependencies,
-  ): Observable<CredentialGeneratorInfo[]>;
+  ): Observable<AlgorithmInfo[]>;
   algorithms$(
     category: CredentialCategory | CredentialCategory[],
     dependencies?: Algorithms$Dependencies,
@@ -163,7 +155,9 @@ export class CredentialGeneratorService {
         return policies$;
       }),
       map((available) => {
-        const filtered = algorithms.filter((c) => available.has(c.id));
+        const filtered = algorithms.filter(
+          (c) => isForwarderIntegration(c.id) || available.has(c.id),
+        );
         return filtered;
       }),
     );
@@ -175,24 +169,67 @@ export class CredentialGeneratorService {
    *  @param category the category or categories of interest
    *  @returns A list containing the requested metadata.
    */
-  algorithms(category: CredentialCategory): CredentialGeneratorInfo[];
-  algorithms(category: CredentialCategory[]): CredentialGeneratorInfo[];
-  algorithms(category: CredentialCategory | CredentialCategory[]): CredentialGeneratorInfo[] {
-    const categories = Array.isArray(category) ? category : [category];
+  algorithms(category: CredentialCategory): AlgorithmInfo[];
+  algorithms(category: CredentialCategory[]): AlgorithmInfo[];
+  algorithms(category: CredentialCategory | CredentialCategory[]): AlgorithmInfo[] {
+    const categories: CredentialCategory[] = Array.isArray(category) ? category : [category];
+
     const algorithms = categories
-      .flatMap((c) => CredentialCategories[c])
-      .map((c) => (c === "forwarder" ? null : Generators[c]))
+      .flatMap((c) => CredentialCategories[c] as CredentialAlgorithm[])
+      .map((id) => this.algorithm(id))
       .filter((info) => info !== null);
 
-    return algorithms;
+    const forwarders = Object.keys(Integrations)
+      .map((key: keyof typeof Integrations) => {
+        const forwarder: ForwarderIntegration = { forwarder: Integrations[key].id };
+        return this.algorithm(forwarder);
+      })
+      .filter((forwarder) => categories.includes(forwarder.category));
+
+    return algorithms.concat(forwarders);
   }
 
   /** Look up the metadata for a specific generator algorithm
    *  @param id identifies the algorithm
    *  @returns the requested metadata, or `null` if the metadata wasn't found.
    */
-  algorithm(id: CredentialAlgorithm): CredentialGeneratorInfo {
-    return (id === "forwarder" ? null : Generators[id]) ?? null;
+  algorithm(id: CredentialAlgorithm): AlgorithmInfo {
+    let generator: CredentialGeneratorInfo = null;
+    let integration: IntegrationMetadata = null;
+
+    if (isForwarderIntegration(id)) {
+      const forwarderConfig = getForwarderConfiguration(id.forwarder);
+      integration = forwarderConfig;
+
+      if (forwarderConfig) {
+        generator = toCredentialGeneratorConfiguration(forwarderConfig);
+      }
+    } else {
+      generator = Generators[id];
+    }
+
+    if (!generator) {
+      throw new Error(`Invalid credential algorithm: ${JSON.stringify(id)}`);
+    }
+
+    const info: AlgorithmInfo = {
+      id: generator.id,
+      category: generator.category,
+      name: integration ? integration.name : this.i18nService.t(generator.nameKey),
+      generate: this.i18nService.t(generator.generateKey),
+      onGeneratedMessage: this.i18nService.t(generator.onGeneratedMessageKey),
+      credentialType: this.i18nService.t(generator.credentialTypeKey),
+      copy: this.i18nService.t(generator.copyKey),
+      useGeneratedValue: this.i18nService.t(generator.useGeneratedValueKey),
+      onlyOnRequest: generator.onlyOnRequest,
+      request: generator.request,
+    };
+
+    if (generator.descriptionKey) {
+      info.description = this.i18nService.t(generator.descriptionKey);
+    }
+
+    return info;
   }
 
   /** Get the settings for the provided configuration
@@ -208,27 +245,26 @@ export class CredentialGeneratorService {
     dependencies?: Settings$Dependencies,
   ) {
     const userId$ = dependencies?.userId$ ?? this.stateProvider.activeUserId$;
-    const completion$ = userId$.pipe(ignoreElements(), endWith(true));
+    const constraints$ = this.policy$(configuration, { userId$ });
 
-    const state$ = userId$.pipe(
+    const settings$ = userId$.pipe(
       filter((userId) => !!userId),
       distinctUntilChanged(),
       switchMap((userId) => {
-        const state$ = this.stateProvider
-          .getUserState$(configuration.settings.account, userId)
-          .pipe(takeUntil(completion$));
+        const singleUserId$ = new BehaviorSubject(userId);
+        const singleUserEncryptor$ = this.encryptorProvider.userEncryptor$(OPTIONS_FRAME_SIZE, {
+          singleUserId$,
+        });
 
+        const state$ = new UserStateSubject(
+          configuration.settings.account,
+          (key) => this.stateProvider.getUser(userId, key),
+          { constraints$, singleUserEncryptor$ },
+        );
         return state$;
       }),
       map((settings) => settings ?? structuredClone(configuration.settings.initial)),
-    );
-
-    const settings$ = combineLatest([state$, this.policy$(configuration, { userId$ })]).pipe(
-      map(([settings, policy]) => {
-        const calibration = isDynamic(policy) ? policy.calibrate(settings) : policy;
-        const adjusted = calibration.adjust(settings);
-        return adjusted;
-      }),
+      takeUntil(anyComplete(userId$)),
     );
 
     return settings$;
@@ -246,13 +282,24 @@ export class CredentialGeneratorService {
   async preferences(
     dependencies: SingleUserDependency,
   ): Promise<UserStateSubject<CredentialPreference>> {
-    const userId = await firstValueFrom(
-      dependencies.singleUserId$.pipe(filter((userId) => !!userId)),
-    );
+    const singleUserId$ = new ReplaySubject<UserId>(1);
+    dependencies.singleUserId$
+      .pipe(
+        filter((userId) => !!userId),
+        distinctUntilChanged(),
+      )
+      .subscribe(singleUserId$);
+    const singleUserEncryptor$ = this.encryptorProvider.userEncryptor$(OPTIONS_FRAME_SIZE, {
+      singleUserId$,
+    });
+    const userId = await firstValueFrom(singleUserId$);
 
     // FIXME: enforce policy
-    const state = this.stateProvider.getUser(userId, PREFERENCES);
-    const subject = new UserStateSubject(state, { ...dependencies });
+    const subject = new UserStateSubject(
+      PREFERENCES,
+      (key) => this.stateProvider.getUser(userId, key),
+      { singleUserEncryptor$ },
+    );
 
     return subject;
   }
@@ -268,13 +315,25 @@ export class CredentialGeneratorService {
     configuration: Readonly<Configuration<Settings, Policy>>,
     dependencies: SingleUserDependency,
   ) {
-    const userId = await firstValueFrom(
-      dependencies.singleUserId$.pipe(filter((userId) => !!userId)),
-    );
-    const state = this.stateProvider.getUser(userId, configuration.settings.account);
+    const singleUserId$ = new ReplaySubject<UserId>(1);
+    dependencies.singleUserId$
+      .pipe(
+        filter((userId) => !!userId),
+        distinctUntilChanged(),
+      )
+      .subscribe(singleUserId$);
+    const singleUserEncryptor$ = this.encryptorProvider.userEncryptor$(OPTIONS_FRAME_SIZE, {
+      singleUserId$,
+    });
+    const userId = await firstValueFrom(singleUserId$);
+
     const constraints$ = this.policy$(configuration, { userId$: dependencies.singleUserId$ });
 
-    const subject = new UserStateSubject(state, { ...dependencies, constraints$ });
+    const subject = new UserStateSubject(
+      configuration.settings.account,
+      (key) => this.stateProvider.getUser(userId, key),
+      { constraints$, singleUserEncryptor$ },
+    );
 
     return subject;
   }
@@ -288,17 +347,30 @@ export class CredentialGeneratorService {
     configuration: Configuration<Settings, Policy>,
     dependencies: Policy$Dependencies,
   ): Observable<GeneratorConstraints<Settings>> {
-    const completion$ = dependencies.userId$.pipe(ignoreElements(), endWith(true));
+    const email$ = dependencies.userId$.pipe(
+      distinctUntilChanged(),
+      withLatestFrom(this.accountService.accounts$),
+      filter((accounts) => !!accounts),
+      map(([userId, accounts]) => {
+        if (userId in accounts) {
+          return { userId, email: accounts[userId].email };
+        }
 
-    const constraints$ = dependencies.userId$.pipe(
-      switchMap((userId) => {
-        // complete policy emissions otherwise `mergeMap` holds `policies$` open indefinitely
+        return { userId, email: null };
+      }),
+    );
+
+    const constraints$ = email$.pipe(
+      switchMap(({ userId, email }) => {
+        // complete policy emissions otherwise `switchMap` holds `policies$` open indefinitely
         const policies$ = this.policyService
           .getAll$(configuration.policy.type, userId)
-          .pipe(takeUntil(completion$));
+          .pipe(
+            mapPolicyToConstraints(configuration.policy, email),
+            takeUntil(anyComplete(email$)),
+          );
         return policies$;
       }),
-      mapPolicyToConstraints(configuration.policy),
     );
 
     return constraints$;

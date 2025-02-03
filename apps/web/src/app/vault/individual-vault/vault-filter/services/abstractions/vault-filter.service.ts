@@ -1,7 +1,11 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Observable } from "rxjs";
 
 import { CollectionAdminView, CollectionView } from "@bitwarden/admin-console/common";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { FolderView } from "@bitwarden/common/src/vault/models/view/folder.view";
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 

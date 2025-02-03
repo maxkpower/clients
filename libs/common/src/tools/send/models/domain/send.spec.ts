@@ -1,12 +1,12 @@
 import { mock } from "jest-mock-extended";
 
-import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
-import { UserKey } from "@bitwarden/common/types/key";
+import { KeyService } from "@bitwarden/key-management";
 
 import { makeStaticByteArray, mockEnc } from "../../../../../spec";
-import { CryptoService } from "../../../../platform/abstractions/crypto.service";
 import { EncryptService } from "../../../../platform/abstractions/encrypt.service";
+import { SymmetricCryptoKey } from "../../../../platform/models/domain/symmetric-crypto-key";
 import { ContainerService } from "../../../../platform/services/container.service";
+import { UserKey } from "../../../../types/key";
 import { SendType } from "../../enums/send-type";
 import { SendData } from "../data/send.data";
 
@@ -111,19 +111,24 @@ describe("Send", () => {
     send.hideEmail = true;
 
     const encryptService = mock<EncryptService>();
-    const cryptoService = mock<CryptoService>();
+    const keyService = mock<KeyService>();
     encryptService.decryptToBytes
       .calledWith(send.key, userKey)
       .mockResolvedValue(makeStaticByteArray(32));
-    cryptoService.makeSendKey.mockResolvedValue("cryptoKey" as any);
-    cryptoService.getUserKey.mockResolvedValue(userKey);
+    keyService.makeSendKey.mockResolvedValue("cryptoKey" as any);
+    keyService.getUserKey.mockResolvedValue(userKey);
 
-    (window as any).bitwardenContainerService = new ContainerService(cryptoService, encryptService);
+    (window as any).bitwardenContainerService = new ContainerService(keyService, encryptService);
 
     const view = await send.decrypt();
 
     expect(text.decrypt).toHaveBeenNthCalledWith(1, "cryptoKey");
-    expect(send.name.decrypt).toHaveBeenNthCalledWith(1, null, "cryptoKey");
+    expect(send.name.decrypt).toHaveBeenNthCalledWith(
+      1,
+      null,
+      "cryptoKey",
+      "Property: name; ObjectContext: No Domain Context",
+    );
 
     expect(view).toMatchObject({
       id: "id",

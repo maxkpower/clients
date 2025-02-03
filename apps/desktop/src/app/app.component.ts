@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { DialogRef } from "@angular/cdk/dialog";
 import {
   Component,
@@ -8,20 +10,19 @@ import {
   ViewChild,
   ViewContainerRef,
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
-import { catchError, filter, firstValueFrom, map, of, Subject, takeUntil, timeout } from "rxjs";
+import { filter, firstValueFrom, map, Subject, takeUntil, timeout, withLatestFrom } from "rxjs";
 
 import { CollectionService } from "@bitwarden/admin-console/common";
 import { ModalRef } from "@bitwarden/angular/components/modal/modal.ref";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
-import { FingerprintDialogComponent } from "@bitwarden/auth/angular";
+import { FingerprintDialogComponent, LoginApprovalComponent } from "@bitwarden/auth/angular";
 import { LogoutReason } from "@bitwarden/auth/common";
 import { EventUploadService } from "@bitwarden/common/abstractions/event/event-upload.service";
-import { NotificationsService } from "@bitwarden/common/abstractions/notifications.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
 import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
+import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { InternalPolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
@@ -30,19 +31,20 @@ import { MasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstrac
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { VaultTimeoutAction } from "@bitwarden/common/enums/vault-timeout-action.enum";
+import { ProcessReloadServiceAbstraction } from "@bitwarden/common/key-management/abstractions/process-reload.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { SdkService } from "@bitwarden/common/platform/abstractions/sdk/sdk.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { SystemService } from "@bitwarden/common/platform/abstractions/system.service";
 import { clearCaches } from "@bitwarden/common/platform/misc/sequentialize";
+import { NotificationsService } from "@bitwarden/common/platform/notifications";
 import { StateEventRunnerService } from "@bitwarden/common/platform/state";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { UserId } from "@bitwarden/common/types/guid";
@@ -51,14 +53,13 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { InternalFolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { DialogService, ToastOptions, ToastService } from "@bitwarden/components";
+import { CredentialGeneratorHistoryDialogComponent } from "@bitwarden/generator-components";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
-import { BiometricStateService } from "@bitwarden/key-management";
+import { KeyService, BiometricStateService } from "@bitwarden/key-management";
 
 import { DeleteAccountComponent } from "../auth/delete-account.component";
-import { LoginApprovalComponent } from "../auth/login/login-approval.component";
+import { PremiumComponent } from "../billing/app/accounts/premium.component";
 import { MenuAccount, MenuUpdateRequest } from "../main/menu/menu.updater";
-import { flagEnabled } from "../platform/flags";
-import { PremiumComponent } from "../vault/app/accounts/premium.component";
 import { FolderAddEditComponent } from "../vault/app/vault/folder-add-edit.component";
 
 import { SettingsComponent } from "./accounts/settings.component";
@@ -134,7 +135,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private vaultTimeoutService: VaultTimeoutService,
     private vaultTimeoutSettingsService: VaultTimeoutSettingsService,
-    private cryptoService: CryptoService,
+    private keyService: KeyService,
     private logService: LogService,
     private messagingService: MessagingService,
     private collectionService: CollectionService,
@@ -142,6 +143,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private notificationsService: NotificationsService,
     private platformUtilsService: PlatformUtilsService,
     private systemService: SystemService,
+    private processReloadService: ProcessReloadServiceAbstraction,
     private stateService: StateService,
     private eventUploadService: EventUploadService,
     private policyService: InternalPolicyService,
@@ -153,27 +155,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private biometricStateService: BiometricStateService,
     private stateEventRunnerService: StateEventRunnerService,
     private accountService: AccountService,
-    private sdkService: SdkService,
-  ) {
-    if (flagEnabled("sdk")) {
-      // Warn if the SDK for some reason can't be initialized
-      this.sdkService.supported$
-        .pipe(
-          takeUntilDestroyed(),
-          catchError(() => {
-            return of(false);
-          }),
-        )
-        .subscribe((supported) => {
-          if (!supported) {
-            this.logService.debug("SDK is not supported");
-            this.sdkService.failedToInitialize().catch((e) => this.logService.error(e));
-          } else {
-            this.logService.debug("SDK is supported");
-          }
-        });
-    }
-  }
+    private organizationService: OrganizationService,
+  ) {}
 
   ngOnInit() {
     this.accountService.activeAccount$.pipe(takeUntil(this.destroy$)).subscribe((account) => {
@@ -209,22 +192,16 @@ export class AppComponent implements OnInit, OnDestroy {
             this.recordActivity();
             // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.notificationsService.updateConnection();
-            // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.updateAppMenu();
-            this.systemService.cancelProcessReload();
+            this.processReloadService.cancelProcessReload();
             break;
           case "loggedOut":
             this.modalService.closeAll();
-            if (message.userId == null || message.userId === this.activeUserId) {
-              await this.notificationsService.updateConnection();
-            }
             // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.updateAppMenu();
             await this.systemService.clearPendingClipboard();
-            await this.systemService.startProcessReload(this.authService);
+            await this.processReloadService.startProcessReload(this.authService);
             break;
           case "authBlocked":
             // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
@@ -263,20 +240,17 @@ export class AppComponent implements OnInit, OnDestroy {
             ) {
               await this.router.navigate(["lock"]);
             }
-            // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.notificationsService.updateConnection();
             await this.updateAppMenu();
             await this.systemService.clearPendingClipboard();
-            await this.systemService.startProcessReload(this.authService);
+            await this.processReloadService.startProcessReload(this.authService);
             break;
           case "startProcessReload":
             // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.systemService.startProcessReload(this.authService);
+            this.processReloadService.startProcessReload(this.authService);
             break;
           case "cancelProcessReload":
-            this.systemService.cancelProcessReload();
+            this.processReloadService.cancelProcessReload();
             break;
           case "reloadProcess":
             ipc.platform.reloadProcess();
@@ -301,20 +275,17 @@ export class AppComponent implements OnInit, OnDestroy {
             const activeUserId = await firstValueFrom(
               this.accountService.activeAccount$.pipe(map((a) => a?.id)),
             );
-            const publicKey = await firstValueFrom(this.cryptoService.userPublicKey$(activeUserId));
-            const fingerprint = await this.cryptoService.getFingerprint(activeUserId, publicKey);
+            const publicKey = await firstValueFrom(this.keyService.userPublicKey$(activeUserId));
+            const fingerprint = await this.keyService.getFingerprint(activeUserId, publicKey);
             const dialogRef = FingerprintDialogComponent.open(this.dialogService, { fingerprint });
             await firstValueFrom(dialogRef.closed);
             break;
           }
           case "deleteAccount":
-            DeleteAccountComponent.open(this.dialogService);
+            await this.deleteAccount();
             break;
           case "openPasswordHistory":
-            await this.openModal<PasswordGeneratorHistoryComponent>(
-              PasswordGeneratorHistoryComponent,
-              this.passwordHistoryRef,
-            );
+            await this.openGeneratorHistory();
             break;
           case "showToast":
             this.toastService._showToast(message);
@@ -348,6 +319,20 @@ export class AppComponent implements OnInit, OnDestroy {
             });
             if (premiumConfirmed) {
               await this.openModal<PremiumComponent>(PremiumComponent, this.premiumRef);
+            }
+            break;
+          }
+          case "upgradeOrganization": {
+            const upgradeConfirmed = await this.dialogService.openSimpleDialog({
+              title: { key: "upgradeOrganization" },
+              content: { key: "upgradeOrganizationDesc" },
+              acceptButtonText: { key: "learnMore" },
+              type: "info",
+            });
+            if (upgradeConfirmed) {
+              this.platformUtilsService.launchUri(
+                "https://bitwarden.com/help/upgrade-from-individual-to-org/",
+              );
             }
             break;
           }
@@ -545,6 +530,21 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  async openGeneratorHistory() {
+    const isGeneratorSwapEnabled = await this.configService.getFeatureFlag(
+      FeatureFlag.GeneratorToolsModernization,
+    );
+    if (isGeneratorSwapEnabled) {
+      await this.dialogService.open(CredentialGeneratorHistoryDialogComponent);
+      return;
+    }
+
+    await this.openModal<PasswordGeneratorHistoryComponent>(
+      PasswordGeneratorHistoryComponent,
+      this.passwordHistoryRef,
+    );
+  }
+
   private async updateAppMenu() {
     let updateRequest: MenuUpdateRequest;
     const stateAccounts = await firstValueFrom(this.accountService.accounts$);
@@ -690,7 +690,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
       // Provide the userId of the user to upload events for
       await this.eventUploadService.uploadEvents(userBeingLoggedOut);
-      await this.cryptoService.clearKeys(userBeingLoggedOut);
+      await this.keyService.clearKeys(userBeingLoggedOut);
       await this.cipherService.clear(userBeingLoggedOut);
       await this.folderService.clear(userBeingLoggedOut);
       await this.collectionService.clear(userBeingLoggedOut);
@@ -861,5 +861,30 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     this.messagingService.send(message, { code: code, state: receivedState });
+  }
+
+  private async deleteAccount() {
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    await firstValueFrom(
+      this.configService.getFeatureFlag$(FeatureFlag.AccountDeprovisioning).pipe(
+        withLatestFrom(this.organizationService.organizations$(userId)),
+        map(async ([accountDeprovisioningEnabled, organization]) => {
+          if (
+            accountDeprovisioningEnabled &&
+            organization.some((o) => o.userIsManagedByOrganization === true)
+          ) {
+            await this.dialogService.openSimpleDialog({
+              title: { key: "cannotDeleteAccount" },
+              content: { key: "cannotDeleteAccountDesc" },
+              cancelButtonText: null,
+              acceptButtonText: { key: "close" },
+              type: "danger",
+            });
+          } else {
+            DeleteAccountComponent.open(this.dialogService);
+          }
+        }),
+      ),
+    );
   }
 }

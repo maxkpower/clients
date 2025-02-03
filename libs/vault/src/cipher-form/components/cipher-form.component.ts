@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { NgIf } from "@angular/common";
 import {
   AfterViewInit,
@@ -36,12 +38,14 @@ import {
 import { CipherFormConfig } from "../abstractions/cipher-form-config.service";
 import { CipherFormService } from "../abstractions/cipher-form.service";
 import { CipherForm, CipherFormContainer } from "../cipher-form-container";
+import { CipherFormCacheService } from "../services/default-cipher-form-cache.service";
 
 import { AdditionalOptionsSectionComponent } from "./additional-options/additional-options-section.component";
 import { CardDetailsSectionComponent } from "./card-details-section/card-details-section.component";
 import { IdentitySectionComponent } from "./identity/identity.component";
 import { ItemDetailsSectionComponent } from "./item-details/item-details-section.component";
 import { LoginDetailsSectionComponent } from "./login-details-section/login-details-section.component";
+import { SshKeySectionComponent } from "./sshkey-section/sshkey-section.component";
 
 @Component({
   selector: "vault-cipher-form",
@@ -51,6 +55,9 @@ import { LoginDetailsSectionComponent } from "./login-details-section/login-deta
     {
       provide: CipherFormContainer,
       useExisting: forwardRef(() => CipherFormComponent),
+    },
+    {
+      provide: CipherFormCacheService,
     },
   ],
   imports: [
@@ -65,6 +72,7 @@ import { LoginDetailsSectionComponent } from "./login-details-section/login-deta
     ItemDetailsSectionComponent,
     CardDetailsSectionComponent,
     IdentitySectionComponent,
+    SshKeySectionComponent,
     NgIf,
     AdditionalOptionsSectionComponent,
     LoginDetailsSectionComponent,
@@ -160,6 +168,26 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
    */
   patchCipher(updateFn: (current: CipherView) => CipherView): void {
     this.updatedCipherView = updateFn(this.updatedCipherView);
+    // Cache the updated cipher
+    this.cipherFormCacheService.cacheCipherView(this.updatedCipherView);
+  }
+
+  /**
+   * Return initial values for given keys of a cipher
+   */
+  getInitialCipherView(): CipherView {
+    const cachedCipherView = this.cipherFormCacheService.getCachedCipherView();
+
+    if (cachedCipherView && this.initializedWithCachedCipher()) {
+      return cachedCipherView;
+    }
+
+    return this.originalCipherView;
+  }
+
+  /** */
+  initializedWithCachedCipher(): boolean {
+    return this.cipherFormCacheService.initializedWithValue;
   }
 
   /**
@@ -182,6 +210,8 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
 
     // Force change detection so that all child components are destroyed and re-created
     this.changeDetectorRef.detectChanges();
+
+    await this.cipherFormCacheService.init();
 
     this.updatedCipherView = new CipherView();
     this.originalCipherView = null;
@@ -216,8 +246,30 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
       }
     }
 
+    this.setInitialCipherFromCache();
+
     this.loading = false;
     this.formReadySubject.next();
+  }
+
+  /**
+   * Updates `updatedCipherView` based on the value from the cache.
+   */
+  setInitialCipherFromCache() {
+    const cachedCipher = this.cipherFormCacheService.getCachedCipherView();
+    if (cachedCipher === null) {
+      return;
+    }
+
+    // Use the cached cipher when it matches the cipher being edited
+    if (this.updatedCipherView.id === cachedCipher.id) {
+      this.updatedCipherView = cachedCipher;
+    }
+
+    // `id` is null when a cipher is being added
+    if (this.updatedCipherView.id === null) {
+      this.updatedCipherView = cachedCipher;
+    }
   }
 
   constructor(
@@ -226,6 +278,7 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
     private toastService: ToastService,
     private i18nService: I18nService,
     private changeDetectorRef: ChangeDetectorRef,
+    private cipherFormCacheService: CipherFormCacheService,
   ) {}
 
   /**

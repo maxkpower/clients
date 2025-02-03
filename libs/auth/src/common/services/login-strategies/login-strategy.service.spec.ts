@@ -5,13 +5,11 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
-import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { KeyConnectorService } from "@bitwarden/common/auth/abstractions/key-connector.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
-import { PBKDF2KdfConfig } from "@bitwarden/common/auth/models/domain/kdf-config";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { IdentityTokenResponse } from "@bitwarden/common/auth/models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "@bitwarden/common/auth/models/response/identity-two-factor.response";
@@ -20,7 +18,6 @@ import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/maste
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { VaultTimeoutAction } from "@bitwarden/common/enums/vault-timeout-action.enum";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -28,7 +25,6 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { KdfType } from "@bitwarden/common/platform/enums";
 import { TaskSchedulerService } from "@bitwarden/common/platform/scheduling";
 import {
   FakeAccountService,
@@ -38,6 +34,7 @@ import {
 } from "@bitwarden/common/spec";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 import { UserId } from "@bitwarden/common/types/guid";
+import { KdfConfigService, KdfType, KeyService, PBKDF2KdfConfig } from "@bitwarden/key-management";
 
 import {
   AuthRequestServiceAbstraction,
@@ -54,7 +51,7 @@ describe("LoginStrategyService", () => {
 
   let accountService: FakeAccountService;
   let masterPasswordService: FakeMasterPasswordService;
-  let cryptoService: MockProxy<CryptoService>;
+  let keyService: MockProxy<KeyService>;
   let apiService: MockProxy<ApiService>;
   let tokenService: MockProxy<TokenService>;
   let appIdService: MockProxy<AppIdService>;
@@ -85,7 +82,7 @@ describe("LoginStrategyService", () => {
   beforeEach(() => {
     accountService = mockAccountServiceWith(userId);
     masterPasswordService = new FakeMasterPasswordService();
-    cryptoService = mock<CryptoService>();
+    keyService = mock<KeyService>();
     apiService = mock<ApiService>();
     tokenService = mock<TokenService>();
     appIdService = mock<AppIdService>();
@@ -112,7 +109,7 @@ describe("LoginStrategyService", () => {
     sut = new LoginStrategyService(
       accountService,
       masterPasswordService,
-      cryptoService,
+      keyService,
       apiService,
       tokenService,
       appIdService,
@@ -295,7 +292,7 @@ describe("LoginStrategyService", () => {
       new IdentityTokenResponse({
         ForcePasswordReset: false,
         Kdf: KdfType.PBKDF2_SHA256,
-        KdfIterations: PBKDF2KdfConfig.PRELOGIN_ITERATIONS.min - 1,
+        KdfIterations: PBKDF2KdfConfig.PRELOGIN_ITERATIONS_MIN - 1,
         Key: "KEY",
         PrivateKey: "PRIVATE_KEY",
         ResetMasterPassword: false,
@@ -309,7 +306,7 @@ describe("LoginStrategyService", () => {
     apiService.postPrelogin.mockResolvedValue(
       new PreloginResponse({
         Kdf: KdfType.PBKDF2_SHA256,
-        KdfIterations: PBKDF2KdfConfig.PRELOGIN_ITERATIONS.min - 1,
+        KdfIterations: PBKDF2KdfConfig.PRELOGIN_ITERATIONS_MIN - 1,
       }),
     );
 
@@ -321,7 +318,70 @@ describe("LoginStrategyService", () => {
     });
 
     await expect(sut.logIn(credentials)).rejects.toThrow(
-      `PBKDF2 iterations must be between ${PBKDF2KdfConfig.PRELOGIN_ITERATIONS.min} and ${PBKDF2KdfConfig.PRELOGIN_ITERATIONS.max}`,
+      `PBKDF2 iterations must be at least ${PBKDF2KdfConfig.PRELOGIN_ITERATIONS_MIN}, but was ${PBKDF2KdfConfig.PRELOGIN_ITERATIONS_MIN - 1}; possible pre-login downgrade attack detected.`,
+    );
+  });
+
+  it("returns an AuthResult on successful new device verification", async () => {
+    const credentials = new PasswordLoginCredentials("EMAIL", "MASTER_PASSWORD");
+    const deviceVerificationOtp = "123456";
+
+    // Setup initial login and device verification response
+    apiService.postPrelogin.mockResolvedValue(
+      new PreloginResponse({
+        Kdf: KdfType.Argon2id,
+        KdfIterations: 2,
+        KdfMemory: 16,
+        KdfParallelism: 1,
+      }),
+    );
+
+    apiService.postIdentityToken.mockResolvedValueOnce(
+      new IdentityTwoFactorResponse({
+        TwoFactorProviders: ["0"],
+        TwoFactorProviders2: { 0: null },
+        error: "invalid_grant",
+        error_description: "Two factor required.",
+        email: undefined,
+        ssoEmail2faSessionToken: undefined,
+      }),
+    );
+
+    await sut.logIn(credentials);
+
+    // Successful device verification login
+    apiService.postIdentityToken.mockResolvedValueOnce(
+      new IdentityTokenResponse({
+        ForcePasswordReset: false,
+        Kdf: KdfType.Argon2id,
+        KdfIterations: 2,
+        KdfMemory: 16,
+        KdfParallelism: 1,
+        Key: "KEY",
+        PrivateKey: "PRIVATE_KEY",
+        ResetMasterPassword: false,
+        access_token: "ACCESS_TOKEN",
+        expires_in: 3600,
+        refresh_token: "REFRESH_TOKEN",
+        scope: "api offline_access",
+        token_type: "Bearer",
+      }),
+    );
+
+    tokenService.decodeAccessToken.calledWith("ACCESS_TOKEN").mockResolvedValue({
+      sub: "USER_ID",
+      name: "NAME",
+      email: "EMAIL",
+      premium: false,
+    });
+
+    const result = await sut.logInNewDeviceVerification(deviceVerificationOtp);
+
+    expect(result).toBeInstanceOf(AuthResult);
+    expect(apiService.postIdentityToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newDeviceOtp: deviceVerificationOtp,
+      }),
     );
   });
 });

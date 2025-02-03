@@ -3,7 +3,6 @@ import { BehaviorSubject } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
-import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
@@ -15,7 +14,6 @@ import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/maste
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { VaultTimeoutAction } from "@bitwarden/common/enums/vault-timeout-action.enum";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -33,6 +31,7 @@ import {
 import { CsprngArray } from "@bitwarden/common/types/csprng";
 import { UserId } from "@bitwarden/common/types/guid";
 import { MasterKey, UserKey } from "@bitwarden/common/types/key";
+import { KdfConfigService, KeyService } from "@bitwarden/key-management";
 
 import { LoginStrategyServiceAbstraction } from "../abstractions";
 import { InternalUserDecryptionOptionsServiceAbstraction } from "../abstractions/user-decryption-options.service.abstraction";
@@ -63,7 +62,7 @@ describe("PasswordLoginStrategy", () => {
   let masterPasswordService: FakeMasterPasswordService;
 
   let loginStrategyService: MockProxy<LoginStrategyServiceAbstraction>;
-  let cryptoService: MockProxy<CryptoService>;
+  let keyService: MockProxy<KeyService>;
   let encryptService: MockProxy<EncryptService>;
   let apiService: MockProxy<ApiService>;
   let tokenService: MockProxy<TokenService>;
@@ -89,7 +88,7 @@ describe("PasswordLoginStrategy", () => {
     masterPasswordService = new FakeMasterPasswordService();
 
     loginStrategyService = mock<LoginStrategyServiceAbstraction>();
-    cryptoService = mock<CryptoService>();
+    keyService = mock<KeyService>();
     encryptService = mock<EncryptService>();
     apiService = mock<ApiService>();
     tokenService = mock<TokenService>();
@@ -113,10 +112,10 @@ describe("PasswordLoginStrategy", () => {
 
     loginStrategyService.makePreloginKey.mockResolvedValue(masterKey);
 
-    cryptoService.hashMasterKey
+    keyService.hashMasterKey
       .calledWith(masterPassword, expect.anything(), undefined)
       .mockResolvedValue(hashedPassword);
-    cryptoService.hashMasterKey
+    keyService.hashMasterKey
       .calledWith(masterPassword, expect.anything(), HashPurpose.LocalAuthorization)
       .mockResolvedValue(localHashedPassword);
 
@@ -129,7 +128,7 @@ describe("PasswordLoginStrategy", () => {
       loginStrategyService,
       accountService,
       masterPasswordService,
-      cryptoService,
+      keyService,
       encryptService,
       apiService,
       tokenService,
@@ -198,12 +197,9 @@ describe("PasswordLoginStrategy", () => {
       localHashedPassword,
       userId,
     );
-    expect(cryptoService.setMasterKeyEncryptedUserKey).toHaveBeenCalledWith(
-      tokenResponse.key,
-      userId,
-    );
-    expect(cryptoService.setUserKey).toHaveBeenCalledWith(userKey, userId);
-    expect(cryptoService.setPrivateKey).toHaveBeenCalledWith(tokenResponse.privateKey, userId);
+    expect(keyService.setMasterKeyEncryptedUserKey).toHaveBeenCalledWith(tokenResponse.key, userId);
+    expect(keyService.setUserKey).toHaveBeenCalledWith(userKey, userId);
+    expect(keyService.setPrivateKey).toHaveBeenCalledWith(tokenResponse.privateKey, userId);
   });
 
   it("does not force the user to update their master password when there are no requirements", async () => {
@@ -279,5 +275,25 @@ describe("PasswordLoginStrategy", () => {
       userId,
     );
     expect(secondResult.forcePasswordReset).toEqual(ForceSetPasswordReason.WeakMasterPassword);
+  });
+
+  it("handles new device verification login with OTP", async () => {
+    const deviceVerificationOtp = "123456";
+    const tokenResponse = identityTokenResponseFactory();
+    apiService.postIdentityToken.mockResolvedValueOnce(tokenResponse);
+    tokenService.decodeAccessToken.mockResolvedValue({ sub: userId });
+
+    await passwordLoginStrategy.logIn(credentials);
+
+    const result = await passwordLoginStrategy.logInNewDeviceVerification(deviceVerificationOtp);
+
+    expect(apiService.postIdentityToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newDeviceOtp: deviceVerificationOtp,
+      }),
+    );
+    expect(result.forcePasswordReset).toBe(ForceSetPasswordReason.None);
+    expect(result.resetMasterPassword).toBe(false);
+    expect(result.userId).toBe(userId);
   });
 });

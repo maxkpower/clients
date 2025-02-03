@@ -1,18 +1,45 @@
 {
   "allApplications": {
-    "message": "All applications"
+    "message": "所有應用程式"
   },
-  "priorityApplications": {
-    "message": "Priority applications"
+  "criticalApplications": {
+    "message": "重要應用程式"
   },
   "accessIntelligence": {
-    "message": "Access Intelligence"
+    "message": "存取資訊"
+  },
+  "riskInsights": {
+    "message": "Risk Insights"
+  },
+  "passwordRisk": {
+    "message": "Password Risk"
+  },
+  "reviewAtRiskPasswords": {
+    "message": "檢視全部應用中具有風險的密碼 (弱、被暴露或重複使用)。選擇最重要的應用程式並優先採取安全措施，幫助使用者解決具有風險的密碼。"
+  },
+  "dataLastUpdated": {
+    "message": "上次資料更新日期：$DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "2021-01-01"
+      }
+    }
   },
   "notifiedMembers": {
-    "message": "Notified members"
+    "message": "已被通知的成員"
+  },
+  "revokeMembers": {
+    "message": "Revoke members"
+  },
+  "restoreMembers": {
+    "message": "Restore members"
+  },
+  "cannotRestoreAccessError": {
+    "message": "無法還原組織存取"
   },
   "allApplicationsWithCount": {
-    "message": "All applications ($COUNT$)",
+    "message": "全部應用程式($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -20,8 +47,11 @@
       }
     }
   },
-  "priorityApplicationsWithCount": {
-    "message": "Priority applications ($COUNT$)",
+  "createNewLoginItem": {
+    "message": "新增登入項目"
+  },
+  "criticalApplicationsWithCount": {
+    "message": "重要應用程式($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -30,7 +60,7 @@
     }
   },
   "notifiedMembersWithCount": {
-    "message": "Notified members ($COUNT$)",
+    "message": "已被通知的成員($COUNT$)",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -38,26 +68,98 @@
       }
     }
   },
+  "noAppsInOrgTitle": {
+    "message": "在$ORG NAME$中找無應用程式",
+    "placeholders": {
+      "org name": {
+        "content": "$1",
+        "example": "Company Name"
+      }
+    }
+  },
+  "noAppsInOrgDescription": {
+    "message": "在使用者儲存登入後，應用程式將會顯示在這裡，並同時顯示具有風險的密碼。標註重要應用程式並通知使用者以更新密碼。"
+  },
+  "noCriticalAppsTitle": {
+    "message": "你並未將任何應用程式標註為重要"
+  },
+  "noCriticalAppsDescription": {
+    "message": "選擇你最重要的應用程式以查找具有風險的密碼，並通知使用者以更改這些密碼。"
+  },
+  "markCriticalApps": {
+    "message": "標註重要應用程式"
+  },
+  "markAppAsCritical": {
+    "message": "標註應用程式為重要"
+  },
+  "appsMarkedAsCritical": {
+    "message": "被標註重要的應用程式"
+  },
   "application": {
     "message": "Application"
   },
   "atRiskPasswords": {
-    "message": "At-risk passwords"
+    "message": "具有風險的密碼"
+  },
+  "requestPasswordChange": {
+    "message": "Request password change"
   },
   "totalPasswords": {
-    "message": "Total passwords"
+    "message": "全部密碼"
+  },
+  "searchApps": {
+    "message": "搜尋應用程式"
   },
   "atRiskMembers": {
-    "message": "At-risk members"
+    "message": "具有風險的成員"
+  },
+  "atRiskMembersWithCount": {
+    "message": "At-risk members ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "atRiskApplicationsWithCount": {
+    "message": "具有風險的應用程式 ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "atRiskMembersDescription": {
+    "message": "These members are logging into applications with weak, exposed, or reused passwords."
+  },
+  "atRiskApplicationsDescription": {
+    "message": "These applications have weak, exposed, or reused passwords."
+  },
+  "atRiskMembersDescriptionWithApp": {
+    "message": "These members are logging into $APPNAME$ with weak, exposed, or reused passwords.",
+    "placeholders": {
+      "appname": {
+        "content": "$1",
+        "example": "Salesforce"
+      }
+    }
   },
   "totalMembers": {
     "message": "Total members"
   },
   "atRiskApplications": {
-    "message": "At-risk applications"
+    "message": "具有風險的應用程式"
   },
   "totalApplications": {
     "message": "Total applications"
+  },
+  "unmarkAsCriticalApp": {
+    "message": "Unmark as critical app"
+  },
+  "criticalApplicationSuccessfullyUnmarked": {
+    "message": "Critical application successfully unmarked"
   },
   "whatTypeOfItem": {
     "message": "這是什麼類型的項目？"
@@ -204,7 +306,7 @@
     "message": "安全碼 (CVV)"
   },
   "securityCodeSlashCVV": {
-    "message": "Security code / CVV"
+    "message": "安全碼 / CVV"
   },
   "identityName": {
     "message": "身分名稱"
@@ -405,6 +507,9 @@
   "generatePassword": {
     "message": "產生密碼"
   },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
+  },
   "checkPassword": {
     "message": "檢查密碼是否已暴露。"
   },
@@ -505,6 +610,9 @@
   "typeSecureNote": {
     "message": "安全筆記"
   },
+  "typeSshKey": {
+    "message": "SSH 金鑰"
+  },
   "typeLoginPlural": {
     "message": "登入資料"
   },
@@ -536,7 +644,7 @@
     "message": "全名"
   },
   "address": {
-    "message": "Address"
+    "message": "地址"
   },
   "address1": {
     "message": "地址 1"
@@ -653,7 +761,7 @@
     }
   },
   "copySuccessful": {
-    "message": "Copy Successful"
+    "message": "複製成功"
   },
   "copyValue": {
     "message": "複製值",
@@ -663,8 +771,12 @@
     "message": "複製密碼",
     "description": "Copy password to clipboard"
   },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
+  },
   "passwordCopied": {
-    "message": "Password copied"
+    "message": "已複製密碼"
   },
   "copyUsername": {
     "message": "複製使用者名稱",
@@ -692,28 +804,28 @@
     }
   },
   "copyWebsite": {
-    "message": "Copy website"
+    "message": "複製網站"
   },
   "copyNotes": {
-    "message": "Copy notes"
+    "message": "複製備註"
   },
   "copyAddress": {
-    "message": "Copy address"
+    "message": "複製地址"
   },
   "copyPhone": {
-    "message": "Copy phone"
+    "message": "複製電話"
   },
   "copyEmail": {
     "message": "複製電子郵件地址"
   },
   "copyCompany": {
-    "message": "Copy company"
+    "message": "複製公司名稱"
   },
   "copySSN": {
-    "message": "Copy Social Security number"
+    "message": "複製社會安全號碼"
   },
   "copyPassportNumber": {
-    "message": "Copy passport number"
+    "message": "複製護照號碼"
   },
   "copyLicenseNumber": {
     "message": "Copy license number"
@@ -920,6 +1032,9 @@
   "loginWithDeviceEnabledNote": {
     "message": "必須先在 Bitwarden 應用程式設定中開啟後，才可以使用裝置登入。要改用其他選項嗎？"
   },
+  "needAnotherOptionV1": {
+    "message": "Need another option?"
+  },
   "loginWithMasterPassword": {
     "message": "使用主密碼登入"
   },
@@ -932,8 +1047,14 @@
   "useADifferentLogInMethod": {
     "message": "改用不同的登入方式"
   },
-  "loginWithPasskey": {
-    "message": "使用密碼金鑰登入"
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
+  },
+  "welcomeBack": {
+    "message": "Welcome back"
   },
   "invalidPasskeyPleaseTryAgain": {
     "message": "無效的密碼金鑰，請再試一次。"
@@ -1016,11 +1137,14 @@
   "createAccount": {
     "message": "建立帳戶"
   },
+  "newToBitwarden": {
+    "message": "第一次使用 Bitwarden？"
+  },
   "setAStrongPassword": {
     "message": "設定一個強密碼"
   },
   "finishCreatingYourAccountBySettingAPassword": {
-    "message": "Finish creating your account by setting a password"
+    "message": "設定密碼以完成建立您的帳號。"
   },
   "newAroundHere": {
     "message": "第一次使用？"
@@ -1031,8 +1155,29 @@
   "logIn": {
     "message": "登入"
   },
+  "logInToBitwarden": {
+    "message": "登入 Bitwarden"
+  },
+  "authenticationTimeout": {
+    "message": "驗證逾時"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "此驗證工作階段已逾時。請重試登入。"
+  },
   "verifyIdentity": {
     "message": "核實你的身份"
+  },
+  "weDontRecognizeThisDevice": {
+    "message": "We don't recognize this device. Enter the code sent to your email to verify your identity."
+  },
+  "continueLoggingIn": {
+    "message": "Continue logging in"
+  },
+  "whatIsADevice": {
+    "message": "What is a device?"
+  },
+  "aDeviceIs": {
+    "message": "A device is a unique installation of the Bitwarden app where you have logged in. Reinstalling, clearing app data, or clearing your cookies could result in a device appearing multiple times."
   },
   "logInInitiated": {
     "message": "登入已發起"
@@ -1074,7 +1219,7 @@
     "message": "主密碼提示"
   },
   "masterPassHintText": {
-    "message": "If you forget your password, the password hint can be sent to your email. $CURRENT$/$MAXIMUM$ character maximum.",
+    "message": "如果您忘記了密碼，可以傳送密碼提示到您的電子信箱。$CURRENT$ / 最多 $MAXIMUM$ 個字元",
     "placeholders": {
       "current": {
         "content": "$1",
@@ -1093,10 +1238,10 @@
     "message": "Account email"
   },
   "requestHint": {
-    "message": "Request hint"
+    "message": "請求提示"
   },
   "requestPasswordHint": {
-    "message": "Request password hint"
+    "message": "請求密碼提示"
   },
   "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
     "message": "Enter your account email address and your password hint will be sent to you"
@@ -1139,10 +1284,10 @@
     "message": "帳戶已建立！現在可以登入了。"
   },
   "newAccountCreated2": {
-    "message": "Your new account has been created!"
+    "message": "您已成功建立新帳號！"
   },
   "youHaveBeenLoggedIn": {
-    "message": "You have been logged in!"
+    "message": "您已經登入！"
   },
   "trialAccountCreated": {
     "message": "帳戶建立成功。"
@@ -1160,10 +1305,10 @@
     "message": "電子郵件地址"
   },
   "yourVaultIsLockedV2": {
-    "message": "Your vault is locked"
+    "message": "您的密碼庫已被鎖定"
   },
   "yourAccountIsLocked": {
-    "message": "Your account is locked"
+    "message": "您的帳號已被鎖定。"
   },
   "uuid": {
     "message": "UUID"
@@ -1200,7 +1345,7 @@
     "message": "您沒有檢視此集合中所有項目的權限。"
   },
   "youDoNotHavePermissions": {
-    "message": "You do not have permissions to this collection"
+    "message": "您沒有存取此集合的權限"
   },
   "noCollectionsInList": {
     "message": "沒有可列出的集合。"
@@ -1225,6 +1370,12 @@
   },
   "notificationSentDevice": {
     "message": "通知已傳送至您的裝置。"
+  },
+  "aNotificationWasSentToYourDevice": {
+    "message": "已傳送通知至您的裝置"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Make sure your account is unlocked and the fingerprint phrase matches on the other device"
   },
   "versionNumber": {
     "message": "版本 $VERSION_NUMBER$",
@@ -1297,7 +1448,7 @@
     "description": "'Bitwarden Authenticator' is a product name and should not be translated."
   },
   "yubiKeyTitleV2": {
-    "message": "Yubico OTP security key"
+    "message": "YubiKey OTP 安全金鑰"
   },
   "yubiKeyDesc": {
     "message": "使用 YubiKey 存取您的帳戶。支援 YubiKey 4 系列、5 系列以及 NEO 裝置。"
@@ -1537,38 +1688,6 @@
   "specialCharacters": {
     "message": "特殊字元 (!@#$%^&*)"
   },
-  "uppercaseDescription": {
-    "message": "Include uppercase characters",
-    "description": "Tooltip for the password generator uppercase character checkbox"
-  },
-  "uppercaseLabel": {
-    "message": "A-Z",
-    "description": "Label for the password generator uppercase character checkbox"
-  },
-  "lowercaseDescription": {
-    "message": "Include lowercase characters",
-    "description": "Full description for the password generator lowercase character checkbox"
-  },
-  "lowercaseLabel": {
-    "message": "a-z",
-    "description": "Label for the password generator lowercase character checkbox"
-  },
-  "numbersDescription": {
-    "message": "Include numbers",
-    "description": "Full description for the password generator numbers checkbox"
-  },
-  "numbersLabel": {
-    "message": "0-9",
-    "description": "Label for the password generator numbers checkbox"
-  },
-  "specialCharactersDescription": {
-    "message": "Include special characters",
-    "description": "Full description for the password generator special characters checkbox"
-  },
-  "specialCharactersLabel": {
-    "message": "!@#$%^&*",
-    "description": "Label for the password generator special characters checkbox"
-  },
   "numWords": {
     "message": "單字數量"
   },
@@ -1589,8 +1708,26 @@
   "passwordHistory": {
     "message": "密碼歷史記錄"
   },
+  "generatorHistory": {
+    "message": "Generator history"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Clear generator history"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "If you continue, all entries will be permanently deleted from generator's history. Are you sure you want to continue?"
+  },
   "noPasswordsInList": {
     "message": "沒有可列出的密碼。"
+  },
+  "clearHistory": {
+    "message": "清除歷史紀錄"
+  },
+  "nothingToShow": {
+    "message": "沒有可顯示的內容"
+  },
+  "nothingGeneratedRecently": {
+    "message": "You haven't generated anything recently"
   },
   "clear": {
     "message": "清除",
@@ -1628,6 +1765,12 @@
   },
   "logBackIn": {
     "message": "請重新登入。"
+  },
+  "currentSession": {
+    "message": "目前工作階段"
+  },
+  "requestPending": {
+    "message": "Request pending"
   },
   "logBackInOthersToo": {
     "message": "請重新登入。若您還在使用其他 Bitwarden 應用程式，也請登出後再重新登入。"
@@ -1696,9 +1839,6 @@
   "dangerZone": {
     "message": "危險區域"
   },
-  "dangerZoneDesc": {
-    "message": "小心，這些動作無法復原！"
-  },
   "deauthorizeSessions": {
     "message": "取消工作階段授權"
   },
@@ -1708,8 +1848,38 @@
   "deauthorizeSessionsWarning": {
     "message": "接下來會登出目前的工作階段，並要求您重新登入。若您有設定兩步驟登入，也需重新驗證。其他裝置上的活動工作階段最多會保持一個小時。"
   },
+  "newDeviceLoginProtection": {
+    "message": "New device login"
+  },
+  "turnOffNewDeviceLoginProtection": {
+    "message": "Turn off new device login protection"
+  },
+  "turnOnNewDeviceLoginProtection": {
+    "message": "Turn on new device login protection"
+  },
+  "turnOffNewDeviceLoginProtectionModalDesc": {
+    "message": "Proceed below to turn off the verification emails bitwarden sends when you login from a new device."
+  },
+  "turnOnNewDeviceLoginProtectionModalDesc": {
+    "message": "Proceed below to have bitwarden send you verification emails when you login from a new device."
+  },
+  "turnOffNewDeviceLoginProtectionWarning": {
+    "message": "With new device login protection turned off, anyone with your master password can access your account from any device. To protect your account without verification emails, set up two-step login."
+  },
+  "accountNewDeviceLoginProtectionSaved": {
+    "message": "New device login protection changes saved"
+  },
   "sessionsDeauthorized": {
     "message": "已取消所有工作階段授權"
+  },
+  "accountIsOwnedMessage": {
+    "message": "此帳號由 $ORGANIZATIONNAME$ 擁有",
+    "placeholders": {
+      "organizationName": {
+        "content": "$1",
+        "example": "Organization"
+      }
+    }
   },
   "purgeVault": {
     "message": "清空密碼庫"
@@ -2016,19 +2186,19 @@
     "message": "輸入您的主密碼以修改兩步驟登入設定。"
   },
   "twoStepAuthenticatorInstructionPrefix": {
-    "message": "Download an authenticator app such as"
+    "message": "下載驗證應用程式，例如"
   },
   "twoStepAuthenticatorInstructionInfix1": {
-    "message": ","
+    "message": "、"
   },
   "twoStepAuthenticatorInstructionInfix2": {
-    "message": "or"
+    "message": "或"
   },
   "twoStepAuthenticatorInstructionSuffix": {
-    "message": "."
+    "message": "。"
   },
   "continueToExternalUrlTitle": {
-    "message": "Continue to $URL$?",
+    "message": "繼續前往 $URL$ 嗎？",
     "placeholders": {
       "url": {
         "content": "$1",
@@ -2037,16 +2207,16 @@
     }
   },
   "continueToExternalUrlDesc": {
-    "message": "You are leaving Bitwarden and launching an external website in a new window."
+    "message": "您將離開 Bitwarden 並在新視窗開啟外部網站。"
   },
   "twoStepContinueToBitwardenUrlTitle": {
-    "message": "Continue to bitwarden.com?"
+    "message": "繼續前往 bitwarden.com？"
   },
   "twoStepContinueToBitwardenUrlDesc": {
     "message": "Bitwarden Authenticator allows you to store authenticator keys and generate TOTP codes for 2-step verification flows. Learn more on the bitwarden.com website."
   },
   "twoStepAuthenticatorScanCodeV2": {
-    "message": "Scan the QR code below with your authenticator app or enter the key."
+    "message": "使用驗證應用程式掃描下方的 QR 碼，或輸入金鑰。"
   },
   "twoStepAuthenticatorQRCanvasError": {
     "message": "Could not load QR code. Try again or use the key below."
@@ -3168,6 +3338,12 @@
       }
     }
   },
+  "inviteSingleEmailDesc": {
+    "message": "You have 1 invite remaining."
+  },
+  "inviteZeroEmailDesc": {
+    "message": "You have 0 invites remaining."
+  },
   "userUsingTwoStep": {
     "message": "此使用者正在使用兩步驟登入保護帳戶。"
   },
@@ -3330,6 +3506,9 @@
         "example": "'Google'"
       }
     }
+  },
+  "viewAllLogInOptions": {
+    "message": "View all log in options"
   },
   "viewAllLoginOptions": {
     "message": "檢視所有登入選項"
@@ -3616,6 +3795,9 @@
       }
     }
   },
+  "unlinkedSso": {
+    "message": "Unlinked SSO."
+  },
   "unlinkedSsoUser": {
     "message": "已為使用者 $ID$ 取消連結 SSO。",
     "placeholders": {
@@ -3663,6 +3845,76 @@
   },
   "device": {
     "message": "裝置"
+  },
+  "loginStatus": {
+    "message": "Login status"
+  },
+  "firstLogin": {
+    "message": "First login"
+  },
+  "trusted": {
+    "message": "Trusted"
+  },
+  "needsApproval": {
+    "message": "Needs approval"
+  },
+  "areYouTryingtoLogin": {
+    "message": "Are you trying to log in?"
+  },
+  "logInAttemptBy": {
+    "message": "Login attempt by $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "name@example.com"
+      }
+    }
+  },
+  "deviceType": {
+    "message": "Device Type"
+  },
+  "ipAddress": {
+    "message": "IP Address"
+  },
+  "confirmLogIn": {
+    "message": "Confirm login"
+  },
+  "denyLogIn": {
+    "message": "Deny login"
+  },
+  "thisRequestIsNoLongerValid": {
+    "message": "This request is no longer valid."
+  },
+  "logInConfirmedForEmailOnDevice": {
+    "message": "Login confirmed for $EMAIL$ on $DEVICE$",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "name@example.com"
+      },
+      "device": {
+        "content": "$2",
+        "example": "iOS"
+      }
+    }
+  },
+  "youDeniedALogInAttemptFromAnotherDevice": {
+    "message": "You denied a login attempt from another device. If this really was you, try to log in with the device again."
+  },
+  "loginRequestHasAlreadyExpired": {
+    "message": "登入要求已逾期。"
+  },
+  "justNow": {
+    "message": "剛剛"
+  },
+  "requestedXMinutesAgo": {
+    "message": "Requested $MINUTES$ minutes ago",
+    "placeholders": {
+      "minutes": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
   },
   "creatingAccountOn": {
     "message": "建立帳號於"
@@ -3781,14 +4033,66 @@
   "updateBrowser": {
     "message": "更新瀏覽器"
   },
+  "generatingRiskInsights": {
+    "message": "Generating your risk insights..."
+  },
   "updateBrowserDesc": {
     "message": "未支援您使用的瀏覽器。網頁版密碼庫可能無法正常運作。"
+  },
+  "freeTrialEndPromptCount": {
+    "message": "您的免費試用將於 $COUNT$ 天後結束。",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "remaining days"
+      }
+    }
+  },
+  "freeTrialEndPromptMultipleDays": {
+    "message": "$ORGANIZATION$，您的免費試用將於 $COUNT$ 天後結束。",
+    "placeholders": {
+      "count": {
+        "content": "$2",
+        "example": "remaining days"
+      },
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndPromptTomorrow": {
+    "message": "$ORGANIZATION$，您的免費試用明天就結束了。",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndPromptTomorrowNoOrgName": {
+    "message": "您的免費試用明天就結束了。"
+  },
+  "freeTrialEndPromptToday": {
+    "message": "$ORGANIZATION$，您的免費試用今天就結束了。",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "organization name"
+      }
+    }
+  },
+  "freeTrialEndingTodayWithoutOrgName": {
+    "message": "您的免費試用今天就結束了。"
+  },
+  "clickHereToAddPaymentMethod": {
+    "message": "按一下此處來新增付款方式。"
   },
   "joinOrganization": {
     "message": "加入組織"
   },
   "joinOrganizationName": {
-    "message": "Join $ORGANIZATIONNAME$",
+    "message": "加入 $ORGANIZATIONNAME$",
     "placeholders": {
       "organizationName": {
         "content": "$1",
@@ -3848,7 +4152,7 @@
     "message": "您已要求刪除您的 Bitwarden 帳戶。請點選下方的按鈕確認。"
   },
   "deleteRecoverOrgConfirmDesc": {
-    "message": "You have requested to delete your Bitwarden organization."
+    "message": "您已要求刪除您的 Bitwarden 組織。"
   },
   "myOrganization": {
     "message": "我的組織"
@@ -4268,7 +4572,7 @@
     "message": "已選擇"
   },
   "recommended": {
-    "message": "Recommended"
+    "message": "建議"
   },
   "ownership": {
     "message": "擁有權"
@@ -4337,6 +4641,9 @@
   "dontAskFingerprintAgain": {
     "message": "不再提示驗證已邀請使用者的指紋短語（不推薦）",
     "description": "A 'fingerprint phrase' is a unique word phrase (similar to a passphrase) that a user can use to authenticate their public key with another user, for the purposes of sharing."
+  },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "You will be notified once the request is approved"
   },
   "free": {
     "message": "免費",
@@ -4568,6 +4875,12 @@
   "ssoLogInWithOrgIdentifier": {
     "message": "若要使用組織的單一登入入口登入。請先輸入您的組織識別碼。"
   },
+  "singleSignOnEnterOrgIdentifier": {
+    "message": "Enter your organization's SSO identifier to begin"
+  },
+  "singleSignOnEnterOrgIdentifierText": {
+    "message": "To log in with your SSO provider, enter your organization's SSO identifier to begin. You may need to enter this SSO identifier when you log in from a new device."
+  },
   "enterpriseSingleSignOn": {
     "message": "企業單一登入"
   },
@@ -4578,10 +4891,10 @@
     "message": "你已成功登入"
   },
   "thisWindowWillCloseIn5Seconds": {
-    "message": "This window will automatically close in 5 seconds"
+    "message": "此視窗將在 5 秒後自動關閉。"
   },
   "youMayCloseThisWindow": {
-    "message": "You may close this window"
+    "message": "您可以關閉此視窗"
   },
   "includeAllTeamsFeatures": {
     "message": "包含所有團隊版功能"
@@ -4635,11 +4948,17 @@
   "singleOrgDesc": {
     "message": "限制成員加入其他組織。"
   },
+  "singleOrgPolicyDesc": {
+    "message": "Restrict members from joining other organizations. This policy is required for organizations that have enabled domain verification."
+  },
   "singleOrgBlockCreateMessage": {
     "message": "您目前的組織原則不允許您加入多個組織。請聯絡您的組織管理員或從其他 Bitwarden 帳戶註冊。"
   },
   "singleOrgPolicyWarning": {
     "message": "不是擁有者或管理員並且已經是其他組織的成員的組織成員將從您的組織中移除。"
+  },
+  "singleOrgPolicyMemberWarning": {
+    "message": "Non-compliant members will be placed in revoked status until they leave all other organizations. Administrators are exempt and can restore members once compliance is met."
   },
   "requireSso": {
     "message": "要求單一登入驗證"
@@ -4740,7 +5059,7 @@
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "copyLink": {
-    "message": "Copy link"
+    "message": "複製連結"
   },
   "copySendLink": {
     "message": "複製 Send 連結",
@@ -5167,19 +5486,19 @@
     "message": "Protect secrets with end-to-end encryption. No more hard coding secrets or sharing through .env files."
   },
   "enhanceDeveloperProductivity": {
-    "message": "Enhance developer productivity."
+    "message": "提升開發者生產力。"
   },
   "enhanceDeveloperProductivityDescription": {
     "message": "Programmatically retrieve and deploy secrets at runtime so developers can focus on what matters most, like improving code quality."
   },
   "strengthenBusinessSecurity": {
-    "message": "Strengthen business security."
+    "message": "強化企業安全。"
   },
   "strengthenBusinessSecurityDescription": {
     "message": "Maintain tight control over machine and human access to secrets with SSO integrations, event logs, and access rotation."
   },
   "tryItNow": {
-    "message": "Try it now"
+    "message": "立即體驗"
   },
   "sendRequest": {
     "message": "Send request"
@@ -5191,7 +5510,7 @@
     "message": "Bitwarden Secrets Manager"
   },
   "moreProductsFromBitwarden": {
-    "message": "More products from Bitwarden"
+    "message": "更多來自 Bitwarden 的產品"
   },
   "requestAccessToSecretsManager": {
     "message": "Request access to Secrets Manager"
@@ -5466,6 +5785,12 @@
   "bulkFilteredMessage": {
     "message": "已排除，不適用於此動作"
   },
+  "nonCompliantMembersTitle": {
+    "message": "Non-compliant members"
+  },
+  "nonCompliantMembersError": {
+    "message": "Members that are non-compliant with the Single organization or Two-step login policy cannot be restored until they adhere to the policy requirements"
+  },
   "fingerprint": {
     "message": "指紋"
   },
@@ -5480,6 +5805,20 @@
   },
   "error": {
     "message": "錯誤"
+  },
+  "decryptionError": {
+    "message": "Decryption error"
+  },
+  "couldNotDecryptVaultItemsBelow": {
+    "message": "Bitwarden could not decrypt the vault item(s) listed below."
+  },
+  "contactCSToAvoidDataLossPart1": {
+    "message": "Contact customer success",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
+  },
+  "contactCSToAvoidDataLossPart2": {
+    "message": "to avoid additional data loss.",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
   },
   "accountRecoveryManageUsers": {
     "message": "管理使用者也必須被授予管理帳戶復原的權限"
@@ -5973,9 +6312,6 @@
   "emailSent": {
     "message": "郵件已寄出"
   },
-  "revokeSponsorshipConfirmation": {
-    "message": "移除此帳戶後，家庭方案贊助將在計費周期結束前逾期。在現有的贊助逾期前您將不能兌換新的贊助邀請。您確定要繼續嗎？"
-  },
   "removeSponsorshipSuccess": {
     "message": "已移除贊助"
   },
@@ -6265,6 +6601,9 @@
   "idpSingleSignOnServiceUrlRequired": {
     "message": "若 Entity ID 非 URL，則必須填入。"
   },
+  "offerNoLongerValid": {
+    "message": "This offer is no longer valid. Contact your organization administrators for more information."
+  },
   "openIdOptionalCustomizations": {
     "message": "自訂（選填）"
   },
@@ -6354,6 +6693,43 @@
   "generateUsername": {
     "message": "產生使用者名稱"
   },
+  "generateEmail": {
+    "message": "Generate email"
+  },
+  "spinboxBoundariesHint": {
+    "message": "值必須介於 $MIN$ 及 $MAX$。",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Use $RECOMMENDED$ characters or more to generate a strong password.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Use $RECOMMENDED$ words or more to generate a strong passphrase.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
   "usernameType": {
     "message": "使用者名稱類型"
   },
@@ -6370,6 +6746,9 @@
   "catchallEmailDesc": {
     "message": "使用您的網域設定的 Catch-all 收件匣。"
   },
+  "useThisEmail": {
+    "message": "Use this email"
+  },
   "random": {
     "message": "隨機",
     "description": "Generates domain-based username using random letters"
@@ -6381,10 +6760,10 @@
     "message": "Username generator"
   },
   "useThisPassword": {
-    "message": "Use this password"
+    "message": "使用此密碼"
   },
   "useThisUsername": {
-    "message": "Use this username"
+    "message": "使用此使用者名稱"
   },
   "securePasswordGenerated": {
     "message": "Secure password generated! Don't forget to also update your password on the website."
@@ -6458,6 +6837,14 @@
   },
   "forwardedEmailDesc": {
     "message": "使用外部轉寄服務產生一個電子郵件別名。"
+  },
+  "forwarderDomainName": {
+    "message": "電子信箱網域",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ 錯誤：$ERRORMESSAGE$",
@@ -6600,6 +6987,10 @@
     "message": "透過 SCIM 佈建，使用您首選的身分提供程式自動佈建使用者和群組",
     "description": "the text, 'SCIM', is an acronym and should not be translated."
   },
+  "scimIntegrationDescription": {
+    "message": "Automatically provision users and groups with your preferred identity provider via SCIM provisioning. Find supported integrations",
+    "description": "the text, 'SCIM', is an acronym and should not be translated."
+  },
   "scimEnabledCheckboxDesc": {
     "message": "啟用 SCIM",
     "description": "the text, 'SCIM', is an acronym and should not be translated."
@@ -6734,7 +7125,7 @@
     "message": "Error connecting with the Duo service. Use a different two-step login method or contact Duo for assistance."
   },
   "launchDuoAndFollowStepsToFinishLoggingIn": {
-    "message": "Launch Duo and follow the steps to finish logging in."
+    "message": "啟動 Duo 並依照步驟完成登入。"
   },
   "duoRequiredByOrgForAccount": {
     "message": "Duo two-step login is required for your account."
@@ -7591,13 +7982,13 @@
     "message": "或"
   },
   "unlockWithBiometrics": {
-    "message": "Unlock with biometrics"
+    "message": "使用生物辨識解鎖"
   },
   "unlockWithPin": {
-    "message": "Unlock with PIN"
+    "message": "使用 PIN 碼解鎖"
   },
   "unlockWithMasterPassword": {
-    "message": "Unlock with master password"
+    "message": "使用主密碼解鎖"
   },
   "licenseAndBillingManagement": {
     "message": "授權和計費管理"
@@ -7877,8 +8268,17 @@
   "loginInitiated": {
     "message": "登入已啟動"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Remember this device to make future logins seamless"
+  },
   "deviceApprovalRequired": {
     "message": "裝置需要取得核准。請在下面選擇一個核准選項："
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Device approval required"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Select an approval option below"
   },
   "rememberThisDevice": {
     "message": "記住這個裝置"
@@ -7901,33 +8301,33 @@
   "trustedDevices": {
     "message": "可信任的裝置"
   },
-  "memberDecryptionOptionTdeDescriptionPartOne": {
-    "message": "通過驗證以後，成員將使用儲存在裝置的金鑰來解密密碼庫資料。使用此選項後，",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO Required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescPart1": {
+    "message": "Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
-  "memberDecryptionOptionTdeDescriptionLinkOne": {
-    "message": "單一組織",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescLink1": {
+    "message": "single organization",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
-  "memberDecryptionOptionTdeDescriptionPartTwo": {
-    "message": "原則，",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescPart2": {
+    "message": "policy,",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
-  "memberDecryptionOptionTdeDescriptionLinkTwo": {
-    "message": "要求 SSO",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescLink2": {
+    "message": "SSO required",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
-  "memberDecryptionOptionTdeDescriptionPartThree": {
-    "message": "原則以及具有自動注冊的",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescPart3": {
+    "message": "policy, and",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
-  "memberDecryptionOptionTdeDescriptionLinkThree": {
-    "message": "帳戶復原管理",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescLink3": {
+    "message": "account recovery administration",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
-  "memberDecryptionOptionTdeDescriptionPartFour": {
-    "message": "原則將被開啓。",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescPart4": {
+    "message": "policy will turn on when this option is used.",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Members will not need a master password when logging in with SSO. Master password is replaced with an encryption key stored on the device, making that device trusted. The first device a member creates their account and logs into will be trusted. New devices will need to be approved by an existing trusted device or by an administrator. The single organization policy, SSO required policy, and account recovery administration policy will turn on when this option is used.'"
   },
   "orgPermissionsUpdatedMustSetPassword": {
     "message": "您的組織權限已更新，因此您需要設定主密碼。",
@@ -8003,6 +8403,18 @@
   },
   "approveRequest": {
     "message": "核准要求"
+  },
+  "deviceApproved": {
+    "message": "Device approved"
+  },
+  "deviceRemoved": {
+    "message": "Device removed"
+  },
+  "removeDevice": {
+    "message": "Remove device"
+  },
+  "removeDeviceConfirmation": {
+    "message": "Are you sure you want to remove this device?"
   },
   "noDeviceRequests": {
     "message": "沒有裝置要求"
@@ -8109,6 +8521,9 @@
   "userEmailMissing": {
     "message": "缺少使用者電子郵件地址"
   },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Active user email not found. Logging you out."
+  },
   "deviceTrusted": {
     "message": "裝置已信任"
   },
@@ -8204,14 +8619,14 @@
   "collectionManagementDesc": {
     "message": "管理組織分類的行為"
   },
-  "limitCollectionCreationDeletionDesc": {
-    "message": "對擁有者和管理員限制集合的建立和刪除"
-  },
   "limitCollectionCreationDesc": {
     "message": "Limit collection creation to owners and admins"
   },
   "limitCollectionDeletionDesc": {
     "message": "Limit collection deletion to owners and admins"
+  },
+  "limitItemDeletionDesc": {
+    "message": "Limit item deletion to members with the Can manage permission"
   },
   "allowAdminAccessToAllCollectionItemsDesc": {
     "message": "擁有人與管理員可以管理所有分類與項目"
@@ -8257,6 +8672,10 @@
   },
   "baseUrl": {
     "message": "伺服器網址"
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "aliasDomain": {
     "message": "別名網域"
@@ -8356,7 +8775,7 @@
   },
   "addAPaymentMethod": {
     "message": "新增付款方式",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'To maintain your subscription for $ORG$, add a payment method'"
   },
   "organizationInformation": {
     "message": "組織資訊"
@@ -8464,10 +8883,10 @@
     }
   },
   "addField": {
-    "message": "Add field"
+    "message": "新增欄位"
   },
   "editField": {
-    "message": "Edit field"
+    "message": "編輯欄位"
   },
   "items": {
     "message": "項目"
@@ -8781,44 +9200,99 @@
   "sdksDesc": {
     "message": "使用 Bitwarden 機密管理軟體開發工具包於下列程式語言來建立你自己的應用程式。"
   },
-  "setUpGithubActions": {
-    "message": "設定 GitHub Actions"
+  "ssoDescStart": {
+    "message": "Configure",
+    "description": "This represents the beginning of a sentence, broken up to include links. The full sentence will be 'Configure single sign-on for Bitwarden using the implementation guide for your Identity Provider."
   },
-  "setUpKubernetes": {
-    "message": "設定 Kubernetes"
+  "ssoDescEnd": {
+    "message": "for Bitwarden using the implementation guide for your Identity Provider.",
+    "description": "This represents the end of a sentence, broken up to include links. The full sentence will be 'Configure single sign-on for Bitwarden using the implementation guide for your Identity Provider."
   },
-  "setUpGitlabCICD": {
-    "message": "設定 GitLab CI/CD"
+  "userProvisioning": {
+    "message": "User provisioning"
   },
-  "setUpAnsible": {
-    "message": "設定 Ansible"
+  "scimIntegration": {
+    "message": "SCIM"
   },
-  "rustSDKRepo": {
-    "message": "檢視 Rust 儲存庫"
+  "scimIntegrationDescStart": {
+    "message": "Configure ",
+    "description": "This represents the beginning of a sentence, broken up to include links. The full sentence will be 'Configure SCIM (System for Cross-domain Identity Management) to automatically provision users and groups to Bitwarden using the implementation guide for your Identity Provider"
   },
-  "cSharpSDKRepo": {
-    "message": "檢視 C# 儲存庫"
+  "scimIntegrationDescEnd": {
+    "message": "(System for Cross-domain Identity Management) to automatically provision users and groups to Bitwarden using the implementation guide for your Identity Provider.",
+    "description": "This represents the end of a sentence, broken up to include links. The full sentence will be 'Configure SCIM (System for Cross-domain Identity Management) to automatically provision users and groups to Bitwarden using the implementation guide for your Identity Provider"
   },
-  "cPlusPlusSDKRepo": {
-    "message": "檢視 C++ 儲存庫"
+  "bwdc": {
+    "message": "Bitwarden Directory Connector"
   },
-  "jsWebAssemblySDKRepo": {
-    "message": "檢視 JS WebAssembly 儲存庫"
+  "bwdcDesc": {
+    "message": "Configure Bitwarden Directory Connector to automatically provision users and groups using the implementation guide for your Identity Provider."
   },
-  "javaSDKRepo": {
-    "message": "檢視 Java 儲存庫"
+  "eventManagement": {
+    "message": "Event management"
   },
-  "pythonSDKRepo": {
-    "message": "檢視 Python 儲存庫"
+  "eventManagementDesc": {
+    "message": "Integrate Bitwarden event logs with your SIEM (system information and event management) system by using the implementation guide for your platform."
   },
-  "phpSDKRepo": {
-    "message": "檢視 PHP 儲存庫"
+  "deviceManagement": {
+    "message": "Device management"
   },
-  "rubySDKRepo": {
-    "message": "檢視 Ruby 儲存庫"
+  "deviceManagementDesc": {
+    "message": "Configure device management for Bitwarden using the implementation guide for your platform."
   },
-  "goSDKRepo": {
-    "message": "檢視 Go 儲存庫"
+  "integrationCardTooltip": {
+    "message": "Launch $INTEGRATION$ implementation guide.",
+    "placeholders": {
+      "integration": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "smIntegrationTooltip": {
+    "message": "設定 $INTEGRATION$。",
+    "placeholders": {
+      "integration": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "smSdkTooltip": {
+    "message": "檢視 $SDK$ 儲存庫",
+    "placeholders": {
+      "sdk": {
+        "content": "$1",
+        "example": "Rust"
+      }
+    }
+  },
+  "integrationCardAriaLabel": {
+    "message": "open $INTEGRATION$ implementation guide in a new tab.",
+    "placeholders": {
+      "integration": {
+        "content": "$1",
+        "example": "google"
+      }
+    }
+  },
+  "smSdkAriaLabel": {
+    "message": "在新分頁中檢視 $SDK$ 儲存庫。",
+    "placeholders": {
+      "sdk": {
+        "content": "$1",
+        "example": "rust"
+      }
+    }
+  },
+  "smIntegrationCardAriaLabel": {
+    "message": "set up $INTEGRATION$ implementation guide in a new tab.",
+    "placeholders": {
+      "integration": {
+        "content": "$1",
+        "example": "google"
+      }
+    }
   },
   "createNewClientToManageAsProvider": {
     "message": "Create a new client organization to manage as a Provider. Additional seats will be reflected in the next billing cycle."
@@ -8831,6 +9305,9 @@
   },
   "monthPerMember": {
     "message": "month per member"
+  },
+  "monthPerMemberBilledAnnually": {
+    "message": "month per member billed annually"
   },
   "seats": {
     "message": "席位"
@@ -8860,13 +9337,13 @@
     "message": "從提供者入口網站管理計費"
   },
   "continueSettingUpFreeTrial": {
-    "message": "Continue setting up your free trial of Bitwarden"
+    "message": "繼續設定您的 Bitwarden 免費試用"
   },
   "continueSettingUpFreeTrialPasswordManager": {
-    "message": "Continue setting up your free trial of Bitwarden Password Manager"
+    "message": "繼續設定您的 Bitwarden 密碼管理器免費試用"
   },
   "continueSettingUpFreeTrialSecretsManager": {
-    "message": "Continue setting up your free trial of Bitwarden Secrets Manager"
+    "message": "繼續設定您的 Bitwarden 機密管理免費試用"
   },
   "enterTeamsOrgInfo": {
     "message": "Enter your Teams organization information"
@@ -8929,6 +9406,12 @@
   "providerPlan": {
     "message": "代管服務供應商"
   },
+  "managedServiceProvider": {
+    "message": "Managed service provider"
+  },
+  "multiOrganizationEnterprise": {
+    "message": "Multi-organization enterprise"
+  },
   "orgSeats": {
     "message": "組織席位"
   },
@@ -8973,6 +9456,18 @@
   },
   "updatedTaxInformation": {
     "message": "已更新稅務資訊"
+  },
+  "billingInvalidTaxIdError": {
+    "message": "Invalid tax ID, if you believe this is an error please contact support."
+  },
+  "billingTaxIdTypeInferenceError": {
+    "message": "We were unable to validate your tax ID, if you believe this is an error please contact support."
+  },
+  "billingPreviewInvalidTaxIdError": {
+    "message": "Invalid tax ID, if you believe this is an error please contact support."
+  },
+  "billingPreviewInvoiceError": {
+    "message": "An error occurred while previewing the invoice. Please try again later."
   },
   "unverified": {
     "message": "未驗證"
@@ -9102,7 +9597,7 @@
     "message": "Client details"
   },
   "downloadCSV": {
-    "message": "Download CSV"
+    "message": "下載 CSV"
   },
   "monthlySubscriptionUserSeatsMessage": {
     "message": "Adjustments to your subscription will result in prorated charges to your billing totals on your next billing period. "
@@ -9133,10 +9628,10 @@
     "message": "After making updates in the Bitwarden cloud server, upload your license file to apply the most recent changes."
   },
   "addToFolder": {
-    "message": "Add to folder"
+    "message": "新增到資料夾"
   },
   "selectFolder": {
-    "message": "Select folder"
+    "message": "選擇資料夾"
   },
   "personalItemTransferWarningSingular": {
     "message": "1 item will be permanently transferred to the selected organization. You will no longer own this item."
@@ -9233,10 +9728,10 @@
     "message": "Learn more about member roles and permissions"
   },
   "whatIsACvvNumber": {
-    "message": "What is a CVV number?"
+    "message": "CVV 號碼是什麼？"
   },
   "learnMoreAboutApi": {
-    "message": "Learn more about Bitwarden's API"
+    "message": "瞭解更多關於 Bitwarden API 的資訊"
   },
   "fileSends": {
     "message": "File Sends"
@@ -9331,6 +9826,39 @@
   "additionalStorageGbMessage": {
     "message": "GB additional storage"
   },
+  "sshKeyAlgorithm": {
+    "message": "Key algorithm"
+  },
+  "sshPrivateKey": {
+    "message": "Private key"
+  },
+  "sshPublicKey": {
+    "message": "Public key"
+  },
+  "sshFingerprint": {
+    "message": "Fingerprint"
+  },
+  "sshKeyFingerprint": {
+    "message": "Fingerprint"
+  },
+  "sshKeyPrivateKey": {
+    "message": "私密金鑰"
+  },
+  "sshKeyPublicKey": {
+    "message": "公開金鑰"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
   "premiumAccounts": {
     "message": "6 premium accounts"
   },
@@ -9413,13 +9941,345 @@
   "linkedLabelHelpText": {
     "message": "Enter the the field's html id, name, aria-label, or placeholder."
   },
+  "uppercaseDescription": {
+    "message": "包含大寫字元",
+    "description": "Tooltip for the password generator uppercase character checkbox"
+  },
+  "uppercaseLabel": {
+    "message": "A-Z",
+    "description": "Label for the password generator uppercase character checkbox"
+  },
+  "lowercaseDescription": {
+    "message": "包含小寫字元",
+    "description": "Full description for the password generator lowercase character checkbox"
+  },
+  "lowercaseLabel": {
+    "message": "a-z",
+    "description": "Label for the password generator lowercase character checkbox"
+  },
+  "numbersDescription": {
+    "message": "包含數字",
+    "description": "Full description for the password generator numbers checkbox"
+  },
+  "numbersLabel": {
+    "message": "0-9",
+    "description": "Label for the password generator numbers checkbox"
+  },
+  "specialCharactersDescription": {
+    "message": "包含特殊字元",
+    "description": "Full description for the password generator special characters checkbox"
+  },
+  "specialCharactersLabel": {
+    "message": "!@#$%^&*",
+    "description": "Label for the password generator special characters checkbox"
+  },
   "addAttachment": {
-    "message": "Add attachment"
+    "message": "新增附件"
   },
   "maxFileSizeSansPunctuation": {
-    "message": "Maximum file size is 500 MB"
+    "message": "最大檔案大小為 500MB"
   },
   "permanentlyDeleteAttachmentConfirmation": {
     "message": "Are you sure you want to permanently delete this attachment?"
+  },
+  "manageSubscriptionFromThe": {
+    "message": "Manage subscription from the",
+    "description": "This represents the beginning of a sentence. The full sentence will be 'Manage subscription from the Provider Portal', but 'Provider Portal' will be a link and thus cannot be included in the translation file."
+  },
+  "toHostBitwardenOnYourOwnServer": {
+    "message": "To host Bitwarden on your own server, you will need to upload your license file. To support Free Families plans and advanced billing capabilities for your self-hosted organization, you will need to set up automatic sync in your self-hosted organization."
+  },
+  "selfHostingTitleProper": {
+    "message": "Self-Hosting"
+  },
+  "claim-domain-single-org-warning": {
+    "message": "Claiming a domain will turn on the single organization policy."
+  },
+  "single-org-revoked-user-warning": {
+    "message": "Non-compliant members will be revoked. Administrators can restore members once they leave all other organizations."
+  },
+  "deleteOrganizationUser": {
+    "message": "刪除 $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      },
+      "description": "Title for the delete organization user dialog"
+    }
+  },
+  "deleteOrganizationUserWarningDesc": {
+    "message": "This will permanently delete all items owned by $NAME$. Collection items are not impacted.",
+    "description": "Warning description for the delete organization user dialog",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      }
+    }
+  },
+  "deleteManyOrganizationUsersWarningDesc": {
+    "message": "This will permanently delete all items owned by the following members. Collection items are not impacted.",
+    "description": "Warning description for the bulk delete organization users dialog"
+  },
+  "organizationUserDeleted": {
+    "message": "已刪除 $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      }
+    }
+  },
+  "organizationUserDeletedDesc": {
+    "message": "The user was removed from the organization and all associated user data has been deleted."
+  },
+  "deletedUserId": {
+    "message": "Deleted user $ID$ - an owner / admin deleted the user account",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "userLeftOrganization": {
+    "message": "User $ID$ left organization",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "suspendedOrganizationTitle": {
+    "message": "The $ORGANIZATION$ is suspended",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "Acme c"
+      }
+    }
+  },
+  "suspendedUserOrgMessage": {
+    "message": "Contact your organization owner for assistance."
+  },
+  "suspendedOwnerOrgMessage": {
+    "message": "To regain access to your organization, add a payment method."
+  },
+  "deleteMembers": {
+    "message": "Delete members"
+  },
+  "noSelectedMembersApplicable": {
+    "message": "This action is not applicable to any of the selected members."
+  },
+  "deletedSuccessfully": {
+    "message": "刪除成功"
+  },
+  "freeFamiliesSponsorship": {
+    "message": "Remove Free Bitwarden Families sponsorship"
+  },
+  "freeFamiliesSponsorshipPolicyDesc": {
+    "message": "Do not allow members to redeem a Families plan through this organization."
+  },
+  "verifyBankAccountWithStatementDescriptorWarning": {
+    "message": "Payment with a bank account is only available to customers in the United States. You will be required to verify your bank account. We will make a micro-deposit within the next 1-2 business days. Enter the statement descriptor code from this deposit on the organization's billing page to verify the bank account. Failure to verify the bank account will result in a missed payment and your subscription being suspended."
+  },
+  "verifyBankAccountWithStatementDescriptorInstructions": {
+    "message": "We have made a micro-deposit to your bank account (this may take 1-2 business days). Enter the six-digit code starting with 'SM' found on the deposit description. Failure to verify the bank account will result in a missed payment and your subscription being suspended."
+  },
+  "descriptorCode": {
+    "message": "Descriptor code"
+  },
+  "importantNotice": {
+    "message": "Important notice"
+  },
+  "setupTwoStepLogin": {
+    "message": "Set up two-step login"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Bitwarden will send a code to your account email to verify logins from new devices starting in February 2025."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "You can set up two-step login as an alternative way to protect your account or change your email to one you can access."
+  },
+  "remindMeLater": {
+    "message": "稍後再提醒我"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Do you have reliable access to your email, $EMAIL$?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "No, I do not"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Yes, I can reliably access my email"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "啟動兩階段登入"
+  },
+  "changeAcctEmail": {
+    "message": "更改帳號電子郵件位址"
+  },
+  "removeMembers": {
+    "message": "Remove members"
+  },
+  "devices": {
+    "message": "Devices"
+  },
+  "deviceListDescription": {
+    "message": "Your account was logged in to each of the devices below. If you do not recognize a device, remove it now."
+  },
+  "deviceListDescriptionTemp": {
+    "message": "Your account was logged in to each of the devices below."
+  },
+  "claimedDomains": {
+    "message": "Claimed domains"
+  },
+  "claimDomain": {
+    "message": "Claim domain"
+  },
+  "reclaimDomain": {
+    "message": "Reclaim domain"
+  },
+  "claimDomainNameInputHint": {
+    "message": "Example: mydomain.com. Subdomains require separate entries to be claimed."
+  },
+  "automaticClaimedDomains": {
+    "message": "Automatic Claimed Domains"
+  },
+  "automaticDomainClaimProcess": {
+    "message": "Bitwarden will attempt to claim the domain 3 times during the first 72 hours. If the domain can’t be claimed, check the DNS record in your host and manually claim. The domain will be removed from your organization in 7 days if it is not claimed."
+  },
+  "domainNotClaimed": {
+    "message": "$DOMAIN$ not claimed. Check your DNS records.",
+    "placeholders": {
+      "DOMAIN": {
+        "content": "$1",
+        "example": "bitwarden.com"
+      }
+    }
+  },
+  "domainStatusClaimed": {
+    "message": "Claimed"
+  },
+  "domainStatusUnderVerification": {
+    "message": "Under verification"
+  },
+  "claimedDomainsDesc": {
+    "message": "Claim a domain to own all member accounts whose email address matches the domain. Members will be able to skip the SSO identifier when logging in. Administrators will also be able to delete member accounts."
+  },
+  "invalidDomainNameClaimMessage": {
+    "message": "Input is not a valid format. Format: mydomain.com. Subdomains require separate entries to be claimed."
+  },
+  "domainClaimedEvent": {
+    "message": "$DOMAIN$ claimed",
+    "placeholders": {
+      "DOMAIN": {
+        "content": "$1",
+        "example": "bitwarden.com"
+      }
+    }
+  },
+  "domainNotClaimedEvent": {
+    "message": "$DOMAIN$ not claimed",
+    "placeholders": {
+      "DOMAIN": {
+        "content": "$1",
+        "example": "bitwarden.com"
+      }
+    }
+  },
+  "updatedRevokeSponsorshipConfirmationForSentSponsorship": {
+    "message": "If you remove $EMAIL$, the sponsorship for this Family plan cannot be redeemed. Are you sure you want to continue?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "sponsored@organization.com"
+      }
+    }
+  },
+  "updatedRevokeSponsorshipConfirmationForAcceptedSponsorship": {
+    "message": "If you remove $EMAIL$, the sponsorship for this Family plan will end and the saved payment method will be charged $40 + applicable tax on $DATE$. You will not be able to redeem a new sponsorship until $DATE$. Are you sure you want to continue?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "sponsored@organization.com"
+      },
+      "date": {
+        "content": "$2",
+        "example": "12/10/2024"
+      }
+    }
+  },
+  "domainClaimed": {
+    "message": "Domain claimed"
+  },
+  "organizationNameMaxLength": {
+    "message": "Organization name cannot exceed 50 characters."
+  },
+  "resellerRenewalWarningMsg": {
+    "message": "Your subscription will renew soon. To ensure uninterrupted service, contact $RESELLER$ to confirm your renewal before $RENEWAL_DATE$.",
+    "placeholders": {
+      "reseller": {
+        "content": "$1",
+        "example": "Reseller Name"
+      },
+      "renewal_date": {
+        "content": "$2",
+        "example": "01/01/2024"
+      }
+    }
+  },
+  "resellerOpenInvoiceWarningMgs": {
+    "message": "An invoice for your subscription was issued on $ISSUED_DATE$. To ensure uninterrupted service, contact $RESELLER$ to confirm your renewal before $DUE_DATE$.",
+    "placeholders": {
+      "reseller": {
+        "content": "$1",
+        "example": "Reseller Name"
+      },
+      "issued_date": {
+        "content": "$2",
+        "example": "01/01/2024"
+      },
+      "due_date": {
+        "content": "$3",
+        "example": "01/15/2024"
+      }
+    }
+  },
+  "resellerPastDueWarningMsg": {
+    "message": "The invoice for your subscription has not been paid. To ensure uninterrupted service, contact $RESELLER$ to confirm your renewal before $GRACE_PERIOD_END$.",
+    "placeholders": {
+      "reseller": {
+        "content": "$1",
+        "example": "Reseller Name"
+      },
+      "grace_period_end": {
+        "content": "$2",
+        "example": "02/14/2024"
+      }
+    }
+  },
+  "restartOrganizationSubscription": {
+    "message": "Organization subscription restarted"
+  },
+  "restartSubscription": {
+    "message": "Restart your subscription"
+  },
+  "suspendedManagedOrgMessage": {
+    "message": "聯繫 $PROVIDER$ 以取得協助。",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Acme c"
+      }
+    }
   }
 }

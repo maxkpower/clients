@@ -26,6 +26,9 @@
   "typeSecureNote": {
     "message": "Ghi chú bảo mật"
   },
+  "typeSshKey": {
+    "message": "SSH key"
+  },
   "folders": {
     "message": "Thư mục"
   },
@@ -59,6 +62,9 @@
         "example": "Company Name"
       }
     }
+  },
+  "welcomeBack": {
+    "message": "Welcome back"
   },
   "moveToOrgDesc": {
     "message": "Chọn một tổ chức mà bạn muốn chuyển mục này đến. Việc chuyển đến một tổ chức sẽ chuyển quyền sở hữu mục này cho tổ chức đó. Bạn sẽ không còn là chủ sở hữu trực tiếp của mục này khi đã chuyển."
@@ -174,6 +180,63 @@
   "address": {
     "message": "Địa chỉ"
   },
+  "sshPrivateKey": {
+    "message": "Private key"
+  },
+  "sshPublicKey": {
+    "message": "Public key"
+  },
+  "sshFingerprint": {
+    "message": "Fingerprint"
+  },
+  "sshKeyAlgorithm": {
+    "message": "Key type"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
+  "sshKeyGenerated": {
+    "message": "A new SSH key was generated"
+  },
+  "sshKeyWrongPassword": {
+    "message": "The password you entered is incorrect."
+  },
+  "importSshKey": {
+    "message": "Import"
+  },
+  "confirmSshKeyPassword": {
+    "message": "Confirm password"
+  },
+  "enterSshKeyPasswordDesc": {
+    "message": "Enter the password for the SSH key."
+  },
+  "enterSshKeyPassword": {
+    "message": "Enter password"
+  },
+  "sshAgentUnlockRequired": {
+    "message": "Please unlock your vault to approve the SSH key request."
+  },
+  "sshAgentUnlockTimeout": {
+    "message": "SSH key request timed out."
+  },
+  "enableSshAgent": {
+    "message": "Enable SSH agent"
+  },
+  "enableSshAgentDesc": {
+    "message": "Enable the SSH agent to sign SSH requests right from your Bitwarden vault."
+  },
+  "enableSshAgentHelp": {
+    "message": "The SSH agent is a service targeted at developers that allows you to sign SSH requests directly from your Bitwarden vault."
+  },
   "premiumRequired": {
     "message": "Cần có tài khoản cao cấp"
   },
@@ -185,6 +248,20 @@
   },
   "error": {
     "message": "Lỗi"
+  },
+  "decryptionError": {
+    "message": "Decryption error"
+  },
+  "couldNotDecryptVaultItemsBelow": {
+    "message": "Bitwarden could not decrypt the vault item(s) listed below."
+  },
+  "contactCSToAvoidDataLossPart1": {
+    "message": "Contact customer success",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
+  },
+  "contactCSToAvoidDataLossPart2": {
+    "message": "to avoid additional data loss.",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
   },
   "january": {
     "message": "Tháng 1"
@@ -258,6 +335,9 @@
   },
   "generatePassword": {
     "message": "Tạo mật khẩu"
+  },
+  "generatePassphrase": {
+    "message": "Generate passphrase"
   },
   "type": {
     "message": "Loại"
@@ -393,6 +473,16 @@
   },
   "copyPassword": {
     "message": "Sao chép Mật khẩu"
+  },
+  "regenerateSshKey": {
+    "message": "Regenerate SSH key"
+  },
+  "copySshPrivateKey": {
+    "message": "Copy SSH private key"
+  },
+  "copyPassphrase": {
+    "message": "Copy passphrase",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
     "message": "Sao chép URI"
@@ -547,6 +637,9 @@
   "createAccount": {
     "message": "Tạo tài khoản"
   },
+  "newToBitwarden": {
+    "message": "New to Bitwarden?"
+  },
   "setAStrongPassword": {
     "message": "Đặt mật khẩu mạnh"
   },
@@ -555,6 +648,18 @@
   },
   "logIn": {
     "message": "Đăng Nhập"
+  },
+  "logInToBitwarden": {
+    "message": "Log in to Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "loginWithDevice": {
+    "message": "Log in with device"
+  },
+  "useSingleSignOn": {
+    "message": "Use single sign-on"
   },
   "submit": {
     "message": "Gửi"
@@ -780,6 +885,15 @@
     "message": "Xác minh với Duo Security cho tổ chức của bạn sử dụng ứng dụng Duo Mobile, SMS, cuộc gọi điện thoại, hoặc khoá bảo mật U2F.",
     "description": "'Duo Security' and 'Duo Mobile' are product names and should not be translated."
   },
+  "verifyIdentity": {
+    "message": "Verify your Identity"
+  },
+  "weDontRecognizeThisDevice": {
+    "message": "We don't recognize this device. Enter the code sent to your email to verify your identity."
+  },
+  "continueLoggingIn": {
+    "message": "Continue logging in"
+  },
   "webAuthnTitle": {
     "message": "FIDO2 WebAuthn"
   },
@@ -827,6 +941,16 @@
   },
   "baseUrl": {
     "message": "Địa chỉ máy chủ"
+  },
+  "authenticationTimeout": {
+    "message": "Authentication timeout"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "The authentication session timed out. Please restart the login process."
+  },
+  "selfHostBaseUrl": {
+    "message": "Self-host server URL",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "Địa chỉ API máy chủ"
@@ -1218,6 +1342,9 @@
     "message": "Chép số",
     "description": "Copy credit card number"
   },
+  "copyEmail": {
+    "message": "Copy email"
+  },
   "copySecurityCode": {
     "message": "Sao chép Mã bảo mật",
     "description": "Copy credit card security code (CVV)"
@@ -1261,9 +1388,6 @@
   "premiumPurchase": {
     "message": "Mua bản Cao Cấp"
   },
-  "premiumPurchaseAlert": {
-    "message": "Bạn có thể nâng cấp làm thành viên cao cấp trong kho bitwarden nền web. Bạn có muốn truy cập trang web bây giờ?"
-  },
   "premiumPurchaseAlertV2": {
     "message": "Bạn có thể mua gói Premium từ cài đặt tài khoản trên trang Bitwarden."
   },
@@ -1288,12 +1412,30 @@
   "passwordHistory": {
     "message": "Lịch sử mật khẩu"
   },
+  "generatorHistory": {
+    "message": "Generator history"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Clear generator history"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "If you continue, all entries will be permanently deleted from generator's history. Are you sure you want to continue?"
+  },
   "clear": {
     "message": "Xoá",
     "description": "To clear something out. example: To clear browser history."
   },
   "noPasswordsInList": {
     "message": "Chưa có mật khẩu."
+  },
+  "clearHistory": {
+    "message": "Clear history"
+  },
+  "nothingToShow": {
+    "message": "Nothing to show"
+  },
+  "nothingGeneratedRecently": {
+    "message": "You haven't generated anything recently"
   },
   "undo": {
     "message": "Hoàn tác"
@@ -1612,9 +1754,6 @@
   "windowsHelloConsentMessage": {
     "message": "Xác minh cho Bitwarden."
   },
-  "polkitConsentMessage": {
-    "message": "Xác thực để mở khóa Bitwarden."
-  },
   "unlockWithTouchId": {
     "message": "Mở khóa với Touch ID"
   },
@@ -1650,6 +1789,12 @@
   },
   "deleteAccountWarning": {
     "message": "Việc xóa tài khoản là vĩnh viễn và không thể hoàn tác."
+  },
+  "cannotDeleteAccount": {
+    "message": "Cannot delete account"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "This action cannot be completed because your account is owned by an organization. Contact your organization administrator for additional details."
   },
   "accountDeleted": {
     "message": "Đã xóa tài khoản"
@@ -2352,6 +2497,43 @@
   "generateUsername": {
     "message": "Tạo tên tài khoản"
   },
+  "generateEmail": {
+    "message": "Generate email"
+  },
+  "spinboxBoundariesHint": {
+    "message": "Value must be between $MIN$ and $MAX$.",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Use $RECOMMENDED$ characters or more to generate a strong password.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Use $RECOMMENDED$ words or more to generate a strong passphrase.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
   "usernameType": {
     "message": "Loại tên người dùng"
   },
@@ -2367,6 +2549,9 @@
   },
   "catchallEmailDesc": {
     "message": "Sử dụng hộp thư bạn đã thiết lập để nhận tất cả email gửi đến tên miền của bạn."
+  },
+  "useThisEmail": {
+    "message": "Use this email"
   },
   "random": {
     "message": "Ngẫu nhiên"
@@ -2394,6 +2579,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Tạo bí danh email với dịch vụ chuyển tiếp bên ngoài."
+  },
+  "forwarderDomainName": {
+    "message": "Email domain",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Choose a domain that is supported by the selected service",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "Lỗi $SERVICENAME$: $ERRORMESSAGE$",
@@ -2555,14 +2748,29 @@
   "notificationSentDevice": {
     "message": "Một thông báo đã được gửi đến thiết bị của bạn."
   },
+  "aNotificationWasSentToYourDevice": {
+    "message": "A notification was sent to your device"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Make sure your account is unlocked and the fingerprint phrase matches on the other device"
+  },
+  "needAnotherOptionV1": {
+    "message": "Need another option?"
+  },
   "fingerprintMatchInfo": {
     "message": "Vui lòng đảm bảo rằng bạn đã mở khoá kho và cụm vân tay khớp trên thiết bị khác."
   },
   "fingerprintPhraseHeader": {
     "message": "Cụm vân tay"
   },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "You will be notified once the request is approved"
+  },
   "needAnotherOption": {
     "message": "Đăng nhập bằng thiết bị phải được thiết lập trong cài đặt của ứng dụng Bitwarden. Dùng cách khác?"
+  },
+  "viewAllLogInOptions": {
+    "message": "View all log in options"
   },
   "viewAllLoginOptions": {
     "message": "Xem tất cả tùy chọn đăng nhập"
@@ -2680,8 +2888,17 @@
   "weakAndBreachedMasterPasswordDesc": {
     "message": "Mật khẩu yếu này đã bị rò rỉ trong một vụ tấn công dữ liệu. Dùng mật khẩu mới và an toàn để bảo vệ tài khoản bạn. Bạn có chắc muốn sử dụng mật khẩu đã bị rò rỉ?"
   },
+  "useThisPassword": {
+    "message": "Use this password"
+  },
+  "useThisUsername": {
+    "message": "Use this username"
+  },
   "checkForBreaches": {
     "message": "Kiểm tra mật khẩu có lộ trong các vụ rò rỉ dữ liệu hay không"
+  },
+  "loggedInExclamation": {
+    "message": "Logged in!"
   },
   "important": {
     "message": "Quan trọng:"
@@ -2713,8 +2930,17 @@
   "windowsBiometricUpdateWarningTitle": {
     "message": "Cập nhật cài đặt được đề xuất"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Remember this device to make future logins seamless"
+  },
   "deviceApprovalRequired": {
     "message": "Yêu cầu phê duyệt thiết bị. Chọn một tuỳ chọn phê duyệt bên dưới:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Device approval required"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Select an approval option below"
   },
   "rememberThisDevice": {
     "message": "Lưu thiết bị này"
@@ -2740,9 +2966,6 @@
   "eu": {
     "message": "Châu Âu",
     "description": "European Union"
-  },
-  "loggingInOn": {
-    "message": "Đang đăng nhập vào"
   },
   "selfHostedServer": {
     "message": "tự lưu trữ"
@@ -2770,6 +2993,9 @@
   },
   "userEmailMissing": {
     "message": "Thiếu email người dùng"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Active user email not found. Logging you out."
   },
   "deviceTrusted": {
     "message": "Thiết bị tin cậy"
@@ -3162,16 +3388,115 @@
   "textSends": {
     "message": "Gửi tin nhắn"
   },
-  "allowScreenshots": {
-    "message": "Allow screen capture"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Allow screen capture of the Bitwarden desktop application."
-  },
   "ssoError": {
     "message": "Không thể tìm thấy cổng trống để đăng nhập SSO."
   },
+  "biometricsStatusHelptextUnlockNeeded": {
+    "message": "Biometric unlock is unavailable because PIN or password unlock is required first."
+  },
+  "biometricsStatusHelptextHardwareUnavailable": {
+    "message": "Biometric unlock is currently unavailable."
+  },
+  "biometricsStatusHelptextAutoSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextManualSetupNeeded": {
+    "message": "Biometric unlock is unavailable due to misconfigured system files."
+  },
+  "biometricsStatusHelptextNotEnabledLocally": {
+    "message": "Biometric unlock is unavailable because it is not enabled for $EMAIL$ in the Bitwarden desktop app.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "mail@example.com"
+      }
+    }
+  },
+  "biometricsStatusHelptextUnavailableReasonUnknown": {
+    "message": "Biometric unlock is currently unavailable for an unknown reason."
+  },
+  "authorize": {
+    "message": "Authorize"
+  },
+  "deny": {
+    "message": "Deny"
+  },
+  "sshkeyApprovalTitle": {
+    "message": "Confirm SSH key usage"
+  },
+  "sshkeyApprovalMessageInfix": {
+    "message": "is requesting access to"
+  },
+  "unknownApplication": {
+    "message": "An application"
+  },
+  "sshKeyPasswordUnsupported": {
+    "message": "Importing password protected SSH keys is not yet supported"
+  },
+  "invalidSshKey": {
+    "message": "The SSH key is invalid"
+  },
+  "sshKeyTypeUnsupported": {
+    "message": "The SSH key type is not supported"
+  },
+  "importSshKeyFromClipboard": {
+    "message": "Import key from clipboard"
+  },
+  "sshKeyPasted": {
+    "message": "SSH key imported successfully"
+  },
   "fileSavedToDevice": {
     "message": "File saved to device. Manage from your device downloads."
+  },
+  "importantNotice": {
+    "message": "Important notice"
+  },
+  "setupTwoStepLogin": {
+    "message": "Set up two-step login"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Bitwarden will send a code to your account email to verify logins from new devices starting in February 2025."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "You can set up two-step login as an alternative way to protect your account or change your email to one you can access."
+  },
+  "remindMeLater": {
+    "message": "Remind me later"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Do you have reliable access to your email, $EMAIL$?",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "No, I do not"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Yes, I can reliably access my email"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "Turn on two-step login"
+  },
+  "changeAcctEmail": {
+    "message": "Change account email"
+  },
+  "organizationUpgradeRequired": {
+    "message": "Organization upgrade required"
+  },
+  "upgradeOrganization": {
+    "message": "Upgrade organization"
+  },
+  "upgradeOrganizationDesc": {
+    "message": "This feature is not available for free organizations. Switch to a paid plan to unlock more features."
+  },
+  "updateBrowserOrDisableFingerprintDialogTitle": {
+    "message": "Extension update required"
+  },
+  "updateBrowserOrDisableFingerprintDialogMessage": {
+    "message": "The browser extension you are using is out of date. Please update it or disable browser integration fingerprint validation in the desktop app settings."
   }
 }

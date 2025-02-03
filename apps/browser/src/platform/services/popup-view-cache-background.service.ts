@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { switchMap, merge, delay, filter, concatMap, map, first, of } from "rxjs";
 
 import { CommandDefinition, MessageListener } from "@bitwarden/common/platform/messaging";
@@ -56,6 +58,11 @@ export class PopupViewCacheBackgroundService {
           })),
         ),
       )
+      .subscribe();
+
+    this.messageListener
+      .messages$(ClEAR_VIEW_CACHE_COMMAND)
+      .pipe(concatMap(() => this.popupViewCacheState.update(() => null)))
       .subscribe();
 
     merge(

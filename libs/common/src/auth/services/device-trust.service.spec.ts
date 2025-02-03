@@ -1,9 +1,16 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { matches, mock } from "jest-mock-extended";
-import { BehaviorSubject, of } from "rxjs";
+import { BehaviorSubject, firstValueFrom, of } from "rxjs";
 
 import { UserDecryptionOptionsServiceAbstraction } from "@bitwarden/auth/common";
 
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { UserDecryptionOptions } from "../../../../auth/src/common/models/domain/user-decryption-options";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
+import { KeyService } from "../../../../key-management/src/abstractions/key.service";
 import { FakeAccountService, mockAccountServiceWith } from "../../../spec/fake-account-service";
 import { FakeActiveUserState } from "../../../spec/fake-state";
 import { FakeStateProvider } from "../../../spec/fake-state-provider";
@@ -11,7 +18,6 @@ import { DeviceType } from "../../enums";
 import { AppIdService } from "../../platform/abstractions/app-id.service";
 import { ConfigService } from "../../platform/abstractions/config/config.service";
 import { CryptoFunctionService } from "../../platform/abstractions/crypto-function.service";
-import { CryptoService } from "../../platform/abstractions/crypto.service";
 import { EncryptService } from "../../platform/abstractions/encrypt.service";
 import { I18nService } from "../../platform/abstractions/i18n.service";
 import { KeyGenerationService } from "../../platform/abstractions/key-generation.service";
@@ -43,7 +49,7 @@ describe("deviceTrustService", () => {
 
   const keyGenerationService = mock<KeyGenerationService>();
   const cryptoFunctionService = mock<CryptoFunctionService>();
-  const cryptoService = mock<CryptoService>();
+  const keyService = mock<KeyService>();
   const encryptService = mock<EncryptService>();
   const appIdService = mock<AppIdService>();
   const devicesApiService = mock<DevicesApiServiceAbstraction>();
@@ -70,15 +76,54 @@ describe("deviceTrustService", () => {
     userId: mockUserId,
   };
 
+  let userDecryptionOptions: UserDecryptionOptions;
+
   beforeEach(() => {
     jest.clearAllMocks();
     const supportsSecureStorage = false; // default to false; tests will override as needed
     // By default all the tests will have a mocked active user in state provider.
     deviceTrustService = createDeviceTrustService(mockUserId, supportsSecureStorage);
+
+    userDecryptionOptions = new UserDecryptionOptions();
   });
 
   it("instantiates", () => {
     expect(deviceTrustService).not.toBeFalsy();
+  });
+
+  describe("supportsDeviceTrustByUserId$", () => {
+    it("returns true when the user has a non-null trusted device decryption option", async () => {
+      // Arrange
+      userDecryptionOptions.trustedDeviceOption = {
+        hasAdminApproval: false,
+        hasLoginApprovingDevice: false,
+        hasManageResetPasswordPermission: false,
+        isTdeOffboarding: false,
+      };
+
+      userDecryptionOptionsService.userDecryptionOptionsById$.mockReturnValue(
+        new BehaviorSubject<UserDecryptionOptions>(userDecryptionOptions),
+      );
+
+      const result = await firstValueFrom(
+        deviceTrustService.supportsDeviceTrustByUserId$(mockUserId),
+      );
+      expect(result).toBe(true);
+    });
+
+    it("returns false when the user has a null trusted device decryption option", async () => {
+      // Arrange
+      userDecryptionOptions.trustedDeviceOption = null;
+
+      userDecryptionOptionsService.userDecryptionOptionsById$.mockReturnValue(
+        new BehaviorSubject<UserDecryptionOptions>(userDecryptionOptions),
+      );
+
+      const result = await firstValueFrom(
+        deviceTrustService.supportsDeviceTrustByUserId$(mockUserId),
+      );
+      expect(result).toBe(false);
+    });
   });
 
   describe("User Trust Device Choice For Decryption", () => {
@@ -368,7 +413,7 @@ describe("deviceTrustService", () => {
           .mockResolvedValue(mockDeviceRsaKeyPair);
 
         cryptoSvcGetUserKeySpy = jest
-          .spyOn(cryptoService, "getUserKey")
+          .spyOn(keyService, "getUserKey")
           .mockResolvedValue(mockUserKey);
 
         cryptoSvcRsaEncryptSpy = jest
@@ -623,7 +668,7 @@ describe("deviceTrustService", () => {
         const fakeNewUserKeyData = new Uint8Array(64);
         fakeNewUserKeyData.fill(FakeNewUserKeyMarker, 0, 1);
         fakeNewUserKey = new SymmetricCryptoKey(fakeNewUserKeyData) as UserKey;
-        cryptoService.userKey$.mockReturnValue(of(fakeNewUserKey));
+        keyService.userKey$.mockReturnValue(of(fakeNewUserKey));
       });
 
       it("throws an error when a null user id is passed in", async () => {
@@ -659,7 +704,7 @@ describe("deviceTrustService", () => {
           fakeOldUserKeyData.fill(FakeOldUserKeyMarker, 0, 1);
 
           // Mock the retrieval of a user key that differs from the new one passed into the method
-          cryptoService.userKey$.mockReturnValue(
+          keyService.userKey$.mockReturnValue(
             of(new SymmetricCryptoKey(fakeOldUserKeyData) as UserKey),
           );
 
@@ -749,7 +794,7 @@ describe("deviceTrustService", () => {
     return new DeviceTrustService(
       keyGenerationService,
       cryptoFunctionService,
-      cryptoService,
+      keyService,
       encryptService,
       appIdService,
       devicesApiService,

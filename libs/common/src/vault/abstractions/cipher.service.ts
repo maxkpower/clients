@@ -1,7 +1,8 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Observable } from "rxjs";
 
-import { UserKeyRotationDataProvider } from "@bitwarden/auth/common";
-import { LocalData } from "@bitwarden/common/vault/models/data/local.data";
+import { UserKeyRotationDataProvider } from "@bitwarden/key-management";
 
 import { UriMatchStrategySetting } from "../../models/domain/domain-service";
 import { SymmetricCryptoKey } from "../../platform/models/domain/symmetric-crypto-key";
@@ -9,6 +10,7 @@ import { CipherId, CollectionId, OrganizationId, UserId } from "../../types/guid
 import { UserKey } from "../../types/key";
 import { CipherType } from "../enums/cipher-type";
 import { CipherData } from "../models/data/cipher.data";
+import { LocalData } from "../models/data/local.data";
 import { Cipher } from "../models/domain/cipher";
 import { Field } from "../models/domain/field";
 import { CipherWithIdRequest } from "../models/request/cipher-with-id.request";
@@ -24,6 +26,12 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
    *  An observable monitoring the add/edit cipher info saved to memory.
    */
   addEditCipherInfo$: Observable<AddEditCipherInfo>;
+  /**
+   * Observable that emits an array of cipherViews that failed to decrypt. Does not emit until decryption has completed.
+   *
+   * An empty array indicates that all ciphers were successfully decrypted.
+   */
+  failedToDecryptCiphers$: Observable<CipherView[]>;
   clearCache: (userId?: string) => Promise<void>;
   encrypt: (
     model: CipherView,
@@ -85,7 +93,7 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
     organizationId: string,
     collectionIds: string[],
     userId: UserId,
-  ) => Promise<any>;
+  ) => Promise<Cipher>;
   shareManyWithServer: (
     ciphers: CipherView[],
     organizationId: string,
@@ -119,7 +127,7 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
    * Used for Unassigned ciphers or when the user only has admin access to the cipher (not assigned normally).
    * @param cipher
    */
-  saveCollectionsWithServerAdmin: (cipher: Cipher) => Promise<void>;
+  saveCollectionsWithServerAdmin: (cipher: Cipher) => Promise<Cipher>;
   /**
    * Bulk update collections for many ciphers with the server
    * @param orgId
@@ -146,8 +154,8 @@ export abstract class CipherService implements UserKeyRotationDataProvider<Ciphe
   delete: (id: string | string[]) => Promise<any>;
   deleteWithServer: (id: string, asAdmin?: boolean) => Promise<any>;
   deleteManyWithServer: (ids: string[], asAdmin?: boolean) => Promise<any>;
-  deleteAttachment: (id: string, attachmentId: string) => Promise<void>;
-  deleteAttachmentWithServer: (id: string, attachmentId: string) => Promise<void>;
+  deleteAttachment: (id: string, revisionDate: string, attachmentId: string) => Promise<CipherData>;
+  deleteAttachmentWithServer: (id: string, attachmentId: string) => Promise<CipherData>;
   sortCiphersByLastUsed: (a: CipherView, b: CipherView) => number;
   sortCiphersByLastUsedThenName: (a: CipherView, b: CipherView) => number;
   getLocaleSortingFunction: () => (a: CipherView, b: CipherView) => number;

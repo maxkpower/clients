@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, Input, OnInit } from "@angular/core";
 
@@ -26,8 +28,8 @@ export class SendFilePopoutDialogContainerComponent implements OnInit {
 
   ngOnInit() {
     if (
-      this.config.sendType === SendType.File &&
-      this.config.mode === "add" &&
+      this.config?.sendType === SendType.File &&
+      this.config?.mode === "add" &&
       this.filePopoutUtilsService.showFilePopoutMessage(window)
     ) {
       this.dialogService.open(SendFilePopoutDialogComponent);

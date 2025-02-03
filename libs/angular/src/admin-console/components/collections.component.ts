@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { firstValueFrom, map } from "rxjs";
 
@@ -61,7 +63,15 @@ export class CollectionsComponent implements OnInit {
     }
 
     if (this.organization == null) {
-      this.organization = await this.organizationService.get(this.cipher.organizationId);
+      this.organization = await firstValueFrom(
+        this.organizationService
+          .organizations$(activeUserId)
+          .pipe(
+            map((organizations) =>
+              organizations.find((org) => org.id === this.cipher.organizationId),
+            ),
+          ),
+      );
     }
   }
 

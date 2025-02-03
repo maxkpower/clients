@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { Meta, StoryObj, applicationConfig, moduleMetadata } from "@storybook/angular";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -15,6 +16,7 @@ import { DialogModule } from "../../dialog.module";
       <h2>{{ group.title }}</h2>
       <div class="tw-mb-4 tw-flex tw-flex-row tw-gap-2">
         <button
+          type="button"
           *ngFor="let dialog of group.dialogs"
           bitButton
           (click)="openSimpleConfigurableDialog(dialog)"
@@ -69,7 +71,7 @@ class StoryDialogComponent {
           content: this.i18nService.t("dialogContent"),
           type: "primary",
           acceptButtonText: "Ok",
-          cancelButtonText: null,
+          cancelButtonText: undefined,
         },
         {
           title: this.i18nService.t("primaryTypeSimpleDialog"),
@@ -120,7 +122,7 @@ class StoryDialogComponent {
 
   showCallout = false;
   calloutType = "info";
-  dialogCloseResult: boolean;
+  dialogCloseResult?: boolean;
 
   constructor(
     public dialogService: DialogService,
@@ -144,7 +146,7 @@ export default {
   component: StoryDialogComponent,
   decorators: [
     moduleMetadata({
-      imports: [ButtonModule, DialogModule, CalloutModule],
+      imports: [ButtonModule, BrowserAnimationsModule, DialogModule, CalloutModule],
     }),
     applicationConfig({
       providers: [
@@ -174,7 +176,7 @@ export default {
   parameters: {
     design: {
       type: "figma",
-      url: "https://www.figma.com/file/Zt3YSeb6E6lebAffrNLa0h/Tailwind-Component-Library",
+      url: "https://www.figma.com/design/Zt3YSeb6E6lebAffrNLa0h/Tailwind-Component-Library?node-id=21514-19247&t=b5tDKylm5sWm2yKo-4",
     },
   },
 } as Meta;

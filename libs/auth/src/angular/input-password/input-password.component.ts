@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 
@@ -9,8 +11,6 @@ import {
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
-import { DEFAULT_KDF_CONFIG } from "@bitwarden/common/auth/models/domain/kdf-config";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { HashPurpose } from "@bitwarden/common/platform/enums";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -24,8 +24,13 @@ import {
   InputModule,
   ToastService,
 } from "@bitwarden/components";
+import { DEFAULT_KDF_CONFIG, KeyService } from "@bitwarden/key-management";
 
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { InputsFieldMatch } from "../../../../angular/src/auth/validators/inputs-field-match.validator";
+// FIXME: remove `src` and fix import
+// eslint-disable-next-line no-restricted-imports
 import { SharedModule } from "../../../../components/src/shared";
 import { PasswordCalloutComponent } from "../password-callout/password-callout.component";
 
@@ -96,7 +101,7 @@ export class InputPasswordComponent {
 
   constructor(
     private auditService: AuditService,
-    private cryptoService: CryptoService,
+    private keyService: KeyService,
     private dialogService: DialogService,
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
@@ -146,15 +151,15 @@ export class InputPasswordComponent {
       throw new Error("Email is required to create master key.");
     }
 
-    const masterKey = await this.cryptoService.makeMasterKey(
+    const masterKey = await this.keyService.makeMasterKey(
       password,
       this.email.trim().toLowerCase(),
       kdfConfig,
     );
 
-    const masterKeyHash = await this.cryptoService.hashMasterKey(password, masterKey);
+    const masterKeyHash = await this.keyService.hashMasterKey(password, masterKey);
 
-    const localMasterKeyHash = await this.cryptoService.hashMasterKey(
+    const localMasterKeyHash = await this.keyService.hashMasterKey(
       password,
       masterKey,
       HashPurpose.LocalAuthorization,

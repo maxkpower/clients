@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Params, Router, RouterModule } from "@angular/router";
@@ -14,7 +16,11 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
 import { ToastService } from "@bitwarden/components";
 
-import { LoginStrategyServiceAbstraction, PasswordLoginCredentials } from "../../../common";
+import {
+  LoginStrategyServiceAbstraction,
+  LoginSuccessHandlerService,
+  PasswordLoginCredentials,
+} from "../../../common";
 import { AnonLayoutWrapperDataService } from "../../anon-layout/anon-layout-wrapper-data.service";
 import { InputPasswordComponent } from "../../input-password/input-password.component";
 import { PasswordInputResult } from "../../input-password/password-input-result";
@@ -49,6 +55,10 @@ export class RegistrationFinishComponent implements OnInit, OnDestroy {
   acceptEmergencyAccessInviteToken: string;
   emergencyAccessId: string;
 
+  // This token is provided when the user is coming from an emailed invite to accept a provider invite
+  providerInviteToken: string;
+  providerUserId: string;
+
   masterPasswordPolicyOptions: MasterPasswordPolicyOptions | null = null;
 
   constructor(
@@ -62,6 +72,7 @@ export class RegistrationFinishComponent implements OnInit, OnDestroy {
     private loginStrategyService: LoginStrategyServiceAbstraction,
     private logService: LogService,
     private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
+    private loginSuccessHandlerService: LoginSuccessHandlerService,
   ) {}
 
   async ngOnInit() {
@@ -104,6 +115,11 @@ export class RegistrationFinishComponent implements OnInit, OnDestroy {
       this.acceptEmergencyAccessInviteToken = qParams.acceptEmergencyAccessInviteToken;
       this.emergencyAccessId = qParams.emergencyAccessId;
     }
+
+    if (qParams.providerInviteToken != null && qParams.providerUserId != null) {
+      this.providerInviteToken = qParams.providerInviteToken;
+      this.providerUserId = qParams.providerUserId;
+    }
   }
 
   private async initOrgInviteFlowIfPresent(): Promise<boolean> {
@@ -140,6 +156,8 @@ export class RegistrationFinishComponent implements OnInit, OnDestroy {
         this.orgSponsoredFreeFamilyPlanToken,
         this.acceptEmergencyAccessInviteToken,
         this.emergencyAccessId,
+        this.providerInviteToken,
+        this.providerUserId,
       );
     } catch (e) {
       this.validationService.showError(e);
@@ -175,6 +193,8 @@ export class RegistrationFinishComponent implements OnInit, OnDestroy {
         title: null,
         message: this.i18nService.t("youHaveBeenLoggedIn"),
       });
+
+      await this.loginSuccessHandlerService.run(authenticationResult.userId);
 
       await this.router.navigate(["/vault"]);
     } catch (e) {

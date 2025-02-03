@@ -26,6 +26,9 @@
   "typeSecureNote": {
     "message": "Ασφαλής σημείωση"
   },
+  "typeSshKey": {
+    "message": "Κλειδί SSH"
+  },
   "folders": {
     "message": "Φάκελοι"
   },
@@ -36,7 +39,7 @@
     "message": "Αναζήτηση κρύπτης"
   },
   "addItem": {
-    "message": "Προσθήκη αντικειμένου"
+    "message": "Προσθήκη στοιχείου"
   },
   "shared": {
     "message": "Κοινοποιήθηκε"
@@ -60,6 +63,9 @@
       }
     }
   },
+  "welcomeBack": {
+    "message": "Καλωσορίσατε και πάλι"
+  },
   "moveToOrgDesc": {
     "message": "Επιλέξτε έναν οργανισμό στον οποίο θέλετε να μετακινήσετε αυτό το στοιχείο. Η μετακίνηση σε έναν οργανισμό μεταβιβάζει την ιδιοκτησία του στοιχείου σε αυτό τον οργανισμό. Δεν θα είστε πλέον ο άμεσος ιδιοκτήτης αυτού του στοιχείου μόλις το μετακινήσετε."
   },
@@ -67,7 +73,7 @@
     "message": "Συνημμένα"
   },
   "viewItem": {
-    "message": "Προβολή αντικειμένου"
+    "message": "Προβολή στοιχείου"
   },
   "name": {
     "message": "Όνομα"
@@ -98,10 +104,10 @@
     "message": "Συνθηματικό"
   },
   "editItem": {
-    "message": "Επεξεργασία αντικειμένου"
+    "message": "Επεξεργασία στοιχείου"
   },
   "emailAddress": {
-    "message": "Διεύθυνση ηλ. ταχυδρομείου"
+    "message": "Διεύθυνση Email"
   },
   "verificationCodeTotp": {
     "message": "Κωδικός Επαλήθευσης (TOTP)"
@@ -174,6 +180,63 @@
   "address": {
     "message": "Διεύθυνση"
   },
+  "sshPrivateKey": {
+    "message": "Ιδιωτικό κλειδί"
+  },
+  "sshPublicKey": {
+    "message": "Δημόσιο κλειδί"
+  },
+  "sshFingerprint": {
+    "message": "Αποτύπωμα"
+  },
+  "sshKeyAlgorithm": {
+    "message": "Τύπος κλειδιού"
+  },
+  "sshKeyAlgorithmED25519": {
+    "message": "ED25519"
+  },
+  "sshKeyAlgorithmRSA2048": {
+    "message": "RSA 2048-Bit"
+  },
+  "sshKeyAlgorithmRSA3072": {
+    "message": "RSA 3072-Bit"
+  },
+  "sshKeyAlgorithmRSA4096": {
+    "message": "RSA 4096-Bit"
+  },
+  "sshKeyGenerated": {
+    "message": "Δημιουργήθηκε ένα νέο SSH κλειδί"
+  },
+  "sshKeyWrongPassword": {
+    "message": "Ο κωδικός πρόσβασης που εισάγατε είναι λάθος."
+  },
+  "importSshKey": {
+    "message": "Εισαγωγή"
+  },
+  "confirmSshKeyPassword": {
+    "message": "Επιβεβαίωση κωδικού πρόσβασης"
+  },
+  "enterSshKeyPasswordDesc": {
+    "message": "Εισάγετε τον κωδικό πρόσβασης για το SSH κλειδί."
+  },
+  "enterSshKeyPassword": {
+    "message": "Εισάγετε κωδικό πρόσβασης"
+  },
+  "sshAgentUnlockRequired": {
+    "message": "Παρακαλώ ξεκλειδώστε την κρύπτη σας για να εγκρίνετε το αίτημα κλειδιού SSH."
+  },
+  "sshAgentUnlockTimeout": {
+    "message": "Λήξη χρονικού ορίου αιτήματος κλειδιού SSH."
+  },
+  "enableSshAgent": {
+    "message": "Ενεργοποίηση πράκτορα SSH"
+  },
+  "enableSshAgentDesc": {
+    "message": "Ενεργοποιήστε τον πράκτορα SSH για την υπογραφή αιτημάτων SSH απευθείας από την κρύπτη Bitwarden."
+  },
+  "enableSshAgentHelp": {
+    "message": "Ο πράκτορα SSH είναι μια υπηρεσία που απευθύνεται σε προγραμματιστές που σας επιτρέπει να υπογράψετε αιτήματα SSH απευθείας από την κρύπτη Bitwarden σας."
+  },
   "premiumRequired": {
     "message": "Απαιτείται Premium"
   },
@@ -185,6 +248,20 @@
   },
   "error": {
     "message": "Σφάλμα"
+  },
+  "decryptionError": {
+    "message": "Σφάλμα αποκρυπτογράφησης"
+  },
+  "couldNotDecryptVaultItemsBelow": {
+    "message": "Το Bitwarden δεν μπόρεσε να αποκρυπτογραφήσει τα αντικείμενα κρύπτης που αναφέρονται παρακάτω."
+  },
+  "contactCSToAvoidDataLossPart1": {
+    "message": "Εποικινωνία επιτυχίας επαφής πελάτη",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
+  },
+  "contactCSToAvoidDataLossPart2": {
+    "message": "για την αποφυγή επιπλέον απώλειας δεδομένων.",
+    "description": "This is part of a larger sentence. The full sentence will read 'Contact customer success to avoid additional data loss.'"
   },
   "january": {
     "message": "Ιανουάριος"
@@ -258,6 +335,9 @@
   },
   "generatePassword": {
     "message": "Γέννηση κωδικού πρόσβασης"
+  },
+  "generatePassphrase": {
+    "message": "Δημιουργία φράσης πρόσβασης"
   },
   "type": {
     "message": "Τύπος"
@@ -393,6 +473,16 @@
   },
   "copyPassword": {
     "message": "Αντιγραφή κωδικού πρόσβασης"
+  },
+  "regenerateSshKey": {
+    "message": "Επαναδημιουργία κλειδιού SSH"
+  },
+  "copySshPrivateKey": {
+    "message": "Αντιγραφή ιδιωτικού κλειδιού SSH"
+  },
+  "copyPassphrase": {
+    "message": "Αντιγραφή φράσης πρόσβασης",
+    "description": "Copy passphrase to clipboard"
   },
   "copyUri": {
     "message": "Αντιγραφή URI"
@@ -547,6 +637,9 @@
   "createAccount": {
     "message": "Δημιουργία λογαριασμού"
   },
+  "newToBitwarden": {
+    "message": "Μόλις ήρθες στο Bitwarden;"
+  },
   "setAStrongPassword": {
     "message": "Ορίστε έναν ισχυρό κωδικό πρόσβασης"
   },
@@ -555,6 +648,18 @@
   },
   "logIn": {
     "message": "Είσοδος"
+  },
+  "logInToBitwarden": {
+    "message": "Σύνδεση στο Bitwarden"
+  },
+  "logInWithPasskey": {
+    "message": "Σύνδεση με κλειδί πρόσβασης"
+  },
+  "loginWithDevice": {
+    "message": "Σύνδεση με χρήση συσκευής"
+  },
+  "useSingleSignOn": {
+    "message": "Χρήση single sign-on"
   },
   "submit": {
     "message": "Υποβολή"
@@ -618,16 +723,16 @@
     "message": "Ρυθμίσεις"
   },
   "accountEmail": {
-    "message": "Email λογαριασμού"
+    "message": "Διεύθυνση ηλ. ταχυδρομείου λογαριασμού"
   },
   "requestHint": {
     "message": "Αίτηση υπόδειξης"
   },
   "requestPasswordHint": {
-    "message": "Υπόδειξη κωδικού πρόσβασης"
+    "message": "Αίτηση υπόδειξης κωδικού πρόσβασης"
   },
   "enterYourAccountEmailAddressAndYourPasswordHintWillBeSentToYou": {
-    "message": "Εισάγετε τη διεύθυνση ηλεκτρονικού ταχυδρομείου του λογαριασμού σας και θα σας αποσταλεί η υπόδειξη κωδικού πρόσβασης"
+    "message": "Εισάγετε τη διεύθυνση ηλ. ταχυδρομείου του λογαριασμού σας και θα σας αποσταλεί η υπόδειξη κωδικού πρόσβασης"
   },
   "passwordHint": {
     "message": "Υπόδειξη κωδικού πρόσβασης"
@@ -780,6 +885,15 @@
     "message": "Επαληθεύστε με το Duo Security για τον οργανισμό σας χρησιμοποιώντας την εφαρμογή Duo Mobile, μήνυμα SMS, τηλεφωνική κλήση ή κλειδί ασφαλείας U2F.",
     "description": "'Duo Security' and 'Duo Mobile' are product names and should not be translated."
   },
+  "verifyIdentity": {
+    "message": "Επαληθεύστε την ταυτότητά σας"
+  },
+  "weDontRecognizeThisDevice": {
+    "message": "Δεν αναγνωρίζουμε αυτή τη συσκευή. Εισάγετε τον κωδικό που στάλθηκε στο email σας για να επαληθεύσετε την ταυτότητά σας."
+  },
+  "continueLoggingIn": {
+    "message": "Παραμείνετε συνδεμένοι"
+  },
   "webAuthnTitle": {
     "message": "FIDO2 WebAuthn"
   },
@@ -827,6 +941,16 @@
   },
   "baseUrl": {
     "message": "URL Διακομιστή"
+  },
+  "authenticationTimeout": {
+    "message": "Χρονικό όριο επαλήθευσης"
+  },
+  "authenticationSessionTimedOut": {
+    "message": "Λήξη χρονικού ορίου συνεδρίας επαλήθευσης. Παρακαλώ επανεκκινήστε τη διαδικασία σύνδεσης."
+  },
+  "selfHostBaseUrl": {
+    "message": "URL διακομιστή αυτο-φιλοξενίας",
+    "description": "Label for field requesting a self-hosted integration service URL"
   },
   "apiUrl": {
     "message": "URL διακομιστή API"
@@ -895,7 +1019,7 @@
     "message": "Νέα σύνδεση"
   },
   "addNewItem": {
-    "message": "Νέο αντικείμενο"
+    "message": "Νέο στοιχείο"
   },
   "addNewFolder": {
     "message": "Νέος φάκελος"
@@ -922,7 +1046,7 @@
     "message": "Βοήθεια και σχόλια"
   },
   "getHelp": {
-    "message": "Ζητήστε βοήθεια"
+    "message": "Λήψη βοήθειας"
   },
   "fileBugReport": {
     "message": "Καταγράψτε μια αναφορά σφάλματος"
@@ -1218,6 +1342,9 @@
     "message": "Αντιγραφή αριθμού",
     "description": "Copy credit card number"
   },
+  "copyEmail": {
+    "message": "Αντιγραφή διεύθυνσης ηλ. ταχυδρομείου"
+  },
   "copySecurityCode": {
     "message": "Αντιγραφή κωδικού ασφαλείας",
     "description": "Copy credit card security code (CVV)"
@@ -1261,9 +1388,6 @@
   "premiumPurchase": {
     "message": "Αγορά Premium έκδοσης"
   },
-  "premiumPurchaseAlert": {
-    "message": "Μπορείτε να αγοράσετε συνδρομή premium στο bitwarden.com web vault. Θέλετε να επισκεφθείτε την ιστοσελίδα τώρα;"
-  },
   "premiumPurchaseAlertV2": {
     "message": "Μπορείτε να αγοράσετε το Premium από τις ρυθμίσεις λογαριασμού σας στη διαδικτυακή εφαρμογή του Bitwarden."
   },
@@ -1286,7 +1410,16 @@
     "message": "Επιτυχής ανανέωση"
   },
   "passwordHistory": {
-    "message": "Ιστορικό κωδικού"
+    "message": "Ιστορικό κωδικού πρόσβασης"
+  },
+  "generatorHistory": {
+    "message": "Ιστορικό γεννήτριας"
+  },
+  "clearGeneratorHistoryTitle": {
+    "message": "Εκκαθάριση ιστορικού γεννήτριας"
+  },
+  "cleargGeneratorHistoryDescription": {
+    "message": "Αν συνεχίσετε, όλες οι καταχωρήσεις θα διαγραφούν οριστικά από το ιστορικό της γεννήτριας. Σίγουρα θέλετε να συνεχίσετε;"
   },
   "clear": {
     "message": "Εκκαθάριση",
@@ -1294,6 +1427,15 @@
   },
   "noPasswordsInList": {
     "message": "Δεν υπάρχουν κωδικοί στη λίστα."
+  },
+  "clearHistory": {
+    "message": "Διαγραφή ιστορικού"
+  },
+  "nothingToShow": {
+    "message": "Τίποτα για προβολή"
+  },
+  "nothingGeneratedRecently": {
+    "message": "Δεν έχετε δημιουργήσει τίποτα πρόσφατα"
   },
   "undo": {
     "message": "Αναίρεση"
@@ -1462,7 +1604,7 @@
     "description": "ex. Date this item was created"
   },
   "datePasswordUpdated": {
-    "message": "Ο κωδικός ενημερώθηκε",
+    "message": "Ο κωδικός πρόσβασης ενημερώθηκε",
     "description": "ex. Date this password was updated"
   },
   "exportFrom": {
@@ -1612,9 +1754,6 @@
   "windowsHelloConsentMessage": {
     "message": "Επαληθεύστε για το Bitwarden."
   },
-  "polkitConsentMessage": {
-    "message": "Αυθεντικοποίηση για ξεκλείδωμα του Bitwarden."
-  },
   "unlockWithTouchId": {
     "message": "Ξεκλείδωμα με Touch ID"
   },
@@ -1650,6 +1789,12 @@
   },
   "deleteAccountWarning": {
     "message": "Η διαγραφή του λογαριασμού σας είναι μόνιμη. Δεν μπορεί να αναιρεθεί."
+  },
+  "cannotDeleteAccount": {
+    "message": "Αδυναμία διαγραφής λογαριασμού"
+  },
+  "cannotDeleteAccountDesc": {
+    "message": "Αυτή η ενέργεια δεν μπορεί να ολοκληρωθεί επειδή ο λογαριασμός σας ανήκει σε έναν οργανισμό. Επικοινωνήστε με το διαχειριστή του οργανισμού σας για πρόσθετες λεπτομέρειες."
   },
   "accountDeleted": {
     "message": "Ο λογαριασμός διαγράφηκε"
@@ -1955,7 +2100,7 @@
     "description": "'Send' is a noun and the name of a feature called 'Bitwarden Send'. It should not be translated."
   },
   "myVault": {
-    "message": "Το θησαυ/κιό μου"
+    "message": "Η κρύπτη μου"
   },
   "text": {
     "message": "Κείμενο"
@@ -2352,6 +2497,43 @@
   "generateUsername": {
     "message": "Δημιουργία ονόματος χρήστη"
   },
+  "generateEmail": {
+    "message": "Δημιουργία διεύθυνσης ηλ. ταχυδρομείου"
+  },
+  "spinboxBoundariesHint": {
+    "message": "Η τιμή πρέπει να είναι μεταξύ $MIN$ και $MAX$.",
+    "description": "Explains spin box minimum and maximum values to the user",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      },
+      "max": {
+        "content": "$2",
+        "example": "128"
+      }
+    }
+  },
+  "passwordLengthRecommendationHint": {
+    "message": " Χρησιμοποιήστε $RECOMMENDED$ ή περισσότερους χαρακτήρες για να δημιουργήσετε έναν ισχυρό κωδικό πρόσβασης.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a length to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "14"
+      }
+    }
+  },
+  "passphraseNumWordsRecommendationHint": {
+    "message": " Χρησιμοποιήστε $RECOMMENDED$ ή περισσότερες λέξεις για να δημιουργήσετε μια ισχυρή φράση πρόσβασης.",
+    "description": "Appended to `spinboxBoundariesHint` to recommend a number of words to the user. This must include any language-specific 'sentence' separator characters (e.g. a space in english).",
+    "placeholders": {
+      "recommended": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
   "usernameType": {
     "message": "Τύπος ονόματος χρήστη"
   },
@@ -2367,6 +2549,9 @@
   },
   "catchallEmailDesc": {
     "message": "Χρησιμοποιήστε τα διαμορφωμένα εισερχόμενα catch-all του domain σας."
+  },
+  "useThisEmail": {
+    "message": "Χρήση αυτού του email"
   },
   "random": {
     "message": "Τυχαίο"
@@ -2394,6 +2579,14 @@
   },
   "forwardedEmailDesc": {
     "message": "Δημιουργήστε ένα alias email με μια εξωτερική υπηρεσία προώθησης."
+  },
+  "forwarderDomainName": {
+    "message": "Τομέας ηλ. ταχυδρομείου",
+    "description": "Labels the domain name email forwarder service option"
+  },
+  "forwarderDomainNameHint": {
+    "message": "Επιλέξτε ένα τομέα που υποστηρίζεται από την επιλεγμένη υπηρεσία",
+    "description": "Guidance provided for email forwarding services that support multiple email domains."
   },
   "forwarderError": {
     "message": "$SERVICENAME$ σφάλμα: $ERRORMESSAGE$",
@@ -2520,7 +2713,7 @@
     "message": "Είστε βέβαιοι ότι θέλετε να χρησιμοποιήσετε την επιλογή \"Ποτέ\"; Ο ορισμός των επιλογών κλειδώματος σε \"Ποτέ\" αποθηκεύει το κλειδί κρυπτογράφησης του θησαυ/κίου σας στη συσκευή σας. Εάν χρησιμοποιήσετε αυτήν την επιλογή, θα πρέπει να διασφαλίσετε ότι θα διατηρείτε τη συσκευή σας κατάλληλα προστατευμένη."
   },
   "vault": {
-    "message": "Θησαυ/κιο"
+    "message": "Κρύπτη"
   },
   "loginWithMasterPassword": {
     "message": "Συνδεθείτε με τον κύριο κωδικό πρόσβασης"
@@ -2532,7 +2725,7 @@
     "message": "Απομνημόνευση διεύθυνσης ηλ. ταχυδρομείου"
   },
   "notYou": {
-    "message": "Όχι εσείς;"
+    "message": "Δεν είστε εσείς;"
   },
   "newAroundHere": {
     "message": "Είστε νέος/α εδώ;"
@@ -2555,14 +2748,29 @@
   "notificationSentDevice": {
     "message": "Μια ειδοποίηση έχει σταλεί στη συσκευή σας."
   },
+  "aNotificationWasSentToYourDevice": {
+    "message": "Μια ειδοποίηση στάλθηκε στη συσκευή σας"
+  },
+  "makeSureYourAccountIsUnlockedAndTheFingerprintEtc": {
+    "message": "Βεβαιωθείτε ότι ο λογαριασμός σας είναι ξεκλείδωτος και ότι η φράση δακτυλικού αποτυπώματος ταιριάζει στην άλλη συσκευή"
+  },
+  "needAnotherOptionV1": {
+    "message": "Χρειάζεστε μια άλλη επιλογή;"
+  },
   "fingerprintMatchInfo": {
     "message": "Παρακαλώ βεβαιωθείτε ότι το θησαυ/κιό σας είναι ξεκλείδωτο και η φράση δακτυλικών αποτυπωμάτων ταιριάζει με την άλλη συσκευή."
   },
   "fingerprintPhraseHeader": {
     "message": "Φράση δακτυλικών αποτυπωμάτων"
   },
+  "youWillBeNotifiedOnceTheRequestIsApproved": {
+    "message": "Θα ειδοποιηθείτε μόλις εγκριθεί η αίτηση"
+  },
   "needAnotherOption": {
     "message": "Η σύνδεση με τη χρήση συσκευής πρέπει να οριστεί στις ρυθμίσεις της εφαρμογής Bitwarden. Χρειάζεστε κάποια άλλη επιλογή;"
+  },
+  "viewAllLogInOptions": {
+    "message": "Δείτε όλες τις επιλογές σύνδεσης"
   },
   "viewAllLoginOptions": {
     "message": "Δείτε όλες τις επιλογές σύνδεσης"
@@ -2663,7 +2871,7 @@
     "message": "Κανένα μήνυμα ηλ. ταχυδρομείου;"
   },
   "goBack": {
-    "message": "Μετάβαση πίσω"
+    "message": "Επιστροφή"
   },
   "toEditYourEmailAddress": {
     "message": "για να επεξεργαστείτε τη διεύθυνση ηλ. ταχυδρομείου σας."
@@ -2680,8 +2888,17 @@
   "weakAndBreachedMasterPasswordDesc": {
     "message": "Βρέθηκε και ταυτοποιήθηκε αδύναμος κωδικός σε μια διαρροή δεδομένων. Χρησιμοποιήστε ένα ισχυρό και μοναδικό κωδικό πρόσβασης για την προστασία του λογαριασμού σας. Είστε σίγουροι ότι θέλετε να χρησιμοποιήσετε αυτόν τον κωδικό πρόσβασης;"
   },
+  "useThisPassword": {
+    "message": "Χρήση αυτού του κωδικού πρόσβασης"
+  },
+  "useThisUsername": {
+    "message": "Χρήση αυτού του ονόματος χρήστη"
+  },
   "checkForBreaches": {
     "message": "Ελέγξτε γνωστές διαρροές δεδομένων για αυτόν τον κωδικό"
+  },
+  "loggedInExclamation": {
+    "message": "Έχετε συνδεθεί!"
   },
   "important": {
     "message": "Σημαντικό:"
@@ -2713,8 +2930,17 @@
   "windowsBiometricUpdateWarningTitle": {
     "message": "Ενημέρωση Προτεινόμενων Ρυθμίσεων"
   },
+  "rememberThisDeviceToMakeFutureLoginsSeamless": {
+    "message": "Απομνημόνευση αυτής της συσκευής για απρόσκοπτη σύνδεση στο μέλλον"
+  },
   "deviceApprovalRequired": {
     "message": "Απαιτείται έγκριση συσκευής. Επιλέξτε μια επιλογή έγκρισης παρακάτω:"
+  },
+  "deviceApprovalRequiredV2": {
+    "message": "Απαιτείται έγκριση συσκευής"
+  },
+  "selectAnApprovalOptionBelow": {
+    "message": "Επιλέξτε μια επιλογή έγκρισης παρακάτω"
   },
   "rememberThisDevice": {
     "message": "Απομνημόνευση αυτής της συσκευής"
@@ -2740,9 +2966,6 @@
   "eu": {
     "message": "ΕΕ",
     "description": "European Union"
-  },
-  "loggingInOn": {
-    "message": "Σύνδεση σε"
   },
   "selfHostedServer": {
     "message": "αυτο-φιλοξενούμενο"
@@ -2770,6 +2993,9 @@
   },
   "userEmailMissing": {
     "message": "Η διεύθυνση ηλ. ταχυδρομείου του χρήστη λείπει"
+  },
+  "activeUserEmailNotFoundLoggingYouOut": {
+    "message": "Το email χρήστη δεν βρέθηκε. Αποσυνδεθήκατε."
   },
   "deviceTrusted": {
     "message": "Αξιόπιστη συσκευή"
@@ -3162,16 +3388,115 @@
   "textSends": {
     "message": "Send κειμένων"
   },
-  "allowScreenshots": {
-    "message": "Να επιτρέπεται η καταγραφή οθόνης"
-  },
-  "allowScreenshotsDesc": {
-    "message": "Να επιτρέπεται η καταγραφή οθόνης της εφαρμογής Bitwarden για υπολογιστή."
-  },
   "ssoError": {
     "message": "Δεν βρέθηκαν ελεύθερες θύρες για τη σύνδεση sso."
   },
+  "biometricsStatusHelptextUnlockNeeded": {
+    "message": "Το βιομετρικό ξεκλείδωμα δεν είναι διαθέσιμο επειδή απαιτείται πρώτα το ξεκλείδωμα με PIN ή κωδικό πρόσβασης."
+  },
+  "biometricsStatusHelptextHardwareUnavailable": {
+    "message": "Το βιομετρικό ξεκλείδωμα δεν είναι διαθέσιμο προς το παρόν."
+  },
+  "biometricsStatusHelptextAutoSetupNeeded": {
+    "message": "Το βιομετρικό ξεκλείδωμα δεν είναι διαθέσιμο λόγω εσφαλμένων ρυθμίσεων αρχείων συστήματος."
+  },
+  "biometricsStatusHelptextManualSetupNeeded": {
+    "message": "Το βιομετρικό ξεκλείδωμα δεν είναι διαθέσιμο λόγω εσφαλμένων ρυθμίσεων αρχείων συστήματος."
+  },
+  "biometricsStatusHelptextNotEnabledLocally": {
+    "message": "Το βιομετρικό ξεκλείδωμα δεν είναι διαθέσιμο επειδή δεν είναι ενεργοποιημένο για το $EMAIL$ στην εφαρμογή Bitwarden για υπολογιστές.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "mail@example.com"
+      }
+    }
+  },
+  "biometricsStatusHelptextUnavailableReasonUnknown": {
+    "message": "Το βιομετρικό ξεκλείδωμα δεν είναι διαθέσιμο για άγνωστο λόγο."
+  },
+  "authorize": {
+    "message": "Εξουσιοδότηση"
+  },
+  "deny": {
+    "message": "Απόρριψη"
+  },
+  "sshkeyApprovalTitle": {
+    "message": "Επιβεβαίωση χρήσης κλειδιού SSH"
+  },
+  "sshkeyApprovalMessageInfix": {
+    "message": "ζητά πρόσβαση σε"
+  },
+  "unknownApplication": {
+    "message": "Μια εφαρμογή"
+  },
+  "sshKeyPasswordUnsupported": {
+    "message": "Η εισαγωγή κλειδιών SSH που προστατεύονται με κωδικό πρόσβασης δεν υποστηρίζεται ακόμη"
+  },
+  "invalidSshKey": {
+    "message": "Το SSH κλειδί δεν είναι έγκυρο"
+  },
+  "sshKeyTypeUnsupported": {
+    "message": "Ο τύπος κλειδιού SSH δεν υποστηρίζεται"
+  },
+  "importSshKeyFromClipboard": {
+    "message": "Εισαγωγή κλειδιού από το πρόχειρο"
+  },
+  "sshKeyPasted": {
+    "message": "Το SSH κλειδί εισήχθη με επιτυχία"
+  },
   "fileSavedToDevice": {
     "message": "Το αρχείο αποθηκεύτηκε στη συσκευή. Διαχείριση από τις λήψεις της συσκευής σας."
+  },
+  "importantNotice": {
+    "message": "Σημαντική ειδοποίηση"
+  },
+  "setupTwoStepLogin": {
+    "message": "Ρύθμιση σύνδεσης δύο βημάτων"
+  },
+  "newDeviceVerificationNoticeContentPage1": {
+    "message": "Το Bitwarden θα στείλει έναν κωδικό στο email του λογαριασμού σας για να επαληθεύσει τις συνδέσεις από νέες συσκευές ξεκινώντας από τον Φεβρουάριο του 2025."
+  },
+  "newDeviceVerificationNoticeContentPage2": {
+    "message": "Μπορείτε να ορίσετε σύνδεση δύο βημάτων ως εναλλακτικό τρόπο προστασίας του λογαριασμού σας ή να αλλάξετε το email σας σε ένα που μπορείτε να έχετε πρόσβαση."
+  },
+  "remindMeLater": {
+    "message": "Υπενθύμιση αργότερα"
+  },
+  "newDeviceVerificationNoticePageOneFormContent": {
+    "message": "Έχετε αξιόπιστη πρόσβαση στο email σας, $EMAIL$;",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "your_name@email.com"
+      }
+    }
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessNo": {
+    "message": "Όχι, δεν έχω"
+  },
+  "newDeviceVerificationNoticePageOneEmailAccessYes": {
+    "message": "Ναι, μπορώ να συνδεθώ αξιόπιστα στο ηλ. ταχυδρομείο email μου"
+  },
+  "turnOnTwoStepLogin": {
+    "message": "Ενεργοποίηση σύνδεσης δύο βημάτων"
+  },
+  "changeAcctEmail": {
+    "message": "Αλλαγή email λογαριασμού"
+  },
+  "organizationUpgradeRequired": {
+    "message": "Απαιτείται αναβάθμιση οργανισμού"
+  },
+  "upgradeOrganization": {
+    "message": "Αναβάθμιση οργανισμού"
+  },
+  "upgradeOrganizationDesc": {
+    "message": "Αυτή η λειτουργία, δεν είναι διαθέσιμη στους δωρεάν οργανισμούς. Μεταβείτε σε ένα πακέτο επί πληρωμής για να ξεκλειδώσετε περισσότερες λειτουργίες."
+  },
+  "updateBrowserOrDisableFingerprintDialogTitle": {
+    "message": "Απαιτείται ενημέρωση επέκτασης"
+  },
+  "updateBrowserOrDisableFingerprintDialogMessage": {
+    "message": "Η επέκταση περιηγητή που χρησιμοποιείτε είναι ξεπερασμένη. Παρακαλούμε ενημερώστε την ή απενεργοποιήστε την επικύρωση δακτυλικών αποτυπωμάτων του προγράμματος περιήγησης στις ρυθμίσεις της εφαρμογής για την επιφάνεια εργασίας."
   }
 }

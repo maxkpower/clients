@@ -1,4 +1,4 @@
-import { CredentialAlgorithm, PasswordAlgorithm } from "./generator-type";
+import { EmailAlgorithm, PasswordAlgorithm, UsernameAlgorithm } from "./generator-type";
 
 export * from "./boundary";
 export * from "./catchall-generator-options";
@@ -6,6 +6,7 @@ export * from "./credential-generator";
 export * from "./credential-generator-configuration";
 export * from "./eff-username-generator-options";
 export * from "./forwarder-options";
+export * from "./generate-request";
 export * from "./generator-constraints";
 export * from "./generated-credential";
 export * from "./generator-options";
@@ -22,7 +23,7 @@ export * from "./word-options";
 /** Provided for backwards compatibility only.
  *  @deprecated Use one of the Algorithm types instead.
  */
-export type GeneratorType = CredentialAlgorithm;
+export type GeneratorType = PasswordAlgorithm | UsernameAlgorithm | EmailAlgorithm;
 
 /** Provided for backwards compatibility only.
  *  @deprecated Use one of the Algorithm types instead.

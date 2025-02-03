@@ -1,9 +1,20 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { coerceBooleanProperty } from "@angular/cdk/coercion";
 import { OnInit, Input, Output, EventEmitter, Component, OnDestroy } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
-import { BehaviorSubject, skip, takeUntil, Subject } from "rxjs";
+import {
+  BehaviorSubject,
+  skip,
+  takeUntil,
+  Subject,
+  map,
+  withLatestFrom,
+  ReplaySubject,
+} from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { UserId } from "@bitwarden/common/types/guid";
 import {
   Generators,
@@ -11,7 +22,7 @@ import {
   PassphraseGenerationOptions,
 } from "@bitwarden/generator-core";
 
-import { completeOnAccountSwitch, toValidators } from "./util";
+import { completeOnAccountSwitch } from "./util";
 
 const Controls = Object.freeze({
   numWords: "numWords",
@@ -29,11 +40,13 @@ export class PassphraseSettingsComponent implements OnInit, OnDestroy {
   /** Instantiates the component
    *  @param accountService queries user availability
    *  @param generatorService settings and policy logic
+   *  @param i18nService localize hints
    *  @param formBuilder reactive form controls
    */
   constructor(
     private formBuilder: FormBuilder,
     private generatorService: CredentialGeneratorService,
+    private i18nService: I18nService,
     private accountService: AccountService,
   ) {}
 
@@ -71,29 +84,34 @@ export class PassphraseSettingsComponent implements OnInit, OnDestroy {
     const settings = await this.generatorService.settings(Generators.passphrase, { singleUserId$ });
 
     // skips reactive event emissions to break a subscription cycle
-    settings.pipe(takeUntil(this.destroyed$)).subscribe((s) => {
-      this.settings.patchValue(s, { emitEvent: false });
-    });
+    settings.withConstraints$
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe(({ state, constraints }) => {
+        this.settings.patchValue(state, { emitEvent: false });
+
+        let boundariesHint = this.i18nService.t(
+          "spinboxBoundariesHint",
+          constraints.numWords.min?.toString(),
+          constraints.numWords.max?.toString(),
+        );
+        if (state.numWords <= (constraints.numWords.recommendation ?? 0)) {
+          boundariesHint += this.i18nService.t(
+            "passphraseNumWordsRecommendationHint",
+            constraints.numWords.recommendation?.toString(),
+          );
+        }
+        this.numWordsBoundariesHint.next(boundariesHint);
+      });
 
     // the first emission is the current value; subsequent emissions are updates
     settings.pipe(skip(1), takeUntil(this.destroyed$)).subscribe(this.onUpdated);
 
-    // dynamic policy enforcement
+    // explain policy & disable policy-overridden fields
     this.generatorService
       .policy$(Generators.passphrase, { userId$: singleUserId$ })
       .pipe(takeUntil(this.destroyed$))
       .subscribe(({ constraints }) => {
-        this.settings
-          .get(Controls.numWords)
-          .setValidators(toValidators(Controls.numWords, Generators.passphrase, constraints));
-
-        this.settings
-          .get(Controls.wordSeparator)
-          .setValidators(toValidators(Controls.wordSeparator, Generators.passphrase, constraints));
-
-        // forward word boundaries to the template (can't do it through the rx form)
-        this.minNumWords = constraints.numWords.min;
-        this.maxNumWords = constraints.numWords.max;
+        this.wordSeparatorMaxLength = constraints.wordSeparator.maxLength;
         this.policyInEffect = constraints.policyInEffect;
 
         this.toggleEnabled(Controls.capitalize, !constraints.capitalize?.readonly);
@@ -101,17 +119,30 @@ export class PassphraseSettingsComponent implements OnInit, OnDestroy {
       });
 
     // now that outputs are set up, connect inputs
-    this.settings.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe(settings);
+    this.saveSettings
+      .pipe(
+        withLatestFrom(this.settings.valueChanges),
+        map(([, settings]) => settings),
+        takeUntil(this.destroyed$),
+      )
+      .subscribe(settings);
   }
 
-  /** attribute binding for numWords[min] */
-  protected minNumWords: number;
+  /** attribute binding for wordSeparator[maxlength] */
+  protected wordSeparatorMaxLength: number;
 
-  /** attribute binding for numWords[max] */
-  protected maxNumWords: number;
+  private saveSettings = new Subject<string>();
+  save(site: string = "component api call") {
+    this.saveSettings.next(site);
+  }
 
   /** display binding for enterprise policy notice */
   protected policyInEffect: boolean;
+
+  private numWordsBoundariesHint = new ReplaySubject<string>(1);
+
+  /** display binding for min/max constraints of `numWords` */
+  protected numWordsBoundariesHint$ = this.numWordsBoundariesHint.asObservable();
 
   private toggleEnabled(setting: keyof typeof Controls, enabled: boolean) {
     if (enabled) {
@@ -136,6 +167,7 @@ export class PassphraseSettingsComponent implements OnInit, OnDestroy {
 
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void {
+    this.destroyed$.next();
     this.destroyed$.complete();
   }
 }

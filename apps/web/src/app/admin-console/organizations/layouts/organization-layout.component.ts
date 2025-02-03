@@ -1,7 +1,9 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, RouterModule } from "@angular/router";
-import { combineLatest, map, mergeMap, Observable, Subject, switchMap, takeUntil } from "rxjs";
+import { combineLatest, filter, firstValueFrom, map, Observable, switchMap } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import {
@@ -12,16 +14,18 @@ import {
   canAccessReportingTab,
   canAccessSettingsTab,
   canAccessVaultTab,
-  getOrganizationById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { PolicyType, ProviderStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { getById } from "@bitwarden/common/platform/misc";
 import { BannerModule, IconModule } from "@bitwarden/components";
 
 import { OrgSwitcherComponent } from "../../../layouts/org-switcher/org-switcher.component";
@@ -42,22 +46,20 @@ import { AdminConsoleLogo } from "../../icons/admin-console-logo";
     BannerModule,
   ],
 })
-export class OrganizationLayoutComponent implements OnInit, OnDestroy {
+export class OrganizationLayoutComponent implements OnInit {
   protected readonly logo = AdminConsoleLogo;
 
   protected orgFilter = (org: Organization) => canAccessOrgAdmin(org);
+  protected domainVerificationNavigationTextKey: string;
+
+  protected integrationPageEnabled$: Observable<boolean>;
 
   organization$: Observable<Organization>;
+  canAccessExport$: Observable<boolean>;
   showPaymentAndHistory$: Observable<boolean>;
   hideNewOrgButton$: Observable<boolean>;
   organizationIsUnmanaged$: Observable<boolean>;
-  isAccessIntelligenceFeatureEnabled = false;
-
-  private _destroy = new Subject<void>();
-
-  protected consolidatedBillingEnabled$ = this.configService.getFeatureFlag$(
-    FeatureFlag.EnableConsolidatedBilling,
-  );
+  enterpriseOrganization$: Observable<boolean>;
 
   constructor(
     private route: ActivatedRoute,
@@ -66,32 +68,27 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private policyService: PolicyService,
     private providerService: ProviderService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit() {
     document.body.classList.remove("layout_frontend");
 
-    this.isAccessIntelligenceFeatureEnabled = await this.configService.getFeatureFlag(
-      FeatureFlag.AccessIntelligence,
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    this.organization$ = this.route.params.pipe(
+      map((p) => p.organizationId),
+      switchMap((id) => this.organizationService.organizations$(userId).pipe(getById(id))),
+      filter((org) => org != null),
     );
 
-    this.organization$ = this.route.params
-      .pipe(takeUntil(this._destroy))
-      .pipe<string>(map((p) => p.organizationId))
-      .pipe(
-        mergeMap((id) => {
-          return this.organizationService.organizations$
-            .pipe(takeUntil(this._destroy))
-            .pipe(getOrganizationById(id));
-        }),
-      );
+    this.canAccessExport$ = this.organization$.pipe(map((org) => org.canAccessExport));
 
     this.showPaymentAndHistory$ = this.organization$.pipe(
       map(
         (org) =>
           !this.platformUtilsService.isSelfHost() &&
-          org?.canViewBillingHistory &&
-          org?.canEditPaymentMethods,
+          org.canViewBillingHistory &&
+          org.canEditPaymentMethods,
       ),
     );
 
@@ -101,24 +98,25 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
       switchMap((organization) => this.providerService.get$(organization.providerId)),
     );
 
-    this.organizationIsUnmanaged$ = combineLatest([
-      this.consolidatedBillingEnabled$,
-      this.organization$,
-      provider$,
-    ]).pipe(
+    this.organizationIsUnmanaged$ = combineLatest([this.organization$, provider$]).pipe(
       map(
-        ([consolidatedBillingEnabled, organization, provider]) =>
-          !consolidatedBillingEnabled ||
+        ([organization, provider]) =>
           !organization.hasProvider ||
           !provider ||
           provider.providerStatus !== ProviderStatusType.Billable,
       ),
     );
-  }
 
-  ngOnDestroy() {
-    this._destroy.next();
-    this._destroy.complete();
+    this.integrationPageEnabled$ = combineLatest(
+      this.organization$,
+      this.configService.getFeatureFlag$(FeatureFlag.PM14505AdminConsoleIntegrationPage),
+    ).pipe(map(([org, featureFlagEnabled]) => featureFlagEnabled && org.canAccessIntegrations));
+
+    this.domainVerificationNavigationTextKey = (await this.configService.getFeatureFlag(
+      FeatureFlag.AccountDeprovisioning,
+    ))
+      ? "claimedDomains"
+      : "domainVerification";
   }
 
   canShowVaultTab(organization: Organization): boolean {

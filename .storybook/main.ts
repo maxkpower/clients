@@ -1,7 +1,8 @@
 import { dirname, join } from "path";
+
 import { StorybookConfig } from "@storybook/angular";
-import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 import remarkGfm from "remark-gfm";
+import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 
 const config: StorybookConfig = {
   stories: [
@@ -29,6 +30,8 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-interactions"),
     {
+      // @storybook/addon-docs is part of @storybook/addon-essentials
+      // eslint-disable-next-line storybook/no-uninstalled-addons
       name: "@storybook/addon-docs",
       options: {
         mdxPluginOptions: {
@@ -57,6 +60,7 @@ const config: StorybookConfig = {
     return config;
   },
   docs: {},
+  staticDirs: ["../apps/web/src/images"],
 };
 
 export default config;

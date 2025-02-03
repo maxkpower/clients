@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { firstValueFrom, map, Observable, Subject, takeUntil } from "rxjs";
 
@@ -52,7 +54,11 @@ export class ShareComponent implements OnInit, OnDestroy {
     const allCollections = await this.collectionService.getAllDecrypted();
     this.writeableCollections = allCollections.map((c) => c).filter((c) => !c.readOnly);
 
-    this.organizations$ = this.organizationService.memberOrganizations$.pipe(
+    const userId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((account) => account?.id)),
+    );
+
+    this.organizations$ = this.organizationService.memberOrganizations$(userId).pipe(
       map((orgs) => {
         return orgs
           .filter((o) => o.enabled && o.status === OrganizationUserStatusType.Confirmed)

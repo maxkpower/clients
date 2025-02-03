@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { Component } from "@angular/core";
 import { UntypedFormBuilder } from "@angular/forms";
 import { Router } from "@angular/router";
@@ -7,14 +9,12 @@ import { FormValidationErrorsService } from "@bitwarden/angular/platform/abstrac
 import { LoginStrategyServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { DialogService, ToastService } from "@bitwarden/components";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { KeyService } from "@bitwarden/key-management";
 
 @Component({
   selector: "app-register",
@@ -30,11 +30,9 @@ export class RegisterComponent extends BaseRegisterComponent {
     loginStrategyService: LoginStrategyServiceAbstraction,
     router: Router,
     i18nService: I18nService,
-    cryptoService: CryptoService,
+    keyService: KeyService,
     apiService: ApiService,
-    stateService: StateService,
     platformUtilsService: PlatformUtilsService,
-    passwordGenerationService: PasswordGenerationServiceAbstraction,
     environmentService: EnvironmentService,
     logService: LogService,
     auditService: AuditService,
@@ -47,11 +45,9 @@ export class RegisterComponent extends BaseRegisterComponent {
       loginStrategyService,
       router,
       i18nService,
-      cryptoService,
+      keyService,
       apiService,
-      stateService,
       platformUtilsService,
-      passwordGenerationService,
       environmentService,
       logService,
       auditService,

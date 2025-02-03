@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { BehaviorSubject } from "rxjs";
 import { Jsonify } from "type-fest";
 
@@ -66,7 +68,7 @@ export class WebAuthnLoginStrategy extends LoginStrategy {
 
     if (masterKeyEncryptedUserKey) {
       // set the master key encrypted user key if it exists
-      await this.cryptoService.setMasterKeyEncryptedUserKey(masterKeyEncryptedUserKey, userId);
+      await this.keyService.setMasterKeyEncryptedUserKey(masterKeyEncryptedUserKey, userId);
     }
 
     const userDecryptionOptions = idTokenResponse?.userDecryptionOptions;
@@ -93,7 +95,7 @@ export class WebAuthnLoginStrategy extends LoginStrategy {
       );
 
       if (userKey) {
-        await this.cryptoService.setUserKey(new SymmetricCryptoKey(userKey) as UserKey, userId);
+        await this.keyService.setUserKey(new SymmetricCryptoKey(userKey) as UserKey, userId);
       }
     }
   }
@@ -102,7 +104,7 @@ export class WebAuthnLoginStrategy extends LoginStrategy {
     response: IdentityTokenResponse,
     userId: UserId,
   ): Promise<void> {
-    await this.cryptoService.setPrivateKey(
+    await this.keyService.setPrivateKey(
       response.privateKey ?? (await this.createKeyPairForOldAccount(userId)),
       userId,
     );

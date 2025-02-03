@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import {
   OrganizationUserUserDetailsResponse,
   CollectionAccessSelectionView,
@@ -25,6 +27,7 @@ export class OrganizationUserView {
    * True if this organizaztion user has been granted access to Secrets Manager, false otherwise.
    */
   accessSecretsManager: boolean;
+  managedByOrganization: boolean;
 
   collections: CollectionAccessSelectionView[] = [];
   groups: string[] = [];

@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
@@ -18,6 +20,7 @@ import {
   LinkModule,
 } from "@bitwarden/components";
 
+import { LoginEmailService } from "../../../common";
 import { AnonLayoutWrapperDataService } from "../../anon-layout/anon-layout-wrapper-data.service";
 import { RegistrationUserAddIcon } from "../../icons";
 import { RegistrationCheckEmailIcon } from "../../icons/registration-check-email.icon";
@@ -89,6 +92,7 @@ export class RegistrationStartComponent implements OnInit, OnDestroy {
     private platformUtilsService: PlatformUtilsService,
     private accountApiService: AccountApiService,
     private router: Router,
+    private loginEmailService: LoginEmailService,
     private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
   ) {
     this.isSelfHost = platformUtilsService.isSelfHost();
@@ -99,6 +103,15 @@ export class RegistrationStartComponent implements OnInit, OnDestroy {
     this.registrationStartStateChange.emit(this.state);
 
     this.listenForQueryParamChanges();
+
+    /**
+     * If the user has a login email, set the email field to the login email.
+     */
+    this.loginEmailService.loginEmail$.pipe(takeUntil(this.destroy$)).subscribe((email) => {
+      if (email) {
+        this.formGroup.patchValue({ email });
+      }
+    });
   }
 
   private listenForQueryParamChanges() {

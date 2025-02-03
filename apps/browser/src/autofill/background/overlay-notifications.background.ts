@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { startWith, Subject, Subscription, switchMap, timer } from "rxjs";
 import { pairwise } from "rxjs/operators";
 
@@ -333,7 +335,7 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
 
     const response = (await BrowserApi.tabSendMessage(
       tab,
-      { command: "getFormFieldDataForNotification" },
+      { command: "getInlineMenuFormFieldData" },
       { frameId },
     )) as OverlayNotificationsExtensionMessage;
     if (response) {
@@ -471,7 +473,7 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
   private shouldTriggerChangePasswordNotification = (
     modifyLoginData: ModifyLoginCipherFormData,
   ) => {
-    return modifyLoginData.newPassword && !modifyLoginData.username;
+    return modifyLoginData?.newPassword && !modifyLoginData.username;
   };
 
   /**
@@ -480,7 +482,7 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
    * @param modifyLoginData - The modified login form data
    */
   private shouldTriggerAddLoginNotification = (modifyLoginData: ModifyLoginCipherFormData) => {
-    return modifyLoginData.username && (modifyLoginData.password || modifyLoginData.newPassword);
+    return modifyLoginData?.username && (modifyLoginData.password || modifyLoginData.newPassword);
   };
 
   /**
@@ -576,8 +578,20 @@ export class OverlayNotificationsBackground implements OverlayNotificationsBackg
    * @param changeInfo - The change info of the tab
    */
   private handleTabUpdated = (tabId: number, changeInfo: chrome.tabs.TabChangeInfo) => {
-    if (changeInfo.status === "loading" && this.websiteOriginsWithFields.has(tabId)) {
-      this.websiteOriginsWithFields.delete(tabId);
+    if (changeInfo.status !== "loading" || !changeInfo.url) {
+      return;
     }
+
+    const originPatterns = this.websiteOriginsWithFields.get(tabId);
+    if (!originPatterns) {
+      return;
+    }
+
+    const matchPatters = generateDomainMatchPatterns(changeInfo.url);
+    if (matchPatters.some((pattern) => originPatterns.has(pattern))) {
+      return;
+    }
+
+    this.websiteOriginsWithFields.delete(tabId);
   };
 }

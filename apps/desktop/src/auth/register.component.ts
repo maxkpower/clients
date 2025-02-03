@@ -8,14 +8,12 @@ import { LoginStrategyServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { DialogService, ToastService } from "@bitwarden/components";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { KeyService } from "@bitwarden/key-management";
 
 const BroadcasterSubscriptionId = "RegisterComponent";
 
@@ -30,11 +28,9 @@ export class RegisterComponent extends BaseRegisterComponent implements OnInit, 
     loginStrategyService: LoginStrategyServiceAbstraction,
     router: Router,
     i18nService: I18nService,
-    cryptoService: CryptoService,
+    keyService: KeyService,
     apiService: ApiService,
-    stateService: StateService,
     platformUtilsService: PlatformUtilsService,
-    passwordGenerationService: PasswordGenerationServiceAbstraction,
     environmentService: EnvironmentService,
     private broadcasterService: BroadcasterService,
     private ngZone: NgZone,
@@ -49,11 +45,9 @@ export class RegisterComponent extends BaseRegisterComponent implements OnInit, 
       loginStrategyService,
       router,
       i18nService,
-      cryptoService,
+      keyService,
       apiService,
-      stateService,
       platformUtilsService,
-      passwordGenerationService,
       environmentService,
       logService,
       auditService,

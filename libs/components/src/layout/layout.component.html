@@ -13,7 +13,7 @@
     >
   </nav>
 </div>
-<div class="tw-group tw-flex tw-w-full">
+<div class="tw-flex tw-w-full">
   <ng-content select="bit-side-nav, [slot=side-nav]"></ng-content>
   <main
     [id]="mainContentId"
@@ -33,8 +33,9 @@
       <div
         *ngIf="data.open"
         (click)="sideNavService.toggle()"
-        class="tw-pointer-events-auto tw-h-full tw-w-full"
+        class="tw-pointer-events-auto tw-size-full"
       ></div>
     </div>
   </main>
+  <ng-template [cdkPortalOutlet]="drawerPortal()"></ng-template>
 </div>

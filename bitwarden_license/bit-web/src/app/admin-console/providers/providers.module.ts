@@ -11,9 +11,7 @@ import { OssModule } from "@bitwarden/web-vault/app/oss.module";
 
 import {
   CreateClientDialogComponent,
-  NoClientsComponent,
   ManageClientNameDialogComponent,
-  ManageClientsComponent,
   ManageClientSubscriptionDialogComponent,
   ProviderBillingHistoryComponent,
   ProviderSubscriptionComponent,
@@ -21,7 +19,6 @@ import {
 } from "../../billing/providers";
 
 import { AddOrganizationComponent } from "./clients/add-organization.component";
-import { ClientsComponent } from "./clients/clients.component";
 import { CreateOrganizationComponent } from "./clients/create-organization.component";
 import { AcceptProviderComponent } from "./manage/accept-provider.component";
 import { AddEditMemberDialogComponent } from "./manage/dialogs/add-edit-member-dialog.component";
@@ -32,10 +29,12 @@ import { MembersComponent } from "./manage/members.component";
 import { UserAddEditComponent } from "./manage/user-add-edit.component";
 import { ProvidersLayoutComponent } from "./providers-layout.component";
 import { ProvidersRoutingModule } from "./providers-routing.module";
+import { ProvidersComponent } from "./providers.component";
 import { WebProviderService } from "./services/web-provider.service";
 import { AccountComponent } from "./settings/account.component";
 import { SetupProviderComponent } from "./setup/setup-provider.component";
 import { SetupComponent } from "./setup/setup.component";
+import { VerifyRecoverDeleteProviderComponent } from "./verify-recover-delete-provider.component";
 
 @NgModule({
   imports: [
@@ -57,7 +56,6 @@ import { SetupComponent } from "./setup/setup.component";
     AddOrganizationComponent,
     BulkConfirmDialogComponent,
     BulkRemoveDialogComponent,
-    ClientsComponent,
     CreateOrganizationComponent,
     EventsComponent,
     MembersComponent,
@@ -66,13 +64,13 @@ import { SetupComponent } from "./setup/setup.component";
     UserAddEditComponent,
     AddEditMemberDialogComponent,
     CreateClientDialogComponent,
-    NoClientsComponent,
-    ManageClientsComponent,
     ManageClientNameDialogComponent,
     ManageClientSubscriptionDialogComponent,
     ProviderBillingHistoryComponent,
     ProviderSubscriptionComponent,
     ProviderSubscriptionStatusComponent,
+    ProvidersComponent,
+    VerifyRecoverDeleteProviderComponent,
   ],
   providers: [WebProviderService],
 })

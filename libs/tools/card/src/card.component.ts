@@ -1,3 +1,5 @@
+// FIXME: Update this file to be type safe and remove this and next line
+// @ts-strict-ignore
 import { CommonModule } from "@angular/common";
 import { Component, Input } from "@angular/core";
 
@@ -11,7 +13,7 @@ import { TypographyModule } from "@bitwarden/components";
   imports: [CommonModule, TypographyModule, JslibModule],
   host: {
     class:
-      "tw-box-border tw-bg-background tw-block tw-text-main tw-border-solid tw-border tw-border-secondary-300 tw-border [&:not(bit-layout_*)]:tw-rounded-lg tw-p-6",
+      "tw-box-border tw-bg-background tw-block tw-text-main tw-border-solid tw-border tw-border-secondary-300 tw-border [&:not(bit-layout_*)]:tw-rounded-lg tw-rounded-lg tw-p-6",
   },
 })
 export class CardComponent {
