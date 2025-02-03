@@ -343,6 +343,7 @@ describe("VaultExportService", () => {
   });
 
   it("exported encrypted json contains folders", async () => {
+    cipherService.getAll.mockResolvedValue(UserCipherDomains.slice(0, 1));
     folderService.folders$.mockReturnValue(of(UserFolders));
     const actual = (await exportService.getExport("encrypted_json")) as string;
 
