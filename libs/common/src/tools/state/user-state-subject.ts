@@ -33,6 +33,7 @@ import { Account } from "../../auth/abstractions/account.service";
 import { EncString } from "../../platform/models/domain/enc-string";
 import { SingleUserState, UserKeyDefinition } from "../../platform/state";
 import { UserEncryptor } from "../cryptography/user-encryptor.abstraction";
+import { SemanticLogger } from "../log";
 import { anyComplete, pin, ready, withLatestReady } from "../rx";
 import { Constraints, SubjectConstraints, WithConstraints } from "../types";
 
@@ -41,10 +42,7 @@ import { unconstrained$ } from "./identity-state-constraint";
 import { isObjectKey, ObjectKey, toUserKeyDefinition } from "./object-key";
 import { isDynamic } from "./state-constraints-dependency";
 import { UserStateSubjectDependencies } from "./user-state-subject-dependencies";
-import {
-  SemanticLogger,
-  UserStateSubjectDependencyProvider,
-} from "./user-state-subject-dependency-provider";
+import { UserStateSubjectDependencyProvider } from "./user-state-subject-dependency-provider";
 
 type Constrained<State> = { constraints: Readonly<Constraints<State>>; state: State };
 

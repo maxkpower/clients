@@ -10,10 +10,8 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { StateProvider } from "@bitwarden/common/platform/state";
 import { KeyServiceLegacyEncryptorProvider } from "@bitwarden/common/tools/cryptography/key-service-legacy-encryptor-provider";
 import { LegacyEncryptorProvider } from "@bitwarden/common/tools/cryptography/legacy-encryptor-provider";
-import {
-  disabledSemanticLoggerProvider,
-  UserStateSubjectDependencyProvider,
-} from "@bitwarden/common/tools/state/user-state-subject-dependency-provider";
+import { disabledSemanticLoggerProvider } from "@bitwarden/common/tools/log";
+import { UserStateSubjectDependencyProvider } from "@bitwarden/common/tools/state/user-state-subject-dependency-provider";
 import {
   createRandomizer,
   CredentialGeneratorService,
