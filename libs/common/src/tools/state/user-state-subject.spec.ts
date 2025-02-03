@@ -13,12 +13,12 @@ import { GENERATOR_DISK, UserKeyDefinition } from "../../platform/state";
 import { UserId } from "../../types/guid";
 import { LegacyEncryptorProvider } from "../cryptography/legacy-encryptor-provider";
 import { UserEncryptor } from "../cryptography/user-encryptor.abstraction";
+import { disabledSemanticLoggerProvider } from "../log";
 import { PrivateClassifier } from "../private-classifier";
 import { StateConstraints } from "../types";
 
 import { ObjectKey } from "./object-key";
 import { UserStateSubject } from "./user-state-subject";
-import { disabledSemanticLoggerProvider } from "./user-state-subject-dependency-provider";
 
 const SomeUser = "some user" as UserId;
 const SomeAccount = {
