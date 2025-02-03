@@ -90,22 +90,21 @@ export class CredentialGeneratorService {
 
   /** Emits metadata concerning the provided generation algorithms
    *  @param category the category or categories of interest
-   *  @param dependences.userId$ when provided, the algorithms are filter to only
-   *   those matching the provided user's policy. Otherwise, emits the algorithms
-   *   available to the active user.
+   *  @param dependences.account$ algorithms are filtered to only
+   *   those matching the provided account's policy.
    *  @returns An observable that emits algorithm metadata.
    */
   algorithms$(
     category: CredentialCategory,
-    dependencies?: BoundDependency<"account", Account>,
+    dependencies: BoundDependency<"account", Account>,
   ): Observable<AlgorithmInfo[]>;
   algorithms$(
     category: CredentialCategory[],
-    dependencies?: BoundDependency<"account", Account>,
+    dependencies: BoundDependency<"account", Account>,
   ): Observable<AlgorithmInfo[]>;
   algorithms$(
     category: CredentialCategory | CredentialCategory[],
-    dependencies?: BoundDependency<"account", Account>,
+    dependencies: BoundDependency<"account", Account>,
   ) {
     // any cast required here because TypeScript fails to bind `category`
     // to the union-typed overload of `algorithms`.
@@ -202,9 +201,7 @@ export class CredentialGeneratorService {
 
   /** Get the settings for the provided configuration
    * @param configuration determines which generator's settings are loaded
-   * @param dependencies.userId$ identifies the user to which the settings are bound.
-   *   If this parameter is not provided, the observable follows the active user and
-   *   may not complete.
+   * @param dependencies.account$ identifies the account to which the settings are bound.
    * @returns an observable that emits settings
    * @remarks the observable enforces policies on the settings
    */
@@ -227,7 +224,7 @@ export class CredentialGeneratorService {
   }
 
   /** Get a subject bound to credential generator preferences.
-   *  @param dependencies.singleUserId$ identifies the user to which the preferences are bound
+   *  @param dependencies.account$ identifies the account to which the preferences are bound
    *  @returns a subject bound to the user's preferences
    *  @remarks Preferences determine which algorithms are used when generating a
    *   credential from a credential category (e.g. `PassX` or `Username`). Preferences
@@ -245,7 +242,7 @@ export class CredentialGeneratorService {
 
   /** Get a subject bound to a specific user's settings
    * @param configuration determines which generator's settings are loaded
-   * @param dependencies.singleUserId$ identifies the user to which the settings are bound
+   * @param dependencies.account$ identifies the account to which the settings are bound
    * @returns a subject bound to the requested user's generator settings
    * @remarks the subject enforces policy for the settings
    */
@@ -264,8 +261,8 @@ export class CredentialGeneratorService {
   }
 
   /** Get the policy constraints for the provided configuration
-   *  @param dependencies.userId$ determines which user's policy is loaded
-   *  @returns an observable that emits the policy once `dependencies.userId$`
+   *  @param dependencies.account$ determines which user's policy is loaded
+   *  @returns an observable that emits the policy once `dependencies.account$`
    *   and the policy become available.
    */
   policy$<Settings, Policy>(

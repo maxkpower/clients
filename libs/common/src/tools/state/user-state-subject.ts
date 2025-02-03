@@ -99,7 +99,7 @@ export class UserStateSubject<
    *   this becomes true. When this occurs, only the last-received update
    *   is applied. The blocked update is kept in memory. It does not persist
    *   to disk.
-   * @param dependencies.singleUserId$ writes block until the singleUserId$
+   * @param dependencies.account$ writes block until the account$
    *   is available.
    */
   constructor(
