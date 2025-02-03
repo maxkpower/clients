@@ -590,6 +590,16 @@ jobs:
             --file $HOME/secrets/bitwarden_desktop_appstore.provisionprofile \
             --output none
 
+          az storage blob download --account-name $ACCOUNT_NAME --container-name $CONTAINER_NAME \
+            --name bitwarden_desktop_autofill_app_store_2024.provisionprofile \
+            --file $HOME/secrets/bitwarden_desktop_autofill_app_store_2024.provisionprofile \
+            --output none
+            
+          az storage blob download --account-name $ACCOUNT_NAME --container-name $CONTAINER_NAME \
+            --name Bitwarden_Desktop_App_Store_2024_w_autofill.provisionprofile \
+            --file $HOME/secrets/Bitwarden_Desktop_App_Store_2024_w_autofill.provisionprofile \
+            --output none
+
       - name: Get certificates
         run: |
           mkdir -p $HOME/certificates
@@ -1462,8 +1472,8 @@ jobs:
           # ls -l dist/mas-dev-universal/Bitwarden.app/Contents/PlugIns/safari.appex/Contents/embedded.provisionprofile
           # ls -l dist/mas-dev-universal/Bitwarden.app/Contents/PlugIns/autofill-extension.appex/Contents/embedded.provisionprofile
 
-          codesign --entitlements resources/entitlements.mas.plist --verbose --timestamp --options runtime --force --sign "E7C9978F6FBCE0553429185C405E61F5380BE8EB" dist/mas-dev-universal/Bitwarden.app/Contents/Plugins/safari.appex
-          codesign --entitlements resources/entitlements.mas.plist --verbose --timestamp --options runtime --force --sign "E7C9978F6FBCE0553429185C405E61F5380BE8EB" dist/mas-dev-universal/Bitwarden.app/Contents/Plugins/autofill-extension.appex
+          codesign --entitlements resources/entitlements.mas.plist --verbose --timestamp --force --sign "E7C9978F6FBCE0553429185C405E61F5380BE8EB" dist/mas-dev-universal/Bitwarden.app/Contents/Plugins/safari.appex
+          codesign --entitlements resources/entitlements.mas.plist --verbose --timestamp --force --sign "E7C9978F6FBCE0553429185C405E61F5380BE8EB" dist/mas-dev-universal/Bitwarden.app/Contents/Plugins/autofill-extension.appex
           codesign --entitlements resources/entitlements.mas.plist --verbose --timestamp --options runtime --force --sign "E7C9978F6FBCE0553429185C405E61F5380BE8EB" dist/mas-dev-universal/Bitwarden.app
           #codesign --entitlements resources/entitlements.mas.plist --deep --verbose --options runtime --force --sign "Developer ID Application: 8bit Solutions LLC (LTZ2PFU5D6)" dist/mas-dev-universal/Bitwarden.app
 
