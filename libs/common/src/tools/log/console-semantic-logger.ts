@@ -5,7 +5,16 @@ import { LogLevelType } from "../../platform/enums";
 import { SemanticLoggerSettings } from "./semantic-logger-settings";
 import { SemanticLogger } from "./semantic-logger.abstraction";
 
-export class ConsoleSemanticLogger<Context> implements SemanticLogger {
+/** Sends semantic logs to the console.
+ *  @remarks the behavior of this logger is based on `LogService`; it
+ *   replaces dynamic messages (`%s`) with a JSON-formatted semantic log.
+ */
+export class ConsoleSemanticLogger<Context extends object> implements SemanticLogger {
+  /** Instantiates a console semantic logger
+   *  @param context a static payload that is cloned when the logger
+   *   logs a message. The `messages`, `level`, and `content` fields
+   *   are reserved for use by loggers.
+   */
   constructor(
     context: Jsonify<Context>,
     private settings: SemanticLoggerSettings,
@@ -31,7 +40,7 @@ export class ConsoleSemanticLogger<Context> implements SemanticLogger {
     this.log(content, LogLevelType.Error, message);
   }
 
-  panic<T>(content: Jsonify<T>, message?: string): void {
+  panic<T>(content: Jsonify<T>, message?: string): never {
     this.log(content, LogLevelType.Error, message);
     throw new Error(message);
   }
