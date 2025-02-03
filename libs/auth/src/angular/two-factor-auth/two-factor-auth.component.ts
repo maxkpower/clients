@@ -13,6 +13,7 @@ import {
   UserDecryptionOptionsServiceAbstraction,
   TrustedDeviceUserDecryptionOption,
   UserDecryptionOptions,
+  LoginSuccessHandlerService,
 } from "@bitwarden/auth/common";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
@@ -143,6 +144,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private destroyRef: DestroyRef,
     private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
     private environmentService: EnvironmentService,
+    private loginSuccessHandlerService: LoginSuccessHandlerService,
   ) {}
 
   async ngOnInit() {
@@ -364,7 +366,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     }
 
     // User is fully logged in so handle any post login logic before executing navigation
-    await this.syncService.fullSync(true);
+    await this.loginSuccessHandlerService.run(authResult.userId);
     this.loginEmailService.clearValues();
 
     // Save off the OrgSsoIdentifier for use in the TDE flows
