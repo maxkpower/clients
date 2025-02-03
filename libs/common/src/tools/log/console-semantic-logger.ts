@@ -42,7 +42,9 @@ export class ConsoleSemanticLogger<Context extends object> implements SemanticLo
 
   panic<T>(content: Jsonify<T>, message?: string): never {
     this.log(content, LogLevelType.Error, message);
-    throw new Error(message);
+    const panicMessage =
+      message ?? (typeof content === "string" ? content : "a fatal error occurred");
+    throw new Error(panicMessage);
   }
 
   private log<T>(content: Jsonify<T>, level: LogLevelType, message?: string) {
@@ -57,7 +59,7 @@ export class ConsoleSemanticLogger<Context extends object> implements SemanticLo
       level,
     };
 
-    if (typeof content == "string" && !message) {
+    if (typeof content === "string" && !message) {
       log.message = content;
       delete log.content;
     }
