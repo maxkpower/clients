@@ -1,9 +1,9 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ActivatedRoute } from "@angular/router";
-import { Subject } from "rxjs";
-import { first, takeUntil } from "rxjs/operators";
+import { first } from "rxjs/operators";
 
 import { PlanType, ProductTierType, ProductType } from "@bitwarden/common/billing/enums";
 
@@ -16,19 +16,13 @@ import { SharedModule } from "../../shared";
   standalone: true,
   imports: [SharedModule, OrganizationPlansComponent, HeaderModule],
 })
-// eslint-disable-next-line rxjs-angular/prefer-takeuntil
-export class CreateOrganizationComponent implements OnInit, OnDestroy {
-  @ViewChild(OrganizationPlansComponent, { static: true })
-  orgPlansComponent: OrganizationPlansComponent;
-  private destroy$ = new Subject<void>();
-  secretsManager = false;
-  plan: PlanType = PlanType.Free;
-  productTier: ProductTierType = ProductTierType.Free;
+export class CreateOrganizationComponent {
+  protected secretsManager = false;
+  protected plan: PlanType = PlanType.Free;
+  protected productTier: ProductTierType = ProductTierType.Free;
 
-  constructor(private route: ActivatedRoute) {}
-
-  ngOnInit() {
-    this.route.queryParams.pipe(first(), takeUntil(this.destroy$)).subscribe((qParams) => {
+  constructor(private route: ActivatedRoute) {
+    this.route.queryParams.pipe(first(), takeUntilDestroyed()).subscribe((qParams) => {
       if (qParams.plan === "families" || qParams.productTier == ProductTierType.Families) {
         this.plan = PlanType.FamiliesAnnually;
         this.productTier = ProductTierType.Families;
@@ -51,10 +45,5 @@ export class CreateOrganizationComponent implements OnInit, OnDestroy {
 
       this.secretsManager = qParams.product == ProductType.SecretsManager;
     });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
