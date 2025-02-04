@@ -31,5 +31,5 @@ import {
   providers: [],
 })
 export class TwoFactorAuthAuthenticatorComponent {
-  @Input() tokenFormControl: FormControl | undefined = undefined;
+  @Input({ required: true }) tokenFormControl: FormControl | undefined = undefined;
 }

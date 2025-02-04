@@ -43,7 +43,7 @@ import { TwoFactorAuthEmailComponentService } from "./two-factor-auth-email-comp
   providers: [],
 })
 export class TwoFactorAuthEmailComponent implements OnInit {
-  @Input() tokenFormControl: FormControl | undefined = undefined;
+  @Input({ required: true }) tokenFormControl: FormControl | undefined = undefined;
 
   twoFactorEmail: string | undefined = undefined;
   emailPromise: Promise<any> | undefined = undefined;
