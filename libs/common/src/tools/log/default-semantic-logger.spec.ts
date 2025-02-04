@@ -7,7 +7,7 @@ import { DefaultSemanticLogger } from "./default-semantic-logger";
 
 const logger = mock<LogService>();
 
-describe("ConsoleLogService", () => {
+describe("DefaultSemanticLogger", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
