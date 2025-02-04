@@ -13,6 +13,7 @@ import {
 } from "@angular/core";
 import { ReactiveFormsModule, UntypedFormBuilder, Validators } from "@angular/forms";
 import {
+  BehaviorSubject,
   combineLatest,
   firstValueFrom,
   map,
@@ -56,7 +57,8 @@ import {
   SelectModule,
   ToastService,
 } from "@bitwarden/components";
-import { PasswordGenerationServiceAbstraction } from "@bitwarden/generator-legacy";
+import { GeneratorServicesModule } from "@bitwarden/generator-components";
+import { CredentialGeneratorService, GenerateRequest, Generators } from "@bitwarden/generator-core";
 import { VaultExportServiceAbstraction } from "@bitwarden/vault-export-core";
 
 import { EncryptedExportType } from "../enums/encrypted-export-type.enum";
@@ -81,6 +83,7 @@ import { ExportScopeCalloutComponent } from "./export-scope-callout.component";
     ExportScopeCalloutComponent,
     UserVerificationDialogComponent,
     PasswordStrengthV2Component,
+    GeneratorServicesModule,
   ],
 })
 export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -181,7 +184,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     protected toastService: ToastService,
     protected exportService: VaultExportServiceAbstraction,
     protected eventCollectionService: EventCollectionService,
-    protected passwordGenerationService: PasswordGenerationServiceAbstraction,
+    protected generatorService: CredentialGeneratorService,
     private platformUtilsService: PlatformUtilsService,
     private policyService: PolicyService,
     private logService: LogService,
@@ -302,10 +305,13 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   generatePassword = async () => {
-    const [options] = await this.passwordGenerationService.getOptions();
-    const generatedPassword = await this.passwordGenerationService.generatePassword(options);
-    this.exportForm.get("filePassword").setValue(generatedPassword);
-    this.exportForm.get("confirmFilePassword").setValue(generatedPassword);
+    const on$ = new BehaviorSubject<GenerateRequest>({ source: "export" });
+    const generatedCredential = await firstValueFrom(
+      this.generatorService.generate$(Generators.password, { on$ }),
+    );
+
+    this.exportForm.get("filePassword").setValue(generatedCredential.credential);
+    this.exportForm.get("confirmFilePassword").setValue(generatedCredential.credential);
   };
 
   submit = async () => {
