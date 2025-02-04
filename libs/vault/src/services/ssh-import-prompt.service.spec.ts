@@ -46,6 +46,7 @@ describe("SshImportPromptService", () => {
       platformUtilsService,
       i18nService,
     );
+    jest.clearAllMocks();
   });
 
   describe("importSshKeyFromClipboard()", () => {
@@ -70,17 +71,41 @@ describe("SshImportPromptService", () => {
     });
 
     it("cancels when no password was provided", async () => {
-      jest
-        .spyOn(sdkInternal, "import_ssh_key")
-        .mockImplementationOnce(() => {
-          throw { variant: "PasswordRequired" };
-        })
-        .mockImplementationOnce(() => exampleSshKey);
+      jest.spyOn(sdkInternal, "import_ssh_key").mockImplementationOnce(() => {
+        throw { variant: "PasswordRequired" };
+      });
       dialogService.open.mockReturnValue({ closed: new BehaviorSubject("") } as any);
       platformUtilsService.readFromClipboard.mockResolvedValue("ssh_key");
 
       expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(null);
       expect(dialogService.open).toHaveBeenCalled();
+    });
+
+    it("passes through error on no password", async () => {
+      jest.spyOn(sdkInternal, "import_ssh_key").mockImplementationOnce(() => {
+        throw { variant: "UnsupportedKeyType" };
+      });
+      platformUtilsService.readFromClipboard.mockResolvedValue("ssh_key");
+
+      expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(null);
+      expect(i18nService.t).toHaveBeenCalledWith("sshKeyTypeUnsupported");
+    });
+
+    it("passes through error with password", async () => {
+      jest
+        .spyOn(sdkInternal, "import_ssh_key")
+        .mockClear()
+        .mockImplementationOnce(() => {
+          throw { variant: "PasswordRequired" };
+        })
+        .mockImplementationOnce(() => {
+          throw { variant: "UnsupportedKeyType" };
+        });
+      platformUtilsService.readFromClipboard.mockResolvedValue("ssh_key");
+      dialogService.open.mockReturnValue({ closed: new BehaviorSubject("password") } as any);
+
+      expect(await sshImportPromptService.importSshKeyFromClipboard()).toEqual(null);
+      expect(i18nService.t).toHaveBeenCalledWith("sshKeyTypeUnsupported");
     });
   });
 });
