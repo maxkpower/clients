@@ -43,7 +43,6 @@ import { EventType } from "@bitwarden/common/enums";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
-import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import {
   AsyncActionsModule,
@@ -185,7 +184,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     protected exportService: VaultExportServiceAbstraction,
     protected eventCollectionService: EventCollectionService,
     protected generatorService: CredentialGeneratorService,
-    private platformUtilsService: PlatformUtilsService,
     private policyService: PolicyService,
     private logService: LogService,
     private formBuilder: UntypedFormBuilder,
