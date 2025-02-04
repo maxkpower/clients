@@ -22,7 +22,7 @@
 
     <app-two-factor-auth-duo
       (tokenEmitter)="submit($event)"
-      [providerData]="providerData"
+      [providerData]="selectedProviderData"
       *ngIf="
         selectedProviderType === providerType.OrganizationDuo ||
         selectedProviderType === providerType.Duo
@@ -76,6 +76,7 @@
         buttonType="secondary"
         bitButton
         bitFormButton
+        *ngIf="twoFactorProviders?.size > 1"
         (click)="selectOtherTwofactorMethod()"
       >
         <span> {{ "selectAnotherMethod" | i18n }} </span>

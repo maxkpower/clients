@@ -24,7 +24,6 @@ import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-p
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
-import { TwoFactorProviders } from "@bitwarden/common/auth/services/two-factor.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -90,11 +89,12 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   orgSsoIdentifier: string | undefined = undefined;
   inSsoFlow = false;
 
-  providers = TwoFactorProviders;
   providerType = TwoFactorProviderType;
   selectedProviderType: TwoFactorProviderType = TwoFactorProviderType.Authenticator;
+
   // TODO: PM-17176 - build more specific type for 2FA metadata
-  providerData: { [key: string]: string } | undefined;
+  twoFactorProviders: Map<TwoFactorProviderType, { [key: string]: string }> | null = null;
+  selectedProviderData: { [key: string]: string } | undefined;
 
   @ViewChild("duoComponent") duoComponent!: TwoFactorAuthDuoComponent;
 
@@ -154,7 +154,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.listenForAuthnSessionTimeout();
 
     await this.setSelected2faProviderType();
-    await this.set2faProviderData();
+    await this.set2faProvidersAndData();
     await this.setAnonLayoutDataByTwoFactorProviderType();
 
     await this.twoFactorAuthComponentService.extendPopupWidthIfRequired?.(
@@ -182,11 +182,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     this.selectedProviderType = await this.twoFactorService.getDefaultProvider(webAuthnSupported);
   }
 
-  private async set2faProviderData() {
-    const providerData = await this.twoFactorService.getProviders().then((providers) => {
-      return providers?.get(this.selectedProviderType);
-    });
-    this.providerData = providerData;
+  private async set2faProvidersAndData() {
+    this.twoFactorProviders = await this.twoFactorService.getProviders();
+    const providerData = this.twoFactorProviders?.get(this.selectedProviderType);
+    this.selectedProviderData = providerData;
   }
 
   private listenForAuthnSessionTimeout() {
@@ -278,7 +277,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
       const providerData = await this.twoFactorService.getProviders().then((providers) => {
         return providers?.get(response.type);
       });
-      this.providerData = providerData;
+      this.selectedProviderData = providerData;
       this.selectedProviderType = response.type;
       await this.setAnonLayoutDataByTwoFactorProviderType();
 
