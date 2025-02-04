@@ -1,23 +1,23 @@
 import { Jsonify } from "type-fest";
 
+import { LogService } from "../../platform/abstractions/log.service";
 import { LogLevelType } from "../../platform/enums";
 
-import { SemanticLoggerSettings } from "./semantic-logger-settings";
 import { SemanticLogger } from "./semantic-logger.abstraction";
 
 /** Sends semantic logs to the console.
  *  @remarks the behavior of this logger is based on `LogService`; it
  *   replaces dynamic messages (`%s`) with a JSON-formatted semantic log.
  */
-export class ConsoleSemanticLogger<Context extends object> implements SemanticLogger {
+export class DefaultSemanticLogger<Context extends object> implements SemanticLogger {
   /** Instantiates a console semantic logger
    *  @param context a static payload that is cloned when the logger
    *   logs a message. The `messages`, `level`, and `content` fields
    *   are reserved for use by loggers.
    */
   constructor(
+    private logger: LogService,
     context: Jsonify<Context>,
-    private settings: SemanticLoggerSettings,
   ) {
     this.context = context && typeof context === "object" ? context : {};
   }
@@ -48,10 +48,6 @@ export class ConsoleSemanticLogger<Context extends object> implements SemanticLo
   }
 
   private log<T>(content: Jsonify<T>, level: LogLevelType, message?: string) {
-    if (this.settings.filter?.(level) ?? false) {
-      return;
-    }
-
     const log = {
       ...this.context,
       message,
@@ -64,25 +60,6 @@ export class ConsoleSemanticLogger<Context extends object> implements SemanticLo
       delete log.content;
     }
 
-    switch (level) {
-      case LogLevelType.Debug:
-        // eslint-disable-next-line
-        console.log(log);
-        break;
-      case LogLevelType.Info:
-        // eslint-disable-next-line
-        console.log(log);
-        break;
-      case LogLevelType.Warning:
-        // eslint-disable-next-line
-        console.warn(log);
-        break;
-      case LogLevelType.Error:
-        // eslint-disable-next-line
-        console.error(log);
-        break;
-      default:
-        break;
-    }
+    this.logger.write(level, log);
   }
 }
