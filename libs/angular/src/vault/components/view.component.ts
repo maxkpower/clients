@@ -528,6 +528,7 @@ export class ViewComponent implements OnDestroy, OnInit {
     this.showCardNumber = false;
     this.showCardCode = false;
     this.passwordReprompted = false;
+    this.destroyed$.next();
     if (this.totpInterval) {
       clearInterval(this.totpInterval);
     }
