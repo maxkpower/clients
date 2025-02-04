@@ -9,6 +9,7 @@ export enum FeatureFlag {
   AccountDeprovisioning = "pm-10308-account-deprovisioning",
   VerifiedSsoDomainEndpoint = "pm-12337-refactor-sso-details-endpoint",
   PM14505AdminConsoleIntegrationPage = "pm-14505-admin-console-integration-page",
+  LimitItemDeletion = "pm-15493-restrict-item-deletion-to-can-manage-permission",
 
   /* Autofill */
   BlockBrowserInjectionsByDomain = "block-browser-injections-by-domain",
@@ -23,8 +24,12 @@ export enum FeatureFlag {
   NotificationRefresh = "notification-refresh",
   UseTreeWalkerApiForPageDetailsCollection = "use-tree-walker-api-for-page-details-collection",
 
+  /* Tools */
   ItemShare = "item-share",
   GeneratorToolsModernization = "generator-tools-modernization",
+  CriticalApps = "pm-14466-risk-insights-critical-application",
+  EnableRiskInsightsNotifications = "enable-risk-insights-notifications",
+
   AC1795_UpdatedSubscriptionStatusSection = "AC-1795_updated-subscription-status-section",
   ExtensionRefresh = "extension-refresh",
   PersistPopupView = "persist-popup-view",
@@ -36,7 +41,6 @@ export enum FeatureFlag {
   SSHAgent = "ssh-agent",
   CipherKeyEncryption = "cipher-key-encryption",
   PM11901_RefactorSelfHostingLicenseUploader = "PM-11901-refactor-self-hosting-license-uploader",
-  CriticalApps = "pm-14466-risk-insights-critical-application",
   TrialPaymentOptional = "PM-8163-trial-payment",
   SecurityTasks = "security-tasks",
   NewDeviceVerificationTemporaryDismiss = "new-device-temporary-dismiss",
@@ -47,8 +51,7 @@ export enum FeatureFlag {
   PrivateKeyRegeneration = "pm-12241-private-key-regeneration",
   ResellerManagedOrgAlert = "PM-15814-alert-owners-of-reseller-managed-orgs",
   NewDeviceVerification = "new-device-verification",
-  EnableRiskInsightsNotifications = "enable-risk-insights-notifications",
-  limitItemDeletion = "pm-15493-restrict-item-deletion-to-can-manage-permission",
+  PM15179_AddExistingOrgsFromProviderPortal = "PM-15179-add-existing-orgs-from-provider-portal",
 }
 
 export type AllowedFeatureFlagTypes = boolean | number | string;
@@ -68,6 +71,7 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.AccountDeprovisioning]: FALSE,
   [FeatureFlag.VerifiedSsoDomainEndpoint]: FALSE,
   [FeatureFlag.PM14505AdminConsoleIntegrationPage]: FALSE,
+  [FeatureFlag.LimitItemDeletion]: FALSE,
 
   /* Autofill */
   [FeatureFlag.BlockBrowserInjectionsByDomain]: FALSE,
@@ -82,8 +86,12 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.NotificationRefresh]: FALSE,
   [FeatureFlag.UseTreeWalkerApiForPageDetailsCollection]: FALSE,
 
+  /* Tools */
   [FeatureFlag.ItemShare]: FALSE,
   [FeatureFlag.GeneratorToolsModernization]: FALSE,
+  [FeatureFlag.CriticalApps]: FALSE,
+  [FeatureFlag.EnableRiskInsightsNotifications]: FALSE,
+
   [FeatureFlag.AC1795_UpdatedSubscriptionStatusSection]: FALSE,
   [FeatureFlag.ExtensionRefresh]: FALSE,
   [FeatureFlag.PersistPopupView]: FALSE,
@@ -95,7 +103,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.SSHAgent]: FALSE,
   [FeatureFlag.CipherKeyEncryption]: FALSE,
   [FeatureFlag.PM11901_RefactorSelfHostingLicenseUploader]: FALSE,
-  [FeatureFlag.CriticalApps]: FALSE,
   [FeatureFlag.TrialPaymentOptional]: FALSE,
   [FeatureFlag.SecurityTasks]: FALSE,
   [FeatureFlag.NewDeviceVerificationTemporaryDismiss]: FALSE,
@@ -106,8 +113,7 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.PrivateKeyRegeneration]: FALSE,
   [FeatureFlag.ResellerManagedOrgAlert]: FALSE,
   [FeatureFlag.NewDeviceVerification]: FALSE,
-  [FeatureFlag.EnableRiskInsightsNotifications]: FALSE,
-  [FeatureFlag.limitItemDeletion]: FALSE,
+  [FeatureFlag.PM15179_AddExistingOrgsFromProviderPortal]: FALSE,
 } satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>;
 
 export type DefaultFeatureFlagValueType = typeof DefaultFeatureFlagValue;
