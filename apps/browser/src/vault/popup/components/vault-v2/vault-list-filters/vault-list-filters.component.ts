@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
-import { Subject, combineLatest, delay, map, take, takeUntil } from "rxjs";
+import { Subject, combineLatest, map, take, takeUntil } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ChipSelectComponent } from "@bitwarden/components";
@@ -45,10 +45,8 @@ export class VaultListFiltersComponent implements OnInit {
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
-    this.allFilters$.pipe(take(1), delay(0), takeUntil(this.destroy$)).subscribe(() => {
-      requestAnimationFrame(() => {
-        this.vaultListFilterLoadingStateService.emitFiltersLoaded();
-      });
+    this.allFilters$.pipe(take(1), takeUntil(this.destroy$)).subscribe(() => {
+      this.vaultListFilterLoadingStateService.emitFiltersLoaded();
     });
   }
 }
