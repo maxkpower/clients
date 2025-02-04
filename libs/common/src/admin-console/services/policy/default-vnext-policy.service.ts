@@ -1,6 +1,6 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { combineLatest, map, Observable, switchMap } from "rxjs";
+import { combineLatest, map, Observable, of, switchMap } from "rxjs";
 
 import { StateProvider } from "../../../platform/state";
 import { UserId } from "../../../types/guid";
@@ -85,8 +85,12 @@ export class vNextPolicyService implements vNextInternalPolicyService {
     });
   }
 
-  masterPasswordPolicyOptions$(userId: UserId): Observable<MasterPasswordPolicyOptions> {
-    return this.policies$(userId).pipe(
+  masterPasswordPolicyOptions$(
+    userId: UserId,
+    policies: Policy[],
+  ): Observable<MasterPasswordPolicyOptions> {
+    const policies$ = policies ? of(policies) : this.policies$(userId);
+    return policies$.pipe(
       map((obsPolicies) => {
         let enforcedOptions: MasterPasswordPolicyOptions = null;
         const filteredPolicies = obsPolicies.filter((p) => p.type === PolicyType.MasterPassword);
