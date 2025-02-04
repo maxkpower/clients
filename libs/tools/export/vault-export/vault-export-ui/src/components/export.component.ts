@@ -13,7 +13,6 @@ import {
 } from "@angular/core";
 import { ReactiveFormsModule, UntypedFormBuilder, Validators } from "@angular/forms";
 import {
-  BehaviorSubject,
   combineLatest,
   firstValueFrom,
   map,
@@ -177,6 +176,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private destroy$ = new Subject<void>();
   private onlyManagedCollections = true;
+  private onGenerate$ = new Subject<GenerateRequest>();
 
   constructor(
     protected i18nService: I18nService,
@@ -218,6 +218,17 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => this.adjustValidators());
 
     const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+
+    // Wire up the password generation for the password-protected export
+    this.generatorService
+      .generate$(Generators.password, { on$: this.onGenerate$ })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((generated) => {
+        this.exportForm.patchValue({
+          filePassword: generated.credential,
+          confirmFilePassword: generated.credential,
+        });
+      });
 
     if (this.organizationId) {
       this.organizations$ = this.organizationService
@@ -303,13 +314,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   generatePassword = async () => {
-    const on$ = new BehaviorSubject<GenerateRequest>({ source: "export" });
-    const generatedCredential = await firstValueFrom(
-      this.generatorService.generate$(Generators.password, { on$ }),
-    );
-
-    this.exportForm.get("filePassword").setValue(generatedCredential.credential);
-    this.exportForm.get("confirmFilePassword").setValue(generatedCredential.credential);
+    this.onGenerate$.next({ source: "export" });
   };
 
   submit = async () => {
