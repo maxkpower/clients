@@ -28,6 +28,7 @@ import { EnvironmentService } from "@bitwarden/common/platform/abstractions/envi
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { UserId } from "@bitwarden/common/types/guid";
 import {
   AsyncActionsModule,
   ButtonModule,
@@ -120,6 +121,7 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
   formPromise: Promise<any> | undefined;
 
   private authenticationSessionTimeoutRoute = "authentication-timeout";
+  private activeUserId: UserId | undefined = undefined;
 
   constructor(
     private loginStrategyService: LoginStrategyServiceAbstraction,
@@ -143,7 +145,11 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
     private environmentService: EnvironmentService,
     private loginSuccessHandlerService: LoginSuccessHandlerService,
-  ) {}
+  ) {
+    this.accountService.activeAccount$.pipe(takeUntilDestroyed()).subscribe((account) => {
+      this.activeUserId = account?.id;
+    });
+  }
 
   async ngOnInit() {
     this.inSsoFlow = this.activatedRoute.snapshot.queryParamMap.get("sso") === "true";
@@ -370,7 +376,10 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     // - TDE login decryption options component
     // - Browser SSO on extension open
     if (this.orgSsoIdentifier !== undefined) {
-      await this.ssoLoginService.setActiveUserOrganizationSsoIdentifier(this.orgSsoIdentifier);
+      await this.ssoLoginService.setActiveUserOrganizationSsoIdentifier(
+        this.orgSsoIdentifier,
+        this.activeUserId,
+      );
     }
 
     // note: this flow affects both TDE & standard users
