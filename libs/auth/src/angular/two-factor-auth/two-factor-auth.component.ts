@@ -29,7 +29,6 @@ import { EnvironmentService } from "@bitwarden/common/platform/abstractions/envi
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { SyncService } from "@bitwarden/common/platform/sync";
 import {
   AsyncActionsModule,
   ButtonModule,
@@ -140,7 +139,6 @@ export class TwoFactorAuthComponent implements OnInit, OnDestroy {
     @Inject(WINDOW) protected win: Window,
     private toastService: ToastService,
     private twoFactorAuthComponentService: TwoFactorAuthComponentService,
-    private syncService: SyncService,
     private destroyRef: DestroyRef,
     private anonLayoutWrapperDataService: AnonLayoutWrapperDataService,
     private environmentService: EnvironmentService,

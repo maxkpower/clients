@@ -15,6 +15,7 @@ import {
   FakeTrustedDeviceUserDecryptionOption as TrustedDeviceUserDecryptionOption,
   FakeUserDecryptionOptions as UserDecryptionOptions,
   UserDecryptionOptionsServiceAbstraction,
+  LoginSuccessHandlerService,
 } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
@@ -32,7 +33,6 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { SyncService } from "@bitwarden/common/platform/sync";
 import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
 import { UserId } from "@bitwarden/common/types/guid";
 import { DialogService, ToastService } from "@bitwarden/components";
@@ -42,7 +42,6 @@ import { AnonLayoutWrapperDataService } from "../anon-layout/anon-layout-wrapper
 import { TwoFactorAuthComponentService } from "./two-factor-auth-component.service";
 import { TwoFactorAuthComponent } from "./two-factor-auth.component";
 
-// TODO: get tests passing
 @Component({})
 class TestTwoFactorComponent extends TwoFactorAuthComponent {}
 
@@ -71,9 +70,9 @@ describe("TwoFactorComponent", () => {
   let mockDialogService: MockProxy<DialogService>;
   let mockToastService: MockProxy<ToastService>;
   let mockTwoFactorAuthCompService: MockProxy<TwoFactorAuthComponentService>;
-  let mockSyncService: MockProxy<SyncService>;
   let anonLayoutWrapperDataService: MockProxy<AnonLayoutWrapperDataService>;
   let mockEnvService: MockProxy<EnvironmentService>;
+  let mockLoginSuccessHandlerService: MockProxy<LoginSuccessHandlerService>;
 
   let mockUserDecryptionOpts: {
     noMasterPassword: UserDecryptionOptions;
@@ -110,9 +109,9 @@ describe("TwoFactorComponent", () => {
     mockTwoFactorAuthCompService = mock<TwoFactorAuthComponentService>();
     mockTwoFactorAuthCompService.handle2faSuccess = undefined;
 
-    mockSyncService = mock<SyncService>();
-
     mockEnvService = mock<EnvironmentService>();
+    mockLoginSuccessHandlerService = mock<LoginSuccessHandlerService>();
+
     anonLayoutWrapperDataService = mock<AnonLayoutWrapperDataService>();
 
     mockUserDecryptionOpts = {
@@ -194,9 +193,9 @@ describe("TwoFactorComponent", () => {
         { provide: DialogService, useValue: mockDialogService },
         { provide: ToastService, useValue: mockToastService },
         { provide: TwoFactorAuthComponentService, useValue: mockTwoFactorAuthCompService },
-        { provide: SyncService, useValue: mockSyncService },
         { provide: EnvironmentService, useValue: mockEnvService },
         { provide: AnonLayoutWrapperDataService, useValue: anonLayoutWrapperDataService },
+        { provide: LoginSuccessHandlerService, useValue: mockLoginSuccessHandlerService },
       ],
     });
 
@@ -217,7 +216,7 @@ describe("TwoFactorComponent", () => {
   const testChangePasswordOnSuccessfulLogin = () => {
     it("navigates to the component's defined change password route when user doesn't have a MP and key connector isn't enabled", async () => {
       // Act
-      await component.submit();
+      await component.submit("testToken");
 
       // Assert
       expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
@@ -232,7 +231,7 @@ describe("TwoFactorComponent", () => {
   const testForceResetOnSuccessfulLogin = (reasonString: string) => {
     it(`navigates to the component's defined forcePasswordResetRoute route when response.forcePasswordReset is ${reasonString}`, async () => {
       // Act
-      await component.submit();
+      await component.submit("testToken");
 
       // expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
       expect(mockRouter.navigate).toHaveBeenCalledWith(["update-temp-password"], {
@@ -252,9 +251,6 @@ describe("TwoFactorComponent", () => {
       );
 
       beforeEach(() => {
-        component.token = token;
-        component.remember = remember;
-
         selectedUserDecryptionOptions.next(mockUserDecryptionOpts.withMasterPassword);
 
         mockLoginStrategyService.currentAuthType$ = currentAuthTypeSubject.asObservable();
@@ -265,7 +261,7 @@ describe("TwoFactorComponent", () => {
         mockLoginStrategyService.logInTwoFactor.mockResolvedValue(new AuthResult());
 
         // Act
-        await component.submit();
+        await component.submit(token, remember);
 
         // Assert
         expect(mockLoginStrategyService.logInTwoFactor).toHaveBeenCalledWith(
@@ -281,7 +277,7 @@ describe("TwoFactorComponent", () => {
         const clearValuesSpy = jest.spyOn(mockLoginEmailService, "clearValues");
 
         // Act
-        await component.submit();
+        await component.submit(token, remember);
 
         // Assert
         expect(clearValuesSpy).toHaveBeenCalled();
@@ -307,7 +303,7 @@ describe("TwoFactorComponent", () => {
             mockUserDecryptionOpts.noMasterPasswordWithKeyConnector,
           );
 
-          await component.submit();
+          await component.submit(token, remember);
 
           expect(mockRouter.navigate).not.toHaveBeenCalledWith(["set-password"], {
             queryParams: {
@@ -341,7 +337,7 @@ describe("TwoFactorComponent", () => {
         mockLoginStrategyService.logInTwoFactor.mockResolvedValue(new AuthResult());
 
         // Act
-        await component.submit();
+        await component.submit("testToken");
 
         // Assert
         expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
@@ -362,7 +358,7 @@ describe("TwoFactorComponent", () => {
           currentAuthTypeSubject.next(authType);
 
           // Act
-          await component.submit();
+          await component.submit("testToken");
 
           // Assert
           expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
@@ -386,11 +382,6 @@ describe("TwoFactorComponent", () => {
       const token = "testToken";
       const remember = false;
 
-      beforeEach(() => {
-        component.token = token;
-        component.remember = remember;
-      });
-
       describe("Trusted Device Encryption scenarios", () => {
         describe("Given Trusted Device Encryption is enabled and user needs to set a master password", () => {
           beforeEach(() => {
@@ -404,7 +395,7 @@ describe("TwoFactorComponent", () => {
 
           it("navigates to the login-initiated route and sets correct flag when user doesn't have a MP and key connector isn't enabled", async () => {
             // Act
-            await component.submit();
+            await component.submit(token, remember);
 
             // Assert
             expect(mockMasterPasswordService.mock.setForceSetPasswordReason).toHaveBeenCalledWith(
@@ -452,7 +443,7 @@ describe("TwoFactorComponent", () => {
           });
 
           it("navigates to the login-initiated route when login is successful", async () => {
-            await component.submit();
+            await component.submit(token, remember);
 
             expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
             expect(mockRouter.navigate).toHaveBeenCalledWith(["login-initiated"]);
