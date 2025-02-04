@@ -17,7 +17,7 @@ import {
   tap,
 } from "rxjs";
 
-import { CollectionService, Collection, CollectionView } from "@bitwarden/admin-console/common";
+import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { DynamicTreeNode } from "@bitwarden/angular/vault/vault-filter/models/dynamic-tree-node.model";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -57,7 +57,7 @@ interface CachedFilterState {
 /** All available cipher filters */
 export type PopupListFilter = {
   organization: Organization | null;
-  collection: Collection | null;
+  collection: CollectionView | null;
   folder: FolderView | null;
   cipherType: CipherType | null;
 };
@@ -88,8 +88,9 @@ export class VaultPopupListFiltersService {
    * Observable for `filterForm` value
    */
   filters$ = this.filterForm.valueChanges.pipe(
-    startWith(INITIAL_FILTERS),
-  ) as Observable<PopupListFilter>;
+    startWith(this.filterForm.value),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
 
   /** Emits the number of applied filters. */
   numberOfAppliedFilters$ = this.filters$.pipe(
@@ -129,29 +130,52 @@ export class VaultPopupListFiltersService {
   private deserializeFilters(state: CachedFilterState): void {
     combineLatest([this.organizations$, this.collections$, this.folders$])
       .pipe(take(1))
-      .subscribe(([orgs, collections, folders]) => {
-        const patchValue: Partial<PopupListFilter> = {};
+      .subscribe(([orgOptions, collectionOptions, folderOptions]) => {
+        const patchValue: PopupListFilter = {
+          organization: null,
+          collection: null,
+          folder: null,
+          cipherType: null,
+        };
 
+        // Handle organization
         if (state.organizationId) {
-          patchValue.organization =
-            orgs.find((o) => o.value.id === state.organizationId)?.value || null;
+          if (state.organizationId === MY_VAULT_ID) {
+            patchValue.organization = { id: MY_VAULT_ID } as Organization;
+          } else {
+            const orgOption = orgOptions.find((o) => o.value.id === state.organizationId);
+            patchValue.organization = orgOption?.value || null;
+          }
         }
 
+        // Handle collection
         if (state.collectionId) {
-          patchValue.collection =
-            (collections.find((c) => c.value.id === state.collectionId)?.value as any) || null;
+          const collection = collectionOptions
+            .flatMap((c) => this.flattenOptions(c))
+            .find((c) => c.value.id === state.collectionId)?.value;
+          patchValue.collection = collection || null;
         }
 
+        // Handle folder
         if (state.folderId) {
-          patchValue.folder = folders.find((f) => f.value.id === state.folderId)?.value || null;
+          const folder = folderOptions
+            .flatMap((f) => this.flattenOptions(f))
+            .find((f) => f.value.id === state.folderId)?.value;
+          patchValue.folder = folder || null;
         }
 
+        // Handle cipher type
         if (state.cipherType) {
           patchValue.cipherType = state.cipherType;
         }
 
         this.filterForm.patchValue(patchValue, { emitEvent: false });
       });
+  }
+
+  // Add this helper method to flatten nested options
+  private flattenOptions<T>(option: ChipSelectOption<T>): ChipSelectOption<T>[] {
+    return [option, ...(option.children?.flatMap((c) => this.flattenOptions(c)) || [])];
   }
 
   constructor(
@@ -218,7 +242,7 @@ export class VaultPopupListFiltersService {
 
           if (
             filters.collection !== null &&
-            !cipher.collectionIds.includes(filters.collection.id)
+            !cipher.collectionIds?.includes(filters.collection.id)
           ) {
             return false;
           }

@@ -48,13 +48,11 @@ import { MY_VAULT_ID, VaultPopupListFiltersService } from "./vault-popup-list-fi
   providedIn: "root",
 })
 export class VaultPopupItemsService {
-  // Replace: private _searchText$ = new BehaviorSubject<string>("");
   private cachedSearchText = inject(PopupViewCacheService).signal({
     key: "vault-search-text",
     initialValue: "",
   });
 
-  // New observable for search text
   readonly searchText$ = toObservable(this.cachedSearchText);
 
   /**
@@ -288,7 +286,6 @@ export class VaultPopupItemsService {
     private accountService: AccountService,
   ) {}
 
-  // Update existing methods
   applyFilter(newSearchText: string) {
     this.cachedSearchText.set(newSearchText);
   }
