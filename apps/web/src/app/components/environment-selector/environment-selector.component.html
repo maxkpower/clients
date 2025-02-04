@@ -15,7 +15,7 @@
       {{ region.domain }}
     </a>
   </bit-menu>
-  <div class="tw-text-sm tw-text-muted">
+  <div bitTypography="body2">
     {{ "accessing" | i18n }}:
     <a [routerLink]="[]" [bitMenuTriggerFor]="environmentOptions">
       <b class="tw-text-primary-600 tw-font-semibold">{{ currentRegion?.domain }}</b>
