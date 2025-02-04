@@ -25,7 +25,6 @@ export enum FeatureFlag {
   UseTreeWalkerApiForPageDetailsCollection = "use-tree-walker-api-for-page-details-collection",
 
   ItemShare = "item-share",
-  GeneratorToolsModernization = "generator-tools-modernization",
   AC1795_UpdatedSubscriptionStatusSection = "AC-1795_updated-subscription-status-section",
   ExtensionRefresh = "extension-refresh",
   PersistPopupView = "persist-popup-view",
@@ -84,7 +83,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.UseTreeWalkerApiForPageDetailsCollection]: FALSE,
 
   [FeatureFlag.ItemShare]: FALSE,
-  [FeatureFlag.GeneratorToolsModernization]: FALSE,
   [FeatureFlag.AC1795_UpdatedSubscriptionStatusSection]: FALSE,
   [FeatureFlag.ExtensionRefresh]: FALSE,
   [FeatureFlag.PersistPopupView]: FALSE,
