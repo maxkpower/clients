@@ -1,16 +1,19 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { Injectable } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { FormBuilder } from "@angular/forms";
 import {
   combineLatest,
+  debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   Observable,
   shareReplay,
   startWith,
   switchMap,
+  take,
   tap,
 } from "rxjs";
 
@@ -38,9 +41,18 @@ import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 import { ServiceUtils } from "@bitwarden/common/vault/service-utils";
 import { ChipSelectOption } from "@bitwarden/components";
 
+import { PopupViewCacheService } from "../../../platform/popup/view-cache/popup-view-cache.service";
+
 const FILTER_VISIBILITY_KEY = new KeyDefinition<boolean>(VAULT_SETTINGS_DISK, "filterVisibility", {
   deserializer: (obj) => obj,
 });
+
+interface CachedFilterState {
+  organizationId?: string;
+  collectionId?: string;
+  folderId?: string;
+  cipherType?: CipherType;
+}
 
 /** All available cipher filters */
 export type PopupListFilter = {
@@ -105,6 +117,43 @@ export class VaultPopupListFiltersService {
 
   private activeUserId$ = this.accountService.activeAccount$.pipe(map((a) => a?.id));
 
+  private serializeFilters(): CachedFilterState {
+    return {
+      organizationId: this.filterForm.value.organization?.id,
+      collectionId: this.filterForm.value.collection?.id,
+      folderId: this.filterForm.value.folder?.id,
+      cipherType: this.filterForm.value.cipherType,
+    };
+  }
+
+  private deserializeFilters(state: CachedFilterState): void {
+    combineLatest([this.organizations$, this.collections$, this.folders$])
+      .pipe(take(1))
+      .subscribe(([orgs, collections, folders]) => {
+        const patchValue: Partial<PopupListFilter> = {};
+
+        if (state.organizationId) {
+          patchValue.organization =
+            orgs.find((o) => o.value.id === state.organizationId)?.value || null;
+        }
+
+        if (state.collectionId) {
+          patchValue.collection =
+            (collections.find((c) => c.value.id === state.collectionId)?.value as any) || null;
+        }
+
+        if (state.folderId) {
+          patchValue.folder = folders.find((f) => f.value.id === state.folderId)?.value || null;
+        }
+
+        if (state.cipherType) {
+          patchValue.cipherType = state.cipherType;
+        }
+
+        this.filterForm.patchValue(patchValue, { emitEvent: false });
+      });
+  }
+
   constructor(
     private folderService: FolderService,
     private cipherService: CipherService,
@@ -115,10 +164,37 @@ export class VaultPopupListFiltersService {
     private policyService: PolicyService,
     private stateProvider: StateProvider,
     private accountService: AccountService,
+    private viewCacheService: PopupViewCacheService,
   ) {
     this.filterForm.controls.organization.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(this.validateOrganizationChange.bind(this));
+
+    // Get the cached filter state
+    const cachedFilters = this.viewCacheService.signal<CachedFilterState>({
+      key: "vault-filters",
+      initialValue: {},
+      deserializer: (v) => v,
+    });
+
+    // Load initial state from cache
+    toObservable(cachedFilters)
+      .pipe(
+        take(1),
+        filter((state) => Object.keys(state).length > 0),
+      )
+      .subscribe((state) => this.deserializeFilters(state));
+
+    // Save changes to cache
+    this.filterForm.valueChanges
+      .pipe(
+        debounceTime(300),
+        map(() => this.serializeFilters()),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+      )
+      .subscribe((state) => {
+        cachedFilters.set(state);
+      });
   }
 
   /** Stored state for the visibility of the filters. */
