@@ -14,9 +14,8 @@ import {
 } from "rxjs";
 import { SemVer } from "semver";
 
-// FIXME: remove `src` and fix import
-// eslint-disable-next-line no-restricted-imports
-import { KeyService } from "../../../../key-management/src/abstractions/key.service";
+import { KeyService } from "@bitwarden/key-management";
+
 import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
 import { AccountService } from "../../auth/abstractions/account.service";
@@ -786,7 +785,7 @@ export class CipherService implements CipherServiceAbstraction {
     organizationId: string,
     collectionIds: string[],
     userId: UserId,
-  ): Promise<any> {
+  ): Promise<Cipher> {
     const attachmentPromises: Promise<any>[] = [];
     if (cipher.attachments != null) {
       cipher.attachments.forEach((attachment) => {
@@ -806,6 +805,7 @@ export class CipherService implements CipherServiceAbstraction {
     const response = await this.apiService.putShareCipher(cipher.id, request);
     const data = new CipherData(response, collectionIds);
     await this.upsert(data);
+    return new Cipher(data, cipher.localData);
   }
 
   async shareManyWithServer(
@@ -1077,7 +1077,11 @@ export class CipherService implements CipherServiceAbstraction {
     await this.delete(ids);
   }
 
-  async deleteAttachment(id: string, attachmentId: string): Promise<void> {
+  async deleteAttachment(
+    id: string,
+    revisionDate: string,
+    attachmentId: string,
+  ): Promise<CipherData> {
     let ciphers = await firstValueFrom(this.ciphers$);
     const cipherId = id as CipherId;
     // eslint-disable-next-line
@@ -1091,6 +1095,10 @@ export class CipherService implements CipherServiceAbstraction {
       }
     }
 
+    // Deleting the cipher updates the revision date on the server,
+    // Update the stored `revisionDate` to match
+    ciphers[cipherId].revisionDate = revisionDate;
+
     await this.clearCache();
     await this.encryptedCiphersState.update(() => {
       if (ciphers == null) {
@@ -1098,15 +1106,20 @@ export class CipherService implements CipherServiceAbstraction {
       }
       return ciphers;
     });
+
+    return ciphers[cipherId];
   }
 
-  async deleteAttachmentWithServer(id: string, attachmentId: string): Promise<void> {
+  async deleteAttachmentWithServer(id: string, attachmentId: string): Promise<CipherData> {
+    let cipherResponse = null;
     try {
-      await this.apiService.deleteCipherAttachment(id, attachmentId);
+      cipherResponse = await this.apiService.deleteCipherAttachment(id, attachmentId);
     } catch (e) {
       return Promise.reject((e as ErrorResponse).getSingleMessage());
     }
-    await this.deleteAttachment(id, attachmentId);
+    const cipherData = CipherData.fromJSON(cipherResponse?.cipher);
+
+    return await this.deleteAttachment(id, cipherData.revisionDate, attachmentId);
   }
 
   sortCiphersByLastUsed(a: CipherView, b: CipherView): number {
