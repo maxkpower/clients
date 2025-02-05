@@ -280,7 +280,8 @@ export class AddEditComponent extends BaseAddEditComponent implements OnInit, On
       return;
     }
 
-    this.totpCode = (await firstValueFrom(this.totpService.getCode$(this.cipher.login.totp))).code;
+    const totpResponse = await firstValueFrom(this.totpService.getCode$(this.cipher.login.totp));
+    this.totpCode = totpResponse.code;
     if (this.totpCode != null) {
       if (this.totpCode.length > 4) {
         const half = Math.floor(this.totpCode.length / 2);
