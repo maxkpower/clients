@@ -21,14 +21,12 @@ import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import { ToastService } from "@bitwarden/components";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
-// FIXME: remove `src` and fix import
-// eslint-disable-next-line no-restricted-imports
-import { InlineMenuFieldQualificationService } from "../../../../../browser/src/autofill/services/inline-menu-field-qualification.service";
 import {
   AutoFillOptions,
   AutofillService,
   PageDetail,
 } from "../../../autofill/services/abstractions/autofill.service";
+import { InlineMenuFieldQualificationService } from "../../../autofill/services/inline-menu-field-qualification.service";
 import { BrowserApi } from "../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../platform/popup/browser-popup-utils";
 
@@ -280,10 +278,10 @@ describe("VaultPopupAutofillService", () => {
 
         it("should close popup after a timeout for chromium browsers", async () => {
           mockPlatformUtilsService.isFirefox.mockReturnValue(false);
-          jest.spyOn(global, "requestAnimationFrame");
+          jest.spyOn(global, "setTimeout");
           await service.doAutofill(mockCipher);
           jest.advanceTimersByTime(50);
-          expect(requestAnimationFrame).toHaveBeenCalled();
+          expect(setTimeout).toHaveBeenCalledTimes(1);
           expect(BrowserApi.closePopup).toHaveBeenCalled();
         });
 

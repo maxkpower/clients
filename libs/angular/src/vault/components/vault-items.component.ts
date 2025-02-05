@@ -1,7 +1,8 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { BehaviorSubject, firstValueFrom, from, map, Subject, switchMap, takeUntil } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { BehaviorSubject, Subject, firstValueFrom, from, map, switchMap, takeUntil } from "rxjs";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -44,7 +45,12 @@ export class VaultItemsComponent implements OnInit, OnDestroy {
     protected searchService: SearchService,
     protected cipherService: CipherService,
     protected accountService: AccountService,
-  ) {}
+  ) {
+    this.cipherService.cipherViews$.pipe(takeUntilDestroyed()).subscribe((ciphers) => {
+      void this.doSearch(ciphers);
+      this.loaded = true;
+    });
+  }
 
   async ngOnInit() {
     this.userId = await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id)));
@@ -123,7 +129,7 @@ export class VaultItemsComponent implements OnInit, OnDestroy {
   protected deletedFilter: (cipher: CipherView) => boolean = (c) => c.isDeleted === this.deleted;
 
   protected async doSearch(indexedCiphers?: CipherView[]) {
-    indexedCiphers = indexedCiphers ?? (await this.cipherService.getAllDecrypted());
+    indexedCiphers = indexedCiphers ?? (await firstValueFrom(this.cipherService.cipherViews$));
 
     const failedCiphers = await firstValueFrom(this.cipherService.failedToDecryptCiphers$);
     if (failedCiphers != null && failedCiphers.length > 0) {

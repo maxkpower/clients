@@ -27,13 +27,11 @@ import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view
 import { ToastService } from "@bitwarden/components";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
-// FIXME: remove `src` and fix import
-// eslint-disable-next-line no-restricted-imports
-import { InlineMenuFieldQualificationService } from "../../../../../browser/src/autofill/services/inline-menu-field-qualification.service";
 import {
   AutofillService,
   PageDetail,
 } from "../../../autofill/services/abstractions/autofill.service";
+import { InlineMenuFieldQualificationService } from "../../../autofill/services/inline-menu-field-qualification.service";
 import { BrowserApi } from "../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../platform/popup/browser-popup-utils";
 import { closeViewVaultItemPopout, VaultPopoutType } from "../utils/vault-popout-window";
@@ -280,7 +278,7 @@ export class VaultPopupAutofillService {
     }
 
     // Slight delay to fix bug in Chromium browsers where popup closes without copying totp to clipboard
-    requestAnimationFrame(() => BrowserApi.closePopup(window));
+    setTimeout(() => BrowserApi.closePopup(window), 50);
   }
 
   /**
