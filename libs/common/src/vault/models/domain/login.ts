@@ -58,7 +58,8 @@ export class Login extends Domain {
     context: string = "No Cipher Context",
     encKey?: SymmetricCryptoKey,
   ): Promise<LoginView> {
-    const view = await this.decryptObj(
+    const view = await this.decryptObj<Login, LoginView>(
+      this,
       new LoginView(this),
       ["username", "password", "totp"],
       orgId,

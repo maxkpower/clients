@@ -85,7 +85,7 @@ export class Send extends Domain {
       // TODO: error?
     }
 
-    await this.decryptObj(model, ["name", "notes"], null, model.cryptoKey);
+    await this.decryptObj<Send, SendView>(this, model, ["name", "notes"], null, model.cryptoKey);
 
     switch (this.type) {
       case SendType.File:

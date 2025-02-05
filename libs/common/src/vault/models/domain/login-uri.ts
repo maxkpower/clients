@@ -38,7 +38,14 @@ export class LoginUri extends Domain {
     context: string = "No Cipher Context",
     encKey?: SymmetricCryptoKey,
   ): Promise<LoginUriView> {
-    return this.decryptObj(new LoginUriView(this), ["uri"], orgId, encKey, context);
+    return this.decryptObj<LoginUri, LoginUriView>(
+      this,
+      new LoginUriView(this),
+      ["uri"],
+      orgId,
+      encKey,
+      context,
+    );
   }
 
   async validateChecksum(clearTextUri: string, orgId: string, encKey: SymmetricCryptoKey) {

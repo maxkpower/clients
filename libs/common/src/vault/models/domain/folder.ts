@@ -40,7 +40,7 @@ export class Folder extends Domain {
   }
 
   decrypt(): Promise<FolderView> {
-    return this.decryptObj(new FolderView(this), ["name"], null);
+    return this.decryptObj<Folder, FolderView>(this, new FolderView(this), ["name"], null);
   }
 
   async decryptWithKey(

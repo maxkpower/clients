@@ -42,7 +42,8 @@ export class Card extends Domain {
     context = "No Cipher Context",
     encKey?: SymmetricCryptoKey,
   ): Promise<CardView> {
-    return this.decryptObj(
+    return this.decryptObj<Card, CardView>(
+      this,
       new CardView(),
       ["cardholderName", "brand", "number", "expMonth", "expYear", "code"],
       orgId,

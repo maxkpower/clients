@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { ConditionalExcept, ConditionalKeys, Constructor } from "type-fest";
 
 import { View } from "../../../models/view/view";
@@ -14,6 +12,19 @@ export type DecryptedObject<
   TEncryptedObject,
   TDecryptedKeys extends EncStringKeys<TEncryptedObject>,
 > = Record<TDecryptedKeys, string> & Omit<TEncryptedObject, TDecryptedKeys>;
+
+// extracts shared keys from the domain and view types
+type EncryptableKeys<D extends Domain, V extends View> = (keyof D &
+  ConditionalKeys<D, EncString | null>) &
+  (keyof V & ConditionalKeys<V, string | null>);
+
+type DomainEncryptableKeys<D extends Domain> = {
+  [key in ConditionalKeys<D, EncString | null>]: EncString | null;
+};
+
+type ViewEncryptableKeys<V extends View> = {
+  [key in ConditionalKeys<V, string | null>]: string | null;
+};
 
 // https://contributing.bitwarden.com/architecture/clients/data-model#domain
 export default class Domain {
@@ -59,23 +70,24 @@ export default class Domain {
     }
   }
 
-  protected async decryptObj<T extends View>(
-    viewModel: T,
-    props: (keyof T & keyof this)[] & (string | EncString)[],
+  protected async decryptObj<D extends Domain, V extends View>(
+    domain: DomainEncryptableKeys<D>,
+    viewModel: ViewEncryptableKeys<V>,
+    props: EncryptableKeys<D, V>[],
     orgId: string | null,
-    key: SymmetricCryptoKey = null,
+    key: SymmetricCryptoKey | null = null,
     objectContext: string = "No Domain Context",
-  ): Promise<T> {
+  ): Promise<V> {
     for (const prop of props) {
-      (viewModel[prop] as string) =
-        (await (this[prop] as EncString)?.decrypt(
+      viewModel[prop] =
+        (await domain[prop]?.decrypt(
           orgId,
           key,
           `Property: ${prop as string}; ObjectContext: ${objectContext}`,
         )) ?? null;
     }
 
-    return viewModel;
+    return viewModel as V;
   }
 
   /**
@@ -131,11 +143,9 @@ export default class Domain {
     encryptService: EncryptService,
     decryptTrace: string,
   ) {
-    let decrypted: string = null;
+    let decrypted: string | null = null;
     if (value) {
       decrypted = await value.decryptWithKey(key, encryptService, decryptTrace);
-    } else {
-      decrypted = null;
     }
     return {
       [propertyKey]: decrypted,
