@@ -1,8 +1,8 @@
-import { TestBed } from "@angular/core/testing";
+import { TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { FormBuilder } from "@angular/forms";
-import { BehaviorSubject, skipWhile } from "rxjs";
+import { BehaviorSubject, skipWhile, take } from "rxjs";
 
-import { CollectionService, Collection, CollectionView } from "@bitwarden/admin-console/common";
+import { CollectionService, CollectionView } from "@bitwarden/admin-console/common";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
@@ -19,7 +19,13 @@ import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
-import { MY_VAULT_ID, VaultPopupListFiltersService } from "./vault-popup-list-filters.service";
+import { PopupViewCacheService } from "../../../platform/popup/view-cache/popup-view-cache.service";
+
+import {
+  CachedFilterState,
+  MY_VAULT_ID,
+  VaultPopupListFiltersService,
+} from "./vault-popup-list-filters.service";
 
 describe("VaultPopupListFiltersService", () => {
   let service: VaultPopupListFiltersService;
@@ -30,6 +36,10 @@ describe("VaultPopupListFiltersService", () => {
   const cipherViews$ = new BehaviorSubject({});
   const decryptedCollections$ = new BehaviorSubject<CollectionView[]>([]);
   const policyAppliesToActiveUser$ = new BehaviorSubject<boolean>(false);
+  let viewCacheService: {
+    signal: jest.Mock;
+    mockSignal: BehaviorSubject<CachedFilterState>;
+  };
 
   const collectionService = {
     decryptedCollections$,
@@ -68,6 +78,13 @@ describe("VaultPopupListFiltersService", () => {
 
     const accountService = mockAccountServiceWith("userId" as UserId);
 
+    viewCacheService = {
+      mockSignal: new BehaviorSubject<CachedFilterState>({}),
+      signal: jest.fn(() => ({
+        set: (value: CachedFilterState) => viewCacheService.mockSignal.next(value),
+      })),
+    };
+
     collectionService.getAllNested = () => Promise.resolve([]);
     TestBed.configureTestingModule({
       providers: [
@@ -103,6 +120,10 @@ describe("VaultPopupListFiltersService", () => {
         {
           provide: AccountService,
           useValue: accountService,
+        },
+        {
+          provide: PopupViewCacheService,
+          useValue: viewCacheService,
         },
       ],
     });
@@ -440,7 +461,7 @@ describe("VaultPopupListFiltersService", () => {
     });
 
     it("filters by collection", (done) => {
-      const collection = { id: "1234" } as Collection;
+      const collection = { id: "1234" } as CollectionView;
 
       service.filterFunction$.subscribe((filterFunction) => {
         expect(filterFunction(ciphers)).toEqual([ciphers[1]]);
@@ -504,5 +525,138 @@ describe("VaultPopupListFiltersService", () => {
       const updateCallback = update.mock.calls[0][0];
       expect(updateCallback()).toBe(false);
     });
+  });
+
+  describe("caching", () => {
+    it("initializes form from cached state", fakeAsync(() => {
+      const cachedState: CachedFilterState = {
+        organizationId: MY_VAULT_ID,
+        collectionId: "test-collection-id",
+        folderId: "test-folder-id",
+        cipherType: CipherType.Login,
+      };
+
+      // Setup mock organizations and collections
+      _memberOrganizations$.next([{ id: MY_VAULT_ID } as Organization]);
+      decryptedCollections$.next([{ id: "test-collection-id" } as CollectionView]);
+      folderViews$.next([{ id: "test-folder-id" } as FolderView]);
+
+      // Simulate cached state
+      viewCacheService.mockSignal.next(cachedState);
+      service = TestBed.inject(VaultPopupListFiltersService);
+      tick(); // Allow async operations to complete
+
+      expect(service.filterForm.value).toEqual({
+        organization: { id: MY_VAULT_ID },
+        collection: { id: "test-collection-id" },
+        folder: { id: "test-folder-id" },
+        cipherType: CipherType.Login,
+      });
+    }));
+
+    it("serializes filters to cache on changes", fakeAsync(() => {
+      const testOrg = { id: "test-org-id" } as Organization;
+      const testCollection = { id: "test-collection-id" } as CollectionView;
+      const testFolder = { id: "test-folder-id" } as FolderView;
+
+      service.filterForm.patchValue({
+        organization: testOrg,
+        collection: testCollection,
+        folder: testFolder,
+        cipherType: CipherType.Card,
+      });
+      tick(300); // Wait for debounce
+
+      expect(viewCacheService.mockSignal.value).toEqual({
+        organizationId: "test-org-id",
+        collectionId: "test-collection-id",
+        folderId: "test-folder-id",
+        cipherType: CipherType.Card,
+      });
+    }));
+
+    it("handles invalid cached IDs", fakeAsync(() => {
+      const cachedState: CachedFilterState = {
+        organizationId: "invalid-org-id",
+        collectionId: "invalid-collection-id",
+        folderId: "invalid-folder-id",
+      };
+
+      // Setup empty data
+      _memberOrganizations$.next([]);
+      decryptedCollections$.next([]);
+      folderViews$.next([]);
+
+      viewCacheService.mockSignal.next(cachedState);
+      service = TestBed.inject(VaultPopupListFiltersService);
+      tick();
+
+      expect(service.filterForm.value).toEqual({
+        organization: null,
+        collection: null,
+        folder: null,
+        cipherType: null,
+      });
+    }));
+  });
+
+  describe("serializeFilters", () => {
+    it("correctly extracts IDs from form values", () => {
+      service.filterForm.patchValue({
+        organization: { id: "org-id" } as Organization,
+        collection: { id: "col-id" } as CollectionView,
+        folder: { id: "folder-id" } as FolderView,
+        cipherType: CipherType.Identity,
+      });
+
+      expect(service.serializeFilters()).toEqual({
+        organizationId: "org-id",
+        collectionId: "col-id",
+        folderId: "folder-id",
+        cipherType: CipherType.Identity,
+      });
+    });
+
+    it("handles null values", () => {
+      service.filterForm.reset();
+      expect(service.serializeFilters()).toEqual({
+        organizationId: undefined,
+        collectionId: undefined,
+        folderId: undefined,
+        cipherType: undefined,
+      });
+    });
+  });
+
+  describe("filter initialization", () => {
+    it("applies cached filters to cipher list on startup", fakeAsync(() => {
+      const ciphers = [
+        { id: "1", organizationId: "test-org", collectionIds: ["test-collection"] },
+        { id: "2", organizationId: "other-org" },
+      ] as CipherView[];
+
+      // Setup cached filters
+      viewCacheService.mockSignal.next({
+        organizationId: "test-org",
+        collectionId: "test-collection",
+      });
+
+      // Setup test data
+      _memberOrganizations$.next([{ id: "test-org" } as Organization]);
+      decryptedCollections$.next([
+        { id: "test-collection", organizationId: "test-org" } as CollectionView,
+      ]);
+      cipherViews$.next(ciphers);
+
+      service = TestBed.inject(VaultPopupListFiltersService);
+
+      let filteredCiphers: CipherView[];
+      service.filterFunction$.pipe(take(1)).subscribe((fn) => {
+        filteredCiphers = fn(ciphers);
+      });
+      tick();
+
+      expect(filteredCiphers).toEqual([ciphers[0]]);
+    }));
   });
 });

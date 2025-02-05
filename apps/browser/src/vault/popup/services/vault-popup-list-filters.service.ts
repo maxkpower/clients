@@ -47,7 +47,7 @@ const FILTER_VISIBILITY_KEY = new KeyDefinition<boolean>(VAULT_SETTINGS_DISK, "f
   deserializer: (obj) => obj,
 });
 
-interface CachedFilterState {
+export interface CachedFilterState {
   organizationId?: string;
   collectionId?: string;
   folderId?: string;
@@ -138,7 +138,6 @@ export class VaultPopupListFiltersService {
           cipherType: null,
         };
 
-        // Handle organization
         if (state.organizationId) {
           if (state.organizationId === MY_VAULT_ID) {
             patchValue.organization = { id: MY_VAULT_ID } as Organization;
@@ -148,7 +147,6 @@ export class VaultPopupListFiltersService {
           }
         }
 
-        // Handle collection
         if (state.collectionId) {
           const collection = collectionOptions
             .flatMap((c) => this.flattenOptions(c))
@@ -156,7 +154,6 @@ export class VaultPopupListFiltersService {
           patchValue.collection = collection || null;
         }
 
-        // Handle folder
         if (state.folderId) {
           const folder = folderOptions
             .flatMap((f) => this.flattenOptions(f))
@@ -164,16 +161,14 @@ export class VaultPopupListFiltersService {
           patchValue.folder = folder || null;
         }
 
-        // Handle cipher type
         if (state.cipherType) {
           patchValue.cipherType = state.cipherType;
         }
 
-        this.filterForm.patchValue(patchValue, { emitEvent: false });
+        this.filterForm.patchValue(patchValue);
       });
   }
 
-  // Add this helper method to flatten nested options
   private flattenOptions<T>(option: ChipSelectOption<T>): ChipSelectOption<T>[] {
     return [option, ...(option.children?.flatMap((c) => this.flattenOptions(c)) || [])];
   }
@@ -386,7 +381,7 @@ export class VaultPopupListFiltersService {
         map(([filters, folders, cipherViews]): [PopupListFilter, FolderView[], CipherView[]] => {
           if (folders.length === 1 && folders[0].id === null) {
             // Do not display folder selections when only the "no folder" option is available.
-            return [filters, [], cipherViews];
+            return [filters as PopupListFilter, [], cipherViews];
           }
 
           // Sort folders by alphabetic name
@@ -405,7 +400,7 @@ export class VaultPopupListFiltersService {
             // Move the "no folder" option to the end of the list
             arrangedFolders = [...folders.filter((f) => f.id !== null), updatedNoFolder];
           }
-          return [filters, arrangedFolders, cipherViews];
+          return [filters as PopupListFilter, arrangedFolders, cipherViews];
         }),
         map(([filters, folders, cipherViews]) => {
           const organizationId = filters.organization?.id ?? null;

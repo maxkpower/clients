@@ -286,7 +286,7 @@ export class VaultPopupItemsService {
     private accountService: AccountService,
   ) {}
 
-  applyFilter(newSearchText: string) {
+  applyFilter(newSearchText: string | null) {
     this.cachedSearchText.set(newSearchText);
   }
 

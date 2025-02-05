@@ -28,9 +28,6 @@ export class VaultV2SearchComponent {
   }
 
   onSearchTextChanged() {
-    if (!this.searchText) {
-      return;
-    }
     this.vaultPopupItemsService.applyFilter(this.searchText);
   }
 
