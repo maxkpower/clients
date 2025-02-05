@@ -782,8 +782,8 @@ jobs:
           # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-installer-cert |
           #   jq -r .value | base64 -d > $HOME/certificates/appstore-installer-cert.p12
 
-          # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/devid-app-cert |
-          #   jq -r .value | base64 -d > $HOME/certificates/devid-app-cert.p12
+          az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/devid-app-cert |
+            jq -r .value | base64 -d > $HOME/certificates/devid-app-cert.p12
 
           # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/devid-installer-cert |
           #   jq -r .value | base64 -d > $HOME/certificates/devid-installer-cert.p12
@@ -800,8 +800,8 @@ jobs:
           security unlock-keychain -p $KEYCHAIN_PASSWORD build.keychain
           security set-keychain-settings -lut 1200 build.keychain
 
-          # security import "$HOME/certificates/devid-app-cert.p12" -k build.keychain -P "" \
-          #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
+          security import "$HOME/certificates/devid-app-cert.p12" -k build.keychain -P "" \
+            -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
           # security import "$HOME/certificates/devid-installer-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
@@ -815,7 +815,7 @@ jobs:
           # security import "$HOME/certificates/macdev-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
-          # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
 
       - name: Set up provisioning profiles
         run: |
@@ -1018,8 +1018,8 @@ jobs:
         run: |
           mkdir -p $HOME/certificates
 
-          # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-app-cert |
-          #   jq -r .value | base64 -d > $HOME/certificates/appstore-app-cert.p12
+          az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-app-cert |
+            jq -r .value | base64 -d > $HOME/certificates/appstore-app-cert.p12
 
           # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-installer-cert |
           #   jq -r .value | base64 -d > $HOME/certificates/appstore-installer-cert.p12
@@ -1048,8 +1048,8 @@ jobs:
           # security import "$HOME/certificates/devid-installer-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
-          # security import "$HOME/certificates/appstore-app-cert.p12" -k build.keychain -P "" \
-          #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
+          security import "$HOME/certificates/appstore-app-cert.p12" -k build.keychain -P "" \
+            -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
           # security import "$HOME/certificates/appstore-installer-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
@@ -1057,7 +1057,7 @@ jobs:
           # security import "$HOME/certificates/macdev-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
-          # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
 
       - name: Set up provisioning profiles
         run: |
@@ -1268,8 +1268,8 @@ jobs:
         run: |
           mkdir -p $HOME/certificates
 
-          # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-app-cert |
-          #   jq -r .value | base64 -d > $HOME/certificates/appstore-app-cert.p12
+          az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-app-cert |
+            jq -r .value | base64 -d > $HOME/certificates/appstore-app-cert.p12
 
           # az keyvault secret show --id https://bitwarden-ci.vault.azure.net/certificates/appstore-installer-cert |
           #   jq -r .value | base64 -d > $HOME/certificates/appstore-installer-cert.p12
@@ -1298,8 +1298,8 @@ jobs:
           # security import "$HOME/certificates/devid-installer-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
-          # security import "$HOME/certificates/appstore-app-cert.p12" -k build.keychain -P "" \
-          #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
+          security import "$HOME/certificates/appstore-app-cert.p12" -k build.keychain -P "" \
+            -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
           # security import "$HOME/certificates/appstore-installer-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
@@ -1307,7 +1307,7 @@ jobs:
           # security import "$HOME/certificates/macdev-cert.p12" -k build.keychain -P "" \
           #   -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild
 
-          # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
 
       - name: Set up provisioning profiles
         run: |
