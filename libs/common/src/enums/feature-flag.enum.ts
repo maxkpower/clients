@@ -45,13 +45,12 @@ export enum FeatureFlag {
   SecurityTasks = "security-tasks",
   NewDeviceVerificationTemporaryDismiss = "new-device-temporary-dismiss",
   NewDeviceVerificationPermanentDismiss = "new-device-permanent-dismiss",
-  DisableFreeFamiliesSponsorship = "PM-12274-disable-free-families-sponsorship",
   MacOsNativeCredentialSync = "macos-native-credential-sync",
   PM9111ExtensionPersistAddEditForm = "pm-9111-extension-persist-add-edit-form",
   PrivateKeyRegeneration = "pm-12241-private-key-regeneration",
   ResellerManagedOrgAlert = "PM-15814-alert-owners-of-reseller-managed-orgs",
   NewDeviceVerification = "new-device-verification",
-  PM15179_AddExistingOrgsFromProviderPortal = "PM-15179-add-existing-orgs-from-provider-portal",
+  PM15179_AddExistingOrgsFromProviderPortal = "pm-15179-add-existing-orgs-from-provider-portal",
 }
 
 export type AllowedFeatureFlagTypes = boolean | number | string;
@@ -107,7 +106,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.SecurityTasks]: FALSE,
   [FeatureFlag.NewDeviceVerificationTemporaryDismiss]: FALSE,
   [FeatureFlag.NewDeviceVerificationPermanentDismiss]: FALSE,
-  [FeatureFlag.DisableFreeFamiliesSponsorship]: FALSE,
   [FeatureFlag.MacOsNativeCredentialSync]: FALSE,
   [FeatureFlag.PM9111ExtensionPersistAddEditForm]: FALSE,
   [FeatureFlag.PrivateKeyRegeneration]: FALSE,
