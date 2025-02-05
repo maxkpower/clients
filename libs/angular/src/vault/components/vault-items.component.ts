@@ -2,11 +2,12 @@
 // @ts-strict-ignore
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { BehaviorSubject, Subject, firstValueFrom, from, map, switchMap, takeUntil } from "rxjs";
+import { BehaviorSubject, Subject, firstValueFrom, from, switchMap, takeUntil } from "rxjs";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -53,7 +54,7 @@ export class VaultItemsComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.userId = await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id)));
+    this.userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
 
     this._searchText$
       .pipe(

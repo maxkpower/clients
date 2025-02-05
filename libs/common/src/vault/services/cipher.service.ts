@@ -14,6 +14,7 @@ import {
 } from "rxjs";
 import { SemVer } from "semver";
 
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { KeyService } from "@bitwarden/key-management";
 
 import { ApiService } from "../../abstractions/api.service";
@@ -492,7 +493,8 @@ export class CipherService implements CipherServiceAbstraction {
   }
 
   private async reindexCiphers() {
-    const userId = await firstValueFrom(this.accountService.activeAccount$.pipe(map((a) => a?.id)));
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+
     const reindexRequired =
       this.searchService != null &&
       ((await firstValueFrom(this.searchService.indexedEntityId$(userId))) ?? userId) !== userId;
