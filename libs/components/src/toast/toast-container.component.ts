@@ -9,7 +9,7 @@ import { ToastContainerDirective, ToastrService } from "ngx-toastr";
 })
 export class ToastContainerComponent implements OnInit {
   @ViewChild(ToastContainerDirective, { static: true })
-  toastContainer: ToastContainerDirective;
+  toastContainer?: ToastContainerDirective;
 
   constructor(private toastrService: ToastrService) {}
 
