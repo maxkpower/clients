@@ -1,14 +1,6 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import {
-  ChangeDetectorRef,
-  Component,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  inject,
-} from "@angular/core";
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit, inject } from "@angular/core";
 import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
 import { Subject, takeUntil, firstValueFrom, concatMap, filter, tap } from "rxjs";
 
@@ -26,7 +18,6 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import {
   DialogService,
   SimpleDialogOptions,
-  ToastContainerDirective,
   ToastOptions,
   ToastService,
 } from "@bitwarden/components";
@@ -48,7 +39,7 @@ import { DesktopSyncVerificationDialogComponent } from "./components/desktop-syn
     <div [@routerTransition]="getRouteElevation(outlet)">
       <router-outlet #outlet="outlet"></router-outlet>
     </div>
-    <div role="status" aria-live="polite" aria-atomic="true" toastContainer></div>
+    <bit-toast-container></bit-toast-container>
   `,
 })
 export class AppComponent implements OnInit, OnDestroy {
@@ -61,9 +52,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private routerAnimations = false;
 
   private destroy$ = new Subject<void>();
-
-  @ViewChild(ToastContainerDirective, { static: true })
-  toastContainer: ToastContainerDirective;
 
   constructor(
     private authService: AuthService,
@@ -89,8 +77,6 @@ export class AppComponent implements OnInit, OnDestroy {
     await this.viewCacheService.init();
 
     this.compactModeService.init();
-
-    this.toastService.overlayContainer = this.toastContainer;
 
     // Component states must not persist between closing and reopening the popup, otherwise they become dead objects
     // Clear them aggressively to make sure this doesn't occur
