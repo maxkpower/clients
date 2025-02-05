@@ -22,8 +22,8 @@ import {
   standalone: true,
 })
 class MockCipherFormGenerator {
-  @Input() type: "password" | "username";
-  @Input() onAlgorithmSelected: (selected: AlgorithmInfo) => void;
+  @Input() type: "password" | "username" = "password";
+  @Output() algorithmSelected: EventEmitter<AlgorithmInfo> = new EventEmitter();
   @Output() valueGenerated = new EventEmitter<string>();
 }
 
@@ -62,33 +62,56 @@ describe("WebVaultGeneratorDialogComponent", () => {
   });
 
   it("should enable button when value and algorithm are selected", () => {
-    // Get the generator component
     const generator = fixture.debugElement.query(
       By.css("vault-cipher-form-generator"),
     ).componentInstance;
 
-    // Simulate algorithm selection and value generation
-    generator.onAlgorithmSelected({ useGeneratedValue: "Use Password" } as any);
+    generator.algorithmSelected.emit({ useGeneratedValue: "Use Password" } as any);
     generator.valueGenerated.emit("test-password");
     fixture.detectChanges();
 
-    // Check button state
     const button = fixture.debugElement.query(
       By.css("[data-testid='select-button']"),
     ).nativeElement;
     expect(button.disabled).toBe(false);
   });
 
-  it("should close with selected value when confirmed", () => {
-    // Set up test data through component methods
+  it("should disable the button if no value has been generated", () => {
     const generator = fixture.debugElement.query(
       By.css("vault-cipher-form-generator"),
     ).componentInstance;
-    generator.onAlgorithmSelected({ useGeneratedValue: "Use Password" } as any);
+
+    generator.algorithmSelected.emit({ useGeneratedValue: "Use Password" } as any);
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(
+      By.css("[data-testid='select-button']"),
+    ).nativeElement;
+    expect(button.disabled).toBe(true);
+  });
+
+  it("should disable the button if no algorithm is selected", () => {
+    const generator = fixture.debugElement.query(
+      By.css("vault-cipher-form-generator"),
+    ).componentInstance;
+
     generator.valueGenerated.emit("test-password");
     fixture.detectChanges();
 
-    // Click select button
+    const button = fixture.debugElement.query(
+      By.css("[data-testid='select-button']"),
+    ).nativeElement;
+    expect(button.disabled).toBe(true);
+  });
+
+  it("should close with selected value when confirmed", () => {
+    const generator = fixture.debugElement.query(
+      By.css("vault-cipher-form-generator"),
+    ).componentInstance;
+    generator.algorithmSelected.emit({ useGeneratedValue: "Use Password" } as any);
+    generator.valueGenerated.emit("test-password");
+    fixture.detectChanges();
+
     fixture.debugElement.query(By.css("[data-testid='select-button']")).nativeElement.click();
 
     expect(dialogRef.close).toHaveBeenCalledWith({

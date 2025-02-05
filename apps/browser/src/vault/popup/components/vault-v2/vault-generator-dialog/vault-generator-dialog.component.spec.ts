@@ -6,6 +6,7 @@ import { NoopAnimationsModule } from "@angular/platform-browser/animations";
 import { mock, MockProxy } from "jest-mock-extended";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { AlgorithmInfo } from "@bitwarden/generator-core";
 import { CipherFormGeneratorComponent } from "@bitwarden/vault";
 
 import { PopupRouterCacheService } from "../../../../../platform/popup/view-cache/popup-router-cache.service";
@@ -23,8 +24,8 @@ import {
   standalone: true,
 })
 class MockCipherFormGenerator {
-  @Input() type: "password" | "username";
-  @Input() onAlgorithmSelected: (selected: any) => void;
+  @Input() type: "password" | "username" = "password";
+  @Output() algorithmSelected: EventEmitter<AlgorithmInfo> = new EventEmitter();
   @Output() valueGenerated = new EventEmitter<string>();
 }
 
@@ -79,6 +80,34 @@ describe("VaultGeneratorDialogComponent", () => {
       By.css("[data-testid='select-button']"),
     ).nativeElement;
     expect(button.disabled).toBe(false);
+  });
+
+  it("should disable the button if no value has been generated", () => {
+    const generator = fixture.debugElement.query(
+      By.css("vault-cipher-form-generator"),
+    ).componentInstance;
+
+    generator.algorithmSelected.emit({ useGeneratedValue: "Use Password" } as any);
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(
+      By.css("[data-testid='select-button']"),
+    ).nativeElement;
+    expect(button.disabled).toBe(true);
+  });
+
+  it("should disable the button if no algorithm is selected", () => {
+    const generator = fixture.debugElement.query(
+      By.css("vault-cipher-form-generator"),
+    ).componentInstance;
+
+    generator.valueGenerated.emit("test-password");
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(
+      By.css("[data-testid='select-button']"),
+    ).nativeElement;
+    expect(button.disabled).toBe(true);
   });
 
   it("should update button text when algorithm is selected", () => {
