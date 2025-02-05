@@ -33,7 +33,7 @@ export default {
 
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, BrowserAnimationsModule, ButtonModule],
+      imports: [CommonModule, BrowserAnimationsModule, ButtonModule, ToastModule],
       declarations: [ToastServiceExampleComponent],
     }),
     applicationConfig({
@@ -104,6 +104,7 @@ export const Service: Story = {
       toastOptions: args,
     },
     template: `
+    <bit-toast-container></bit-toast-container>
       <toast-service-example [toastOptions]="toastOptions"></toast-service-example>
     `,
   }),

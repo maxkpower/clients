@@ -10,21 +10,57 @@ import { ToastService } from "@bitwarden/components";
 
 # Toast
 
-<Primary />
-<Controls />
-
-## Stories
-
-### Default
+Toasts are used for error or confirmation messaging. The toast body content should accurately
+describe the warning, error, or successful event following best practices for UX Writing. Avoid
+using long messages in toasts.
 
 <Canvas of={stories.Default} />
 
-### Long Content
-
-Avoid using long messages in toasts.
-
 <Canvas of={stories.LongContent} />
 
-### Service
+## Displaying a toast
+
+Toasts are triggered via the `toastService` from a frontend Angular context.
+
+```
+toastService.showToast({
+  variant: 'success',
+  title: null,
+  message: 'Hi I'm a toast,
+});
+```
+
+The following options are accepted:
+
+| Option    | Description                                   |
+| --------- | --------------------------------------------- |
+| `variant` | `"success" \| "error" \| "info" \| "warning"` |
+| `title`   | Optional title `string`                       |
+| `message` | Main toast content. Required `string`         |
 
 <Canvas of={stories.Service} />
+
+## Toast container
+
+Each web client uses the `bit-toast-container` component in its root `app` component to house the
+toasts. This container component provides aria attributes that make the toasts accessible to
+screenreader technology. Any new clients should do the same. Without the toast container, toasts
+will still display visually but will be more difficult for screenreader users to perceive.
+
+```
+<other app file html here>
+<bit-toast-container></bit-toast-container>
+```
+
+The `Service` story utilizes the `bit-toast-container` for more accurate screenreader testing.
+
+## Toast configuration
+
+Toast placement, auto dismiss, close button visibility, and max number of toasts to display are
+configured once at the shared module import level, but can be overridden in a client's module import
+file.
+
+## Accessibility
+
+In addition to the accessibility provided by the `bit-toast-container` component, the toast itself
+will apply `aria-alert="true"` if the toast is of type `error`.
