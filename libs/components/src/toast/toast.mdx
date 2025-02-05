@@ -10,9 +10,8 @@ import { ToastService } from "@bitwarden/components";
 
 # Toast
 
-Toasts are used for error or confirmation messaging. The toast body content should accurately
-describe the warning, error, or successful event following best practices for UX Writing. Avoid
-using long messages in toasts.
+Toasts are ephemeral notifications. They most often communicate the result of a user action. Due to
+their ephemeral nature, long messages and critical alerts should not utilize toasts.
 
 <Canvas of={stories.Default} />
 
@@ -20,12 +19,11 @@ using long messages in toasts.
 
 ## Displaying a toast
 
-Toasts are triggered via the `toastService` from a frontend Angular context.
+Toasts are triggered via the `ToastService`, which must be called from a frontend Angular context.
 
 ```
 toastService.showToast({
   variant: 'success',
-  title: null,
   message: 'Hi I'm a toast,
 });
 ```
@@ -42,23 +40,13 @@ The following options are accepted:
 
 ## Toast container
 
-Each web client uses the `bit-toast-container` component in its root `app` component to house the
-toasts. This container component provides aria attributes that make the toasts accessible to
-screenreader technology. Any new clients should do the same. Without the toast container, toasts
-will still display visually but will be more difficult for screenreader users to perceive.
+`bit-toast-container` should be added to the app root of consuming clients to ensure toasts are
+properly announced to screenreaders.
 
 ```
 <other app file html here>
 <bit-toast-container></bit-toast-container>
 ```
-
-The `Service` story utilizes the `bit-toast-container` for more accurate screenreader testing.
-
-## Toast configuration
-
-Toast placement, auto dismiss, close button visibility, and max number of toasts to display are
-configured once at the shared module import level, but can be overridden in a client's module import
-file.
 
 ## Accessibility
 
