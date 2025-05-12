@@ -34,6 +34,40 @@
     <h2 bitTypography="h1">{{ "loading" | i18n }}</h2>
   </div>
 </ng-container>
+<div
+  class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-4 tw-mb-6"
+  *ngIf="!(isLoading$ | async)"
+>
+  <div class="tw-bg-background-alt tw-rounded-lg tw-p-4 tw-shadow-sm">
+    <div class="tw-text-muted tw-text-sm tw-mb-1">{{ "assignedSeats" | i18n }}</div>
+    <div class="tw-flex tw-items-baseline tw-gap-2">
+      <span class="tw-text-2xl tw-font-semibold">{{ totalMembers }}</span>
+      <span class="tw-text-muted">out of {{ totalPurchasedSeats }}</span>
+    </div>
+  </div>
+  <div class="tw-bg-background-alt tw-rounded-lg tw-p-4 tw-shadow-sm">
+    <div class="tw-text-muted tw-text-sm tw-mb-1">{{ "usersWithVaultItems" | i18n }}</div>
+    <div class="tw-flex tw-items-baseline tw-gap-2">
+      <span class="tw-text-2xl tw-font-semibold">{{ membersWithItems }}</span>
+      <span class="tw-text-muted">out of {{ totalMembers }}</span>
+    </div>
+  </div>
+  <div class="tw-bg-background-alt tw-rounded-lg tw-p-4 tw-shadow-sm">
+    <div class="tw-text-muted tw-text-sm tw-mb-1">{{ "twoStepLogin" | i18n }}</div>
+    <div class="tw-flex tw-items-baseline tw-gap-2">
+      <span class="tw-text-2xl tw-font-semibold">{{ membersWithTwoStepLogin }}</span>
+      <span class="tw-text-muted">out of {{ totalMembers }}</span>
+    </div>
+  </div>
+  <div class="tw-bg-background-alt tw-rounded-lg tw-p-4 tw-shadow-sm">
+    <div class="tw-text-muted tw-text-sm tw-mb-1">{{ "enrolledAccountRecovery" | i18n }}</div>
+    <div class="tw-flex tw-items-baseline tw-gap-2">
+      <span class="tw-text-2xl tw-font-semibold">{{ membersWithAccountRecovery }}</span>
+      <span class="tw-text-muted">out of {{ totalMembers }}</span>
+    </div>
+  </div>
+</div>
+
 <bit-table-scroll *ngIf="!(isLoading$ | async)" [dataSource]="dataSource" [rowSize]="53">
   <ng-container header>
     <th bitCell bitSortable="name" default>{{ "members" | i18n }}</th>
