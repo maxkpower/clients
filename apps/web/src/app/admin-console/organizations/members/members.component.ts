@@ -108,7 +108,7 @@ const memberExportHeaders: { [key in keyof MemberExportItem]: string } = {
   name: "Name",
   email: "Email",
   status: "Status",
-  type: "Type",
+  type: "Role",
   twoFactorEnabled: "Two-Step Login",
   accessSecretsManager: "Secrets Manager Access",
   managedByOrganization: "Enterprise Managed (SCIM/Directory)",
