@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { Location } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormControl, Validators } from "@angular/forms";
@@ -9,8 +7,8 @@ import { firstValueFrom, lastValueFrom, map } from "rxjs";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  getOrganizationById,
   OrganizationService,
+  getOrganizationById,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
@@ -18,14 +16,13 @@ import { PaymentMethodType } from "@bitwarden/common/billing/enums";
 import { BillingPaymentResponse } from "@bitwarden/common/billing/models/response/billing-payment.response";
 import { OrganizationSubscriptionResponse } from "@bitwarden/common/billing/models/response/organization-subscription.response";
 import { SubscriptionResponse } from "@bitwarden/common/billing/models/response/subscription.response";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { VerifyBankRequest } from "@bitwarden/common/models/request/verify-bank.request";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SyncService } from "@bitwarden/common/platform/sync";
 import { DialogService, ToastService } from "@bitwarden/components";
-
-import { TrialFlowService } from "../services/trial-flow.service";
-import { FreeTrial } from "../types/free-trial";
 
 import { AddCreditDialogResult, openAddCreditDialog } from "./add-credit-dialog.component";
 import {
@@ -35,26 +32,26 @@ import {
 
 @Component({
   templateUrl: "payment-method.component.html",
+  standalone: false,
 })
-// eslint-disable-next-line rxjs-angular/prefer-takeuntil
 export class PaymentMethodComponent implements OnInit, OnDestroy {
   loading = false;
   firstLoaded = false;
-  billing: BillingPaymentResponse;
-  org: OrganizationSubscriptionResponse;
-  sub: SubscriptionResponse;
+  billing?: BillingPaymentResponse;
+  org?: OrganizationSubscriptionResponse;
+  sub?: SubscriptionResponse;
   paymentMethodType = PaymentMethodType;
-  organizationId: string;
+  organizationId?: string;
   isUnpaid = false;
-  organization: Organization;
+  organization?: Organization;
 
   verifyBankForm = this.formBuilder.group({
-    amount1: new FormControl<number>(null, [
+    amount1: new FormControl<number>(0, [
       Validators.required,
       Validators.max(99),
       Validators.min(0),
     ]),
-    amount2: new FormControl<number>(null, [
+    amount2: new FormControl<number>(0, [
       Validators.required,
       Validators.max(99),
       Validators.min(0),
@@ -62,8 +59,6 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
   });
 
   launchPaymentModalAutomatically = false;
-  protected freeTrialData: FreeTrial;
-
   constructor(
     protected apiService: ApiService,
     protected organizationApiService: OrganizationApiServiceAbstraction,
@@ -75,13 +70,13 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
     private toastService: ToastService,
-    private trialFlowService: TrialFlowService,
     private organizationService: OrganizationService,
     private accountService: AccountService,
     protected syncService: SyncService,
+    private configService: ConfigService,
   ) {
     const state = this.router.getCurrentNavigation()?.extras?.state;
-    // incase the above state is undefined or null we use redundantState
+    // In case the above state is undefined or null, we use redundantState
     const redundantState: any = location.getState();
     if (state && Object.prototype.hasOwnProperty.call(state, "launchPaymentModalAutomatically")) {
       this.launchPaymentModalAutomatically = state.launchPaymentModalAutomatically;
@@ -107,6 +102,14 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
         return;
       }
 
+      const managePaymentDetailsOutsideCheckout = await this.configService.getFeatureFlag(
+        FeatureFlag.PM21881_ManagePaymentDetailsOutsideCheckout,
+      );
+
+      if (managePaymentDetailsOutsideCheckout) {
+        await this.router.navigate(["../payment-details"], { relativeTo: this.route });
+      }
+
       await this.load();
       this.firstLoaded = true;
     });
@@ -118,17 +121,23 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
     }
     this.loading = true;
     if (this.forOrganization) {
-      const billingPromise = this.organizationApiService.getBilling(this.organizationId);
+      const billingPromise = this.organizationApiService.getBilling(this.organizationId!);
       const organizationSubscriptionPromise = this.organizationApiService.getSubscription(
-        this.organizationId,
+        this.organizationId!,
       );
+
       const userId = await firstValueFrom(
         this.accountService.activeAccount$.pipe(map((a) => a?.id)),
       );
+
+      if (!userId) {
+        throw new Error("User ID is not found");
+      }
+
       const organizationPromise = await firstValueFrom(
         this.organizationService
           .organizations$(userId)
-          .pipe(getOrganizationById(this.organizationId)),
+          .pipe(getOrganizationById(this.organizationId!)),
       );
 
       [this.billing, this.org, this.organization] = await Promise.all([
@@ -136,13 +145,14 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
         organizationSubscriptionPromise,
         organizationPromise,
       ]);
-      this.determineOrgsWithUpcomingPaymentIssues();
     } else {
       const billingPromise = this.apiService.getUserBillingPayment();
       const subPromise = this.apiService.getUserSubscription();
 
       [this.billing, this.sub] = await Promise.all([billingPromise, subPromise]);
     }
+    // TODO: Eslint upgrade. Please resolve this since the ?? does nothing
+    // eslint-disable-next-line no-constant-binary-expression
     this.isUnpaid = this.subscription?.status === "unpaid" ?? false;
     this.loading = false;
     // If the flag `launchPaymentModalAutomatically` is set to true,
@@ -158,14 +168,16 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
   };
 
   addCredit = async () => {
-    const dialogRef = openAddCreditDialog(this.dialogService, {
-      data: {
-        organizationId: this.organizationId,
-      },
-    });
-    const result = await lastValueFrom(dialogRef.closed);
-    if (result === AddCreditDialogResult.Added) {
-      await this.load();
+    if (this.forOrganization) {
+      const dialogRef = openAddCreditDialog(this.dialogService, {
+        data: {
+          organizationId: this.organizationId!,
+        },
+      });
+      const result = await lastValueFrom(dialogRef.closed);
+      if (result === AddCreditDialogResult.Added) {
+        await this.load();
+      }
     }
   };
 
@@ -181,7 +193,7 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
 
     if (result === AdjustPaymentDialogResultType.Submitted) {
       this.location.replaceState(this.location.path(), "", {});
-      if (this.launchPaymentModalAutomatically && !this.organization.enabled) {
+      if (this.launchPaymentModalAutomatically && !this.organization?.enabled) {
         await this.syncService.fullSync(true);
       }
       this.launchPaymentModalAutomatically = false;
@@ -195,24 +207,16 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
     }
 
     const request = new VerifyBankRequest();
-    request.amount1 = this.verifyBankForm.value.amount1;
-    request.amount2 = this.verifyBankForm.value.amount2;
-    await this.organizationApiService.verifyBank(this.organizationId, request);
+    request.amount1 = this.verifyBankForm.value.amount1!;
+    request.amount2 = this.verifyBankForm.value.amount2!;
+    await this.organizationApiService.verifyBank(this.organizationId!, request);
     this.toastService.showToast({
       variant: "success",
-      title: null,
+      title: "",
       message: this.i18nService.t("verifiedBankAccount"),
     });
     await this.load();
   };
-
-  determineOrgsWithUpcomingPaymentIssues() {
-    this.freeTrialData = this.trialFlowService.checkForOrgsWithUpcomingPaymentIssues(
-      this.organization,
-      this.org,
-      this.billing?.paymentSource,
-    );
-  }
 
   get isCreditBalance() {
     return this.billing == null || this.billing.balance <= 0;
@@ -238,9 +242,8 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
       case PaymentMethodType.Card:
         return ["bwi-credit-card"];
       case PaymentMethodType.BankAccount:
-        return ["bwi-bank"];
       case PaymentMethodType.Check:
-        return ["bwi-money"];
+        return ["bwi-billing"];
       case PaymentMethodType.PayPal:
         return ["bwi-paypal text-primary"];
       default:

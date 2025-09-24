@@ -1,5 +1,4 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
+import { UserId } from "@bitwarden/user-core";
 
 import { OrganizationResponse } from "../../admin-console/models/response/organization.response";
 import { InitiationPath } from "../../models/request/reference-event.request";
@@ -36,6 +35,7 @@ export type BillingInformation = {
 export type PaymentInformation = {
   paymentMethod: [string, PaymentMethodType];
   billing: BillingInformation;
+  skipTrial?: boolean;
 };
 
 export type SubscriptionInformation = {
@@ -45,18 +45,26 @@ export type SubscriptionInformation = {
 };
 
 export abstract class OrganizationBillingServiceAbstraction {
-  getPaymentSource: (organizationId: string) => Promise<PaymentSourceResponse>;
+  abstract getPaymentSource(organizationId: string): Promise<PaymentSourceResponse>;
 
-  purchaseSubscription: (subscription: SubscriptionInformation) => Promise<OrganizationResponse>;
-
-  purchaseSubscriptionNoPaymentMethod: (
+  abstract purchaseSubscription(
     subscription: SubscriptionInformation,
-  ) => Promise<OrganizationResponse>;
+    activeUserId: UserId,
+  ): Promise<OrganizationResponse>;
 
-  startFree: (subscription: SubscriptionInformation) => Promise<OrganizationResponse>;
+  abstract purchaseSubscriptionNoPaymentMethod(
+    subscription: SubscriptionInformation,
+    activeUserId: UserId,
+  ): Promise<OrganizationResponse>;
 
-  restartSubscription: (
+  abstract startFree(
+    subscription: SubscriptionInformation,
+    activeUserId: UserId,
+  ): Promise<OrganizationResponse>;
+
+  abstract restartSubscription(
     organizationId: string,
     subscription: SubscriptionInformation,
-  ) => Promise<void>;
+    activeUserId: UserId,
+  ): Promise<void>;
 }

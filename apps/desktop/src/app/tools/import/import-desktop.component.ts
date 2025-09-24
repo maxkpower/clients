@@ -1,14 +1,12 @@
-import { DialogRef } from "@angular/cdk/dialog";
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { AsyncActionsModule, ButtonModule, DialogModule } from "@bitwarden/components";
-import { ImportComponent } from "@bitwarden/importer/ui";
+import { DialogRef, AsyncActionsModule, ButtonModule, DialogModule } from "@bitwarden/components";
+import { ImportComponent } from "@bitwarden/importer-ui";
 
 @Component({
   templateUrl: "import-desktop.component.html",
-  standalone: true,
   imports: [
     CommonModule,
     JslibModule,
@@ -29,5 +27,13 @@ export class ImportDesktopComponent {
    */
   protected async onSuccessfulImport(organizationId: string): Promise<void> {
     this.dialogRef.close();
+  }
+
+  protected onLoadProfilesFromBrowser(browser: string): Promise<any[]> {
+    return ipc.tools.chromiumImporter.getAvailableProfiles(browser);
+  }
+
+  protected onImportFromBrowser(browser: string, profile: string): Promise<any[]> {
+    return ipc.tools.chromiumImporter.importLogins(browser, profile);
   }
 }

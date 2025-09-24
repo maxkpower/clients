@@ -6,17 +6,23 @@ import {
   ChangeDetectorRef,
   Component,
   ContentChildren,
+  DestroyRef,
   ElementRef,
   EventEmitter,
+  inject,
   Input,
+  NgZone,
   Output,
   QueryList,
   ViewChild,
   ViewChildren,
-  inject,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { take } from "rxjs";
 
-import { ButtonModule } from "@bitwarden/components";
+import { JslibModule } from "@bitwarden/angular/jslib.module";
+import { ButtonModule, IconButtonModule } from "@bitwarden/components";
+import { I18nPipe } from "@bitwarden/ui-common";
 
 import { VaultCarouselButtonComponent } from "./carousel-button/carousel-button.component";
 import { VaultCarouselContentComponent } from "./carousel-content/carousel-content.component";
@@ -25,13 +31,15 @@ import { VaultCarouselSlideComponent } from "./carousel-slide/carousel-slide.com
 @Component({
   selector: "vault-carousel",
   templateUrl: "./carousel.component.html",
-  standalone: true,
   imports: [
     CdkPortalOutlet,
     CommonModule,
+    JslibModule,
+    IconButtonModule,
     ButtonModule,
     VaultCarouselContentComponent,
     VaultCarouselButtonComponent,
+    I18nPipe,
   ],
 })
 export class VaultCarouselComponent implements AfterViewInit {
@@ -45,7 +53,7 @@ export class VaultCarouselComponent implements AfterViewInit {
   @Input({ required: true }) label = "";
 
   /**
-   * Emits the index of of the newly selected slide.
+   * Emits the index of the newly selected slide.
    */
   @Output() slideChange = new EventEmitter<number>();
 
@@ -83,13 +91,30 @@ export class VaultCarouselComponent implements AfterViewInit {
    */
   protected keyManager: FocusKeyManager<VaultCarouselButtonComponent> | null = null;
 
+  constructor(
+    private ngZone: NgZone,
+    private destroyRef: DestroyRef,
+  ) {}
+
   /** Set the selected index of the carousel. */
   protected selectSlide(index: number) {
     this.selectedIndex = index;
     this.slideChange.emit(index);
   }
 
-  ngAfterViewInit(): void {
+  protected nextSlide() {
+    if (this.selectedIndex < this.slides.length - 1) {
+      this.selectSlide(this.selectedIndex + 1);
+    }
+  }
+
+  protected prevSlide() {
+    if (this.selectedIndex > 0) {
+      this.selectSlide(this.selectedIndex - 1);
+    }
+  }
+
+  async ngAfterViewInit() {
     this.keyManager = new FocusKeyManager(this.carouselButtons)
       .withHorizontalOrientation("ltr")
       .withWrap()
@@ -98,7 +123,9 @@ export class VaultCarouselComponent implements AfterViewInit {
     // Set the first carousel button as active, this avoids having to double tab the arrow keys on initial focus.
     this.keyManager.setFirstItemActive();
 
-    this.setMinHeightOfCarousel();
+    this.ngZone.onStable.pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      void this.setMinHeightOfCarousel();
+    });
   }
 
   /**
@@ -106,7 +133,7 @@ export class VaultCarouselComponent implements AfterViewInit {
    * Render each slide in a temporary portal outlet to get the height of each slide
    * and store the tallest slide height.
    */
-  private setMinHeightOfCarousel() {
+  private async setMinHeightOfCarousel() {
     // Store the height of the carousel button element.
     const heightOfButtonsPx = this.carouselButtonWrapper.nativeElement.offsetHeight;
 
@@ -121,13 +148,14 @@ export class VaultCarouselComponent implements AfterViewInit {
     // to determine the height of the first slide.
     let tallestSlideHeightPx = containerHeight - heightOfButtonsPx;
 
-    this.slides.forEach((slide, index) => {
-      // Skip the first slide, the height is accounted for above.
-      if (index === this.selectedIndex) {
-        return;
+    for (let i = 0; i < this.slides.length; i++) {
+      if (i === this.selectedIndex) {
+        continue;
       }
+      this.tempSlideOutlet.attach(this.slides.get(i)!.content);
 
-      this.tempSlideOutlet.attach(slide.content);
+      // Wait for the slide to render. Otherwise, the previous slide may not have been removed from the DOM yet.
+      await new Promise(requestAnimationFrame);
 
       // Store the height of the current slide if is larger than the current stored height;
       if (this.tempSlideContainer.nativeElement.offsetHeight > tallestSlideHeightPx) {
@@ -136,8 +164,7 @@ export class VaultCarouselComponent implements AfterViewInit {
 
       // cleanup the outlet
       this.tempSlideOutlet.detach();
-    });
-
+    }
     // Set the min height of the entire carousel based on the largest slide.
     this.minHeight = `${tallestSlideHeightPx + heightOfButtonsPx}px`;
     this.changeDetectorRef.detectChanges();

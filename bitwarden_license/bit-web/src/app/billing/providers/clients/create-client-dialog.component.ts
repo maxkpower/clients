@@ -1,14 +1,21 @@
-import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
-import { BasePortalOutlet } from "@angular/cdk/portal";
 import { Component, Inject, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingApiServiceAbstraction } from "@bitwarden/common/billing/abstractions/billing-api.service.abstraction";
 import { PlanType, ProductTierType } from "@bitwarden/common/billing/enums";
 import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.response";
 import { ProviderPlanResponse } from "@bitwarden/common/billing/models/response/provider-subscription-response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { DialogService, ToastService } from "@bitwarden/components";
+import {
+  DIALOG_DATA,
+  DialogConfig,
+  DialogRef,
+  DialogService,
+  ToastService,
+} from "@bitwarden/components";
 
 import { WebProviderService } from "../../../admin-console/providers/services/web-provider.service";
 
@@ -17,6 +24,8 @@ type CreateClientDialogParams = {
   plans: PlanResponse[];
 };
 
+// FIXME: update to use a const object instead of a typescript enum
+// eslint-disable-next-line @bitwarden/platform/no-enums
 export enum CreateClientDialogResultType {
   Closed = "closed",
   Submitted = "submitted",
@@ -26,8 +35,7 @@ export const openCreateClientDialog = (
   dialogService: DialogService,
   dialogConfig: DialogConfig<
     CreateClientDialogParams,
-    DialogRef<CreateClientDialogResultType, unknown>,
-    BasePortalOutlet
+    DialogRef<CreateClientDialogResultType, unknown>
   >,
 ) =>
   dialogService.open<CreateClientDialogResultType, CreateClientDialogParams>(
@@ -94,6 +102,7 @@ export class PlanCard {
 
 @Component({
   templateUrl: "./create-client-dialog.component.html",
+  standalone: false,
 })
 export class CreateClientDialogComponent implements OnInit {
   protected discountPercentage: number | null | undefined;
@@ -124,6 +133,7 @@ export class CreateClientDialogComponent implements OnInit {
     private i18nService: I18nService,
     private toastService: ToastService,
     private webProviderService: WebProviderService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -192,13 +202,14 @@ export class CreateClientDialogComponent implements OnInit {
     if (!selectedPlanCard) {
       return;
     }
-
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
     await this.webProviderService.createClientOrganization(
       this.dialogParams.providerId,
       this.formGroup.controls.organizationName.value,
       this.formGroup.controls.clientOwnerEmail.value,
       selectedPlanCard.type,
       this.formGroup.controls.seats.value,
+      activeUserId,
     );
 
     this.toastService.showToast({

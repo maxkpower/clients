@@ -1,12 +1,10 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
+// FIXME (PM-22628): angular imports are forbidden in background
+// eslint-disable-next-line no-restricted-imports
 import { inject } from "@angular/core";
 import { combineLatest, defer, firstValueFrom, map, Observable } from "rxjs";
 
-import {
-  PinServiceAbstraction,
-  UserDecryptionOptionsServiceAbstraction,
-} from "@bitwarden/auth/common";
+import { UserDecryptionOptionsServiceAbstraction } from "@bitwarden/auth/common";
+import { PinServiceAbstraction } from "@bitwarden/common/key-management/pin/pin.service.abstraction";
 import { UserId } from "@bitwarden/common/types/guid";
 import {
   BiometricsService,
@@ -16,6 +14,10 @@ import {
 import { LockComponentService, UnlockOptions } from "@bitwarden/key-management-ui";
 
 import { BiometricErrors, BiometricErrorTypes } from "../../../models/biometricErrors";
+import { BrowserApi } from "../../../platform/browser/browser-api";
+import BrowserPopupUtils from "../../../platform/browser/browser-popup-utils";
+// FIXME (PM-22628): Popup imports are forbidden in background
+// eslint-disable-next-line no-restricted-imports
 import { BrowserRouterService } from "../../../platform/popup/services/browser-router.service";
 
 export class ExtensionLockComponentService implements LockComponentService {
@@ -26,7 +28,7 @@ export class ExtensionLockComponentService implements LockComponentService {
   private readonly biometricStateService = inject(BiometricStateService);
 
   getPreviousUrl(): string | null {
-    return this.routerService.getPreviousUrl();
+    return this.routerService.getPreviousUrl() ?? null;
   }
 
   getBiometricsError(error: any): string | null {
@@ -37,6 +39,18 @@ export class ExtensionLockComponentService implements LockComponentService {
     }
 
     return biometricsError.description;
+  }
+
+  async popOutBrowserExtension(): Promise<void> {
+    if (!BrowserPopupUtils.inPopout(global.window) && !BrowserPopupUtils.inSidebar(global.window)) {
+      await BrowserPopupUtils.openCurrentPagePopout(global.window);
+    }
+  }
+
+  closeBrowserExtensionPopout(): void {
+    if (BrowserPopupUtils.inPopout(global.window)) {
+      BrowserApi.closePopup(global.window);
+    }
   }
 
   async isWindowVisible(): Promise<boolean> {
@@ -71,7 +85,7 @@ export class ExtensionLockComponentService implements LockComponentService {
       map(([biometricsStatus, userDecryptionOptions, pinDecryptionAvailable]) => {
         const unlockOpts: UnlockOptions = {
           masterPassword: {
-            enabled: userDecryptionOptions.hasMasterPassword,
+            enabled: userDecryptionOptions?.hasMasterPassword,
           },
           pin: {
             enabled: pinDecryptionAvailable,

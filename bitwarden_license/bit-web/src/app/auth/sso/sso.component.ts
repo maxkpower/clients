@@ -9,15 +9,16 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { concatMap, firstValueFrom, Observable, Subject, takeUntil } from "rxjs";
+import { concatMap, firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { ControlsOf } from "@bitwarden/angular/types/controls-of";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
   getOrganizationById,
-  OrganizationService,
+  InternalOrganizationServiceAbstraction,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationData } from "@bitwarden/common/admin-console/models/data/organization.data";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import {
@@ -33,8 +34,6 @@ import { OrganizationSsoRequest } from "@bitwarden/common/auth/models/request/or
 import { OrganizationSsoResponse } from "@bitwarden/common/auth/models/response/organization-sso.response";
 import { SsoConfigView } from "@bitwarden/common/auth/models/view/sso-config.view";
 import { getUserId } from "@bitwarden/common/auth/services/account.service";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
-import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -53,6 +52,7 @@ const defaultSigningAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha2
 @Component({
   selector: "app-org-manage-sso",
   templateUrl: "sso.component.html",
+  standalone: false,
 })
 export class SsoComponent implements OnInit, OnDestroy {
   readonly ssoType = SsoType;
@@ -66,8 +66,8 @@ export class SsoComponent implements OnInit, OnDestroy {
 
   readonly samlSigningAlgorithms = [
     "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-    "http://www.w3.org/2000/09/xmldsig#rsa-sha384",
-    "http://www.w3.org/2000/09/xmldsig#rsa-sha512",
+    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",
+    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",
   ];
 
   readonly samlSigningAlgorithmOptions: SelectOptions[] = this.samlSigningAlgorithms.map(
@@ -191,24 +191,17 @@ export class SsoComponent implements OnInit, OnDestroy {
     return this.ssoConfigForm?.controls?.configType as FormControl;
   }
 
-  accountDeprovisioningEnabled$: Observable<boolean>;
-
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private apiService: ApiService,
     private platformUtilsService: PlatformUtilsService,
     private i18nService: I18nService,
-    private organizationService: OrganizationService,
+    private organizationService: InternalOrganizationServiceAbstraction,
     private accountService: AccountService,
     private organizationApiService: OrganizationApiServiceAbstraction,
-    private configService: ConfigService,
     private toastService: ToastService,
-  ) {
-    this.accountDeprovisioningEnabled$ = this.configService.getFeatureFlag$(
-      FeatureFlag.AccountDeprovisioning,
-    );
-  }
+  ) {}
 
   async ngOnInit() {
     this.enabledCtrl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((enabled) => {
@@ -305,6 +298,8 @@ export class SsoComponent implements OnInit, OnDestroy {
 
     const response = await this.organizationApiService.updateSso(this.organizationId, request);
     this.populateForm(response);
+
+    await this.upsertOrganizationWithSsoChanges(request);
 
     this.toastService.showToast({
       variant: "success",
@@ -406,5 +401,26 @@ export class SsoComponent implements OnInit, OnDestroy {
     }
 
     document.body.append(div);
+  }
+
+  private async upsertOrganizationWithSsoChanges(
+    organizationSsoRequest: OrganizationSsoRequest,
+  ): Promise<void> {
+    const userId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const currentOrganization = await firstValueFrom(
+      this.organizationService
+        .organizations$(userId)
+        .pipe(getOrganizationById(this.organizationId)),
+    );
+
+    if (currentOrganization) {
+      const updatedOrganization: OrganizationData = {
+        ...currentOrganization,
+        ssoEnabled: organizationSsoRequest.enabled,
+        ssoMemberDecryptionType: organizationSsoRequest.data.memberDecryptionType,
+      };
+
+      await this.organizationService.upsert(updatedOrganization, userId);
+    }
   }
 }

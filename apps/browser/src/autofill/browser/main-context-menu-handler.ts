@@ -1,8 +1,9 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import {
   AUTOFILL_CARD_ID,
   AUTOFILL_ID,
@@ -23,14 +24,15 @@ import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/s
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { CipherType } from "@bitwarden/common/vault/enums";
+import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { RestrictedItemTypesService } from "@bitwarden/common/vault/services/restricted-item-types.service";
 
 import { InitContextMenuItems } from "./abstractions/main-context-menu-handler";
 
 export class MainContextMenuHandler {
+  static existingMenuItems: Set<string> = new Set();
   initRunning = false;
   private initContextMenuItems: InitContextMenuItems[] = [
     {
@@ -41,6 +43,7 @@ export class MainContextMenuHandler {
       id: AUTOFILL_ID,
       parentId: ROOT_ID,
       title: this.i18nService.t("autoFillLogin"),
+      requiresUnblockedUri: true,
     },
     {
       id: COPY_USERNAME_ID,
@@ -56,7 +59,7 @@ export class MainContextMenuHandler {
       id: COPY_VERIFICATION_CODE_ID,
       parentId: ROOT_ID,
       title: this.i18nService.t("copyVerificationCode"),
-      checkPremiumAccess: true,
+      requiresPremiumAccess: true,
     },
     {
       id: SEPARATOR_ID + 1,
@@ -67,16 +70,19 @@ export class MainContextMenuHandler {
       id: AUTOFILL_IDENTITY_ID,
       parentId: ROOT_ID,
       title: this.i18nService.t("autoFillIdentity"),
+      requiresUnblockedUri: true,
     },
     {
       id: AUTOFILL_CARD_ID,
       parentId: ROOT_ID,
       title: this.i18nService.t("autoFillCard"),
+      requiresUnblockedUri: true,
     },
     {
       id: SEPARATOR_ID + 2,
       type: "separator",
       parentId: ROOT_ID,
+      requiresUnblockedUri: true,
     },
     {
       id: GENERATE_PASSWORD_ID,
@@ -87,6 +93,7 @@ export class MainContextMenuHandler {
       id: COPY_IDENTIFIER_ID,
       parentId: ROOT_ID,
       title: this.i18nService.t("copyElementIdentifier"),
+      requiresUnblockedUri: true,
     },
   ];
   private noCardsContextMenuItems: chrome.contextMenus.CreateProperties[] = [
@@ -145,12 +152,13 @@ export class MainContextMenuHandler {
   ];
 
   constructor(
-    private stateService: StateService,
+    private tokenService: TokenService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
     private i18nService: I18nService,
     private logService: LogService,
     private billingAccountProfileStateService: BillingAccountProfileStateService,
     private accountService: AccountService,
+    private restrictedItemTypesService: RestrictedItemTypesService,
   ) {}
 
   /**
@@ -175,13 +183,26 @@ export class MainContextMenuHandler {
         this.billingAccountProfileStateService.hasPremiumFromAnySource$(account.id),
       );
 
-      for (const options of this.initContextMenuItems) {
-        if (options.checkPremiumAccess && !hasPremium) {
+      const isCardRestricted = (
+        await firstValueFrom(this.restrictedItemTypesService.restricted$)
+      ).some((rt) => rt.cipherType === CipherType.Card);
+
+      for (const menuItem of this.initContextMenuItems) {
+        const {
+          requiresPremiumAccess,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          requiresUnblockedUri, // destructuring this out of being passed to `create`
+          ...otherOptions
+        } = menuItem;
+
+        if (requiresPremiumAccess && !hasPremium) {
+          continue;
+        }
+        if (menuItem.id.startsWith(AUTOFILL_CARD_ID) && isCardRestricted) {
           continue;
         }
 
-        delete options.checkPremiumAccess;
-        await MainContextMenuHandler.create({ ...options, contexts: ["all"] });
+        await MainContextMenuHandler.create({ ...otherOptions, contexts: ["all"] });
       }
     } catch (error) {
       this.logService.warning(error.message);
@@ -202,12 +223,16 @@ export class MainContextMenuHandler {
     }
 
     return new Promise<void>((resolve, reject) => {
-      chrome.contextMenus.create(options, () => {
+      const itemId = chrome.contextMenus.create(options, () => {
         if (chrome.runtime.lastError) {
           return reject(chrome.runtime.lastError);
         }
         resolve();
       });
+
+      this.existingMenuItems.add(`${itemId}`);
+
+      return itemId;
     });
   };
 
@@ -221,12 +246,16 @@ export class MainContextMenuHandler {
 
         resolve();
       });
+
+      this.existingMenuItems = new Set();
+
+      return;
     });
   }
 
   static remove(menuItemId: string) {
     return new Promise<void>((resolve, reject) => {
-      chrome.contextMenus.remove(menuItemId, () => {
+      const itemId = chrome.contextMenus.remove(menuItemId, () => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
           return;
@@ -234,6 +263,10 @@ export class MainContextMenuHandler {
 
         resolve();
       });
+
+      this.existingMenuItems.delete(`${itemId}`);
+
+      return;
     });
   }
 
@@ -243,6 +276,11 @@ export class MainContextMenuHandler {
 
       const createChildItem = async (parentId: string) => {
         const menuItemId = `${parentId}_${optionId}`;
+
+        const itemAlreadyExists = MainContextMenuHandler.existingMenuItems.has(menuItemId);
+        if (itemAlreadyExists) {
+          return;
+        }
 
         return await MainContextMenuHandler.create({
           type: "normal",
@@ -255,10 +293,18 @@ export class MainContextMenuHandler {
 
       if (
         !cipher ||
-        (cipher.type === CipherType.Login && !Utils.isNullOrEmpty(cipher.login?.password))
+        (cipher.type === CipherType.Login &&
+          (!Utils.isNullOrEmpty(cipher.login?.username) ||
+            !Utils.isNullOrEmpty(cipher.login?.password) ||
+            !Utils.isNullOrEmpty(cipher.login?.totp)))
       ) {
         await createChildItem(AUTOFILL_ID);
+      }
 
+      if (
+        !cipher ||
+        (cipher.type === CipherType.Login && !Utils.isNullOrEmpty(cipher.login?.password))
+      ) {
         if (cipher?.viewPassword ?? true) {
           await createChildItem(COPY_PASSWORD_ID);
         }
@@ -297,7 +343,11 @@ export class MainContextMenuHandler {
 
   async noAccess() {
     if (await this.init()) {
-      const authed = await this.stateService.getIsAuthenticated();
+      const userId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      const authed =
+        userId != null && (await firstValueFrom(this.tokenService.hasAccessToken$(userId)));
       this.loadOptions(
         this.i18nService.t(authed ? "unlockVaultMenu" : "loginToVaultMenu"),
         NOOP_COMMAND_SUFFIX,
@@ -305,10 +355,22 @@ export class MainContextMenuHandler {
     }
   }
 
+  async removeBlockedUriMenuItems() {
+    try {
+      for (const menuItem of this.initContextMenuItems) {
+        if (menuItem.requiresUnblockedUri && menuItem.id) {
+          await MainContextMenuHandler.remove(menuItem.id);
+        }
+      }
+    } catch (error) {
+      this.logService.warning(error.message);
+    }
+  }
+
   async noCards() {
     try {
-      for (const option of this.noCardsContextMenuItems) {
-        await MainContextMenuHandler.create(option);
+      for (const menuItem of this.noCardsContextMenuItems) {
+        await MainContextMenuHandler.create(menuItem);
       }
     } catch (error) {
       this.logService.warning(error.message);
@@ -317,8 +379,8 @@ export class MainContextMenuHandler {
 
   async noIdentities() {
     try {
-      for (const option of this.noIdentitiesContextMenuItems) {
-        await MainContextMenuHandler.create(option);
+      for (const menuItem of this.noIdentitiesContextMenuItems) {
+        await MainContextMenuHandler.create(menuItem);
       }
     } catch (error) {
       this.logService.warning(error.message);
@@ -327,8 +389,8 @@ export class MainContextMenuHandler {
 
   async noLogins() {
     try {
-      for (const option of this.noLoginsContextMenuItems) {
-        await MainContextMenuHandler.create(option);
+      for (const menuItem of this.noLoginsContextMenuItems) {
+        await MainContextMenuHandler.create(menuItem);
       }
 
       await this.loadOptions(this.i18nService.t("addLoginMenu"), CREATE_LOGIN_ID);

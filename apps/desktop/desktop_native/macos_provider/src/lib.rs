@@ -7,15 +7,18 @@ use std::{
 };
 
 use futures::FutureExt;
-use log::{error, info};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use tracing::{error, info};
 
 uniffi::setup_scaffolding!();
 
 mod assertion;
 mod registration;
 
-use assertion::{PasskeyAssertionRequest, PreparePasskeyAssertionCallback};
+use assertion::{
+    PasskeyAssertionRequest, PasskeyAssertionWithoutUserInterfaceRequest,
+    PreparePasskeyAssertionCallback,
+};
 use registration::{PasskeyRegistrationRequest, PreparePasskeyRegistrationCallback};
 
 #[derive(uniffi::Enum, Debug, Serialize, Deserialize)]
@@ -24,6 +27,13 @@ pub enum UserVerification {
     Preferred,
     Required,
     Discouraged,
+}
+
+#[derive(uniffi::Record, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Debug, uniffi::Error, Serialize, Deserialize)]
@@ -51,6 +61,8 @@ pub struct MacOSProviderClient {
 
 #[uniffi::export]
 impl MacOSProviderClient {
+    // FIXME: Remove unwraps! They panic and terminate the whole application.
+    #[allow(clippy::unwrap_used)]
     #[uniffi::constructor]
     pub fn connect() -> Self {
         let _ = oslog::OsLogger::new("com.bitwarden.desktop.autofill-extension")
@@ -102,21 +114,21 @@ impl MacOSProviderClient {
                                 match value {
                                     Ok(value) => {
                                         if let Err(e) = cb.complete(value) {
-                                            error!("Error deserializing message: {e}");
+                                            error!(error = %e, "Error deserializing message");
                                         }
                                     }
                                     Err(e) => {
-                                        error!("Error processing message: {e:?}");
+                                        error!(error = ?e, "Error processing message");
                                         cb.error(e)
                                     }
                                 }
                             }
                             None => {
-                                error!("No callback found for sequence number: {sequence_number}")
+                                error!(sequence_number, "No callback found for sequence number")
                             }
                         },
                         Err(e) => {
-                            error!("Error deserializing message: {e}");
+                            error!(error = %e, "Error deserializing message");
                         }
                     };
                 }
@@ -141,6 +153,14 @@ impl MacOSProviderClient {
     ) {
         self.send_message(request, Box::new(callback));
     }
+
+    pub fn prepare_passkey_assertion_without_user_interface(
+        &self,
+        request: PasskeyAssertionWithoutUserInterfaceRequest,
+        callback: Arc<dyn PreparePasskeyAssertionCallback>,
+    ) {
+        self.send_message(request, Box::new(callback));
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -161,6 +181,8 @@ enum SerializedMessage {
 }
 
 impl MacOSProviderClient {
+    // FIXME: Remove unwraps! They panic and terminate the whole application.
+    #[allow(clippy::unwrap_used)]
     fn add_callback(&self, callback: Box<dyn Callback>) -> u32 {
         let sequence_number = self
             .response_callbacks_counter
@@ -174,6 +196,8 @@ impl MacOSProviderClient {
         sequence_number
     }
 
+    // FIXME: Remove unwraps! They panic and terminate the whole application.
+    #[allow(clippy::unwrap_used)]
     fn send_message(
         &self,
         message: impl Serialize + DeserializeOwned,
@@ -196,8 +220,7 @@ impl MacOSProviderClient {
                 .remove(&sequence_number)
             {
                 cb.error(BitwardenError::Internal(format!(
-                    "Error sending message: {}",
-                    e
+                    "Error sending message: {e}"
                 )));
             }
         }

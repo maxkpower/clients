@@ -1,10 +1,9 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { DialogRef } from "@angular/cdk/dialog";
 import { Component } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router } from "@angular/router";
-import { combineLatest, lastValueFrom, switchMap } from "rxjs";
+import { combineLatest, firstValueFrom, lastValueFrom, switchMap } from "rxjs";
 import { first } from "rxjs/operators";
 
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
@@ -15,12 +14,14 @@ import { ProviderUserStatusType, ProviderUserType } from "@bitwarden/common/admi
 import { ProviderUserBulkRequest } from "@bitwarden/common/admin-console/models/request/provider/provider-user-bulk.request";
 import { ProviderUserConfirmRequest } from "@bitwarden/common/admin-console/models/request/provider/provider-user-confirm.request";
 import { ProviderUserUserDetailsResponse } from "@bitwarden/common/admin-console/models/response/provider/provider-user.response";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { EncryptService } from "@bitwarden/common/key-management/crypto/abstractions/encrypt.service";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
-import { DialogService, ToastService } from "@bitwarden/components";
+import { DialogRef, DialogService, ToastService } from "@bitwarden/components";
 import { KeyService } from "@bitwarden/key-management";
 import { BaseMembersComponent } from "@bitwarden/web-vault/app/admin-console/common/base-members.component";
 import {
@@ -46,14 +47,15 @@ class MembersTableDataSource extends PeopleTableDataSource<ProviderUser> {
 
 @Component({
   templateUrl: "members.component.html",
+  standalone: false,
 })
 export class MembersComponent extends BaseMembersComponent<ProviderUser> {
   accessEvents = false;
   dataSource = new MembersTableDataSource();
   loading = true;
   providerId: string;
-  rowHeight = 69;
-  rowHeightClass = `tw-h-[69px]`;
+  rowHeight = 70;
+  rowHeightClass = `tw-h-[70px]`;
   status: ProviderUserStatusType = null;
 
   userStatusType = ProviderUserStatusType;
@@ -73,6 +75,7 @@ export class MembersComponent extends BaseMembersComponent<ProviderUser> {
     private activatedRoute: ActivatedRoute,
     private providerService: ProviderService,
     private router: Router,
+    private accountService: AccountService,
   ) {
     super(
       apiService,
@@ -96,7 +99,13 @@ export class MembersComponent extends BaseMembersComponent<ProviderUser> {
           this.dataSource.filter = peopleFilter(queryParams.search, null);
 
           this.providerId = urlParams.providerId;
-          const provider = await this.providerService.get(this.providerId);
+          const provider = await firstValueFrom(
+            this.accountService.activeAccount$.pipe(
+              getUserId,
+              switchMap((userId) => this.providerService.get$(this.providerId, userId)),
+            ),
+          );
+
           if (!provider || !provider.canManageUsers) {
             return await this.router.navigate(["../"], { relativeTo: this.activatedRoute });
           }
@@ -170,6 +179,10 @@ export class MembersComponent extends BaseMembersComponent<ProviderUser> {
     }
   }
 
+  async invite() {
+    await this.edit(null);
+  }
+
   async bulkRemove(): Promise<void> {
     if (this.actionPromise != null) {
       return;
@@ -188,7 +201,7 @@ export class MembersComponent extends BaseMembersComponent<ProviderUser> {
 
   async confirmUser(user: ProviderUser, publicKey: Uint8Array): Promise<void> {
     const providerKey = await this.keyService.getProviderKey(this.providerId);
-    const key = await this.encryptService.rsaEncrypt(providerKey.key, publicKey);
+    const key = await this.encryptService.encapsulateKeyUnsigned(providerKey, publicKey);
     const request = new ProviderUserConfirmRequest();
     request.key = key.encryptedString;
     await this.apiService.postProviderUserConfirm(this.providerId, user.id, request);

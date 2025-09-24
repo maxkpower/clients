@@ -8,7 +8,7 @@ import { EventType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
-import { CipherRepromptType } from "@bitwarden/common/vault/enums";
+import { CipherRepromptType, CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import { ToastService } from "@bitwarden/components";
@@ -128,6 +128,7 @@ describe("CopyCipherFieldService", () => {
     describe("totp", () => {
       beforeEach(() => {
         actionType = "totp";
+        cipher.type = CipherType.Login;
         cipher.login = new LoginView();
         cipher.login.totp = "secret-totp";
         cipher.reprompt = CipherRepromptType.None;
@@ -136,10 +137,10 @@ describe("CopyCipherFieldService", () => {
 
       it("should get TOTP code when allowed from premium", async () => {
         billingAccountProfileStateService.hasPremiumFromAnySource$.mockReturnValue(of(true));
-        totpService.getCode.mockResolvedValue("123456");
+        totpService.getCode$.mockReturnValue(of({ code: "123456", period: 30 }));
         const result = await service.copy(valueToCopy, actionType, cipher, skipReprompt);
         expect(result).toBeTruthy();
-        expect(totpService.getCode).toHaveBeenCalledWith(valueToCopy);
+        expect(totpService.getCode$).toHaveBeenCalledWith(valueToCopy);
         expect(platformUtilsService.copyToClipboard).toHaveBeenCalledWith("123456");
         expect(billingAccountProfileStateService.hasPremiumFromAnySource$).toHaveBeenCalledWith(
           userId,
@@ -148,10 +149,10 @@ describe("CopyCipherFieldService", () => {
 
       it("should get TOTP code when allowed from organization", async () => {
         cipher.organizationUseTotp = true;
-        totpService.getCode.mockResolvedValue("123456");
+        totpService.getCode$.mockReturnValue(of({ code: "123456", period: 30 }));
         const result = await service.copy(valueToCopy, actionType, cipher, skipReprompt);
         expect(result).toBeTruthy();
-        expect(totpService.getCode).toHaveBeenCalledWith(valueToCopy);
+        expect(totpService.getCode$).toHaveBeenCalledWith(valueToCopy);
         expect(platformUtilsService.copyToClipboard).toHaveBeenCalledWith("123456");
       });
 
@@ -159,7 +160,7 @@ describe("CopyCipherFieldService", () => {
         billingAccountProfileStateService.hasPremiumFromAnySource$.mockReturnValue(of(false));
         const result = await service.copy(valueToCopy, actionType, cipher, skipReprompt);
         expect(result).toBeFalsy();
-        expect(totpService.getCode).not.toHaveBeenCalled();
+        expect(totpService.getCode$).not.toHaveBeenCalled();
         expect(platformUtilsService.copyToClipboard).not.toHaveBeenCalled();
         expect(billingAccountProfileStateService.hasPremiumFromAnySource$).toHaveBeenCalledWith(
           userId,
@@ -170,7 +171,7 @@ describe("CopyCipherFieldService", () => {
         cipher.login.totp = null;
         const result = await service.copy(valueToCopy, actionType, cipher, skipReprompt);
         expect(result).toBeFalsy();
-        expect(totpService.getCode).not.toHaveBeenCalled();
+        expect(totpService.getCode$).not.toHaveBeenCalled();
         expect(platformUtilsService.copyToClipboard).not.toHaveBeenCalled();
       });
     });

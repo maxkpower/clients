@@ -1,15 +1,17 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { Component, Inject, OnInit } from "@angular/core";
+import { Observable, switchMap } from "rxjs";
 
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { Provider } from "@bitwarden/common/admin-console/models/domain/provider";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
-import { DialogService, ToastService } from "@bitwarden/components";
+import { DIALOG_DATA, DialogRef, DialogService, ToastService } from "@bitwarden/components";
 
 import { WebProviderService } from "../services/web-provider.service";
 
@@ -20,9 +22,10 @@ interface AddOrganizationDialogData {
 
 @Component({
   templateUrl: "add-organization.component.html",
+  standalone: false,
 })
 export class AddOrganizationComponent implements OnInit {
-  protected provider: Provider;
+  protected provider$: Observable<Provider>;
   protected loading = true;
 
   constructor(
@@ -35,6 +38,7 @@ export class AddOrganizationComponent implements OnInit {
     private validationService: ValidationService,
     private dialogService: DialogService,
     private toastService: ToastService,
+    private accountService: AccountService,
   ) {}
 
   async ngOnInit() {
@@ -46,18 +50,21 @@ export class AddOrganizationComponent implements OnInit {
       return;
     }
 
-    this.provider = await this.providerService.get(this.data.providerId);
+    this.provider$ = this.accountService.activeAccount$.pipe(
+      getUserId,
+      switchMap((userId) => this.providerService.get$(this.data.providerId, userId)),
+    );
 
     this.loading = false;
   }
 
-  add(organization: Organization) {
+  add(organization: Organization, provider: Provider) {
     return async () => {
       const confirmed = await this.dialogService.openSimpleDialog({
         title: organization.name,
         content: {
           key: "addOrganizationConfirmation",
-          placeholders: [organization.name, this.provider.name],
+          placeholders: [organization.name, provider.name],
         },
         type: "warning",
       });

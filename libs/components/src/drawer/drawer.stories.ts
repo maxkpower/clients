@@ -1,5 +1,3 @@
-// FIXME: Update this file to be type safe and remove this and next line
-// @ts-strict-ignore
 import { RouterTestingModule } from "@angular/router/testing";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 
@@ -9,10 +7,7 @@ import { ButtonModule } from "../button";
 import { CalloutModule } from "../callout";
 import { LayoutComponent } from "../layout";
 import { mockLayoutI18n } from "../layout/mocks";
-import {
-  disableBothThemeDecorator,
-  positionFixedWrapperDecorator,
-} from "../stories/storybook-decorators";
+import { positionFixedWrapperDecorator } from "../stories/storybook-decorators";
 import { TypographyModule } from "../typography";
 import { I18nMockService } from "../utils";
 
@@ -30,7 +25,6 @@ export default {
   },
   decorators: [
     positionFixedWrapperDecorator(),
-    disableBothThemeDecorator,
     moduleMetadata({
       imports: [
         RouterTestingModule,
@@ -47,6 +41,7 @@ export default {
             return new I18nMockService({
               ...mockLayoutI18n,
               close: "Close",
+              loading: "Loading",
             });
           },
         },

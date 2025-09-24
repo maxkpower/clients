@@ -12,8 +12,9 @@ import { DomainSettingsService } from "@bitwarden/common/autofill/services/domai
 import { AnimationControlService } from "@bitwarden/common/platform/abstractions/animation-control.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
-import { ThemeType } from "@bitwarden/common/platform/enums";
+import { Theme, ThemeTypes } from "@bitwarden/common/platform/enums";
 import { ThemeStateService } from "@bitwarden/common/platform/theming/theme-state.service";
+import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault-settings/vault-settings.service";
 import {
   BadgeModule,
   CardComponent,
@@ -22,19 +23,17 @@ import {
   Option,
   SelectModule,
 } from "@bitwarden/components";
+import { PermitCipherDetailsPopoverComponent } from "@bitwarden/vault";
 
+import { PopupWidthOption } from "../../../platform/browser/browser-popup-utils";
 import { PopOutComponent } from "../../../platform/popup/components/pop-out.component";
 import { PopupCompactModeService } from "../../../platform/popup/layout/popup-compact-mode.service";
 import { PopupHeaderComponent } from "../../../platform/popup/layout/popup-header.component";
 import { PopupPageComponent } from "../../../platform/popup/layout/popup-page.component";
-import {
-  PopupWidthOption,
-  PopupSizeService,
-} from "../../../platform/popup/layout/popup-size.service";
+import { PopupSizeService } from "../../../platform/popup/layout/popup-size.service";
 import { VaultPopupCopyButtonsService } from "../services/vault-popup-copy-buttons.service";
 
 @Component({
-  standalone: true,
   templateUrl: "./appearance-v2.component.html",
   imports: [
     CommonModule,
@@ -48,6 +47,7 @@ import { VaultPopupCopyButtonsService } from "../services/vault-popup-copy-butto
     ReactiveFormsModule,
     CheckboxModule,
     BadgeModule,
+    PermitCipherDetailsPopoverComponent,
   ],
 })
 export class AppearanceV2Component implements OnInit {
@@ -59,18 +59,19 @@ export class AppearanceV2Component implements OnInit {
   appearanceForm = this.formBuilder.group({
     enableFavicon: false,
     enableBadgeCounter: true,
-    theme: ThemeType.System,
+    theme: ThemeTypes.System as Theme,
     enableAnimations: true,
     enableCompactMode: false,
     showQuickCopyActions: false,
     width: "default" as PopupWidthOption,
+    clickItemsToAutofillVaultView: false,
   });
 
   /** To avoid flashes of inaccurate values, only show the form after the entire form is populated. */
   formLoading = true;
 
   /** Available theme options */
-  themeOptions: { name: string; value: ThemeType }[];
+  themeOptions: { name: string; value: Theme }[];
 
   /** Available width options */
   protected readonly widthOptions: Option<PopupWidthOption>[] = [
@@ -88,11 +89,12 @@ export class AppearanceV2Component implements OnInit {
     private destroyRef: DestroyRef,
     private animationControlService: AnimationControlService,
     i18nService: I18nService,
+    private vaultSettingsService: VaultSettingsService,
   ) {
     this.themeOptions = [
-      { name: i18nService.t("systemDefault"), value: ThemeType.System },
-      { name: i18nService.t("light"), value: ThemeType.Light },
-      { name: i18nService.t("dark"), value: ThemeType.Dark },
+      { name: i18nService.t("systemDefault"), value: ThemeTypes.System },
+      { name: i18nService.t("light"), value: ThemeTypes.Light },
+      { name: i18nService.t("dark"), value: ThemeTypes.Dark },
     ];
   }
 
@@ -108,6 +110,9 @@ export class AppearanceV2Component implements OnInit {
       this.copyButtonsService.showQuickCopyActions$,
     );
     const width = await firstValueFrom(this.popupSizeService.width$);
+    const clickItemsToAutofillVaultView = await firstValueFrom(
+      this.vaultSettingsService.clickItemsToAutofillVaultView$,
+    );
 
     // Set initial values for the form
     this.appearanceForm.setValue({
@@ -118,6 +123,7 @@ export class AppearanceV2Component implements OnInit {
       enableCompactMode,
       showQuickCopyActions,
       width,
+      clickItemsToAutofillVaultView,
     });
 
     this.formLoading = false;
@@ -163,6 +169,16 @@ export class AppearanceV2Component implements OnInit {
       .subscribe((width) => {
         void this.updateWidth(width);
       });
+
+    this.appearanceForm.controls.clickItemsToAutofillVaultView.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((clickItemsToAutofillVaultView) => {
+        void this.updateClickItemsToAutofillVaultView(clickItemsToAutofillVaultView);
+      });
+  }
+
+  async updateClickItemsToAutofillVaultView(clickItemsToAutofillVaultView: boolean) {
+    await this.vaultSettingsService.setClickItemsToAutofillVaultView(clickItemsToAutofillVaultView);
   }
 
   async updateFavicon(enableFavicon: boolean) {
@@ -174,7 +190,7 @@ export class AppearanceV2Component implements OnInit {
     this.messagingService.send("bgUpdateContextMenu");
   }
 
-  async saveTheme(newTheme: ThemeType) {
+  async saveTheme(newTheme: Theme) {
     await this.themeStateService.setSelectedTheme(newTheme);
   }
 

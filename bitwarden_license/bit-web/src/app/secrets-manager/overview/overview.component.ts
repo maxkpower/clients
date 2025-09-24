@@ -14,12 +14,8 @@ import {
   take,
   share,
   firstValueFrom,
-  of,
-  filter,
 } from "rxjs";
 
-import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
-import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
   getOrganizationById,
   OrganizationService,
@@ -27,13 +23,12 @@ import {
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { getUserId } from "@bitwarden/common/auth/services/account.service";
-import { OrganizationBillingServiceAbstraction } from "@bitwarden/common/billing/abstractions";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { DialogService } from "@bitwarden/components";
-import { TrialFlowService } from "@bitwarden/web-vault/app/billing/services/trial-flow.service";
-import { FreeTrial } from "@bitwarden/web-vault/app/billing/types/free-trial";
 
 import { OrganizationCounts } from "../models/view/counts.view";
 import { ProjectListView } from "../models/view/project-list.view";
@@ -85,6 +80,7 @@ type OrganizationTasks = {
 @Component({
   selector: "sm-overview",
   templateUrl: "./overview.component.html",
+  standalone: false,
 })
 export class OverviewComponent implements OnInit, OnDestroy {
   private destroy$: Subject<void> = new Subject<void>();
@@ -96,7 +92,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
   protected loading = true;
   protected organizationEnabled = false;
   protected organization: Organization;
-  protected i18n: I18nPipe;
   protected onboardingTasks$: Observable<SMOnboardingTasks>;
 
   protected view$: Observable<{
@@ -107,7 +102,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
     tasks: OrganizationTasks;
     counts: OrganizationCounts;
   }>;
-  protected freeTrial$: Observable<FreeTrial>;
 
   constructor(
     private route: ActivatedRoute,
@@ -123,9 +117,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private smOnboardingTasksService: SMOnboardingTasksService,
     private logService: LogService,
     private router: Router,
-    private organizationApiService: OrganizationApiServiceAbstraction,
-    private trialFlowService: TrialFlowService,
-    private organizationBillingService: OrganizationBillingServiceAbstraction,
+    private configService: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -154,21 +146,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
       this.loading = true;
       this.organizationEnabled = org.enabled;
     });
-
-    this.freeTrial$ = org$.pipe(
-      filter((org) => org.isOwner && org.canViewBillingHistory && org.canViewSubscription),
-      switchMap((org) =>
-        combineLatest([
-          of(org),
-          this.organizationApiService.getSubscription(org.id),
-          this.organizationBillingService.getPaymentSource(org.id),
-        ]),
-      ),
-      map(([org, sub, paymentSource]) => {
-        return this.trialFlowService.checkForOrgsWithUpcomingPaymentIssues(org, sub, paymentSource);
-      }),
-      takeUntil(this.destroy$),
-    );
 
     const projects$ = combineLatest([
       orgId$,
@@ -241,12 +218,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   async navigateToPaymentMethod() {
-    await this.router.navigate(
-      ["organizations", `${this.organizationId}`, "billing", "payment-method"],
-      {
-        state: { launchPaymentModalAutomatically: true },
-      },
+    const managePaymentDetailsOutsideCheckout = await this.configService.getFeatureFlag(
+      FeatureFlag.PM21881_ManagePaymentDetailsOutsideCheckout,
     );
+    const route = managePaymentDetailsOutsideCheckout ? "payment-details" : "payment-method";
+    await this.router.navigate(["organizations", `${this.organizationId}`, "billing", route], {
+      state: { launchPaymentModalAutomatically: true },
+    });
   }
 
   ngOnDestroy(): void {

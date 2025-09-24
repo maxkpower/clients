@@ -11,10 +11,10 @@ use std::{
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
-use super::{BitwardenDesktopAgent, SshAgentUIRequest};
+use super::{BitwardenDesktopAgent, BitwardenSshKey, SshAgentUIRequest};
 
-impl BitwardenDesktopAgent {
-    pub async fn start_server(
+impl BitwardenDesktopAgent<BitwardenSshKey> {
+    pub fn start_server(
         auth_request_tx: tokio::sync::mpsc::Sender<SshAgentUIRequest>,
         auth_response_rx: Arc<Mutex<tokio::sync::broadcast::Receiver<(u32, bool)>>>,
     ) -> Result<Self, anyhow::Error> {

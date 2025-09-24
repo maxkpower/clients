@@ -11,24 +11,6 @@
         }}</span>
         <!-- Discount Badge -->
         <div class="tw-flex tw-items-center tw-gap-2">
-          <span
-            class="tw-mr-1"
-            [hidden]="isSubscriptionCanceled"
-            *ngIf="
-              this.discountPercentageFromSub > 0
-                ? discountPercentageFromSub
-                : this.discountPercentage && selectedInterval === planIntervals.Annually
-            "
-            bitBadge
-            variant="success"
-            >{{
-              "upgradeDiscount"
-                | i18n
-                  : (selectedInterval === planIntervals.Annually && discountPercentageFromSub == 0
-                      ? this.discountPercentage
-                      : this.discountPercentageFromSub)
-            }}</span
-          >
           <!-- Plan Interval Toggle -->
           <div class="tw-inline-block" *ngIf="!isSubscriptionCanceled">
             <bit-toggle-group
@@ -55,7 +37,7 @@
           class="tw-grid tw-grid-flow-col tw-gap-4 tw-mb-4"
           [class]="'tw-grid-cols-' + selectableProducts.length"
         >
-          <div
+          <bit-card
             *ngFor="
               let selectableProduct of selectableProducts;
               trackBy: manageSelectableProduct;
@@ -64,7 +46,6 @@
             [ngClass]="getPlanCardContainerClasses(selectableProduct, i)"
             (click)="selectPlan(selectableProduct)"
             [attr.tabindex]="focusedIndex !== i || isCardDisabled(i) ? '-1' : '0'"
-            class="product-card"
             (keyup)="onKeydown($event, i)"
             (focus)="onFocus(i)"
             [attr.aria-disabled]="isCardDisabled(i)"
@@ -151,10 +132,11 @@
                     >{{
                       "costPerMember"
                         | i18n
-                          : ((selectableProduct.isAnnual
-                              ? selectableProduct.PasswordManager.seatPrice / 12
-                              : selectableProduct.PasswordManager.seatPrice
-                            )
+                          : (((this.sub.useSecretsManager
+                              ? selectableProduct.SecretsManager.seatPrice
+                              : 0) +
+                              selectableProduct.PasswordManager.seatPrice) /
+                              (selectableProduct.isAnnual ? 12 : 1)
                               | currency: "$")
                     }}
                   </b>
@@ -322,7 +304,7 @@
                 </ul>
               </ng-template>
             </ng-template>
-          </div>
+          </bit-card>
         </div>
         <br />
         <bit-callout
@@ -353,7 +335,7 @@
         >
           <i class="bwi bwi-fw" [ngClass]="paymentSourceClasses"></i>
           {{ paymentSource?.description }}
-          <span class="ml-2 tw-text-primary-600 tw-cursor-pointer" (click)="toggleShowPayment()">
+          <span class="tw-ml-2 tw-text-primary-600 tw-cursor-pointer" (click)="toggleShowPayment()">
             {{ "changePaymentMethod" | i18n }}
           </span>
           <a></a>
@@ -377,13 +359,13 @@
               type="button"
               [bitIconButton]="totalOpened ? 'bwi-angle-down' : 'bwi-angle-up'"
               size="small"
-              aria-hidden="true"
+              [label]="totalOpened ? ('hidePricingSummary' | i18n) : ('showPricingSummary' | i18n)"
             ></button>
           </p>
         </div>
         <!-- SM + PM and PM only cost summary -->
-        <div *ngIf="totalOpened && !isSecretsManagerTrial()" class="row">
-          <bit-hint class="col-6" *ngIf="selectedInterval == planIntervals.Annually">
+        <div *ngIf="totalOpened && !isSecretsManagerTrial()" class="tw-flex tw-flex-wrap tw-gap-4">
+          <bit-hint class="tw-w-1/2" *ngIf="selectedInterval == planIntervals.Annually">
             <p class="tw-font-semibold tw-mb-1" *ngIf="organization.useSecretsManager">
               {{ "passwordManager" | i18n }}
             </p>
@@ -550,7 +532,7 @@
               </ng-container>
             </p>
           </bit-hint>
-          <bit-hint class="col-6" *ngIf="selectedInterval == planIntervals.Monthly">
+          <bit-hint class="tw-w-1/2" *ngIf="selectedInterval == planIntervals.Monthly">
             <p class="tw-font-semibold tw-mb-1" *ngIf="organization.useSecretsManager">
               {{ "passwordManager" | i18n }}
             </p>
@@ -706,8 +688,8 @@
           </bit-hint>
         </div>
         <!-- SM + Free PM cost summary -->
-        <div *ngIf="totalOpened && isSecretsManagerTrial()" class="row">
-          <bit-hint class="col-6" *ngIf="selectedInterval == planIntervals.Annually">
+        <div *ngIf="totalOpened && isSecretsManagerTrial()" class="tw-flex tw-flex-wrap tw-gap-4">
+          <bit-hint class="tw-w-1/2" *ngIf="selectedInterval == planIntervals.Annually">
             <!-- secrets manager summary for annual -->
             <p class="tw-font-semibold tw-mt-2 tw-mb-0" *ngIf="organization.useSecretsManager">
               {{ "secretsManager" | i18n }}
@@ -826,7 +808,7 @@
               </span>
             </p>
           </bit-hint>
-          <bit-hint class="col-6" *ngIf="selectedInterval == planIntervals.Monthly">
+          <bit-hint class="tw-w-1/2" *ngIf="selectedInterval == planIntervals.Monthly">
             <!-- secrets manager summary for monthly -->
             <p class="tw-font-semibold tw-mt-2 tw-mb-0" *ngIf="organization.useSecretsManager">
               {{ "secretsManager" | i18n }}
@@ -929,10 +911,10 @@
         </div>
         <!-- discountPercentage to PM Only -->
         <div
-          *ngIf="totalOpened && discountPercentage && !organization.useSecretsManager"
-          class="row"
+          *ngIf="totalOpened && !organization.useSecretsManager"
+          class="tw-flex tw-flex-wrap tw-gap-4"
         >
-          <bit-hint class="col-6">
+          <bit-hint class="tw-w-1/2">
             <p
               class="tw-mb-0 tw-flex tw-justify-between"
               bitTypography="body2"
@@ -949,8 +931,8 @@
             </p>
           </bit-hint>
         </div>
-        <div *ngIf="totalOpened" class="row tw-mt-4">
-          <bit-hint class="col-6">
+        <div *ngIf="totalOpened" class="tw-flex tw-flex-wrap tw-gap-4 tw-mt-4">
+          <bit-hint class="tw-w-1/2">
             <p
               class="tw-flex tw-justify-between tw-border-0 tw-border-solid tw-border-t tw-border-secondary-300 tw-pt-2 tw-mb-0"
             >
@@ -963,8 +945,8 @@
             </p>
           </bit-hint>
         </div>
-        <div *ngIf="totalOpened" class="row tw-mt-4">
-          <bit-hint class="col-6">
+        <div *ngIf="totalOpened" class="tw-flex tw-flex-wrap tw-gap-4 tw-mt-4">
+          <bit-hint class="tw-w-1/2">
             <p
               class="tw-flex tw-justify-between tw-border-0 tw-border-solid tw-border-t tw-border-secondary-300 tw-pt-2 tw-mb-0"
             >
@@ -984,7 +966,7 @@
     </div>
     <ng-container bitDialogFooter>
       <button bitButton bitFormButton buttonType="primary" type="submit">
-        {{ "upgrade" | i18n }}
+        {{ submitButtonLabel }}
       </button>
       <button bitButton buttonType="secondary" type="button" [bitDialogClose]="ResultType.Closed">
         {{ "cancel" | i18n }}

@@ -8,13 +8,15 @@ import { AvatarService } from "@bitwarden/common/auth/abstractions/avatar.servic
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/sdk-internal";
 
 @Component({
   selector: "app-org-badge",
   templateUrl: "organization-name-badge.component.html",
+  standalone: false,
 })
 export class OrganizationNameBadgeComponent implements OnChanges {
-  @Input() organizationId?: string;
+  @Input() organizationId?: OrganizationId | string;
   @Input() organizationName: string;
   @Input() disabled: boolean;
 

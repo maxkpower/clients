@@ -1,6 +1,5 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
 import {
   Component,
   EventEmitter,
@@ -13,7 +12,7 @@ import {
 } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { Subject, firstValueFrom, map, takeUntil } from "rxjs";
+import { firstValueFrom, map, Subject, switchMap, takeUntil } from "rxjs";
 
 import { ManageTaxInformationComponent } from "@bitwarden/angular/billing/components";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -28,13 +27,14 @@ import { Organization } from "@bitwarden/common/admin-console/models/domain/orga
 import { OrganizationKeysRequest } from "@bitwarden/common/admin-console/models/request/organization-keys.request";
 import { OrganizationUpgradeRequest } from "@bitwarden/common/admin-console/models/request/organization-upgrade.request";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   BillingApiServiceAbstraction,
   BillingInformation,
+  OrganizationBillingServiceAbstraction as OrganizationBillingService,
   OrganizationInformation,
   PaymentInformation,
   PlanInformation,
-  OrganizationBillingServiceAbstraction as OrganizationBillingService,
 } from "@bitwarden/common/billing/abstractions";
 import { TaxServiceAbstraction } from "@bitwarden/common/billing/abstractions/tax.service.abstraction";
 import {
@@ -54,24 +54,37 @@ import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.res
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
-import { DialogService, ToastService } from "@bitwarden/components";
+import {
+  DIALOG_DATA,
+  DialogConfig,
+  DialogRef,
+  DialogService,
+  ToastService,
+} from "@bitwarden/components";
 import { KeyService } from "@bitwarden/key-management";
+import { UserId } from "@bitwarden/user-core";
 
+import { BillingNotificationService } from "../services/billing-notification.service";
 import { BillingSharedModule } from "../shared/billing-shared.module";
 import { PaymentComponent } from "../shared/payment/payment.component";
 
 type ChangePlanDialogParams = {
   organizationId: string;
-  subscription: OrganizationSubscriptionResponse;
   productTierType: ProductTierType;
+  subscription?: OrganizationSubscriptionResponse;
 };
 
+// FIXME: update to use a const object instead of a typescript enum
+// eslint-disable-next-line @bitwarden/platform/no-enums
 export enum ChangePlanDialogResultType {
   Closed = "closed",
   Submitted = "submitted",
 }
 
+// FIXME: update to use a const object instead of a typescript enum
+// eslint-disable-next-line @bitwarden/platform/no-enums
 export enum PlanCardState {
   Selected = "selected",
   NotSelected = "not_selected",
@@ -98,7 +111,6 @@ interface OnSuccessArgs {
 
 @Component({
   templateUrl: "./change-plan-dialog.component.html",
-  standalone: true,
   imports: [BillingSharedModule],
 })
 export class ChangePlanDialogComponent implements OnInit, OnDestroy {
@@ -139,7 +151,6 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   @Output() onCanceled = new EventEmitter<void>();
   @Output() onTrialBillingSuccess = new EventEmitter();
 
-  protected discountPercentage: number = 20;
   protected discountPercentageFromSub: number;
   protected loading = true;
   protected planCards: PlanCard[];
@@ -184,6 +195,7 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   paymentSource?: PaymentSourceResponse;
   plans: ListResponse<PlanResponse>;
   isSubscriptionCanceled: boolean = false;
+  secretsManagerTotal: number;
 
   private destroy$ = new Subject<void>();
 
@@ -207,6 +219,7 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
     private taxService: TaxServiceAbstraction,
     private accountService: AccountService,
     private organizationBillingService: OrganizationBillingService,
+    private billingNotificationService: BillingNotificationService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -227,10 +240,16 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
           .organizations$(userId)
           .pipe(getOrganizationById(this.organizationId)),
       );
-      const { accountCredit, paymentSource } =
-        await this.billingApiService.getOrganizationPaymentMethod(this.organizationId);
-      this.accountCredit = accountCredit;
-      this.paymentSource = paymentSource;
+      if (this.sub?.subscription?.status !== "canceled") {
+        try {
+          const { accountCredit, paymentSource } =
+            await this.billingApiService.getOrganizationPaymentMethod(this.organizationId);
+          this.accountCredit = accountCredit;
+          this.paymentSource = paymentSource;
+        } catch (error) {
+          this.billingNotificationService.handleError(error);
+        }
+      }
     }
 
     if (!this.selfHosted) {
@@ -258,9 +277,14 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
     }
     this.upgradeFlowPrefillForm();
 
-    this.policyService
-      .policyAppliesToActiveUser$(PolicyType.SingleOrg)
-      .pipe(takeUntil(this.destroy$))
+    this.accountService.activeAccount$
+      .pipe(
+        getUserId,
+        switchMap((userId) =>
+          this.policyService.policyAppliesToUser$(PolicyType.SingleOrg, userId),
+        ),
+        takeUntil(this.destroy$),
+      )
       .subscribe((policyAppliesToActiveUser) => {
         this.singleOrgPolicyAppliesToActiveUser = policyAppliesToActiveUser;
       });
@@ -289,13 +313,16 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
     const taxInfo = await this.organizationApiService.getTaxInfo(this.organizationId);
     this.taxInformation = TaxInformation.from(taxInfo);
 
-    this.refreshSalesTax();
+    if (!this.isSubscriptionCanceled) {
+      this.refreshSalesTax();
+    }
   }
 
   resolveHeaderName(subscription: OrganizationSubscriptionResponse): string {
     if (subscription.subscription != null) {
-      this.isSubscriptionCanceled = subscription.subscription.cancelled;
-      if (subscription.subscription.cancelled) {
+      this.isSubscriptionCanceled =
+        subscription.subscription.cancelled && this.sub?.plan.productTier !== ProductTierType.Free;
+      if (this.isSubscriptionCanceled) {
         return this.i18nService.t("restartSubscription");
       }
     }
@@ -468,7 +495,11 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   get selectedSecretsManagerPlan() {
-    return this.secretsManagerPlans.find((plan) => plan.type === this.selectedPlan.type);
+    let planResponse: PlanResponse;
+    if (this.secretsManagerPlans) {
+      return this.secretsManagerPlans.find((plan) => plan.type === this.selectedPlan.type);
+    }
+    return planResponse;
   }
 
   get selectedPlanInterval() {
@@ -579,6 +610,8 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
 
     return (
       plan.PasswordManager.additionalStoragePricePerGb *
+      // TODO: Eslint upgrade. Please resolve this  since the null check does nothing
+      // eslint-disable-next-line no-constant-binary-expression
       Math.abs(this.sub?.maxStorageGb ? this.sub?.maxStorageGb - 1 : 0 || 0)
     );
   }
@@ -599,6 +632,10 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   get passwordManagerSubtotal() {
+    if (!this.selectedPlan || !this.selectedPlan.PasswordManager) {
+      return 0;
+    }
+
     let subTotal = this.selectedPlan.PasswordManager.basePrice;
     if (this.selectedPlan.PasswordManager.hasAdditionalSeatsOption) {
       subTotal += this.passwordManagerSeatTotal(this.selectedPlan);
@@ -609,21 +646,28 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
     return subTotal - this.discount;
   }
 
-  get secretsManagerSubtotal() {
-    const plan = this.selectedSecretsManagerPlan;
-
-    if (!this.organization.useSecretsManager) {
-      return 0;
+  secretsManagerSubtotal() {
+    const plan = this.selectedPlan;
+    if (!plan || !plan.SecretsManager) {
+      return this.secretsManagerTotal || 0;
     }
 
-    return (
+    if (this.secretsManagerTotal) {
+      return this.secretsManagerTotal;
+    }
+
+    this.secretsManagerTotal =
       plan.SecretsManager.basePrice +
       this.secretsManagerSeatTotal(plan, this.sub?.smSeats) +
-      this.additionalServiceAccountTotal(plan)
-    );
+      this.additionalServiceAccountTotal(plan);
+    return this.secretsManagerTotal;
   }
 
   get passwordManagerSeats() {
+    if (!this.selectedPlan) {
+      return 0;
+    }
+
     if (this.selectedPlan.productTier === ProductTierType.Families) {
       return this.selectedPlan.PasswordManager.baseSeats;
     }
@@ -631,11 +675,15 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   get total() {
+    if (!this.organization || !this.selectedPlan) {
+      return 0;
+    }
+
     if (this.organization.useSecretsManager) {
       return (
         this.passwordManagerSubtotal +
         this.additionalStorageTotal(this.selectedPlan) +
-        this.secretsManagerSubtotal +
+        this.secretsManagerSubtotal() +
         this.estimatedTax
       );
     }
@@ -651,6 +699,10 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
   }
 
   get additionalServiceAccount() {
+    if (!this.currentPlan || !this.currentPlan.SecretsManager) {
+      return 0;
+    }
+
     const baseServiceAccount = this.currentPlan.SecretsManager?.baseServiceAccount || 0;
     const usedServiceAccounts = this.sub?.smServiceAccounts || 0;
 
@@ -713,13 +765,20 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
 
   submit = async () => {
     if (this.taxComponent !== undefined && !this.taxComponent.validate()) {
+      this.taxComponent.markAllAsTouched();
       return;
     }
 
     const doSubmit = async (): Promise<string> => {
+      const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
       let orgId: string = null;
-      if (this.isSubscriptionCanceled) {
-        await this.restartSubscription();
+      const sub = this.sub?.subscription;
+      const isCanceled = sub?.status === "canceled";
+      const isCancelledDowngradedToFreeOrg =
+        sub?.cancelled && this.organization.productTierType === ProductTierType.Free;
+
+      if (isCanceled || isCancelledDowngradedToFreeOrg) {
+        await this.restartSubscription(activeUserId);
         orgId = this.organizationId;
       } else {
         orgId = await this.updateOrganization();
@@ -759,7 +818,7 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   };
 
-  private async restartSubscription() {
+  private async restartSubscription(activeUserId: UserId) {
     const org = await this.organizationApiService.get(this.organizationId);
     const organization: OrganizationInformation = {
       name: org.name,
@@ -791,11 +850,15 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
       billing: this.getBillingInformationFromTaxInfoComponent(),
     };
 
-    await this.organizationBillingService.restartSubscription(this.organization.id, {
-      organization,
-      plan,
-      payment,
-    });
+    await this.organizationBillingService.restartSubscription(
+      this.organization.id,
+      {
+        organization,
+        plan,
+        payment,
+      },
+      activeUserId,
+    );
   }
 
   private async updateOrganization() {
@@ -835,7 +898,14 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
 
     // Backfill pub/priv key if necessary
     if (!this.organization.hasPublicAndPrivateKeys) {
-      const orgShareKey = await this.keyService.getOrgKey(this.organizationId);
+      const userId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      const orgShareKey = await firstValueFrom(
+        this.keyService
+          .orgKeys$(userId)
+          .pipe(map((orgKeys) => orgKeys?.[this.organizationId as OrganizationId] ?? null)),
+      );
       const orgKeys = await this.keyService.makeKeyPair(orgShareKey);
       request.keys = new OrganizationKeysRequest(orgKeys[0], orgKeys[1].encryptedString);
     }
@@ -944,9 +1014,8 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
       case PaymentMethodType.Card:
         return ["bwi-credit-card"];
       case PaymentMethodType.BankAccount:
-        return ["bwi-bank"];
       case PaymentMethodType.Check:
-        return ["bwi-money"];
+        return ["bwi-billing"];
       case PaymentMethodType.PayPal:
         return ["bwi-paypal text-primary"];
       default:
@@ -1035,7 +1104,8 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
     if (this.organization.useSecretsManager) {
       request.secretsManager = {
         seats: this.sub.smSeats,
-        additionalMachineAccounts: this.sub.smServiceAccounts,
+        additionalMachineAccounts:
+          this.sub.smServiceAccounts - this.sub.plan.SecretsManager.baseServiceAccount,
       };
     }
 
@@ -1062,5 +1132,18 @@ export class ChangePlanDialogComponent implements OnInit, OnDestroy {
       this.isPaymentSourceEmpty() ||
       this.isSubscriptionCanceled
     );
+  }
+
+  get submitButtonLabel(): string {
+    if (
+      this.organization &&
+      this.sub &&
+      this.organization.productTierType !== ProductTierType.Free &&
+      this.sub.subscription?.status === "canceled"
+    ) {
+      return this.i18nService.t("restart");
+    } else {
+      return this.i18nService.t("upgrade");
+    }
   }
 }

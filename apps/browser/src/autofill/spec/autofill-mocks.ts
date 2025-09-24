@@ -103,6 +103,7 @@ export function createChromeTabMock(customFields = {}): chrome.tabs.Tab {
     selected: true,
     discarded: false,
     autoDiscardable: false,
+    frozen: false,
     groupId: 2,
     url: "https://jest-testing-website.com",
     ...customFields,
@@ -113,7 +114,6 @@ export function createGenerateFillScriptOptionsMock(customFields = {}): Generate
   return {
     skipUsernameOnlyFill: false,
     onlyEmptyFields: false,
-    onlyVisibleFields: false,
     fillNewPassword: false,
     allowTotpAutofill: false,
     autoSubmitLogin: false,

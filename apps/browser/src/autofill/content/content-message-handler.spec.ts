@@ -1,6 +1,6 @@
 import { mock } from "jest-mock-extended";
 
-import { VaultOnboardingMessages } from "@bitwarden/common/vault/enums/vault-onboarding.enum";
+import { VaultMessages } from "@bitwarden/common/vault/enums/vault-messages.enum";
 
 import { postWindowMessage, sendMockExtensionMessage } from "../spec/testing-utils";
 
@@ -34,10 +34,10 @@ describe("ContentMessageHandler", () => {
       const mockPostMessage = jest.fn();
       window.postMessage = mockPostMessage;
 
-      postWindowMessage({ command: VaultOnboardingMessages.checkBwInstalled });
+      postWindowMessage({ command: VaultMessages.checkBwInstalled });
 
       expect(mockPostMessage).toHaveBeenCalledWith({
-        command: VaultOnboardingMessages.HasBwInstalled,
+        command: VaultMessages.HasBwInstalled,
       });
     });
   });
@@ -100,10 +100,19 @@ describe("ContentMessageHandler", () => {
     });
 
     it("forwards the message to the extension background if it is present in the forwardCommands list", () => {
-      sendMockExtensionMessage({ command: "bgUnlockPopoutOpened" });
+      const forwardCommands = [
+        "addToLockedVaultPendingNotifications",
+        "unlockCompleted",
+        "addedCipher",
+      ];
 
-      expect(sendMessageSpy).toHaveBeenCalledTimes(1);
-      expect(sendMessageSpy).toHaveBeenCalledWith({ command: "bgUnlockPopoutOpened" });
+      forwardCommands.forEach((command) => {
+        sendMockExtensionMessage({ command });
+
+        expect(sendMessageSpy).toHaveBeenCalledWith({ command });
+      });
+
+      expect(sendMessageSpy).toHaveBeenCalledTimes(forwardCommands.length);
     });
   });
 

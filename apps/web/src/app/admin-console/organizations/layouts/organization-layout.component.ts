@@ -6,6 +6,7 @@ import { ActivatedRoute, RouterModule } from "@angular/router";
 import { combineLatest, filter, map, Observable, switchMap, withLatestFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
+import { AdminConsoleLogo } from "@bitwarden/assets/svg";
 import {
   canAccessBillingTab,
   canAccessGroupsTab,
@@ -22,23 +23,25 @@ import { PolicyType, ProviderStatusType } from "@bitwarden/common/admin-console/
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { getUserId } from "@bitwarden/common/auth/services/account.service";
-import { ProductTierType } from "@bitwarden/common/billing/enums";
+import { OrganizationBillingServiceAbstraction } from "@bitwarden/common/billing/abstractions";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { getById } from "@bitwarden/common/platform/misc";
 import { BannerModule, IconModule } from "@bitwarden/components";
+import { OrganizationWarningsModule } from "@bitwarden/web-vault/app/billing/organizations/warnings/organization-warnings.module";
+import { OrganizationWarningsService } from "@bitwarden/web-vault/app/billing/organizations/warnings/services";
+import { NonIndividualSubscriber } from "@bitwarden/web-vault/app/billing/types";
+import { TaxIdWarningComponent } from "@bitwarden/web-vault/app/billing/warnings/components";
+import { TaxIdWarningType } from "@bitwarden/web-vault/app/billing/warnings/types";
 
+import { FreeFamiliesPolicyService } from "../../../billing/services/free-families-policy.service";
 import { OrgSwitcherComponent } from "../../../layouts/org-switcher/org-switcher.component";
 import { WebLayoutModule } from "../../../layouts/web-layout.module";
-import { AdminConsoleLogo } from "../../icons/admin-console-logo";
-
-import { AccountDeprovisioningBannerService } from "./services/account-deprovisioning-banner.service";
 
 @Component({
   selector: "app-organization-layout",
   templateUrl: "organization-layout.component.html",
-  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -47,13 +50,15 @@ import { AccountDeprovisioningBannerService } from "./services/account-deprovisi
     IconModule,
     OrgSwitcherComponent,
     BannerModule,
+    TaxIdWarningComponent,
+    TaxIdWarningComponent,
+    OrganizationWarningsModule,
   ],
 })
 export class OrganizationLayoutComponent implements OnInit {
   protected readonly logo = AdminConsoleLogo;
 
   protected orgFilter = (org: Organization) => canAccessOrgAdmin(org);
-  protected domainVerificationNavigationTextKey: string;
 
   protected integrationPageEnabled$: Observable<boolean>;
 
@@ -62,9 +67,16 @@ export class OrganizationLayoutComponent implements OnInit {
   showPaymentAndHistory$: Observable<boolean>;
   hideNewOrgButton$: Observable<boolean>;
   organizationIsUnmanaged$: Observable<boolean>;
-  enterpriseOrganization$: Observable<boolean>;
 
-  showAccountDeprovisioningBanner$: Observable<boolean>;
+  protected showSponsoredFamiliesDropdown$: Observable<boolean>;
+
+  protected paymentDetailsPageData$: Observable<{
+    route: string;
+    textKey: string;
+  }>;
+
+  protected subscriber$: Observable<NonIndividualSubscriber>;
+  protected getTaxIdWarning$: () => Observable<TaxIdWarningType | null>;
 
   constructor(
     private route: ActivatedRoute,
@@ -73,8 +85,10 @@ export class OrganizationLayoutComponent implements OnInit {
     private configService: ConfigService,
     private policyService: PolicyService,
     private providerService: ProviderService,
-    protected bannerService: AccountDeprovisioningBannerService,
     private accountService: AccountService,
+    private freeFamiliesPolicyService: FreeFamiliesPolicyService,
+    private organizationBillingService: OrganizationBillingServiceAbstraction,
+    private organizationWarningsService: OrganizationWarningsService,
   ) {}
 
   async ngOnInit() {
@@ -88,20 +102,8 @@ export class OrganizationLayoutComponent implements OnInit {
       ),
       filter((org) => org != null),
     );
-
-    this.showAccountDeprovisioningBanner$ = combineLatest([
-      this.bannerService.showBanner$,
-      this.configService.getFeatureFlag$(FeatureFlag.AccountDeprovisioningBanner),
-      this.organization$,
-    ]).pipe(
-      map(
-        ([dismissedOrgs, featureFlagEnabled, organization]) =>
-          organization.productTierType === ProductTierType.Enterprise &&
-          organization.isAdmin &&
-          !dismissedOrgs?.includes(organization.id) &&
-          featureFlagEnabled,
-      ),
-    );
+    this.showSponsoredFamiliesDropdown$ =
+      this.freeFamiliesPolicyService.showSponsoredFamiliesDropdown$(this.organization$);
 
     this.canAccessExport$ = this.organization$.pipe(map((org) => org.canAccessExport));
 
@@ -114,10 +116,18 @@ export class OrganizationLayoutComponent implements OnInit {
       ),
     );
 
-    this.hideNewOrgButton$ = this.policyService.policyAppliesToActiveUser$(PolicyType.SingleOrg);
+    this.hideNewOrgButton$ = this.accountService.activeAccount$.pipe(
+      getUserId,
+      switchMap((userId) => this.policyService.policyAppliesToUser$(PolicyType.SingleOrg, userId)),
+    );
 
-    const provider$ = this.organization$.pipe(
-      switchMap((organization) => this.providerService.get$(organization.providerId)),
+    const provider$ = combineLatest([
+      this.organization$,
+      this.accountService.activeAccount$.pipe(getUserId),
+    ]).pipe(
+      switchMap(([organization, userId]) =>
+        this.providerService.get$(organization.providerId, userId),
+      ),
     );
 
     this.organizationIsUnmanaged$ = combineLatest([this.organization$, provider$]).pipe(
@@ -129,16 +139,31 @@ export class OrganizationLayoutComponent implements OnInit {
       ),
     );
 
-    this.integrationPageEnabled$ = combineLatest(
-      this.organization$,
-      this.configService.getFeatureFlag$(FeatureFlag.PM14505AdminConsoleIntegrationPage),
-    ).pipe(map(([org, featureFlagEnabled]) => featureFlagEnabled && org.canAccessIntegrations));
+    this.integrationPageEnabled$ = this.organization$.pipe(map((org) => org.canAccessIntegrations));
 
-    this.domainVerificationNavigationTextKey = (await this.configService.getFeatureFlag(
-      FeatureFlag.AccountDeprovisioning,
-    ))
-      ? "claimedDomains"
-      : "domainVerification";
+    this.paymentDetailsPageData$ = this.configService
+      .getFeatureFlag$(FeatureFlag.PM21881_ManagePaymentDetailsOutsideCheckout)
+      .pipe(
+        map((managePaymentDetailsOutsideCheckout) =>
+          managePaymentDetailsOutsideCheckout
+            ? { route: "billing/payment-details", textKey: "paymentDetails" }
+            : { route: "billing/payment-method", textKey: "paymentMethod" },
+        ),
+      );
+
+    this.subscriber$ = this.organization$.pipe(
+      map((organization) => ({
+        type: "organization",
+        data: organization,
+      })),
+    );
+
+    this.getTaxIdWarning$ = () =>
+      this.organization$.pipe(
+        switchMap((organization) =>
+          this.organizationWarningsService.getTaxIdWarning$(organization),
+        ),
+      );
   }
 
   canShowVaultTab(organization: Organization): boolean {
@@ -168,4 +193,6 @@ export class OrganizationLayoutComponent implements OnInit {
   getReportTabLabel(organization: Organization): string {
     return organization.useEvents ? "reporting" : "reports";
   }
+
+  refreshTaxIdWarning = () => this.organizationWarningsService.refreshTaxIdWarning();
 }

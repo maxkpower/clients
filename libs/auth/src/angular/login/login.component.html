@@ -11,7 +11,7 @@
 -->
 
 <form [bitSubmit]="submit" [formGroup]="formGroup">
-  <div [ngClass]="{ 'tw-invisible tw-h-0': loginUiState !== LoginUiState.EMAIL_ENTRY }">
+  <div [ngClass]="{ 'tw-hidden': loginUiState !== LoginUiState.EMAIL_ENTRY }">
     <!-- Email Address input -->
     <bit-form-field>
       <bit-label>{{ "emailAddress" | i18n }}</bit-label>
@@ -27,41 +27,54 @@
 
     <!-- Remember Email input -->
     <bit-form-control>
-      <input type="checkbox" formControlName="rememberEmail" bitCheckbox />
+      <input
+        type="checkbox"
+        formControlName="rememberEmail"
+        (input)="onRememberEmailInput($event)"
+        bitCheckbox
+      />
       <bit-label>{{ "rememberEmail" | i18n }}</bit-label>
     </bit-form-control>
 
     <div class="tw-grid tw-gap-3">
       <!-- Continue button -->
-      <button type="button" bitButton block buttonType="primary" (click)="continuePressed()">
+      <button
+        type="button"
+        bitButton
+        block
+        buttonType="primary"
+        (click)="continuePressed()"
+        [disabled]="ssoRequired"
+      >
         {{ "continue" | i18n }}
       </button>
 
       <div class="tw-text-center">{{ "or" | i18n }}</div>
 
-      <!-- Link to Login with Passkey page -->
+      <!-- Button to Login with Passkey -->
       <ng-container *ngIf="isLoginWithPasskeySupported()">
-        <a
+        <button
+          type="button"
           bitButton
           block
-          linkType="primary"
-          routerLink="/login-with-passkey"
-          (mousedown)="$event.preventDefault()"
+          buttonType="secondary"
+          (click)="handleLoginWithPasskeyClick()"
+          [disabled]="ssoRequired"
         >
-          <i class="bwi bwi-passkey tw-mr-1"></i>
+          <i class="bwi bwi-passkey tw-mr-1" aria-hidden="true"></i>
           {{ "logInWithPasskey" | i18n }}
-        </a>
+        </button>
       </ng-container>
 
       <!-- Button to Login with SSO -->
       <button type="button" bitButton block buttonType="secondary" (click)="handleSsoClick()">
-        <i class="bwi bwi-provider tw-mr-1"></i>
+        <i class="bwi bwi-provider tw-mr-1" aria-hidden="true"></i>
         {{ "useSingleSignOn" | i18n }}
       </button>
     </div>
   </div>
 
-  <div [ngClass]="{ 'tw-invisible tw-h-0': loginUiState !== LoginUiState.MASTER_PASSWORD_ENTRY }">
+  <div [ngClass]="{ 'tw-hidden': loginUiState !== LoginUiState.MASTER_PASSWORD_ENTRY }">
     <!-- Master Password input -->
     <bit-form-field class="!tw-mb-1">
       <bit-label>{{ "masterPass" | i18n }}</bit-label>
@@ -91,7 +104,7 @@
           buttonType="secondary"
           (click)="startAuthRequestLogin()"
         >
-          <i class="bwi bwi-mobile"></i>
+          <i class="bwi bwi-mobile" aria-hidden="true"></i>
           {{ "loginWithDevice" | i18n }}
         </button>
       </ng-container>

@@ -17,7 +17,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { Subject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherType, SecureNoteType } from "@bitwarden/common/vault/enums";
@@ -26,10 +26,8 @@ import {
   AsyncActionsModule,
   BitSubmitDirective,
   ButtonComponent,
-  CardComponent,
   FormFieldModule,
   ItemModule,
-  SectionComponent,
   SelectModule,
   ToastService,
   TypographyModule,
@@ -45,12 +43,12 @@ import { CardDetailsSectionComponent } from "./card-details-section/card-details
 import { IdentitySectionComponent } from "./identity/identity.component";
 import { ItemDetailsSectionComponent } from "./item-details/item-details-section.component";
 import { LoginDetailsSectionComponent } from "./login-details-section/login-details-section.component";
+import { NewItemNudgeComponent } from "./new-item-nudge/new-item-nudge.component";
 import { SshKeySectionComponent } from "./sshkey-section/sshkey-section.component";
 
 @Component({
   selector: "vault-cipher-form",
   templateUrl: "./cipher-form.component.html",
-  standalone: true,
   providers: [
     {
       provide: CipherFormContainer,
@@ -62,8 +60,6 @@ import { SshKeySectionComponent } from "./sshkey-section/sshkey-section.componen
   ],
   imports: [
     AsyncActionsModule,
-    CardComponent,
-    SectionComponent,
     TypographyModule,
     ItemModule,
     FormFieldModule,
@@ -76,6 +72,7 @@ import { SshKeySectionComponent } from "./sshkey-section/sshkey-section.componen
     NgIf,
     AdditionalOptionsSectionComponent,
     LoginDetailsSectionComponent,
+    NewItemNudgeComponent,
   ],
 })
 export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, CipherFormContainer {
@@ -116,6 +113,12 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
   @Output() formReady = this.formReadySubject.asObservable();
 
   /**
+   * Emitted when the form is enabled
+   */
+  private formStatusChangeSubject = new BehaviorSubject<"enabled" | "disabled" | null>(null);
+  @Output() formStatusChange$ = this.formStatusChangeSubject.asObservable();
+
+  /**
    * The original cipher being edited or cloned. Null for add mode.
    */
   originalCipherView: CipherView | null;
@@ -133,6 +136,10 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
    */
   protected updatedCipherView: CipherView | null;
 
+  get website(): string | null {
+    return this.updatedCipherView?.login?.uris?.[0]?.uri ?? null;
+  }
+
   protected loading: boolean = true;
 
   CipherType = CipherType;
@@ -140,12 +147,30 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
   ngAfterViewInit(): void {
     if (this.submitBtn) {
       this.bitSubmit.loading$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((loading) => {
-        this.submitBtn.loading = loading;
+        this.submitBtn.loading.set(loading);
       });
 
       this.bitSubmit.disabled$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((disabled) => {
-        this.submitBtn.disabled = disabled;
+        this.submitBtn.disabled.set(disabled);
       });
+    }
+  }
+
+  disableFormFields(): void {
+    this.cipherForm.disable({ emitEvent: false });
+    this.formStatusChangeSubject.next("disabled");
+  }
+
+  /**
+   * Enables the form, only when it is currently disabled.
+   * Child forms could have disabled some of their controls based on
+   * other factors. Enabling the form from this level should only occur
+   * when the form was disabled at this level.
+   */
+  enableFormFields(): void {
+    if (this.formStatusChangeSubject.getValue() === "disabled") {
+      this.cipherForm.enable({ emitEvent: false });
+      this.formStatusChangeSubject.next("enabled");
     }
   }
 
@@ -211,8 +236,6 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
     // Force change detection so that all child components are destroyed and re-created
     this.changeDetectorRef.detectChanges();
 
-    await this.cipherFormCacheService.init();
-
     this.updatedCipherView = new CipherView();
     this.originalCipherView = null;
     this.cipherForm = this.formBuilder.group<CipherForm>({});
@@ -237,6 +260,10 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
 
       if (this.config.mode === "clone") {
         this.updatedCipherView.id = null;
+
+        if (this.updatedCipherView.login) {
+          this.updatedCipherView.login.fido2Credentials = null;
+        }
       }
     } else {
       this.updatedCipherView.type = this.config.cipherType;
@@ -263,11 +290,6 @@ export class CipherFormComponent implements AfterViewInit, OnInit, OnChanges, Ci
 
     // Use the cached cipher when it matches the cipher being edited
     if (this.updatedCipherView.id === cachedCipher.id) {
-      this.updatedCipherView = cachedCipher;
-    }
-
-    // `id` is null when a cipher is being added
-    if (this.updatedCipherView.id === null) {
       this.updatedCipherView = cachedCipher;
     }
   }

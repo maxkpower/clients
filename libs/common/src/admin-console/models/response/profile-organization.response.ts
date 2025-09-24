@@ -1,3 +1,4 @@
+import { MemberDecryptionType } from "../../../auth/enums/sso";
 import { ProductTierType } from "../../../billing/enums";
 import { BaseResponse } from "../../../models/response/base.response";
 import { OrganizationUserStatusType, OrganizationUserType, ProviderType } from "../../enums";
@@ -14,6 +15,7 @@ export class ProfileOrganizationResponse extends BaseResponse {
   use2fa: boolean;
   useApi: boolean;
   useSso: boolean;
+  useOrganizationDomains: boolean;
   useKeyConnector: boolean;
   useScim: boolean;
   useCustomPermissions: boolean;
@@ -55,6 +57,10 @@ export class ProfileOrganizationResponse extends BaseResponse {
   allowAdminAccessToAllCollectionItems: boolean;
   userIsManagedByOrganization: boolean;
   useRiskInsights: boolean;
+  useAdminSponsoredFamilies: boolean;
+  isAdminInitiated: boolean;
+  ssoEnabled: boolean;
+  ssoMemberDecryptionType?: MemberDecryptionType;
 
   constructor(response: any) {
     super(response);
@@ -68,6 +74,7 @@ export class ProfileOrganizationResponse extends BaseResponse {
     this.use2fa = this.getResponseProperty("Use2fa");
     this.useApi = this.getResponseProperty("UseApi");
     this.useSso = this.getResponseProperty("UseSso");
+    this.useOrganizationDomains = this.getResponseProperty("UseOrganizationDomains");
     this.useKeyConnector = this.getResponseProperty("UseKeyConnector") ?? false;
     this.useScim = this.getResponseProperty("UseScim") ?? false;
     this.useCustomPermissions = this.getResponseProperty("UseCustomPermissions") ?? false;
@@ -121,5 +128,9 @@ export class ProfileOrganizationResponse extends BaseResponse {
     );
     this.userIsManagedByOrganization = this.getResponseProperty("UserIsManagedByOrganization");
     this.useRiskInsights = this.getResponseProperty("UseRiskInsights");
+    this.useAdminSponsoredFamilies = this.getResponseProperty("UseAdminSponsoredFamilies");
+    this.isAdminInitiated = this.getResponseProperty("IsAdminInitiated");
+    this.ssoEnabled = this.getResponseProperty("SsoEnabled") ?? false;
+    this.ssoMemberDecryptionType = this.getResponseProperty("SsoMemberDecryptionType");
   }
 }

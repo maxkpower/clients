@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
+import { UnionOfValues } from "@bitwarden/common/vault/types/union-of-values";
 
 import {
   CipherTypeFilter,
@@ -15,13 +16,16 @@ export type VaultFilterType =
   | FolderFilter
   | CollectionFilter;
 
-export enum VaultFilterLabel {
-  OrganizationFilter = "organizationFilter",
-  TypeFilter = "typeFilter",
-  FolderFilter = "folderFilter",
-  CollectionFilter = "collectionFilter",
-  TrashFilter = "trashFilter",
-}
+export const VaultFilterLabel = {
+  OrganizationFilter: "organizationFilter",
+  TypeFilter: "typeFilter",
+  FolderFilter: "folderFilter",
+  CollectionFilter: "collectionFilter",
+  ArchiveFilter: "archiveFilter",
+  TrashFilter: "trashFilter",
+} as const;
+
+type VaultFilterLabel = UnionOfValues<typeof VaultFilterLabel>;
 
 export type VaultFilterSection = {
   data$: Observable<TreeNode<VaultFilterType>>;
@@ -31,7 +35,7 @@ export type VaultFilterSection = {
   };
   action: (filterNode: TreeNode<VaultFilterType>) => Promise<void>;
   edit?: {
-    text: string;
+    filterName: string;
     action: (filter: VaultFilterType) => void;
   };
   add?: {

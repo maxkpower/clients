@@ -12,7 +12,7 @@ import {
 import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { Subject, firstValueFrom, takeUntil } from "rxjs";
-import { debounceTime, map } from "rxjs/operators";
+import { debounceTime, map, switchMap } from "rxjs/operators";
 
 import { ManageTaxInformationComponent } from "@bitwarden/angular/billing/components";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -31,9 +31,15 @@ import { OrganizationUpgradeRequest } from "@bitwarden/common/admin-console/mode
 import { ProviderOrganizationCreateRequest } from "@bitwarden/common/admin-console/models/request/provider/provider-organization-create.request";
 import { ProviderResponse } from "@bitwarden/common/admin-console/models/response/provider/provider.response";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { BillingApiServiceAbstraction } from "@bitwarden/common/billing/abstractions";
 import { TaxServiceAbstraction } from "@bitwarden/common/billing/abstractions/tax.service.abstraction";
-import { PaymentMethodType, PlanType, ProductTierType } from "@bitwarden/common/billing/enums";
+import {
+  PaymentMethodType,
+  PlanSponsorshipType,
+  PlanType,
+  ProductTierType,
+} from "@bitwarden/common/billing/enums";
 import { TaxInformation } from "@bitwarden/common/billing/models/domain";
 import { ExpandedTaxInfoUpdateRequest } from "@bitwarden/common/billing/models/request/expanded-tax-info-update.request";
 import { PreviewOrganizationInvoiceRequest } from "@bitwarden/common/billing/models/request/preview-organization-invoice.request";
@@ -41,14 +47,14 @@ import { UpdatePaymentMethodRequest } from "@bitwarden/common/billing/models/req
 import { BillingResponse } from "@bitwarden/common/billing/models/response/billing.response";
 import { OrganizationSubscriptionResponse } from "@bitwarden/common/billing/models/response/organization-subscription.response";
 import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.response";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { EncryptService } from "@bitwarden/common/key-management/crypto/abstractions/encrypt.service";
+import { EncString } from "@bitwarden/common/key-management/crypto/models/enc-string";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { OrgKey } from "@bitwarden/common/types/key";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { ToastService } from "@bitwarden/components";
@@ -72,7 +78,6 @@ const Allowed2020PlansForLegacyProviders = [
 @Component({
   selector: "app-organization-plans",
   templateUrl: "organization-plans.component.html",
-  standalone: true,
   imports: [BillingSharedModule, OrganizationCreateModule],
 })
 export class OrganizationPlansComponent implements OnInit, OnDestroy {
@@ -83,6 +88,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
   @Input() showFree = true;
   @Input() showCancel = false;
   @Input() acceptingSponsorship = false;
+  @Input() planSponsorshipType?: PlanSponsorshipType;
   @Input() currentPlan: PlanResponse;
 
   selectedFile: File;
@@ -110,6 +116,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
     this._plan = plan;
     this.formGroup?.controls?.plan?.setValue(plan);
   }
+  @Input() enableSecretsManagerByDefault: boolean;
 
   private _plan = PlanType.Free;
   @Input() providerId?: string;
@@ -125,10 +132,6 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
   singleOrgPolicyAppliesToActiveUser = false;
   isInTrialFlow = false;
   discount = 0;
-
-  protected useLicenseUploaderComponent$ = this.configService.getFeatureFlag$(
-    FeatureFlag.PM11901_RefactorSelfHostingLicenseUploader,
-  );
 
   secretsManagerSubscription = secretsManagerSubscribeFormFactory(this.formBuilder);
 
@@ -244,9 +247,14 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
       this.formGroup.controls.billingEmail.addValidators(Validators.required);
     }
 
-    this.policyService
-      .policyAppliesToActiveUser$(PolicyType.SingleOrg)
-      .pipe(takeUntil(this.destroy$))
+    this.accountService.activeAccount$
+      .pipe(
+        getUserId,
+        switchMap((userId) =>
+          this.policyService.policyAppliesToUser$(PolicyType.SingleOrg, userId),
+        ),
+        takeUntil(this.destroy$),
+      )
       .subscribe((policyAppliesToActiveUser) => {
         this.singleOrgPolicyAppliesToActiveUser = policyAppliesToActiveUser;
       });
@@ -269,6 +277,14 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.refreshSalesTax();
       });
+
+    if (this.enableSecretsManagerByDefault && this.selectedSecretsManagerPlan) {
+      this.secretsManagerSubscription.patchValue({
+        enabled: true,
+        userSeats: 1,
+        additionalServiceAccounts: 0,
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -608,9 +624,10 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
     const doSubmit = async (): Promise<string> => {
       let orgId: string;
       if (this.createOrganization) {
-        const orgKey = await this.keyService.makeOrgKey<OrgKey>();
+        const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+        const orgKey = await this.keyService.makeOrgKey<OrgKey>(activeUserId);
         const key = orgKey[0].encryptedString;
-        const collection = await this.encryptService.encrypt(
+        const collection = await this.encryptService.encryptString(
           this.i18nService.t("defaultCollection"),
           orgKey[1],
         );
@@ -672,11 +689,6 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
   }
 
   private refreshSalesTax(): void {
-    if (this.formGroup.controls.plan.value == PlanType.Free) {
-      this.estimatedTax = 0;
-      return;
-    }
-
     if (!this.taxComponent.validate()) {
       return;
     }
@@ -686,6 +698,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
       passwordManager: {
         additionalStorage: this.formGroup.controls.additionalStorage.value,
         plan: this.formGroup.controls.plan.value,
+        sponsoredPlan: this.planSponsorshipType,
         seats: this.formGroup.controls.additionalSeats.value,
       },
       taxInformation: {
@@ -745,7 +758,14 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
 
     // Backfill pub/priv key if necessary
     if (!this.organization.hasPublicAndPrivateKeys) {
-      const orgShareKey = await this.keyService.getOrgKey(this.organizationId);
+      const userId = await firstValueFrom(
+        this.accountService.activeAccount$.pipe(map((a) => a?.id)),
+      );
+      const orgShareKey = await firstValueFrom(
+        this.keyService
+          .orgKeys$(userId)
+          .pipe(map((orgKeys) => orgKeys?.[this.organizationId as OrganizationId] ?? null)),
+      );
       const orgKeys = await this.keyService.makeKeyPair(orgShareKey);
       request.keys = new OrganizationKeysRequest(orgKeys[0], orgKeys[1].encryptedString);
     }
@@ -800,7 +820,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
       );
       const providerKey = await this.keyService.getProviderKey(this.providerId);
       providerRequest.organizationCreateRequest.key = (
-        await this.encryptService.encrypt(orgKey.key, providerKey)
+        await this.encryptService.wrapSymmetricKey(orgKey, providerKey)
       ).encryptedString;
       const orgId = (
         await this.apiService.postProviderCreateOrganization(this.providerId, providerRequest)

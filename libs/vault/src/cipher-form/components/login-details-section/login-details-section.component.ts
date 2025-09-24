@@ -1,7 +1,7 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { DatePipe, NgIf } from "@angular/common";
-import { Component, inject, OnInit, Optional } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, Optional } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
 import { map } from "rxjs";
@@ -20,7 +20,6 @@ import {
   IconButtonModule,
   LinkModule,
   PopoverModule,
-  SectionComponent,
   SectionHeaderComponent,
   ToastService,
   TypographyModule,
@@ -34,9 +33,7 @@ import { AutofillOptionsComponent } from "../autofill-options/autofill-options.c
 @Component({
   selector: "vault-login-details-section",
   templateUrl: "./login-details-section.component.html",
-  standalone: true,
   imports: [
-    SectionComponent,
     ReactiveFormsModule,
     SectionHeaderComponent,
     TypographyModule,
@@ -83,6 +80,8 @@ export class LoginDetailsSectionComponent implements OnInit {
    * @private
    */
   private existingFido2Credentials?: Fido2CredentialView[];
+
+  private destroyRef = inject(DestroyRef);
 
   get hasPasskey(): boolean {
     return this.existingFido2Credentials != null && this.existingFido2Credentials.length > 0;
@@ -151,6 +150,19 @@ export class LoginDetailsSectionComponent implements OnInit {
     if (this.cipherFormContainer.config.mode === "partial-edit") {
       this.loginDetailsForm.disable();
     }
+
+    // If the form is enabled, ensure to disable password or TOTP
+    // for hidden password users
+    this.cipherFormContainer.formStatusChange$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((status) => {
+        if (status === "enabled") {
+          if (!this.viewHiddenFields) {
+            this.loginDetailsForm.controls.password.disable();
+            this.loginDetailsForm.controls.totp.disable();
+          }
+        }
+      });
   }
 
   private initFromExistingCipher(existingLogin: LoginView) {
@@ -160,7 +172,9 @@ export class LoginDetailsSectionComponent implements OnInit {
       totp: existingLogin.totp,
     });
 
-    this.existingFido2Credentials = existingLogin.fido2Credentials;
+    if (this.cipherFormContainer.config.mode != "clone") {
+      this.existingFido2Credentials = existingLogin.fido2Credentials;
+    }
 
     if (!this.viewHiddenFields) {
       this.loginDetailsForm.controls.password.disable();
@@ -243,7 +257,9 @@ export class LoginDetailsSectionComponent implements OnInit {
    * TODO: Browser extension needs a means to cache the current form so values are not lost upon navigating to the generator.
    */
   generateUsername = async () => {
-    const newUsername = await this.generationService.generateUsername();
+    const newUsername = await this.generationService.generateUsername(
+      this.cipherFormContainer.website,
+    );
     if (newUsername) {
       this.loginDetailsForm.controls.username.patchValue(newUsername);
     }

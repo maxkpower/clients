@@ -1,9 +1,8 @@
-import { sshagent as ssh } from "desktop_native/napi";
 import { ipcRenderer } from "electron";
 
 import { DeviceType } from "@bitwarden/common/enums";
+import { EncString } from "@bitwarden/common/key-management/crypto/models/enc-string";
 import { ThemeType, LogLevelType } from "@bitwarden/common/platform/enums";
-import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 
 import {
   EncryptedMessageResponse,
@@ -64,13 +63,6 @@ const sshAgent = {
   clearKeys: async () => {
     return await ipcRenderer.invoke("sshagent.clearkeys");
   },
-  importKey: async (key: string, password: string): Promise<ssh.SshKeyImportResult> => {
-    const res = await ipcRenderer.invoke("sshagent.importkey", {
-      privateKey: key,
-      password: password,
-    });
-    return res;
-  },
   isLoaded(): Promise<boolean> {
     return ipcRenderer.invoke("sshagent.isloaded");
   },
@@ -106,17 +98,6 @@ const nativeMessaging = {
   },
 };
 
-const crypto = {
-  argon2: (
-    password: Uint8Array,
-    salt: Uint8Array,
-    iterations: number,
-    memory: number,
-    parallelism: number,
-  ): Promise<Uint8Array> =>
-    ipcRenderer.invoke("crypto.argon2", { password, salt, iterations, memory, parallelism }),
-};
-
 const ephemeralStore = {
   setEphemeralValue: (key: string, value: string): Promise<void> =>
     ipcRenderer.invoke("setEphemeralValue", { key, value }),
@@ -127,8 +108,8 @@ const ephemeralStore = {
 };
 
 const localhostCallbackService = {
-  openSsoPrompt: (codeChallenge: string, state: string): Promise<void> => {
-    return ipcRenderer.invoke("openSsoPrompt", { codeChallenge, state });
+  openSsoPrompt: (codeChallenge: string, state: string, email: string): Promise<void> => {
+    return ipcRenderer.invoke("openSsoPrompt", { codeChallenge, state, email });
   },
 };
 

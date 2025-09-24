@@ -2,11 +2,14 @@
 // @ts-strict-ignore
 import { Component, EventEmitter, Output } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationKeysRequest } from "@bitwarden/common/admin-console/models/request/organization-keys.request";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
+import { getUserId } from "@bitwarden/common/auth/services/account.service";
 import { EncryptService } from "@bitwarden/common/key-management/crypto/abstractions/encrypt.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -24,6 +27,7 @@ import { AbstractSelfHostingLicenseUploaderComponent } from "../../shared/self-h
 @Component({
   selector: "organization-self-hosting-license-uploader",
   templateUrl: "./self-hosting-license-uploader.component.html",
+  standalone: false,
 })
 export class OrganizationSelfHostingLicenseUploaderComponent extends AbstractSelfHostingLicenseUploaderComponent {
   /**
@@ -42,16 +46,17 @@ export class OrganizationSelfHostingLicenseUploaderComponent extends AbstractSel
     private readonly keyService: KeyService,
     private readonly organizationApiService: OrganizationApiServiceAbstraction,
     private readonly syncService: SyncService,
+    private readonly accountService: AccountService,
   ) {
     super(formBuilder, i18nService, platformUtilsService, toastService, tokenService);
   }
 
   protected async submit(): Promise<void> {
     await super.submit();
-
-    const orgKey = await this.keyService.makeOrgKey<OrgKey>();
+    const activeUserId = await firstValueFrom(getUserId(this.accountService.activeAccount$));
+    const orgKey = await this.keyService.makeOrgKey<OrgKey>(activeUserId);
     const key = orgKey[0].encryptedString;
-    const collection = await this.encryptService.encrypt(
+    const collection = await this.encryptService.encryptString(
       this.i18nService.t("defaultCollection"),
       orgKey[1],
     );

@@ -4,6 +4,7 @@ import { Jsonify } from "type-fest";
 
 import { CipherRepromptType } from "../../enums/cipher-reprompt-type";
 import { CipherType } from "../../enums/cipher-type";
+import { CipherPermissionsApi } from "../api/cipher-permissions.api";
 import { CipherResponse } from "../response/cipher.response";
 
 import { AttachmentData } from "./attachment.data";
@@ -21,6 +22,7 @@ export class CipherData {
   folderId: string;
   edit: boolean;
   viewPassword: boolean;
+  permissions: CipherPermissionsApi;
   organizationUseTotp: boolean;
   favorite: boolean;
   revisionDate: string;
@@ -37,7 +39,8 @@ export class CipherData {
   passwordHistory?: PasswordHistoryData[];
   collectionIds?: string[];
   creationDate: string;
-  deletedDate: string;
+  deletedDate: string | undefined;
+  archivedDate: string | undefined;
   reprompt: CipherRepromptType;
   key: string;
 
@@ -51,15 +54,17 @@ export class CipherData {
     this.folderId = response.folderId;
     this.edit = response.edit;
     this.viewPassword = response.viewPassword;
+    this.permissions = response.permissions;
     this.organizationUseTotp = response.organizationUseTotp;
     this.favorite = response.favorite;
     this.revisionDate = response.revisionDate;
-    this.type = response.type;
+    this.type = response.type as CipherType;
     this.name = response.name;
     this.notes = response.notes;
     this.collectionIds = collectionIds != null ? collectionIds : response.collectionIds;
     this.creationDate = response.creationDate;
     this.deletedDate = response.deletedDate;
+    this.archivedDate = response.archivedDate;
     this.reprompt = response.reprompt;
     this.key = response.key;
 
@@ -95,6 +100,8 @@ export class CipherData {
   }
 
   static fromJSON(obj: Jsonify<CipherData>) {
-    return Object.assign(new CipherData(), obj);
+    const result = Object.assign(new CipherData(), obj);
+    result.permissions = CipherPermissionsApi.fromJSON(obj.permissions);
+    return result;
   }
 }

@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { firstValueFrom, map, switchMap } from "rxjs";
 
+import { PremiumBadgeComponent } from "@bitwarden/angular/billing/components/premium-badge";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import {
   getOrganizationById,
@@ -18,22 +19,23 @@ import { ProductTierType } from "@bitwarden/common/billing/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import {
-  BadgeModule,
-  CardComponent,
-  ItemModule,
-  ToastService,
-  TypographyModule,
-} from "@bitwarden/components";
+import { BadgeModule, ItemModule, ToastService, TypographyModule } from "@bitwarden/components";
+import { CipherFormContainer } from "@bitwarden/vault";
 
-import BrowserPopupUtils from "../../../../../../platform/popup/browser-popup-utils";
+import BrowserPopupUtils from "../../../../../../platform/browser/browser-popup-utils";
 import { FilePopoutUtilsService } from "../../../../../../tools/popup/services/file-popout-utils.service";
 
 @Component({
-  standalone: true,
   selector: "app-open-attachments",
   templateUrl: "./open-attachments.component.html",
-  imports: [BadgeModule, CommonModule, ItemModule, JslibModule, TypographyModule, CardComponent],
+  imports: [
+    BadgeModule,
+    CommonModule,
+    ItemModule,
+    JslibModule,
+    TypographyModule,
+    PremiumBadgeComponent,
+  ],
 })
 export class OpenAttachmentsComponent implements OnInit {
   /** Cipher `id` */
@@ -48,6 +50,9 @@ export class OpenAttachmentsComponent implements OnInit {
   /** True when the cipher is a part of a free organization */
   cipherIsAPartOfFreeOrg: boolean;
 
+  /** Tracks the disabled status of the edit cipher form */
+  parentFormDisabled: boolean;
+
   constructor(
     private router: Router,
     private billingAccountProfileStateService: BillingAccountProfileStateService,
@@ -57,6 +62,7 @@ export class OpenAttachmentsComponent implements OnInit {
     private i18nService: I18nService,
     private filePopoutUtilsService: FilePopoutUtilsService,
     private accountService: AccountService,
+    private cipherFormContainer: CipherFormContainer,
   ) {
     this.accountService.activeAccount$
       .pipe(
@@ -68,6 +74,10 @@ export class OpenAttachmentsComponent implements OnInit {
       .subscribe((canAccessPremium) => {
         this.canAccessAttachments = canAccessPremium;
       });
+
+    this.cipherFormContainer.formStatusChange$.pipe(takeUntilDestroyed()).subscribe((status) => {
+      this.parentFormDisabled = status === "disabled";
+    });
   }
 
   async ngOnInit(): Promise<void> {
@@ -77,13 +87,11 @@ export class OpenAttachmentsComponent implements OnInit {
       return;
     }
 
-    const cipherDomain = await this.cipherService.get(this.cipherId);
     const activeUserId = await firstValueFrom(
       this.accountService.activeAccount$.pipe(map((a) => a?.id)),
     );
-    const cipher = await cipherDomain.decrypt(
-      await this.cipherService.getKeyForCipherKeyDecryption(cipherDomain, activeUserId),
-    );
+    const cipherDomain = await this.cipherService.get(this.cipherId, activeUserId);
+    const cipher = await this.cipherService.decrypt(cipherDomain, activeUserId);
 
     if (!cipher.organizationId) {
       this.cipherIsAPartOfFreeOrg = false;

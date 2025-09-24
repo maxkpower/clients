@@ -2,6 +2,7 @@
 // @ts-strict-ignore
 import { Jsonify } from "type-fest";
 
+import { MemberDecryptionType } from "../../../auth/enums/sso";
 import { ProductTierType } from "../../../billing/enums";
 import { OrganizationUserStatusType, OrganizationUserType, ProviderType } from "../../enums";
 import { PermissionsApi } from "../api/permissions.api";
@@ -21,6 +22,7 @@ export class OrganizationData {
   use2fa: boolean;
   useApi: boolean;
   useSso: boolean;
+  useOrganizationDomains: boolean;
   useKeyConnector: boolean;
   useScim: boolean;
   useCustomPermissions: boolean;
@@ -60,6 +62,10 @@ export class OrganizationData {
   allowAdminAccessToAllCollectionItems: boolean;
   userIsManagedByOrganization: boolean;
   useRiskInsights: boolean;
+  useAdminSponsoredFamilies: boolean;
+  isAdminInitiated: boolean;
+  ssoEnabled: boolean;
+  ssoMemberDecryptionType?: MemberDecryptionType;
 
   constructor(
     response?: ProfileOrganizationResponse,
@@ -85,6 +91,7 @@ export class OrganizationData {
     this.use2fa = response.use2fa;
     this.useApi = response.useApi;
     this.useSso = response.useSso;
+    this.useOrganizationDomains = response.useOrganizationDomains;
     this.useKeyConnector = response.useKeyConnector;
     this.useScim = response.useScim;
     this.useCustomPermissions = response.useCustomPermissions;
@@ -122,6 +129,10 @@ export class OrganizationData {
     this.allowAdminAccessToAllCollectionItems = response.allowAdminAccessToAllCollectionItems;
     this.userIsManagedByOrganization = response.userIsManagedByOrganization;
     this.useRiskInsights = response.useRiskInsights;
+    this.useAdminSponsoredFamilies = response.useAdminSponsoredFamilies;
+    this.isAdminInitiated = response.isAdminInitiated;
+    this.ssoEnabled = response.ssoEnabled;
+    this.ssoMemberDecryptionType = response.ssoMemberDecryptionType;
 
     this.isMember = options.isMember;
     this.isProviderUser = options.isProviderUser;

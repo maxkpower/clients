@@ -1,11 +1,17 @@
 #[macro_use]
 extern crate napi_derive;
 
+mod passkey_authenticator_internal;
 mod registry;
 
 #[napi]
 pub mod passwords {
+    /// The error message returned when a password is not found during retrieval or deletion.
+    #[napi]
+    pub const PASSWORD_NOT_FOUND: &str = desktop_core::password::PASSWORD_NOT_FOUND;
+
     /// Fetch the stored password from the keychain.
+    /// Throws {@link Error} with message {@link PASSWORD_NOT_FOUND} if the password does not exist.
     #[napi]
     pub async fn get_password(service: String, account: String) -> napi::Result<String> {
         desktop_core::password::get_password(&service, &account)
@@ -26,6 +32,7 @@ pub mod passwords {
     }
 
     /// Delete the stored password from the keychain.
+    /// Throws {@link Error} with message {@link PASSWORD_NOT_FOUND} if the password does not exist.
     #[napi]
     pub async fn delete_password(service: String, account: String) -> napi::Result<()> {
         desktop_core::password::delete_password(&service, &account)
@@ -33,7 +40,7 @@ pub mod passwords {
             .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
 
-    // Checks if the os secure storage is available
+    /// Checks if the os secure storage is available
     #[napi]
     pub async fn is_available() -> napi::Result<bool> {
         desktop_core::password::is_available()
@@ -83,6 +90,8 @@ pub mod biometrics {
         .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
 
+    /// Retrieves the biometric secret for the given service and account.
+    /// Throws Error with message [`passwords::PASSWORD_NOT_FOUND`] if the secret does not exist.
     #[napi]
     pub async fn get_biometric_secret(
         service: String,
@@ -101,6 +110,7 @@ pub mod biometrics {
     /// If the iv is provided, it will be used as the challenge. Otherwise a random challenge will be generated.
     ///
     /// `format!("<key_base64>|<iv_base64>")`
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn derive_key_material(iv: Option<String>) -> napi::Result<OsDerivedKey> {
         Biometric::derive_key_material(iv.as_deref())
@@ -141,11 +151,13 @@ pub mod biometrics {
 
 #[napi]
 pub mod clipboards {
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn read() -> napi::Result<String> {
         desktop_core::clipboard::read().map_err(|e| napi::Error::from_reason(e.to_string()))
     }
 
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn write(text: String, password: bool) -> napi::Result<()> {
         desktop_core::clipboard::write(&text, password)
@@ -157,15 +169,17 @@ pub mod clipboards {
 pub mod sshagent {
     use std::sync::Arc;
 
+    use desktop_core::ssh_agent::BitwardenSshKey;
     use napi::{
         bindgen_prelude::Promise,
         threadsafe_function::{ErrorStrategy::CalleeHandled, ThreadsafeFunction},
     };
     use tokio::{self, sync::Mutex};
+    use tracing::error;
 
     #[napi]
     pub struct SshAgentState {
-        state: desktop_core::ssh_agent::BitwardenDesktopAgent,
+        state: desktop_core::ssh_agent::BitwardenDesktopAgent<BitwardenSshKey>,
     }
 
     #[napi(object)]
@@ -182,70 +196,19 @@ pub mod sshagent {
         pub key_fingerprint: String,
     }
 
-    impl From<desktop_core::ssh_agent::importer::SshKey> for SshKey {
-        fn from(key: desktop_core::ssh_agent::importer::SshKey) -> Self {
-            SshKey {
-                private_key: key.private_key,
-                public_key: key.public_key,
-                key_fingerprint: key.key_fingerprint,
-            }
-        }
-    }
-
-    #[napi]
-    pub enum SshKeyImportStatus {
-        /// ssh key was parsed correctly and will be returned in the result
-        Success,
-        /// ssh key was parsed correctly but is encrypted and requires a password
-        PasswordRequired,
-        /// ssh key was parsed correctly, and a password was provided when calling the import, but it was incorrect
-        WrongPassword,
-        /// ssh key could not be parsed, either due to an incorrect / unsupported format (pkcs#8) or key type (ecdsa), or because the input is not an ssh key
-        ParsingError,
-        /// ssh key type is not supported (e.g. ecdsa)
-        UnsupportedKeyType,
-    }
-
-    impl From<desktop_core::ssh_agent::importer::SshKeyImportStatus> for SshKeyImportStatus {
-        fn from(status: desktop_core::ssh_agent::importer::SshKeyImportStatus) -> Self {
-            match status {
-                desktop_core::ssh_agent::importer::SshKeyImportStatus::Success => {
-                    SshKeyImportStatus::Success
-                }
-                desktop_core::ssh_agent::importer::SshKeyImportStatus::PasswordRequired => {
-                    SshKeyImportStatus::PasswordRequired
-                }
-                desktop_core::ssh_agent::importer::SshKeyImportStatus::WrongPassword => {
-                    SshKeyImportStatus::WrongPassword
-                }
-                desktop_core::ssh_agent::importer::SshKeyImportStatus::ParsingError => {
-                    SshKeyImportStatus::ParsingError
-                }
-                desktop_core::ssh_agent::importer::SshKeyImportStatus::UnsupportedKeyType => {
-                    SshKeyImportStatus::UnsupportedKeyType
-                }
-            }
-        }
-    }
-
     #[napi(object)]
-    pub struct SshKeyImportResult {
-        pub status: SshKeyImportStatus,
-        pub ssh_key: Option<SshKey>,
+    pub struct SshUIRequest {
+        pub cipher_id: Option<String>,
+        pub is_list: bool,
+        pub process_name: String,
+        pub is_forwarding: bool,
+        pub namespace: Option<String>,
     }
 
-    impl From<desktop_core::ssh_agent::importer::SshKeyImportResult> for SshKeyImportResult {
-        fn from(result: desktop_core::ssh_agent::importer::SshKeyImportResult) -> Self {
-            SshKeyImportResult {
-                status: result.status.into(),
-                ssh_key: result.ssh_key.map(|k| k.into()),
-            }
-        }
-    }
-
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn serve(
-        callback: ThreadsafeFunction<(Option<String>, bool, String), CalleeHandled>,
+        callback: ThreadsafeFunction<SshUIRequest, CalleeHandled>,
     ) -> napi::Result<SshAgentState> {
         let (auth_request_tx, mut auth_request_rx) =
             tokio::sync::mpsc::channel::<desktop_core::ssh_agent::SshAgentUIRequest>(32);
@@ -262,11 +225,13 @@ pub mod sshagent {
                     let auth_response_tx_arc = cloned_response_tx_arc;
                     let callback = cloned_callback;
                     let promise_result: Result<Promise<bool>, napi::Error> = callback
-                        .call_async(Ok((
-                            request.cipher_id,
-                            request.is_list,
-                            request.process_name,
-                        )))
+                        .call_async(Ok(SshUIRequest {
+                            cipher_id: request.cipher_id,
+                            is_list: request.is_list,
+                            process_name: request.process_name,
+                            is_forwarding: request.is_forwarding,
+                            namespace: request.namespace,
+                        }))
                         .await;
                     match promise_result {
                         Ok(promise_result) => match promise_result.await {
@@ -278,7 +243,7 @@ pub mod sshagent {
                                     .expect("should be able to send auth response to agent");
                             }
                             Err(e) => {
-                                println!("[SSH Agent Native Module] calling UI callback promise was rejected: {}", e);
+                                error!(error = %e, "Calling UI callback promise was rejected");
                                 let _ = auth_response_tx_arc
                                     .lock()
                                     .await
@@ -287,7 +252,7 @@ pub mod sshagent {
                             }
                         },
                         Err(e) => {
-                            println!("[SSH Agent Native Module] calling UI callback could not create promise: {}", e);
+                            error!(error = %e, "Calling UI callback could not create promise");
                             let _ = auth_response_tx_arc
                                 .lock()
                                 .await
@@ -302,9 +267,7 @@ pub mod sshagent {
         match desktop_core::ssh_agent::BitwardenDesktopAgent::start_server(
             auth_request_tx,
             Arc::new(Mutex::new(auth_response_rx)),
-        )
-        .await
-        {
+        ) {
             Ok(state) => Ok(SshAgentState { state }),
             Err(e) => Err(napi::Error::from_reason(e.to_string())),
         }
@@ -349,13 +312,6 @@ pub mod sshagent {
     }
 
     #[napi]
-    pub fn import_key(encoded_key: String, password: String) -> napi::Result<SshKeyImportResult> {
-        let result = desktop_core::ssh_agent::importer::import_key(encoded_key, password)
-            .map_err(|e| napi::Error::from_reason(e.to_string()))?;
-        Ok(result.into())
-    }
-
-    #[napi]
     pub fn clear_keys(agent_state: &mut SshAgentState) -> napi::Result<()> {
         let bitwarden_agent_state = &mut agent_state.state;
         bitwarden_agent_state
@@ -366,19 +322,24 @@ pub mod sshagent {
 
 #[napi]
 pub mod processisolations {
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn disable_coredumps() -> napi::Result<()> {
         desktop_core::process_isolation::disable_coredumps()
             .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
+
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn is_core_dumping_disabled() -> napi::Result<bool> {
         desktop_core::process_isolation::is_core_dumping_disabled()
             .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
+
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
-    pub async fn disable_memory_access() -> napi::Result<()> {
-        desktop_core::process_isolation::disable_memory_access()
+    pub async fn isolate_process() -> napi::Result<()> {
+        desktop_core::process_isolation::isolate_process()
             .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
 }
@@ -414,12 +375,14 @@ pub mod powermonitors {
 
 #[napi]
 pub mod windows_registry {
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn create_key(key: String, subkey: String, value: String) -> napi::Result<()> {
         crate::registry::create_key(&key, &subkey, &value)
             .map_err(|e| napi::Error::from_reason(e.to_string()))
     }
 
+    #[allow(clippy::unused_async)] // FIXME: Remove unused async!
     #[napi]
     pub async fn delete_key(key: String, subkey: String) -> napi::Result<()> {
         crate::registry::delete_key(&key, &subkey)
@@ -479,6 +442,7 @@ pub mod ipc {
         ///
         /// @param name The endpoint name to listen on. This name uniquely identifies the IPC connection and must be the same for both the server and client.
         /// @param callback This function will be called whenever a message is received from a client.
+        #[allow(clippy::unused_async)] // FIXME: Remove unused async!
         #[napi(factory)]
         pub async fn listen(
             name: String,
@@ -534,12 +498,23 @@ pub mod ipc {
 }
 
 #[napi]
+pub mod autostart {
+    #[napi]
+    pub async fn set_autostart(autostart: bool, params: Vec<String>) -> napi::Result<()> {
+        desktop_core::autostart::set_autostart(autostart, params)
+            .await
+            .map_err(|e| napi::Error::from_reason(format!("Error setting autostart - {e} - {e:?}")))
+    }
+}
+
+#[napi]
 pub mod autofill {
     use desktop_core::ipc::server::{Message, MessageType};
     use napi::threadsafe_function::{
         ErrorStrategy, ThreadsafeFunction, ThreadsafeFunctionCallMode,
     };
     use serde::{de::DeserializeOwned, Deserialize, Serialize};
+    use tracing::error;
 
     #[napi]
     pub async fn run_command(value: String) -> napi::Result<String> {
@@ -575,6 +550,14 @@ pub mod autofill {
     #[napi(object)]
     #[derive(Debug, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    pub struct Position {
+        pub x: i32,
+        pub y: i32,
+    }
+
+    #[napi(object)]
+    #[derive(Debug, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct PasskeyRegistrationRequest {
         pub rp_id: String,
         pub user_name: String,
@@ -582,6 +565,7 @@ pub mod autofill {
         pub client_data_hash: Vec<u8>,
         pub user_verification: UserVerification,
         pub supported_algorithms: Vec<i32>,
+        pub window_xy: Position,
     }
 
     #[napi(object)]
@@ -599,12 +583,25 @@ pub mod autofill {
     #[serde(rename_all = "camelCase")]
     pub struct PasskeyAssertionRequest {
         pub rp_id: String,
+        pub client_data_hash: Vec<u8>,
+        pub user_verification: UserVerification,
+        pub allowed_credentials: Vec<Vec<u8>>,
+        pub window_xy: Position,
+        //extension_input: Vec<u8>, TODO: Implement support for extensions
+    }
+
+    #[napi(object)]
+    #[derive(Debug, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct PasskeyAssertionWithoutUserInterfaceRequest {
+        pub rp_id: String,
         pub credential_id: Vec<u8>,
         pub user_name: String,
         pub user_handle: Vec<u8>,
         pub record_identifier: Option<String>,
         pub client_data_hash: Vec<u8>,
         pub user_verification: UserVerification,
+        pub window_xy: Position,
     }
 
     #[napi(object)]
@@ -624,12 +621,15 @@ pub mod autofill {
         server: desktop_core::ipc::server::Server,
     }
 
+    // FIXME: Remove unwraps! They panic and terminate the whole application.
+    #[allow(clippy::unwrap_used)]
     #[napi]
     impl IpcServer {
         /// Create and start the IPC server without blocking.
         ///
         /// @param name The endpoint name to listen on. This name uniquely identifies the IPC connection and must be the same for both the server and client.
         /// @param callback This function will be called whenever a message is received from a client.
+        #[allow(clippy::unused_async)] // FIXME: Remove unused async!
         #[napi(factory)]
         pub async fn listen(
             name: String,
@@ -649,6 +649,13 @@ pub mod autofill {
                 (u32, u32, PasskeyAssertionRequest),
                 ErrorStrategy::CalleeHandled,
             >,
+            #[napi(
+                ts_arg_type = "(error: null | Error, clientId: number, sequenceNumber: number, message: PasskeyAssertionWithoutUserInterfaceRequest) => void"
+            )]
+            assertion_without_user_interface_callback: ThreadsafeFunction<
+                (u32, u32, PasskeyAssertionWithoutUserInterfaceRequest),
+                ErrorStrategy::CalleeHandled,
+            >,
         ) -> napi::Result<Self> {
             let (send, mut recv) = tokio::sync::mpsc::channel::<Message>(32);
             tokio::spawn(async move {
@@ -663,7 +670,7 @@ pub mod autofill {
                         MessageType::Connected | MessageType::Disconnected => continue,
                         MessageType::Message => {
                             let Some(message) = message else {
-                                println!("[ERROR] Message is empty");
+                                error!("Message is empty");
                                 continue;
                             };
 
@@ -681,7 +688,26 @@ pub mod autofill {
                                     continue;
                                 }
                                 Err(e) => {
-                                    println!("[ERROR] Error deserializing message1: {e}");
+                                    error!(error = %e, "Error deserializing message1");
+                                }
+                            }
+
+                            match serde_json::from_str::<
+                                PasskeyMessage<PasskeyAssertionWithoutUserInterfaceRequest>,
+                            >(&message)
+                            {
+                                Ok(msg) => {
+                                    let value = msg
+                                        .value
+                                        .map(|value| (client_id, msg.sequence_number, value))
+                                        .map_err(|e| napi::Error::from_reason(format!("{e:?}")));
+
+                                    assertion_without_user_interface_callback
+                                        .call(value, ThreadsafeFunctionCallMode::NonBlocking);
+                                    continue;
+                                }
+                                Err(e) => {
+                                    error!(error = %e, "Error deserializing message1");
                                 }
                             }
 
@@ -698,11 +724,11 @@ pub mod autofill {
                                     continue;
                                 }
                                 Err(e) => {
-                                    println!("[ERROR] Error deserializing message2: {e}");
+                                    error!(error = %e, "Error deserializing message2");
                                 }
                             }
 
-                            println!("[ERROR] Received an unknown message2: {message:?}");
+                            error!(message, "Received an unknown message2");
                         }
                     }
                 }
@@ -788,20 +814,239 @@ pub mod autofill {
 }
 
 #[napi]
-pub mod crypto {
-    use napi::bindgen_prelude::Buffer;
+pub mod passkey_authenticator {
+    #[napi]
+    pub fn register() -> napi::Result<()> {
+        crate::passkey_authenticator_internal::register().map_err(|e| {
+            napi::Error::from_reason(format!("Passkey registration failed - Error: {e} - {e:?}"))
+        })
+    }
+}
+
+#[napi]
+pub mod logging {
+    //! `logging` is the interface between the native desktop's usage of the `tracing` crate
+    //!  for logging, to intercept events and write to the JS space.
+    //!
+    //! # Example
+    //!
+    //! [Elec] 14:34:03.517 › [NAPI] [INFO] desktop_core::ssh_agent::platform_ssh_agent: Starting SSH Agent server {socket=/Users/foo/.bitwarden-ssh-agent.sock}
+
+    use std::fmt::Write;
+    use std::sync::OnceLock;
+
+    use napi::threadsafe_function::{
+        ErrorStrategy::CalleeHandled, ThreadsafeFunction, ThreadsafeFunctionCallMode,
+    };
+    use tracing::Level;
+    use tracing_subscriber::fmt::format::{DefaultVisitor, Writer};
+    use tracing_subscriber::{
+        filter::{EnvFilter, LevelFilter},
+        layer::SubscriberExt,
+        util::SubscriberInitExt,
+        Layer,
+    };
+
+    struct JsLogger(OnceLock<ThreadsafeFunction<(LogLevel, String), CalleeHandled>>);
+    static JS_LOGGER: JsLogger = JsLogger(OnceLock::new());
 
     #[napi]
-    pub async fn argon2(
-        secret: Buffer,
-        salt: Buffer,
-        iterations: u32,
-        memory: u32,
-        parallelism: u32,
-    ) -> napi::Result<Buffer> {
-        desktop_core::crypto::argon2(&secret, &salt, iterations, memory, parallelism)
+    pub enum LogLevel {
+        Trace,
+        Debug,
+        Info,
+        Warn,
+        Error,
+    }
+
+    impl From<&Level> for LogLevel {
+        fn from(level: &Level) -> Self {
+            match *level {
+                Level::TRACE => LogLevel::Trace,
+                Level::DEBUG => LogLevel::Debug,
+                Level::INFO => LogLevel::Info,
+                Level::WARN => LogLevel::Warn,
+                Level::ERROR => LogLevel::Error,
+            }
+        }
+    }
+
+    // JsLayer lets us intercept events and write them to the JS Logger.
+    struct JsLayer;
+
+    impl<S> Layer<S> for JsLayer
+    where
+        S: tracing::Subscriber,
+    {
+        // This function builds a log message buffer from the event data and
+        // calls the JS logger with it.
+        //
+        // For example, this log call:
+        //
+        // ```
+        // mod supreme {
+        //   mod module {
+        //     let foo = "bar";
+        //     info!(best_variable_name = %foo, "Foo done it again.");
+        //   }
+        // }
+        // ```
+        //
+        // , results in the following string:
+        //
+        // [INFO] supreme::module: Foo done it again. {best_variable_name=bar}
+        fn on_event(
+            &self,
+            event: &tracing::Event<'_>,
+            _ctx: tracing_subscriber::layer::Context<'_, S>,
+        ) {
+            let mut buffer = String::new();
+
+            // create the preamble text that precedes the message and vars. e.g.:
+            //     [INFO] desktop_core::ssh_agent::platform_ssh_agent:
+            let level = event.metadata().level().as_str();
+            let module_path = event.metadata().module_path().unwrap_or_default();
+
+            write!(&mut buffer, "[{level}] {module_path}:")
+                .expect("Failed to write tracing event to buffer");
+
+            let writer = Writer::new(&mut buffer);
+
+            // DefaultVisitor adds the message and variables to the buffer
+            let mut visitor = DefaultVisitor::new(writer, false);
+            event.record(&mut visitor);
+
+            let msg = (event.metadata().level().into(), buffer);
+
+            if let Some(logger) = JS_LOGGER.0.get() {
+                let _ = logger.call(Ok(msg), ThreadsafeFunctionCallMode::NonBlocking);
+            };
+        }
+    }
+
+    #[napi]
+    pub fn init_napi_log(js_log_fn: ThreadsafeFunction<(LogLevel, String), CalleeHandled>) {
+        let _ = JS_LOGGER.0.set(js_log_fn);
+
+        let filter = EnvFilter::builder()
+            // set the default log level to INFO.
+            .with_default_directive(LevelFilter::INFO.into())
+            // parse directives from the RUST_LOG environment variable,
+            // overriding the default directive for matching targets.
+            .from_env_lossy();
+
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(JsLayer)
+            .init();
+    }
+}
+
+#[napi]
+pub mod chromium_importer {
+    use bitwarden_chromium_importer::chromium::LoginImportResult as _LoginImportResult;
+    use bitwarden_chromium_importer::chromium::ProfileInfo as _ProfileInfo;
+
+    #[napi(object)]
+    pub struct ProfileInfo {
+        pub id: String,
+        pub name: String,
+    }
+
+    #[napi(object)]
+    pub struct Login {
+        pub url: String,
+        pub username: String,
+        pub password: String,
+        pub note: String,
+    }
+
+    #[napi(object)]
+    pub struct LoginImportFailure {
+        pub url: String,
+        pub username: String,
+        pub error: String,
+    }
+
+    #[napi(object)]
+    pub struct LoginImportResult {
+        pub login: Option<Login>,
+        pub failure: Option<LoginImportFailure>,
+    }
+
+    impl From<_LoginImportResult> for LoginImportResult {
+        fn from(l: _LoginImportResult) -> Self {
+            match l {
+                _LoginImportResult::Success(l) => LoginImportResult {
+                    login: Some(Login {
+                        url: l.url,
+                        username: l.username,
+                        password: l.password,
+                        note: l.note,
+                    }),
+                    failure: None,
+                },
+                _LoginImportResult::Failure(l) => LoginImportResult {
+                    login: None,
+                    failure: Some(LoginImportFailure {
+                        url: l.url,
+                        username: l.username,
+                        error: l.error,
+                    }),
+                },
+            }
+        }
+    }
+
+    impl From<_ProfileInfo> for ProfileInfo {
+        fn from(p: _ProfileInfo) -> Self {
+            ProfileInfo {
+                id: p.folder,
+                name: p.name,
+            }
+        }
+    }
+
+    #[napi]
+    pub fn get_installed_browsers() -> napi::Result<Vec<String>> {
+        bitwarden_chromium_importer::chromium::get_installed_browsers()
             .map_err(|e| napi::Error::from_reason(e.to_string()))
-            .map(|v| v.to_vec())
-            .map(Buffer::from)
+    }
+
+    #[napi]
+    pub fn get_available_profiles(browser: String) -> napi::Result<Vec<ProfileInfo>> {
+        bitwarden_chromium_importer::chromium::get_available_profiles(&browser)
+            .map(|profiles| profiles.into_iter().map(ProfileInfo::from).collect())
+            .map_err(|e| napi::Error::from_reason(e.to_string()))
+    }
+
+    #[napi]
+    pub async fn import_logins(
+        browser: String,
+        profile_id: String,
+    ) -> napi::Result<Vec<LoginImportResult>> {
+        bitwarden_chromium_importer::chromium::import_logins(&browser, &profile_id)
+            .await
+            .map(|logins| logins.into_iter().map(LoginImportResult::from).collect())
+            .map_err(|e| napi::Error::from_reason(e.to_string()))
+    }
+}
+
+#[napi]
+pub mod autotype {
+    #[napi]
+    pub fn get_foreground_window_title() -> napi::Result<String, napi::Status> {
+        autotype::get_foreground_window_title().map_err(|_| {
+            napi::Error::from_reason(
+                "Autotype Error: failed to get foreground window title".to_string(),
+            )
+        })
+    }
+
+    #[napi]
+    pub fn type_input(input: Vec<u16>) -> napi::Result<(), napi::Status> {
+        autotype::type_input(input).map_err(|_| {
+            napi::Error::from_reason("Autotype Error: failed to type input".to_string())
+        })
     }
 }

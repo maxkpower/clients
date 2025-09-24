@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { mock, MockProxy } from "jest-mock-extended";
 import { BehaviorSubject } from "rxjs";
@@ -14,11 +14,12 @@ import { CustomFieldsComponent } from "../custom-fields/custom-fields.component"
 import { AdditionalOptionsSectionComponent } from "./additional-options-section.component";
 
 @Component({
-  standalone: true,
   selector: "vault-custom-fields",
   template: "",
 })
-class MockCustomFieldsComponent {}
+class MockCustomFieldsComponent {
+  @Input() disableSectionMargin: boolean;
+}
 
 describe("AdditionalOptionsSectionComponent", () => {
   let component: AdditionalOptionsSectionComponent;
@@ -28,11 +29,12 @@ describe("AdditionalOptionsSectionComponent", () => {
   let passwordRepromptEnabled$: BehaviorSubject<boolean>;
 
   const getInitialCipherView = jest.fn(() => null);
+  const formStatusChange$ = new BehaviorSubject<"enabled" | "disabled">("enabled");
 
   beforeEach(async () => {
     getInitialCipherView.mockClear();
 
-    cipherFormProvider = mock<CipherFormContainer>({ getInitialCipherView });
+    cipherFormProvider = mock<CipherFormContainer>({ getInitialCipherView, formStatusChange$ });
     passwordRepromptService = mock<PasswordRepromptService>();
     passwordRepromptEnabled$ = new BehaviorSubject(true);
     passwordRepromptService.enabled$ = passwordRepromptEnabled$;

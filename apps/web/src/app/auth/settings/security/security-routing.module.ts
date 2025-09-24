@@ -1,10 +1,11 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
-import { ChangePasswordComponent } from "../change-password.component";
+import { DeviceManagementComponent } from "@bitwarden/angular/auth/device-management/device-management.component";
+
 import { TwoFactorSetupComponent } from "../two-factor/two-factor-setup.component";
 
-import { DeviceManagementComponent } from "./device-management.component";
+import { PasswordSettingsComponent } from "./password-settings/password-settings.component";
 import { SecurityKeysComponent } from "./security-keys.component";
 import { SecurityComponent } from "./security.component";
 
@@ -14,10 +15,10 @@ const routes: Routes = [
     component: SecurityComponent,
     data: { titleId: "security" },
     children: [
-      { path: "", pathMatch: "full", redirectTo: "change-password" },
+      { path: "", pathMatch: "full", redirectTo: "password" },
       {
-        path: "change-password",
-        component: ChangePasswordComponent,
+        path: "password",
+        component: PasswordSettingsComponent,
         data: { titleId: "masterPassword" },
       },
       {

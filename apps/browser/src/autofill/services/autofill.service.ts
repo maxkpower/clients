@@ -1,13 +1,23 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
-import { filter, firstValueFrom, merge, Observable, ReplaySubject, scan, startWith } from "rxjs";
-import { pairwise } from "rxjs/operators";
+import {
+  filter,
+  firstValueFrom,
+  merge,
+  Observable,
+  ReplaySubject,
+  scan,
+  startWith,
+  timer,
+} from "rxjs";
+import { map, pairwise, share, takeUntil } from "rxjs/operators";
 
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AccountInfo, AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
+import { getOptionalUserId } from "@bitwarden/common/auth/services/account.service";
 import {
   AutofillOverlayVisibility,
   CardExpiryDateDelimiters,
@@ -19,7 +29,6 @@ import { InlineMenuVisibilitySetting } from "@bitwarden/common/autofill/types";
 import { normalizeExpiryYearFormat } from "@bitwarden/common/autofill/utils";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { EventType } from "@bitwarden/common/enums";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import {
   UriMatchStrategySetting,
   UriMatchStrategy,
@@ -39,6 +48,8 @@ import { IdentityView } from "@bitwarden/common/vault/models/view/identity.view"
 
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { ScriptInjectorService } from "../../platform/services/abstractions/script-injector.service";
+// FIXME (PM-22628): Popup imports are forbidden in background
+// eslint-disable-next-line no-restricted-imports
 import { openVaultItemPasswordRepromptPopout } from "../../vault/popup/utils/vault-popout-window";
 import { AutofillMessageCommand, AutofillMessageSender } from "../enums/autofill-message.enums";
 import { AutofillPort } from "../enums/autofill-port.enum";
@@ -145,7 +156,19 @@ export default class AutofillService implements AutofillServiceInterface {
       pageDetailsFallback$.next([]);
     }
 
-    return merge(pageDetailsFromTab$, pageDetailsFallback$);
+    // Share the pageDetailsFromTab$ observable so that multiple subscribers don't trigger multiple executions.
+    const sharedPageDetailsFromTab$ = pageDetailsFromTab$.pipe(share());
+
+    // Create a timeout observable that emits an empty array if pageDetailsFromTab$ hasn't emitted within 1 second.
+    const pageDetailsTimeout$ = timer(1000).pipe(
+      map(() => []),
+      takeUntil(sharedPageDetailsFromTab$),
+    );
+
+    // Merge the responses so that if pageDetailsFromTab$ emits, that value is used.
+    // Otherwise, if it doesn't emit in time, the timeout observable emits an empty array.
+    // Also, pageDetailsFallback$ will emit in error cases.
+    return merge(sharedPageDetailsFromTab$, pageDetailsFallback$, pageDetailsTimeout$);
   }
 
   /**
@@ -189,9 +212,7 @@ export default class AutofillService implements AutofillServiceInterface {
       this.autofillScriptPortsSet.delete(port);
     });
 
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.injectAutofillScriptsInAllTabs();
+    void this.injectAutofillScriptsInAllTabs();
   }
 
   /**
@@ -214,13 +235,8 @@ export default class AutofillService implements AutofillServiceInterface {
     const authStatus = await firstValueFrom(this.authService.activeAccountStatus$);
     const accountIsUnlocked = authStatus === AuthenticationStatus.Unlocked;
     let autoFillOnPageLoadIsEnabled = false;
-    const addLoginImprovementsFlagActive = await this.configService.getFeatureFlag(
-      FeatureFlag.NotificationBarAddLoginImprovements,
-    );
 
-    const injectedScripts = [
-      await this.getBootstrapAutofillContentScript(activeAccount, addLoginImprovementsFlagActive),
-    ];
+    const injectedScripts = [await this.getBootstrapAutofillContentScript(activeAccount)];
 
     if (activeAccount && accountIsUnlocked) {
       autoFillOnPageLoadIsEnabled = await this.getAutofillOnPageLoad();
@@ -235,10 +251,6 @@ export default class AutofillService implements AutofillServiceInterface {
         tabId: tab.id,
         injectDetails: { file: "content/content-message-handler.js", runAt: "document_start" },
       });
-    }
-
-    if (!addLoginImprovementsFlagActive) {
-      injectedScripts.push("notificationBar.js");
     }
 
     injectedScripts.push("contextMenuHandler.js");
@@ -261,25 +273,14 @@ export default class AutofillService implements AutofillServiceInterface {
    * enabled.
    *
    * @param activeAccount - The active account
-   * @param addLoginImprovementsFlagActive - Whether the add login improvements feature flag is active
    */
   private async getBootstrapAutofillContentScript(
     activeAccount: { id: UserId | undefined } & AccountInfo,
-    addLoginImprovementsFlagActive = false,
   ): Promise<string> {
     let inlineMenuVisibility: InlineMenuVisibilitySetting = AutofillOverlayVisibility.Off;
 
     if (activeAccount) {
       inlineMenuVisibility = await this.getInlineMenuVisibility();
-    }
-
-    const inlineMenuPositioningImprovements = await this.configService.getFeatureFlag(
-      FeatureFlag.InlineMenuPositioningImprovements,
-    );
-    if (!inlineMenuPositioningImprovements) {
-      return !inlineMenuVisibility
-        ? "bootstrap-autofill.js"
-        : "bootstrap-legacy-autofill-overlay.js";
     }
 
     const enableChangedPasswordPrompt = await firstValueFrom(
@@ -288,8 +289,7 @@ export default class AutofillService implements AutofillServiceInterface {
     const enableAddedLoginPrompt = await firstValueFrom(
       this.userNotificationSettingsService.enableAddedLoginPrompt$,
     );
-    const isNotificationBarEnabled =
-      addLoginImprovementsFlagActive && (enableChangedPasswordPrompt || enableAddedLoginPrompt);
+    const isNotificationBarEnabled = enableChangedPasswordPrompt || enableAddedLoginPrompt;
 
     if (!inlineMenuVisibility && !isNotificationBarEnabled) {
       return "bootstrap-autofill.js";
@@ -437,7 +437,6 @@ export default class AutofillService implements AutofillServiceInterface {
         const fillScript = await this.generateFillScript(pd.details, {
           skipUsernameOnlyFill: options.skipUsernameOnlyFill || false,
           onlyEmptyFields: options.onlyEmptyFields || false,
-          onlyVisibleFields: options.onlyVisibleFields || false,
           fillNewPassword: options.fillNewPassword || false,
           allowTotpAutofill: options.allowTotpAutofill || false,
           autoSubmitLogin: options.autoSubmitLogin || false,
@@ -463,18 +462,11 @@ export default class AutofillService implements AutofillServiceInterface {
         fillScript.properties.delay_between_operations = 20;
 
         didAutofill = true;
-
         if (!options.skipLastUsed) {
-          // In order to prevent a UI update send message to background script to update last used date
-          await chrome.runtime.sendMessage({
-            command: "updateLastUsedDate",
-            cipherId: options.cipher.id,
-          });
+          await this.cipherService.updateLastUsedDate(options.cipher.id, activeAccount.id);
         }
 
-        // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        BrowserApi.tabSendMessage(
+        void BrowserApi.tabSendMessage(
           tab,
           {
             command: options.autoSubmitLogin ? "triggerAutoSubmitLogin" : "fillForm",
@@ -498,15 +490,16 @@ export default class AutofillService implements AutofillServiceInterface {
         const shouldAutoCopyTotp = await this.getShouldAutoCopyTotp();
 
         totp = shouldAutoCopyTotp
-          ? await this.totpService.getCode(options.cipher.login.totp)
+          ? (await firstValueFrom(this.totpService.getCode$(options.cipher.login.totp))).code
           : null;
       }),
     );
 
     if (didAutofill) {
-      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.eventCollectionService.collect(EventType.Cipher_ClientAutofilled, options.cipher.id);
+      await this.eventCollectionService.collect(
+        EventType.Cipher_ClientAutofilled,
+        options.cipher.id,
+      );
       if (totp !== null) {
         return totp;
       } else {
@@ -532,17 +525,29 @@ export default class AutofillService implements AutofillServiceInterface {
     autoSubmitLogin = false,
   ): Promise<string | null> {
     let cipher: CipherView;
+
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(getOptionalUserId),
+    );
+    if (activeUserId == null) {
+      return null;
+    }
+
     if (fromCommand) {
-      cipher = await this.cipherService.getNextCipherForUrl(tab.url);
+      cipher = await this.cipherService.getNextCipherForUrl(tab.url, activeUserId);
     } else {
-      const lastLaunchedCipher = await this.cipherService.getLastLaunchedForUrl(tab.url, true);
+      const lastLaunchedCipher = await this.cipherService.getLastLaunchedForUrl(
+        tab.url,
+        activeUserId,
+        true,
+      );
       if (
         lastLaunchedCipher &&
         Date.now().valueOf() - lastLaunchedCipher.localData?.lastLaunched?.valueOf() < 30000
       ) {
         cipher = lastLaunchedCipher;
       } else {
-        cipher = await this.cipherService.getLastUsedForUrl(tab.url, true);
+        cipher = await this.cipherService.getLastUsedForUrl(tab.url, activeUserId, true);
       }
     }
 
@@ -565,7 +570,6 @@ export default class AutofillService implements AutofillServiceInterface {
       skipLastUsed: !fromCommand,
       skipUsernameOnlyFill: !fromCommand,
       onlyEmptyFields: !fromCommand,
-      onlyVisibleFields: !fromCommand,
       fillNewPassword: fromCommand,
       allowUntrustedIframe: fromCommand,
       allowTotpAutofill: fromCommand,
@@ -585,15 +589,20 @@ export default class AutofillService implements AutofillServiceInterface {
    *
    * @param cipher - The cipher to autofill
    * @param tab - The tab to autofill
+   * @param action - override for default action once reprompt is completed successfully
    */
-  async isPasswordRepromptRequired(cipher: CipherView, tab: chrome.tabs.Tab): Promise<boolean> {
+  async isPasswordRepromptRequired(
+    cipher: CipherView,
+    tab: chrome.tabs.Tab,
+    action?: string,
+  ): Promise<boolean> {
     const userHasMasterPasswordAndKeyHash =
       await this.userVerificationService.hasMasterPasswordAndMasterKeyHash();
     if (cipher.reprompt === CipherRepromptType.Password && userHasMasterPasswordAndKeyHash) {
       if (!this.isDebouncingPasswordRepromptPopout()) {
         await this.openVaultItemPasswordRepromptPopout(tab, {
           cipherId: cipher.id,
-          action: "autofill",
+          action: action ?? "autofill",
         });
       }
 
@@ -631,12 +640,19 @@ export default class AutofillService implements AutofillServiceInterface {
     let cipher: CipherView;
     let cacheKey = "";
 
+    const activeUserId = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(getOptionalUserId),
+    );
+    if (activeUserId == null) {
+      return null;
+    }
+
     if (cipherType === CipherType.Card) {
       cacheKey = "cardCiphers";
-      cipher = await this.cipherService.getNextCardCipher();
+      cipher = await this.cipherService.getNextCardCipher(activeUserId);
     } else {
       cacheKey = "identityCiphers";
-      cipher = await this.cipherService.getNextIdentityCipher();
+      cipher = await this.cipherService.getNextIdentityCipher(activeUserId);
     }
 
     if (!cipher || !cacheKey || (cipher.reprompt === CipherRepromptType.Password && !fromCommand)) {
@@ -658,7 +674,6 @@ export default class AutofillService implements AutofillServiceInterface {
       skipLastUsed: !fromCommand,
       skipUsernameOnlyFill: !fromCommand,
       onlyEmptyFields: !fromCommand,
-      onlyVisibleFields: !fromCommand,
       fillNewPassword: false,
       allowUntrustedIframe: fromCommand,
       allowTotpAutofill: false,
@@ -825,23 +840,13 @@ export default class AutofillService implements AutofillServiceInterface {
 
     fillScript.untrustedIframe = await this.inUntrustedIframe(pageDetails.url, options);
 
-    let passwordFields = AutofillService.loadPasswordFields(
+    const passwordFields = AutofillService.loadPasswordFields(
       pageDetails,
       false,
       false,
       options.onlyEmptyFields,
       options.fillNewPassword,
     );
-    if (!passwordFields.length && !options.onlyVisibleFields) {
-      // not able to find any viewable password fields. maybe there are some "hidden" ones?
-      passwordFields = AutofillService.loadPasswordFields(
-        pageDetails,
-        true,
-        true,
-        options.onlyEmptyFields,
-        options.fillNewPassword,
-      );
-    }
 
     for (const formKey in pageDetails.forms) {
       // eslint-disable-next-line
@@ -856,11 +861,6 @@ export default class AutofillService implements AutofillServiceInterface {
         if (login.username) {
           username = this.findUsernameField(pageDetails, pf, false, false, false);
 
-          if (!username && !options.onlyVisibleFields) {
-            // not able to find any viewable username fields. maybe there are some "hidden" ones?
-            username = this.findUsernameField(pageDetails, pf, true, true, false);
-          }
-
           if (username) {
             usernames.push(username);
           }
@@ -868,11 +868,6 @@ export default class AutofillService implements AutofillServiceInterface {
 
         if (options.allowTotpAutofill && login.totp) {
           totp = this.findTotpField(pageDetails, pf, false, false, false);
-
-          if (!totp && !options.onlyVisibleFields) {
-            // not able to find any viewable totp fields. maybe there are some "hidden" ones?
-            totp = this.findTotpField(pageDetails, pf, true, true, false);
-          }
 
           if (totp) {
             totps.push(totp);
@@ -891,11 +886,6 @@ export default class AutofillService implements AutofillServiceInterface {
       if (login.username && pf.elementNumber > 0) {
         username = this.findUsernameField(pageDetails, pf, false, false, true);
 
-        if (!username && !options.onlyVisibleFields) {
-          // not able to find any viewable username fields. maybe there are some "hidden" ones?
-          username = this.findUsernameField(pageDetails, pf, true, true, true);
-        }
-
         if (username) {
           usernames.push(username);
         }
@@ -904,11 +894,6 @@ export default class AutofillService implements AutofillServiceInterface {
       if (options.allowTotpAutofill && login.totp && pf.elementNumber > 0) {
         totp = this.findTotpField(pageDetails, pf, false, false, true);
 
-        if (!totp && !options.onlyVisibleFields) {
-          // not able to find any viewable username fields. maybe there are some "hidden" ones?
-          totp = this.findTotpField(pageDetails, pf, true, true, true);
-        }
-
         if (totp) {
           totps.push(totp);
         }
@@ -916,28 +901,38 @@ export default class AutofillService implements AutofillServiceInterface {
     }
 
     if (!passwordFields.length) {
-      // No password fields on this page. Let's try to just fuzzy fill the username.
-      pageDetails.fields.forEach((f) => {
-        if (
-          !options.skipUsernameOnlyFill &&
-          f.viewable &&
-          (f.type === "text" || f.type === "email" || f.type === "tel") &&
-          AutofillService.fieldIsFuzzyMatch(f, AutoFillConstants.UsernameFieldNames)
-        ) {
-          usernames.push(f);
+      // If there are no passwords, username or TOTP fields may be present.
+      // username and TOTP fields are mutually exclusive
+      pageDetails.fields.forEach((field) => {
+        if (!field.viewable) {
+          return;
         }
 
-        if (
+        const isFillableTotpField =
           options.allowTotpAutofill &&
-          f.viewable &&
-          (f.type === "text" || f.type === "number") &&
-          (AutofillService.fieldIsFuzzyMatch(f, [
+          ["number", "tel", "text"].some((t) => t === field.type) &&
+          (AutofillService.fieldIsFuzzyMatch(field, [
             ...AutoFillConstants.TotpFieldNames,
             ...AutoFillConstants.AmbiguousTotpFieldNames,
           ]) ||
-            f.autoCompleteType === "one-time-code")
-        ) {
-          totps.push(f);
+            field.autoCompleteType === "one-time-code") &&
+          !AutofillService.fieldIsFuzzyMatch(field, [...AutoFillConstants.RecoveryCodeFieldNames]);
+
+        const isFillableUsernameField =
+          !options.skipUsernameOnlyFill &&
+          ["email", "tel", "text"].some((t) => t === field.type) &&
+          AutofillService.fieldIsFuzzyMatch(field, AutoFillConstants.UsernameFieldNames);
+
+        // Prefer more uniquely keyworded fields first.
+        switch (true) {
+          case isFillableTotpField:
+            totps.push(field);
+            return;
+          case isFillableUsernameField:
+            usernames.push(field);
+            return;
+          default:
+            return;
         }
       });
     }
@@ -977,7 +972,10 @@ export default class AutofillService implements AutofillServiceInterface {
           }
 
           filledFields[t.opid] = t;
-          let totpValue = await this.totpService.getCode(login.totp);
+          const totpResponse = await firstValueFrom(
+            this.totpService.getCode$(options.cipher.login.totp),
+          );
+          let totpValue = totpResponse.code;
           if (totpValue.length == totps.length) {
             totpValue = totpValue.charAt(i);
           }
@@ -1181,161 +1179,7 @@ export default class AutofillService implements AutofillServiceInterface {
       AutofillService.hasValue(card.expMonth) &&
       AutofillService.hasValue(card.expYear)
     ) {
-      let combinedExpiryFillValue = null;
-
-      const enableNewCardCombinedExpiryAutofill = await this.configService.getFeatureFlag(
-        FeatureFlag.EnableNewCardCombinedExpiryAutofill,
-      );
-
-      if (enableNewCardCombinedExpiryAutofill) {
-        combinedExpiryFillValue = this.generateCombinedExpiryValue(card, fillFields.exp);
-      } else {
-        const fullMonth = ("0" + card.expMonth).slice(-2);
-
-        let fullYear: string = card.expYear;
-        let partYear: string = null;
-        if (fullYear.length === 2) {
-          partYear = fullYear;
-          fullYear = normalizeExpiryYearFormat(fullYear);
-        } else if (fullYear.length === 4) {
-          partYear = fullYear.substr(2, 2);
-        }
-
-        for (let i = 0; i < CreditCardAutoFillConstants.MonthAbbr.length; i++) {
-          if (
-            // mm/yyyy
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.MonthAbbr[i] +
-                "/" +
-                CreditCardAutoFillConstants.YearAbbrLong[i],
-            )
-          ) {
-            combinedExpiryFillValue = fullMonth + "/" + fullYear;
-          } else if (
-            // mm/yy
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.MonthAbbr[i] +
-                "/" +
-                CreditCardAutoFillConstants.YearAbbrShort[i],
-            ) &&
-            partYear != null
-          ) {
-            combinedExpiryFillValue = fullMonth + "/" + partYear;
-          } else if (
-            // yyyy/mm
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.YearAbbrLong[i] +
-                "/" +
-                CreditCardAutoFillConstants.MonthAbbr[i],
-            )
-          ) {
-            combinedExpiryFillValue = fullYear + "/" + fullMonth;
-          } else if (
-            // yy/mm
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.YearAbbrShort[i] +
-                "/" +
-                CreditCardAutoFillConstants.MonthAbbr[i],
-            ) &&
-            partYear != null
-          ) {
-            combinedExpiryFillValue = partYear + "/" + fullMonth;
-          } else if (
-            // mm-yyyy
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.MonthAbbr[i] +
-                "-" +
-                CreditCardAutoFillConstants.YearAbbrLong[i],
-            )
-          ) {
-            combinedExpiryFillValue = fullMonth + "-" + fullYear;
-          } else if (
-            // mm-yy
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.MonthAbbr[i] +
-                "-" +
-                CreditCardAutoFillConstants.YearAbbrShort[i],
-            ) &&
-            partYear != null
-          ) {
-            combinedExpiryFillValue = fullMonth + "-" + partYear;
-          } else if (
-            // yyyy-mm
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.YearAbbrLong[i] +
-                "-" +
-                CreditCardAutoFillConstants.MonthAbbr[i],
-            )
-          ) {
-            combinedExpiryFillValue = fullYear + "-" + fullMonth;
-          } else if (
-            // yy-mm
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.YearAbbrShort[i] +
-                "-" +
-                CreditCardAutoFillConstants.MonthAbbr[i],
-            ) &&
-            partYear != null
-          ) {
-            combinedExpiryFillValue = partYear + "-" + fullMonth;
-          } else if (
-            // yyyymm
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.YearAbbrLong[i] +
-                CreditCardAutoFillConstants.MonthAbbr[i],
-            )
-          ) {
-            combinedExpiryFillValue = fullYear + fullMonth;
-          } else if (
-            // yymm
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.YearAbbrShort[i] +
-                CreditCardAutoFillConstants.MonthAbbr[i],
-            ) &&
-            partYear != null
-          ) {
-            combinedExpiryFillValue = partYear + fullMonth;
-          } else if (
-            // mmyyyy
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.MonthAbbr[i] +
-                CreditCardAutoFillConstants.YearAbbrLong[i],
-            )
-          ) {
-            combinedExpiryFillValue = fullMonth + fullYear;
-          } else if (
-            // mmyy
-            this.fieldAttrsContain(
-              fillFields.exp,
-              CreditCardAutoFillConstants.MonthAbbr[i] +
-                CreditCardAutoFillConstants.YearAbbrShort[i],
-            ) &&
-            partYear != null
-          ) {
-            combinedExpiryFillValue = fullMonth + partYear;
-          }
-
-          if (combinedExpiryFillValue != null) {
-            break;
-          }
-        }
-
-        // If none of the previous cases applied, set as default
-        if (combinedExpiryFillValue == null) {
-          combinedExpiryFillValue = fullYear + "-" + fullMonth;
-        }
-      }
+      const combinedExpiryFillValue = this.generateCombinedExpiryValue(card, fillFields.exp);
 
       this.makeScriptActionWithValue(
         fillScript,
@@ -1394,7 +1238,6 @@ export default class AutofillService implements AutofillServiceInterface {
 
     let doesContainValue = false;
     CreditCardAutoFillConstants.CardAttributesExtended.forEach((attributeName) => {
-      // eslint-disable-next-line no-prototype-builtins
       if (doesContainValue || !field[attributeName]) {
         return;
       }
@@ -1549,252 +1392,6 @@ export default class AutofillService implements AutofillServiceInterface {
   }
 
   /**
-   * Generates the autofill script for the specified page details and identify cipher item.
-   * @param {AutofillScript} fillScript
-   * @param {AutofillPageDetails} pageDetails
-   * @param {{[p: string]: AutofillField}} filledFields
-   * @param {GenerateFillScriptOptions} options
-   * @returns {AutofillScript}
-   * @private
-   */
-  private async generateIdentityFillScript(
-    fillScript: AutofillScript,
-    pageDetails: AutofillPageDetails,
-    filledFields: { [id: string]: AutofillField },
-    options: GenerateFillScriptOptions,
-  ): Promise<AutofillScript> {
-    if (await this.configService.getFeatureFlag(FeatureFlag.GenerateIdentityFillScriptRefactor)) {
-      return this._generateIdentityFillScript(fillScript, pageDetails, filledFields, options);
-    }
-
-    if (!options.cipher.identity) {
-      return null;
-    }
-
-    const fillFields: { [id: string]: AutofillField } = {};
-
-    pageDetails.fields.forEach((f) => {
-      if (
-        AutofillService.isExcludedFieldType(f, AutoFillConstants.ExcludedAutofillTypes) ||
-        ["current-password", "new-password"].includes(f.autoCompleteType)
-      ) {
-        return;
-      }
-
-      for (let i = 0; i < IdentityAutoFillConstants.IdentityAttributes.length; i++) {
-        const attr = IdentityAutoFillConstants.IdentityAttributes[i];
-        // eslint-disable-next-line
-        if (!f.hasOwnProperty(attr) || !f[attr] || !f.viewable) {
-          continue;
-        }
-
-        // ref https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
-        // ref https://developers.google.com/web/fundamentals/design-and-ux/input/forms/
-        if (
-          !fillFields.name &&
-          AutofillService.isFieldMatch(
-            f[attr],
-            IdentityAutoFillConstants.FullNameFieldNames,
-            IdentityAutoFillConstants.FullNameFieldNameValues,
-          )
-        ) {
-          fillFields.name = f;
-          break;
-        } else if (
-          !fillFields.firstName &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.FirstnameFieldNames)
-        ) {
-          fillFields.firstName = f;
-          break;
-        } else if (
-          !fillFields.middleName &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.MiddlenameFieldNames)
-        ) {
-          fillFields.middleName = f;
-          break;
-        } else if (
-          !fillFields.lastName &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.LastnameFieldNames)
-        ) {
-          fillFields.lastName = f;
-          break;
-        } else if (
-          !fillFields.title &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.TitleFieldNames)
-        ) {
-          fillFields.title = f;
-          break;
-        } else if (
-          !fillFields.email &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.EmailFieldNames)
-        ) {
-          fillFields.email = f;
-          break;
-        } else if (
-          !fillFields.address1 &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.Address1FieldNames)
-        ) {
-          fillFields.address1 = f;
-          break;
-        } else if (
-          !fillFields.address2 &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.Address2FieldNames)
-        ) {
-          fillFields.address2 = f;
-          break;
-        } else if (
-          !fillFields.address3 &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.Address3FieldNames)
-        ) {
-          fillFields.address3 = f;
-          break;
-        } else if (
-          !fillFields.address &&
-          AutofillService.isFieldMatch(
-            f[attr],
-            IdentityAutoFillConstants.AddressFieldNames,
-            IdentityAutoFillConstants.AddressFieldNameValues,
-          )
-        ) {
-          fillFields.address = f;
-          break;
-        } else if (
-          !fillFields.postalCode &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.PostalCodeFieldNames)
-        ) {
-          fillFields.postalCode = f;
-          break;
-        } else if (
-          !fillFields.city &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.CityFieldNames)
-        ) {
-          fillFields.city = f;
-          break;
-        } else if (
-          !fillFields.state &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.StateFieldNames)
-        ) {
-          fillFields.state = f;
-          break;
-        } else if (
-          !fillFields.country &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.CountryFieldNames)
-        ) {
-          fillFields.country = f;
-          break;
-        } else if (
-          !fillFields.phone &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.PhoneFieldNames)
-        ) {
-          fillFields.phone = f;
-          break;
-        } else if (
-          !fillFields.username &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.UserNameFieldNames)
-        ) {
-          fillFields.username = f;
-          break;
-        } else if (
-          !fillFields.company &&
-          AutofillService.isFieldMatch(f[attr], IdentityAutoFillConstants.CompanyFieldNames)
-        ) {
-          fillFields.company = f;
-          break;
-        }
-      }
-    });
-
-    const identity = options.cipher.identity;
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "title");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "firstName");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "middleName");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "lastName");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "address1");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "address2");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "address3");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "city");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "postalCode");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "company");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "email");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "phone");
-    this.makeScriptAction(fillScript, identity, fillFields, filledFields, "username");
-
-    let filledState = false;
-    if (fillFields.state && identity.state && identity.state.length > 2) {
-      const stateLower = identity.state.toLowerCase();
-      const isoState =
-        IdentityAutoFillConstants.IsoStates[stateLower] ||
-        IdentityAutoFillConstants.IsoProvinces[stateLower];
-      if (isoState) {
-        filledState = true;
-        this.makeScriptActionWithValue(fillScript, isoState, fillFields.state, filledFields);
-      }
-    }
-
-    if (!filledState) {
-      this.makeScriptAction(fillScript, identity, fillFields, filledFields, "state");
-    }
-
-    let filledCountry = false;
-    if (fillFields.country && identity.country && identity.country.length > 2) {
-      const countryLower = identity.country.toLowerCase();
-      const isoCountry = IdentityAutoFillConstants.IsoCountries[countryLower];
-      if (isoCountry) {
-        filledCountry = true;
-        this.makeScriptActionWithValue(fillScript, isoCountry, fillFields.country, filledFields);
-      }
-    }
-
-    if (!filledCountry) {
-      this.makeScriptAction(fillScript, identity, fillFields, filledFields, "country");
-    }
-
-    if (fillFields.name && (identity.firstName || identity.lastName)) {
-      let fullName = "";
-      if (AutofillService.hasValue(identity.firstName)) {
-        fullName = identity.firstName;
-      }
-      if (AutofillService.hasValue(identity.middleName)) {
-        if (fullName !== "") {
-          fullName += " ";
-        }
-        fullName += identity.middleName;
-      }
-      if (AutofillService.hasValue(identity.lastName)) {
-        if (fullName !== "") {
-          fullName += " ";
-        }
-        fullName += identity.lastName;
-      }
-
-      this.makeScriptActionWithValue(fillScript, fullName, fillFields.name, filledFields);
-    }
-
-    if (fillFields.address && AutofillService.hasValue(identity.address1)) {
-      let address = "";
-      if (AutofillService.hasValue(identity.address1)) {
-        address = identity.address1;
-      }
-      if (AutofillService.hasValue(identity.address2)) {
-        if (address !== "") {
-          address += ", ";
-        }
-        address += identity.address2;
-      }
-      if (AutofillService.hasValue(identity.address3)) {
-        if (address !== "") {
-          address += ", ";
-        }
-        address += identity.address3;
-      }
-
-      this.makeScriptActionWithValue(fillScript, address, fillFields.address, filledFields);
-    }
-
-    return fillScript;
-  }
-
-  /**
    * Generates the autofill script for the specified page details and identity cipher item.
    *
    * @param fillScript - Object to store autofill script, passed between method references
@@ -1802,7 +1399,7 @@ export default class AutofillService implements AutofillServiceInterface {
    * @param filledFields - The fields that have already been filled, passed between method references
    * @param options - Contains data used to fill cipher items
    */
-  private _generateIdentityFillScript(
+  private generateIdentityFillScript(
     fillScript: AutofillScript,
     pageDetails: AutofillPageDetails,
     filledFields: { [id: string]: AutofillField },
@@ -2675,22 +2272,23 @@ export default class AutofillService implements AutofillServiceInterface {
         break;
       }
 
+      const includesUsernameFieldName =
+        this.findMatchingFieldIndex(f, AutoFillConstants.UsernameFieldNames) > -1;
+
       if (
         !f.disabled &&
         (canBeReadOnly || !f.readonly) &&
-        (withoutForm || f.form === passwordField.form) &&
+        (withoutForm || f.form === passwordField.form || includesUsernameFieldName) &&
         (canBeHidden || f.viewable) &&
         (f.type === "text" || f.type === "email" || f.type === "tel")
       ) {
         usernameField = f;
-
-        if (this.findMatchingFieldIndex(f, AutoFillConstants.UsernameFieldNames) > -1) {
-          // We found an exact match. No need to keep looking.
+        // We found an exact match. No need to keep looking.
+        if (includesUsernameFieldName) {
           break;
         }
       }
     }
-
     return usernameField;
   }
 
@@ -2727,11 +2325,15 @@ export default class AutofillService implements AutofillServiceInterface {
         (canBeReadOnly || !f.readonly) &&
         (withoutForm || f.form === passwordField.form) &&
         (canBeHidden || f.viewable) &&
-        (f.type === "text" || f.type === "number") &&
+        (f.type === "text" ||
+          f.type === "number" ||
+          // sites will commonly use tel in order to get the digit pad against semantic recommendations
+          f.type === "tel") &&
         AutofillService.fieldIsFuzzyMatch(f, [
           ...AutoFillConstants.TotpFieldNames,
           ...AutoFillConstants.AmbiguousTotpFieldNames,
-        ])
+        ]) &&
+        !AutofillService.fieldIsFuzzyMatch(f, [...AutoFillConstants.RecoveryCodeFieldNames])
       ) {
         totpField = f;
 
@@ -2886,52 +2488,47 @@ export default class AutofillService implements AutofillServiceInterface {
   /**
    * Accepts a field and returns true if the field contains a
    * value that matches any of the names in the provided list.
+   *
+   * Returns boolean and attr of value that was matched as a tuple if showMatch is set to true.
+   *
    * @param {AutofillField} field
    * @param {string[]} names
-   * @returns {boolean}
+   * @param {boolean} showMatch
+   * @returns {boolean | [boolean, { attr: string; value: string }?]}
    */
-  static fieldIsFuzzyMatch(field: AutofillField, names: string[]): boolean {
-    if (AutofillService.hasValue(field.htmlID) && this.fuzzyMatch(names, field.htmlID)) {
-      return true;
-    }
-    if (AutofillService.hasValue(field.htmlName) && this.fuzzyMatch(names, field.htmlName)) {
-      return true;
-    }
-    if (
-      AutofillService.hasValue(field["label-tag"]) &&
-      this.fuzzyMatch(names, field["label-tag"])
-    ) {
-      return true;
-    }
-    if (AutofillService.hasValue(field.placeholder) && this.fuzzyMatch(names, field.placeholder)) {
-      return true;
-    }
-    if (
-      AutofillService.hasValue(field["label-left"]) &&
-      this.fuzzyMatch(names, field["label-left"])
-    ) {
-      return true;
-    }
-    if (
-      AutofillService.hasValue(field["label-top"]) &&
-      this.fuzzyMatch(names, field["label-top"])
-    ) {
-      return true;
-    }
-    if (
-      AutofillService.hasValue(field["label-aria"]) &&
-      this.fuzzyMatch(names, field["label-aria"])
-    ) {
-      return true;
-    }
-    if (
-      AutofillService.hasValue(field.dataSetValues) &&
-      this.fuzzyMatch(names, field.dataSetValues)
-    ) {
-      return true;
-    }
+  static fieldIsFuzzyMatch(
+    field: AutofillField,
+    names: string[],
+    showMatch: true,
+  ): [boolean, { attr: string; value: string }?];
+  static fieldIsFuzzyMatch(field: AutofillField, names: string[]): boolean;
+  static fieldIsFuzzyMatch(
+    field: AutofillField,
+    names: string[],
+    showMatch: boolean = false,
+  ): boolean | [boolean, { attr: string; value: string }?] {
+    const attrs = [
+      "htmlID",
+      "htmlName",
+      "label-tag",
+      "placeholder",
+      "label-left",
+      "label-right",
+      "label-top",
+      "label-aria",
+      "dataSetValues",
+    ];
 
-    return false;
+    for (const attr of attrs) {
+      const value = field[attr];
+      if (!AutofillService.hasValue(value)) {
+        continue;
+      }
+      if (AutofillService.fuzzyMatch(names, value)) {
+        return showMatch ? [true, { attr, value }] : true;
+      }
+    }
+    return showMatch ? [false] : false;
   }
 
   /**
@@ -2943,7 +2540,13 @@ export default class AutofillService implements AutofillServiceInterface {
    * @private
    */
   private static fuzzyMatch(options: string[], value: string): boolean {
-    if (options == null || options.length === 0 || value == null || value === "") {
+    if (
+      options == null ||
+      options.length === 0 ||
+      value == null ||
+      typeof value !== "string" ||
+      value.length < 1
+    ) {
       return false;
     }
 
@@ -3007,7 +2610,7 @@ export default class AutofillService implements AutofillServiceInterface {
   }
 
   /**
-   * Updates a fill script to place the `cilck_on_opid`, `focus_on_opid`, and `fill_by_opid`
+   * Updates a fill script to place the `click_on_opid`, `focus_on_opid`, and `fill_by_opid`
    * fill script actions associated with the provided field.
    * @param {AutofillScript} fillScript
    * @param {AutofillField} field

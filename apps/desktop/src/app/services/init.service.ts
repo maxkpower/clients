@@ -8,22 +8,24 @@ import { EventUploadService as EventUploadServiceAbstraction } from "@bitwarden/
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { TwoFactorService as TwoFactorServiceAbstraction } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { EncryptService } from "@bitwarden/common/key-management/crypto/abstractions/encrypt.service";
+import { DefaultVaultTimeoutService } from "@bitwarden/common/key-management/vault-timeout";
 import { I18nService as I18nServiceAbstraction } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService as PlatformUtilsServiceAbstraction } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SdkLoadService } from "@bitwarden/common/platform/abstractions/sdk/sdk-load.service";
 import { StateService as StateServiceAbstraction } from "@bitwarden/common/platform/abstractions/state.service";
-import { NotificationsService } from "@bitwarden/common/platform/notifications";
+import { ServerNotificationsService } from "@bitwarden/common/platform/server-notifications";
 import { ContainerService } from "@bitwarden/common/platform/services/container.service";
+import { MigrationRunner } from "@bitwarden/common/platform/services/migration-runner";
 import { UserAutoUnlockKeyService } from "@bitwarden/common/platform/services/user-auto-unlock-key.service";
 import { SyncService as SyncServiceAbstraction } from "@bitwarden/common/platform/sync";
 import { EventUploadService } from "@bitwarden/common/services/event/event-upload.service";
-import { VaultTimeoutService } from "@bitwarden/common/services/vault-timeout/vault-timeout.service";
 import { UserId } from "@bitwarden/common/types/guid";
 import { KeyService as KeyServiceAbstraction } from "@bitwarden/key-management";
 
 import { DesktopAutofillService } from "../../autofill/services/desktop-autofill.service";
+import { DesktopAutotypeService } from "../../autofill/services/desktop-autotype.service";
+import { SshAgentService } from "../../autofill/services/ssh-agent.service";
 import { I18nRendererService } from "../../platform/services/i18n.renderer.service";
-import { SshAgentService } from "../../platform/services/ssh-agent.service";
 import { VersionService } from "../../platform/services/version.service";
 import { NativeMessagingService } from "../../services/native-messaging.service";
 
@@ -32,11 +34,11 @@ export class InitService {
   constructor(
     @Inject(WINDOW) private win: Window,
     private syncService: SyncServiceAbstraction,
-    private vaultTimeoutService: VaultTimeoutService,
+    private vaultTimeoutService: DefaultVaultTimeoutService,
     private i18nService: I18nServiceAbstraction,
     private eventUploadService: EventUploadServiceAbstraction,
     private twoFactorService: TwoFactorServiceAbstraction,
-    private notificationsService: NotificationsService,
+    private notificationsService: ServerNotificationsService,
     private platformUtilsService: PlatformUtilsServiceAbstraction,
     private stateService: StateServiceAbstraction,
     private keyService: KeyServiceAbstraction,
@@ -48,16 +50,18 @@ export class InitService {
     private versionService: VersionService,
     private sshAgentService: SshAgentService,
     private autofillService: DesktopAutofillService,
+    private autotypeService: DesktopAutotypeService,
     private sdkLoadService: SdkLoadService,
     @Inject(DOCUMENT) private document: Document,
+    private readonly migrationRunner: MigrationRunner,
   ) {}
 
   init() {
     return async () => {
-      await this.sdkLoadService.load();
+      await this.sdkLoadService.loadAndInit();
       await this.sshAgentService.init();
       this.nativeMessagingService.init();
-      await this.stateService.init({ runMigrations: false }); // Desktop will run them in main process
+      await this.migrationRunner.waitForCompletion(); // Desktop will run migrations in the main process
 
       const accounts = await firstValueFrom(this.accountService.accounts$);
       const setUserKeyInMemoryPromises = [];
@@ -89,6 +93,7 @@ export class InitService {
       containerService.attachToGlobal(this.win);
 
       await this.autofillService.init();
+      await this.autotypeService.init();
     };
   }
 }

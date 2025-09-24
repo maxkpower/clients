@@ -2,6 +2,8 @@
 // @ts-strict-ignore
 import { Jsonify } from "type-fest";
 
+import { LoginUriView as SdkLoginUriView } from "@bitwarden/sdk-internal";
+
 import { UriMatchStrategy, UriMatchStrategySetting } from "../../../models/domain/domain-service";
 import { View } from "../../../models/view/view";
 import { SafeUrls } from "../../../platform/misc/safe-urls";
@@ -112,10 +114,36 @@ export class LoginUriView implements View {
     return Object.assign(new LoginUriView(), obj);
   }
 
+  /**
+   * Converts a LoginUriView object from the SDK to a LoginUriView object.
+   */
+  static fromSdkLoginUriView(obj: SdkLoginUriView): LoginUriView | undefined {
+    if (obj == null) {
+      return undefined;
+    }
+
+    const view = new LoginUriView();
+    view.uri = obj.uri;
+    view.match = obj.match;
+
+    return view;
+  }
+
+  /** Converts a LoginUriView object to an SDK LoginUriView object. */
+  toSdkLoginUriView(): SdkLoginUriView {
+    return {
+      uri: this.uri ?? undefined,
+      match: this.match ?? undefined,
+      uriChecksum: undefined, // SDK handles uri checksum generation internally
+    };
+  }
+
   matchesUri(
     targetUri: string,
     equivalentDomains: Set<string>,
     defaultUriMatch: UriMatchStrategySetting = null,
+    /** When present, will override the match strategy for the cipher if it is `Never` with `Domain` */
+    overrideNeverMatchStrategy?: true,
   ): boolean {
     if (!this.uri || !targetUri) {
       return false;
@@ -123,6 +151,12 @@ export class LoginUriView implements View {
 
     let matchType = this.match ?? defaultUriMatch;
     matchType ??= UriMatchStrategy.Domain;
+
+    // Override the match strategy with `Domain` when it is `Never` and `overrideNeverMatchStrategy` is true.
+    // This is useful in scenarios when the cipher should be matched to rely other information other than autofill.
+    if (overrideNeverMatchStrategy && matchType === UriMatchStrategy.Never) {
+      matchType = UriMatchStrategy.Domain;
+    }
 
     const targetDomain = Utils.getDomain(targetUri);
     const matchDomains = equivalentDomains.add(targetDomain);

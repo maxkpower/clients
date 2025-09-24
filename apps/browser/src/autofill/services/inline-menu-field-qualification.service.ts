@@ -16,6 +16,7 @@ import {
   SubmitChangePasswordButtonNames,
   SubmitLoginButtonNames,
 } from "./autofill-constants";
+import AutofillService from "./autofill.service";
 
 export class InlineMenuFieldQualificationService
   implements InlineMenuFieldQualificationServiceInterface
@@ -36,7 +37,6 @@ export class InlineMenuFieldQualificationService
   private newPasswordAutoCompleteValue = "new-password";
   private autofillFieldKeywordsMap: AutofillKeywordsMap = new WeakMap();
   private submitButtonKeywordsMap: SubmitButtonKeywordsMap = new WeakMap();
-  private autocompleteDisabledValues = new Set(["off", "false"]);
   private accountCreationFieldKeywords = [
     "register",
     "registration",
@@ -58,6 +58,8 @@ export class InlineMenuFieldQualificationService
     "neue e-mail",
     "pwdcheck",
   ];
+  private newEmailFieldKeywords = new Set(AutoFillConstants.NewEmailFieldKeywords);
+  private newsletterFormKeywords = new Set(AutoFillConstants.NewsletterFormNames);
   private updatePasswordFieldKeywords = [
     "update password",
     "change password",
@@ -150,18 +152,68 @@ export class InlineMenuFieldQualificationService
     this.identityPostalCodeAutocompleteValue,
   ]);
   private totpFieldAutocompleteValue = "one-time-code";
-  private inlineMenuFieldQualificationFlagSet = false;
-  private inlineMenuTotpFeatureFlag = false;
   private premiumEnabled = false;
+
+  /**
+   * Validates the provided field to indicate if the field is a new email field used for account creation/registration.
+   *
+   * @param field - The field to validate
+   */
+  private isExplicitIdentityEmailField(field: AutofillField): boolean {
+    const matchFieldAttributeValues = [field.type, field.htmlName, field.htmlID, field.placeholder];
+    for (let attrIndex = 0; attrIndex < matchFieldAttributeValues.length; attrIndex++) {
+      if (!matchFieldAttributeValues[attrIndex]) {
+        continue;
+      }
+
+      for (let keywordIndex = 0; keywordIndex < matchFieldAttributeValues.length; keywordIndex++) {
+        if (this.newEmailFieldKeywords.has(matchFieldAttributeValues[attrIndex])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Validates the provided form to indicate if the form is related to newsletter registration.
+   *
+   * @param parentForm - The form to validate
+   */
+  private isNewsletterForm(parentForm: any): boolean {
+    if (!parentForm) {
+      return false;
+    }
+
+    const matchFieldAttributeValues = [
+      parentForm.type,
+      parentForm.htmlName,
+      parentForm.htmlID,
+      parentForm.placeholder,
+    ];
+
+    for (let attrIndex = 0; attrIndex < matchFieldAttributeValues.length; attrIndex++) {
+      const attrValue = matchFieldAttributeValues[attrIndex];
+      if (!attrValue || typeof attrValue !== "string") {
+        continue;
+      }
+      const attrValueLower = attrValue.toLowerCase();
+      for (const keyword of this.newsletterFormKeywords) {
+        if (attrValueLower.includes(keyword.toLowerCase())) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 
   constructor() {
     void Promise.all([
       sendExtensionMessage("getInlineMenuFieldQualificationFeatureFlag"),
-      sendExtensionMessage("getInlineMenuTotpFeatureFlag"),
       sendExtensionMessage("getUserPremiumStatus"),
-    ]).then(([fieldQualificationFlag, totpFeatureFlag, premiumStatus]) => {
-      this.inlineMenuFieldQualificationFlagSet = !!fieldQualificationFlag?.result;
-      this.inlineMenuTotpFeatureFlag = !!totpFeatureFlag?.result;
+    ]).then(([fieldQualificationFlag, premiumStatus]) => {
       this.premiumEnabled = !!premiumStatus?.result;
     });
   }
@@ -173,14 +225,10 @@ export class InlineMenuFieldQualificationService
    * @param pageDetails - The details of the page that the field is on.
    */
   isFieldForLoginForm(field: AutofillField, pageDetails: AutofillPageDetails): boolean {
-    if (!this.inlineMenuFieldQualificationFlagSet) {
-      return this.isFieldForLoginFormFallback(field);
-    }
-
     /**
      * Totp inline menu is available only for premium users.
      */
-    if (this.inlineMenuTotpFeatureFlag && this.premiumEnabled) {
+    if (this.premiumEnabled) {
       const isTotpField = this.isTotpField(field);
       // Autofill does not fill totp inputs with a "password" `type` attribute value
       const passwordType = field.type === "password";
@@ -309,7 +357,11 @@ export class InlineMenuFieldQualificationService
       return false;
     }
 
-    return this.fieldContainsAutocompleteValues(field, this.identityAutocompleteValues);
+    return (
+      // Recognize explicit identity email fields (like id="new-email")
+      this.isFieldForIdentityEmail(field) ||
+      this.fieldContainsAutocompleteValues(field, this.identityAutocompleteValues)
+    );
   }
 
   /**
@@ -366,10 +418,8 @@ export class InlineMenuFieldQualificationService
       }
 
       // If a single username field or less is present on the page, then we can assume that the
-      // provided field is for a login form. This will only be the case if the field does not
-      // explicitly have its autocomplete attribute set to "off" or "false".
-
-      return !this.fieldContainsAutocompleteValues(field, this.autocompleteDisabledValues);
+      // provided field is for a login form.
+      return true;
     }
 
     // If the field has a form parent and there are multiple visible password fields
@@ -389,9 +439,8 @@ export class InlineMenuFieldQualificationService
       return true;
     }
 
-    // If the field has a form parent and no username field exists and the field has an
-    // autocomplete attribute set to "off" or "false", this is not a password field
-    return !this.fieldContainsAutocompleteValues(field, this.autocompleteDisabledValues);
+    // If the field has a form parent and a username field exists this is a password field
+    return true;
   }
 
   /**
@@ -406,6 +455,12 @@ export class InlineMenuFieldQualificationService
   ): boolean {
     // If the provided field is set with an autocomplete of "username", we should assume that
     // the page developer intends for this field to be interpreted as a username field.
+
+    // Exclude non-login email field from being treated as a login username field
+    if (this.isExplicitIdentityEmailField(field)) {
+      return false;
+    }
+
     if (this.fieldContainsAutocompleteValues(field, this.loginUsernameAutocompleteValues)) {
       const newPasswordFieldsInPageDetails = pageDetails.fields.filter(
         (field) => field.viewable && this.isNewPasswordField(field),
@@ -423,6 +478,10 @@ export class InlineMenuFieldQualificationService
     // the field based on the other fields that are present on the page.
     const parentForm = pageDetails.forms[field.form];
     const passwordFieldsInPageDetails = pageDetails.fields.filter(this.isCurrentPasswordField);
+
+    if (this.isNewsletterForm(parentForm)) {
+      return false;
+    }
 
     // If the field is not structured within a form, we need to identify if the field is used in conjunction
     // with a password field. If that's the case, then we should assume that it is a form field element.
@@ -449,20 +508,12 @@ export class InlineMenuFieldQualificationService
       }
 
       // If the page does not contain any password fields, it might be part of a multistep login form.
-      // That will only be the case if the field does not explicitly have its autocomplete attribute
-      // set to "off" or "false".
-      return !this.fieldContainsAutocompleteValues(field, this.autocompleteDisabledValues);
+      return true;
     }
 
     // If the field is structured within a form, but no password fields are present in the form,
     // we need to consider whether the field is part of a multistep login form.
     if (passwordFieldsInPageDetails.length === 0) {
-      // If the field's autocomplete is set to a disabled value, we should assume that the field is
-      // not part of a login form.
-      if (this.fieldContainsAutocompleteValues(field, this.autocompleteDisabledValues)) {
-        return false;
-      }
-
       // If the form that contains a single field, we should assume that it is part
       // of a multistep login form.
       const fieldsWithinForm = pageDetails.fields.filter(
@@ -498,8 +549,7 @@ export class InlineMenuFieldQualificationService
     }
 
     // If no visible password fields are found, this field might be part of a multipart form.
-    // Check for an invalid autocompleteType to determine if the field is part of a login form.
-    return !this.fieldContainsAutocompleteValues(field, this.autocompleteDisabledValues);
+    return true;
   }
 
   /**
@@ -831,9 +881,14 @@ export class InlineMenuFieldQualificationService
    * @param field - The field to validate
    */
   isFieldForIdentityEmail = (field: AutofillField): boolean => {
+    if (this.isExplicitIdentityEmailField(field)) {
+      return true;
+    }
+
     if (
       this.fieldContainsAutocompleteValues(field, this.emailAutocompleteValue) ||
-      field.type === "email"
+      field.type === "email" ||
+      field.htmlName === "email"
     ) {
       return true;
     }
@@ -1004,6 +1059,10 @@ export class InlineMenuFieldQualificationService
    * @param field - The field to validate
    */
   isTotpField = (field: AutofillField): boolean => {
+    if (AutofillService.fieldIsFuzzyMatch(field, [...AutoFillConstants.RecoveryCodeFieldNames])) {
+      return false;
+    }
+
     if (this.fieldContainsAutocompleteValues(field, this.totpFieldAutocompleteValue)) {
       return true;
     }
@@ -1225,19 +1284,5 @@ export class InlineMenuFieldQualificationService
     }
 
     return false;
-  }
-
-  /**
-   * This method represents the previous rudimentary approach to qualifying fields for login forms.
-   *
-   * @param field - The field to validate
-   * @deprecated - This method will only be used when the fallback flag is set to true.
-   */
-  private isFieldForLoginFormFallback(field: AutofillField): boolean {
-    if (field.type === "password") {
-      return true;
-    }
-
-    return this.isUsernameField(field);
   }
 }

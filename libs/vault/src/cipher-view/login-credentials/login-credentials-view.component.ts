@@ -1,33 +1,37 @@
 // FIXME: Update this file to be type safe and remove this and next line
 // @ts-strict-ignore
 import { CommonModule, DatePipe } from "@angular/common";
-import { Component, inject, Input } from "@angular/core";
 import {
-  BehaviorSubject,
-  combineLatest,
-  filter,
-  map,
-  Observable,
-  shareReplay,
-  switchMap,
-} from "rxjs";
+  Component,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild,
+} from "@angular/core";
+import { Observable, switchMap } from "rxjs";
 
+import { PremiumBadgeComponent } from "@bitwarden/angular/billing/components/premium-badge";
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions";
 import { EventType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { UserId } from "@bitwarden/common/types/guid";
 import { PremiumUpgradePromptService } from "@bitwarden/common/vault/abstractions/premium-upgrade-prompt.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import {
-  BadgeModule,
-  ColorPasswordModule,
   FormFieldModule,
-  IconButtonModule,
-  SectionComponent,
   SectionHeaderComponent,
   TypographyModule,
+  LinkModule,
+  IconButtonModule,
+  BadgeModule,
+  ColorPasswordModule,
 } from "@bitwarden/components";
 
 import { BitTotpCountdownComponent } from "../../components/totp-countdown/totp-countdown.component";
@@ -41,11 +45,9 @@ type TotpCodeValues = {
 @Component({
   selector: "app-login-credentials-view",
   templateUrl: "login-credentials-view.component.html",
-  standalone: true,
   imports: [
     CommonModule,
     JslibModule,
-    SectionComponent,
     SectionHeaderComponent,
     TypographyModule,
     FormFieldModule,
@@ -54,37 +56,27 @@ type TotpCodeValues = {
     ColorPasswordModule,
     BitTotpCountdownComponent,
     ReadOnlyCipherCardComponent,
+    LinkModule,
+    PremiumBadgeComponent,
   ],
 })
-export class LoginCredentialsViewComponent {
-  @Input()
-  get cipher(): CipherView {
-    return this._cipher$.value;
-  }
-  set cipher(value: CipherView) {
-    this._cipher$.next(value);
-  }
-  private _cipher$ = new BehaviorSubject<CipherView>(null);
+export class LoginCredentialsViewComponent implements OnChanges {
+  @Input() cipher: CipherView;
+  @Input() activeUserId: UserId;
+  @Input() hadPendingChangePasswordTask: boolean;
+  @Output() handleChangePassword = new EventEmitter<void>();
+  @ViewChild("passwordInput")
+  private passwordInput!: ElementRef<HTMLInputElement>;
 
-  private _userHasPremium$: Observable<boolean> = this.accountService.activeAccount$.pipe(
+  isPremium$: Observable<boolean> = this.accountService.activeAccount$.pipe(
     switchMap((account) =>
       this.billingAccountProfileStateService.hasPremiumFromAnySource$(account.id),
     ),
   );
-
-  allowTotpGeneration$: Observable<boolean> = combineLatest([
-    this._userHasPremium$,
-    this._cipher$.pipe(filter((c) => c != null)),
-  ]).pipe(
-    map(([userHasPremium, cipher]) => {
-      // User premium status only applies to personal ciphers, organizationUseTotp applies to organization ciphers
-      return (userHasPremium && cipher.organizationId == null) || cipher.organizationUseTotp;
-    }),
-    shareReplay({ refCount: true, bufferSize: 1 }),
-  );
   showPasswordCount: boolean = false;
   passwordRevealed: boolean = false;
   totpCodeCopyObj: TotpCodeValues;
+
   private datePipe = inject(DatePipe);
 
   constructor(
@@ -104,8 +96,15 @@ export class LoginCredentialsViewComponent {
     return `${dateCreated} ${creationDate}`;
   }
 
-  async getPremium(organizationId?: string) {
-    await this.premiumUpgradeService.promptForPremium(organizationId);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["cipher"]) {
+      if (this.passwordInput?.nativeElement) {
+        // Reset password input type in case it's been toggled
+        this.passwordInput.nativeElement.type = "password";
+      }
+      this.passwordRevealed = false;
+      this.showPasswordCount = false;
+    }
   }
 
   async pwToggleValue(passwordVisible: boolean) {
@@ -136,5 +135,9 @@ export class LoginCredentialsViewComponent {
       false,
       this.cipher.organizationId,
     );
+  }
+
+  launchChangePasswordEvent(): void {
+    this.handleChangePassword.emit();
   }
 }
