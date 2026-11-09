@@ -253,6 +253,9 @@ fn reject_foreign_objects(request: &WireRequest) -> Result<(), &'static str> {
     if request.generate.is_some() {
         return Err("generate object is not valid for this operation");
     }
+    if request.access_token.is_some() {
+        return Err("accessToken object is not valid for this operation");
+    }
     Ok(())
 }
 
@@ -1075,6 +1078,7 @@ mod tests {
             ("target", json!({"id": "x"})),
             ("fill", json!({})),
             ("generate", json!({})),
+            ("accessToken", json!({"machineAccount": "x", "name": "y"})),
         ] {
             let mut value_json = fixture_json();
             value_json[key] = value;

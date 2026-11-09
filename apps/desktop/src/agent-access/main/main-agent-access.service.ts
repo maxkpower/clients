@@ -826,6 +826,10 @@ export class MainAgentAccessService {
         // only — the activity row above keeps ids alone.
         openshell: data.openshell,
         providerTargets: data.providerTargets,
+        // Additive (access tokens): the agent's machine-account / token-name / expiry hints for
+        // `resourceType: "access_token"`. Hints only — there is no token material to carry, and
+        // like the create fields above this rides the live IPC message, never `activityBuffer`.
+        accessTokenRequest: data.accessTokenRequest,
         ...(data.origin === AgentAccessActivityOrigin.OpenShell
           ? { receivedAtMs: Date.now() }
           : {}),

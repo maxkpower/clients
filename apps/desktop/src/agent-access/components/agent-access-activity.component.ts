@@ -316,7 +316,12 @@ export class AgentAccessActivityComponent implements OnInit {
           (entry.secretId
             ? this.agentAccessSecretsService.resolveSecretName(entry.secretId)
             : undefined) ?? this.i18nService.t("agentAccessCreateFallbackName");
-        return this.i18nService.t("agentAccessCreatedItem", secretName);
+        return this.i18nService.t(
+          entry.resourceType === AgentAccessResourceType.AccessToken
+            ? "agentAccessCreatedAccessTokenItem"
+            : "agentAccessCreatedItem",
+          secretName,
+        );
       }
       case AgentAccessRequestStatus.Filled: {
         // A fill row reads like a Shared one — the item and the roles written — because the same

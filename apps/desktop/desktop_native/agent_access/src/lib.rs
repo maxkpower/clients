@@ -31,13 +31,13 @@ mod storage;
 
 pub use attestation::{ParentProcessInfo, SignatureInfo, SignatureKind};
 pub use callbacks::{
-    AgentAccessEvent, CallbackError, CredentialDenialReason, CredentialQueryKind,
-    CredentialRequestData, CredentialRequestHandler, CredentialRequestOrigin,
-    CredentialResponseData, DeliveryMode, EventSink, FingerprintVerificationData,
-    FingerprintVerificationResponse, FingerprintVerifier, KvStorage, OpenShellContext,
-    OpenShellEndpoint, OpenShellEndpointSource, OpenShellLifetime, OpenShellLifetimeMode,
-    OpenShellResolution, ProjectEntry, ProviderField, ProviderTarget, ProviderValue,
-    RequestOperation, ResourceKind,
+    AccessTokenInfo, AccessTokenRequestData, AgentAccessEvent, CallbackError,
+    CredentialDenialReason, CredentialQueryKind, CredentialRequestData, CredentialRequestHandler,
+    CredentialRequestOrigin, CredentialResponseData, DeliveryMode, EventSink,
+    FingerprintVerificationData, FingerprintVerificationResponse, FingerprintVerifier, KvStorage,
+    OpenShellContext, OpenShellEndpoint, OpenShellEndpointSource, OpenShellLifetime,
+    OpenShellLifetimeMode, OpenShellResolution, ProjectEntry, ProviderField, ProviderTarget,
+    ProviderValue, RequestOperation, ResourceKind,
 };
 pub use client::{AgentAccessConfig, DesktopAgentAccess};
 pub use error::AgentAccessError;

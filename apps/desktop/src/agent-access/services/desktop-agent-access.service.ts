@@ -63,6 +63,10 @@ import {
   ConfirmDeleteRequestResult,
 } from "../components/confirm-delete-request.component";
 import {
+  CreateAccessTokenRequestComponent,
+  CreateAccessTokenRequestResult,
+} from "../components/create-access-token-request.component";
+import {
   CreateProjectRequestComponent,
   CreateProjectRequestResult,
 } from "../components/create-project-request.component";
@@ -96,6 +100,7 @@ import {
   deriveAgentAccessDisplayName,
 } from "../utils/agent-access-attestation.util";
 
+import { AgentAccessAccessTokensService } from "./agent-access-access-tokens.service";
 import { AgentAccessOpenShellService } from "./agent-access-openshell.service";
 import { AgentAccessSecretsService, SmProjectMatch } from "./agent-access-secrets.service";
 import {
@@ -252,6 +257,7 @@ export class DesktopAgentAccessService implements OnDestroy {
   private configService = inject(ConfigService);
   private totpService = inject(TotpService);
   private agentAccessSecretsService = inject(AgentAccessSecretsService);
+  private agentAccessAccessTokensService = inject(AgentAccessAccessTokensService);
   private eventCollectionService = inject(EventCollectionService);
   private domainSettingsService = inject(DomainSettingsService);
   private agentFillBrowserService = inject(AgentFillBrowserService);
@@ -1123,6 +1129,10 @@ export class DesktopAgentAccessService implements OnDestroy {
 
     switch (operation) {
       case AgentAccessOperation.Create:
+        if (resourceType === AgentAccessResourceType.AccessToken) {
+          await this.handleAccessTokenCreateRequest(message, userId);
+          return;
+        }
         if (resourceType === AgentAccessResourceType.Project) {
           await this.handleProjectCreateRequest(message, userId);
           return;
@@ -1300,6 +1310,126 @@ export class DesktopAgentAccessService implements OnDestroy {
         variant: "error",
         title: null,
         message: this.i18nService.t("agentAccessCreateFailedToast"),
+      });
+      await this.denyCredentialRequest(requestId);
+    }
+  }
+
+  // `accessTokenCreate` branch (agent-access-architecture.md, "M9 — Access-token creation"). The
+  // agent asks for a machine-account access token to be minted and stored in a new secret; it
+  // never receives the token. Same lifecycle shape as `handleCreateRequest` (own dialog, own
+  // respond/deny), but the one thing that must hold here is that no token material is ever in this
+  // method's scope: `createAccessTokenSecret` mints and stores it internally and returns ids and an
+  // expiry only, so there is nothing for the response, the outcome, a log line or a toast to carry.
+  private async handleAccessTokenCreateRequest(
+    message: Record<string, unknown>,
+    userId: UserId,
+  ): Promise<void> {
+    const requestId = message.requestId as number;
+    const proposal = message.accessTokenRequest as
+      { machineAccount?: string; tokenName?: string; expiresInDays?: number } | undefined;
+    const secretName = message.newSecretName as string | undefined;
+
+    if (!proposal?.machineAccount || !proposal.tokenName || !secretName) {
+      // Defensive: `validate()` guarantees all three. Deny rather than open an empty dialog.
+      this.logService.error("Agent Access: access token request is missing required fields");
+      await this.denyCredentialRequest(requestId);
+      return;
+    }
+
+    const organizations = await this.agentAccessSecretsService.smOrganizations(userId);
+    if (organizations.length === 0) {
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("agentAccessCreateNoSmAccess"),
+      });
+      await this.denyCredentialRequest(requestId);
+      return;
+    }
+
+    ipc.platform.focusWindow();
+
+    const dialogRef = CreateAccessTokenRequestComponent.open(this.dialogService, {
+      requesterName: message.requesterName as string | undefined,
+      requesterFingerprint: message.requesterFingerprint as string | undefined,
+      machineAccountHint: proposal.machineAccount,
+      tokenName: proposal.tokenName,
+      expiresInDays: proposal.expiresInDays,
+      secretName,
+      projectHint: message.projectHint as string | undefined,
+      organizations,
+      userId,
+      lastOrganizationId: this.lastCreateOrganizationId,
+      lastProjectId: this.lastCreateProjectId,
+    });
+
+    const result: CreateAccessTokenRequestResult | undefined = await firstValueFrom(
+      dialogRef.closed,
+    );
+    if (
+      result == null ||
+      !result.approved ||
+      result.organizationId == null ||
+      result.machineAccountId == null ||
+      !result.tokenName ||
+      !result.secretName
+    ) {
+      await this.denyCredentialRequest(requestId);
+      return;
+    }
+
+    try {
+      let projectId: string | null = null;
+      if (result.newProjectName) {
+        const createdProject = await this.agentAccessSecretsService.createProject(
+          result.organizationId,
+          userId,
+          result.newProjectName,
+        );
+        projectId = createdProject.id;
+      } else if (result.projectId) {
+        projectId = result.projectId;
+      }
+
+      const expiresAt =
+        result.expiresInDays != null
+          ? new Date(Date.now() + result.expiresInDays * 24 * 60 * 60 * 1000)
+          : undefined;
+
+      const created = await this.agentAccessAccessTokensService.createAccessTokenSecret(
+        result.organizationId,
+        userId,
+        result.machineAccountId,
+        projectId,
+        { name: result.tokenName, expiresAt },
+        result.secretName,
+      );
+
+      this.lastCreateOrganizationId = result.organizationId;
+      this.lastCreateProjectId = projectId ?? undefined;
+
+      const response: agent_access.CredentialResponseData = {
+        approved: true,
+        secretId: created.secretId,
+        itemName: result.secretName,
+        accessTokenInfo: {
+          machineAccountId: result.machineAccountId,
+          tokenName: result.tokenName,
+          expiresAt: created.expiresAt,
+        },
+      };
+      await ipc.agentAccess.credentialRequestResponse(requestId, response, {
+        status: AgentAccessRequestStatus.Created,
+        secretId: created.secretId,
+        operation: AgentAccessOperation.Create,
+      });
+    } catch (e) {
+      this.logService.error("Agent Access: failed to create a Secrets Manager access token", e);
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("agentAccessAccessTokenFailedToast"),
       });
       await this.denyCredentialRequest(requestId);
     }

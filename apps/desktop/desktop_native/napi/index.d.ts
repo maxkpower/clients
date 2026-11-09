@@ -382,6 +382,33 @@ export declare namespace agent_access {
      * `origin: "openshell"`.
      */
     providerTargets?: Array<ProviderTargetData>
+    /**
+     * The agent's hints for `resourceType: "access_token"` + `operation: "create"`: which
+     * machine account to mint a token for, the token name and an optional lifetime. The
+     * destination secret name / project hint ride in `newSecretName` / `projectHint`.
+     * Contains no token material (none exists yet at this point).
+     */
+    accessTokenRequest?: AccessTokenRequestData
+  }
+  /** Mirror of `agent_access_core::AccessTokenRequestData`. */
+  export interface AccessTokenRequestData {
+    /** Machine-account id or name hint — never trusted silently. */
+    machineAccount: string
+    /** Proposed access-token name. */
+    tokenName: string
+    /** Proposed lifetime in days; absent means no preference (the dialog defaults to 30 days). */
+    expiresInDays?: number
+  }
+  /**
+   * Value-free metadata about a created access token, sent back with the approval. Mirror of
+   * `agent_access_core::AccessTokenInfo`. There is deliberately no field that could hold the
+   * token itself.
+   */
+  export interface AccessTokenInfoData {
+    machineAccountId: string
+    tokenName: string
+    /** RFC 3339 expiry; absent for a token that never expires. */
+    expiresAt?: string
   }
   /** Which ingress a [`CredentialRequestData`] arrived through. */
   export const enum CredentialRequestOrigin {
@@ -481,6 +508,11 @@ export declare namespace agent_access {
     openshellValues?: Array<ProviderValueData>
     /** The approval lifetime for an approved `operation: "providerResolve"` request (§M8). */
     openshellLifetime?: OpenShellLifetimeData
+    /**
+     * Value-free metadata for an approved `resourceType: "access_token"` create. The new
+     * secret's id/name ride in `secretId` / `itemName`. Never carries the token itself.
+     */
+    accessTokenInfo?: AccessTokenInfoData
   }
   /**
    * How the requester wants an approved credential delivered. Only present for
@@ -634,7 +666,14 @@ export declare namespace agent_access {
     Credential = 'credential',
     Secret = 'secret',
     /** Secrets Manager project (M6) — list/create/update/delete operations only. */
-    Project = 'project'
+    Project = 'project',
+    /**
+     * Secrets Manager machine-account access token (`accessTokenCreate`) — create only. The
+     * token never crosses this boundary in either direction; see
+     * `agent_access_core::AccessTokenRequestData`. Explicit value because the enum's
+     * camelCase rule would otherwise yield `"accessToken"`.
+     */
+    AccessToken = 'access_token'
   }
   /**
    * Code-signature facts (W2a) about the attested process — the resolved `parent` if

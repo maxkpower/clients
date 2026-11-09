@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
 
 use crate::callbacks::{
-    CallbackError, CredentialDenialReason, CredentialQueryKind, CredentialResponseData,
-    DeliveryMode, ProjectEntry, RequestOperation, ResourceKind,
+    AccessTokenInfo, CallbackError, CredentialDenialReason, CredentialQueryKind,
+    CredentialResponseData, DeliveryMode, ProjectEntry, RequestOperation, ResourceKind,
 };
 
 /// The only protocol version this server understands. Requests with a different `version` are
@@ -68,9 +68,52 @@ pub(super) struct WireRequest {
     /// reject it as a foreign object (§M8.4); every other op keeps ignoring it as before.
     #[serde(default)]
     pub(super) generate: Option<serde_json::Value>,
+    /// Present only on an `accessTokenCreate` request. [`validate`] rejects it as a foreign
+    /// object on every other `op`.
+    #[serde(default)]
+    pub(super) access_token: Option<WireAccessTokenCreate>,
     #[serde(default)]
     pub(super) client: Option<WireClientInfo>,
 }
+
+/// The `accessToken` object on an `accessTokenCreate` request: a proposal to mint a Secrets
+/// Manager machine-account access token and store it straight into a new secret. Every field is
+/// a HINT the user can change in the approval dialog. There is deliberately no field for a token
+/// value — the agent never supplies one and never receives one. Names can reveal what an agent
+/// is up to, so `Debug` prints presence only.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct WireAccessTokenCreate {
+    /// Machine-account id or name hint.
+    pub(super) machine_account: String,
+    /// Proposed access-token name.
+    pub(super) name: String,
+    /// Proposed lifetime in days; absent means no preference (the dialog defaults to 30 days). Bounded by [`validate`].
+    #[serde(default)]
+    pub(super) expires_in_days: Option<u32>,
+    /// Hint for the name of the secret that will hold the token; defaults to `name`.
+    #[serde(default)]
+    pub(super) secret_name: Option<String>,
+    /// Hint for the destination project name.
+    #[serde(default)]
+    pub(super) project: Option<String>,
+}
+
+impl std::fmt::Debug for WireAccessTokenCreate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WireAccessTokenCreate")
+            .field("has_machine_account", &!self.machine_account.is_empty())
+            .field("has_name", &!self.name.is_empty())
+            .field("expires_in_days", &self.expires_in_days)
+            .field("has_secret_name", &self.secret_name.is_some())
+            .field("has_project", &self.project.is_some())
+            .finish()
+    }
+}
+
+/// Longest access-token lifetime an agent may propose, in days. The user can still pick
+/// "never" or anything else in the dialog; this only bounds the hint.
+pub(super) const MAX_ACCESS_TOKEN_EXPIRY_DAYS: u32 = 3650;
 
 /// The `target` object on a `secretUpdate`/`secretDelete`/`projectUpdate`/`projectDelete`
 /// request (M6) — identifies which existing secret/project the request acts on. Value-free (an
@@ -320,6 +363,17 @@ pub(super) enum ValidatedRequest {
     /// fillable fields. No query, no delivery, no fill/create/update/target object on the wire —
     /// [`validate`] rejects a request that carries any of them under this op.
     DescribeFillTarget { client: Option<WireClientInfo> },
+    /// `accessTokenCreate` — a proposal to mint a machine-account access token and store it in a
+    /// new secret. Always [`ResourceKind::AccessToken`]. No value/generate field exists on the
+    /// wire: the token is born in the desktop app after approval and never travels here.
+    AccessTokenCreate {
+        machine_account: String,
+        token_name: String,
+        expires_in_days: Option<u32>,
+        secret_name: Option<String>,
+        project: Option<String>,
+        client: Option<WireClientInfo>,
+    },
 }
 
 /// Requested field roles + optional target-token binding for a `delivery: "fill"` request (M5).
@@ -405,6 +459,21 @@ impl std::fmt::Debug for ValidatedRequest {
                 .debug_struct("ValidatedRequest::DescribeFillTarget")
                 .field("client", client)
                 .finish(),
+            Self::AccessTokenCreate {
+                expires_in_days,
+                secret_name,
+                project,
+                client,
+                ..
+            } => f
+                .debug_struct("ValidatedRequest::AccessTokenCreate")
+                .field("machine_account", &"<redacted>")
+                .field("token_name", &"<redacted>")
+                .field("expires_in_days", expires_in_days)
+                .field("has_secret_name", &secret_name.is_some())
+                .field("has_project", &project.is_some())
+                .field("client", client)
+                .finish(),
         }
     }
 }
@@ -433,6 +502,11 @@ pub(super) fn validate(request: WireRequest) -> Result<ValidatedRequest, &'stati
     if request.openshell.is_some() {
         return Err("openshell object is not valid for this operation");
     }
+    // An `accessToken` object belongs only to `accessTokenCreate`; on every other op it is a
+    // foreign object — rejected, never ignored.
+    if request.access_token.is_some() && request.op != "accessTokenCreate" {
+        return Err("accessToken object is not valid for this operation");
+    }
     match request.op.as_str() {
         "credentialRequest" | "secretRequest" => validate_lookup(request),
         "secretCreate" => validate_create(ResourceKind::Secret, request),
@@ -443,6 +517,7 @@ pub(super) fn validate(request: WireRequest) -> Result<ValidatedRequest, &'stati
         "projectDelete" => validate_delete(ResourceKind::Project, request),
         "projectList" => validate_list(request),
         "describeFillTarget" => validate_describe_fill_target(request),
+        "accessTokenCreate" => validate_access_token_create(request),
         _ => Err("unknown operation"),
     }
 }
@@ -801,6 +876,55 @@ fn validate_describe_fill_target(request: WireRequest) -> Result<ValidatedReques
     })
 }
 
+/// `accessTokenCreate` — a proposal to mint a machine-account access token into a new secret.
+/// Foreign objects: `query`, `delivery`, `fill`, `create`, `update`, `target`, `generate`.
+fn validate_access_token_create(request: WireRequest) -> Result<ValidatedRequest, &'static str> {
+    if request.query.is_some() {
+        return Err("query is not valid for this operation");
+    }
+    if request.delivery.is_some() {
+        return Err("delivery is not valid for this operation");
+    }
+    if request.fill.is_some() {
+        return Err("fill object is not valid for this operation");
+    }
+    if request.create.is_some() {
+        return Err("create object is not valid for this operation");
+    }
+    if request.update.is_some() {
+        return Err("update object is not valid for this operation");
+    }
+    if request.target.is_some() {
+        return Err("target object is not valid for this operation");
+    }
+    if request.generate.is_some() {
+        return Err("generate is not valid for this operation");
+    }
+    let token = request.access_token.ok_or("missing accessToken object")?;
+    if token.machine_account.trim().is_empty() {
+        return Err("accessToken.machineAccount must not be empty");
+    }
+    if token.name.trim().is_empty() {
+        return Err("accessToken.name must not be empty");
+    }
+    if let Some(days) = token.expires_in_days {
+        if !(1..=MAX_ACCESS_TOKEN_EXPIRY_DAYS).contains(&days) {
+            return Err("accessToken.expiresInDays must be between 1 and 3650");
+        }
+    }
+    if matches!(&token.secret_name, Some(name) if name.trim().is_empty()) {
+        return Err("accessToken.secretName must not be empty");
+    }
+    Ok(ValidatedRequest::AccessTokenCreate {
+        machine_account: token.machine_account,
+        token_name: token.name,
+        expires_in_days: token.expires_in_days,
+        secret_name: token.secret_name,
+        project: token.project,
+        client: request.client,
+    })
+}
+
 // ---------------------------------------------------------------------------------------------
 // Response
 // ---------------------------------------------------------------------------------------------
@@ -893,6 +1017,17 @@ pub(super) struct WireProjectEntry {
     pub(super) organization: Option<String>,
 }
 
+/// Value-free metadata about a created access token in an approved `accessTokenCreate` reply:
+/// ids, the token name and the expiry. There is no field here that could carry token material.
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct WireAccessTokenInfo {
+    pub(super) machine_account_id: String,
+    pub(super) token_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(super) expires_at: Option<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct WireItem {
@@ -930,6 +1065,10 @@ pub(super) struct WireResponse {
     /// list-shaped release"). `None`/absent for every other op.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(super) projects: Option<Vec<WireProjectEntry>>,
+    /// Metadata about the machine-account access token an approved `accessTokenCreate` stored in
+    /// the secret named by `reference`/`item`. Never the token itself. Absent for every other op.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(super) access_token: Option<WireAccessTokenInfo>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(super) message: Option<String>,
     /// M5's `fill` response object (`delivery: "fill"`'s execution outcome) — a value-free
@@ -957,6 +1096,7 @@ impl WireResponse {
             reference: None,
             item: None,
             projects: None,
+            access_token: None,
             message: Some(message.to_string()),
             fill: None,
             fill_target: None,
@@ -1011,6 +1151,11 @@ pub(super) fn build_response(
                 // consistent with Create's existing treatment — all three report no fields
                 // shared (M6, "Full Secrets Manager surface" — see `local_listener::mod`'s
                 // request construction, which never sets a value-changed flag on the response).
+                // An access-token create is the one Create whose reply carries extra (value-free)
+                // metadata; it has its own builder.
+                (RequestOperation::Create, _) if resource == ResourceKind::AccessToken => {
+                    (build_approved_access_token(&response), None)
+                }
                 (RequestOperation::Create, _)
                 | (RequestOperation::Update, _)
                 | (RequestOperation::Delete, _) => {
@@ -1158,6 +1303,11 @@ fn build_approved(
         ResourceKind::Project => {
             WireResponse::status(WireStatus::Error, "Lookup is not supported for projects")
         }
+        // Same: `accessTokenCreate` is a create, never a lookup.
+        ResourceKind::AccessToken => WireResponse::status(
+            WireStatus::Error,
+            "Lookup is not supported for access tokens",
+        ),
     }
 }
 
@@ -1221,6 +1371,7 @@ fn build_approved_credential(
                 reference: Some(reference),
                 item: None,
                 projects: None,
+                access_token: None,
                 message: None,
                 fill: None,
                 fill_target: None,
@@ -1239,6 +1390,7 @@ fn build_approved_credential(
                     username: username.map(str::to_string),
                 }),
                 projects: None,
+                access_token: None,
                 message: None,
                 fill: None,
                 fill_target: None,
@@ -1283,6 +1435,7 @@ fn build_approved_fill(response: &CredentialResponseData, reference: String) -> 
             username: response.username.clone(),
         }),
         projects: None,
+        access_token: None,
         message: None,
         fill: Some(fill),
         fill_target: None,
@@ -1317,6 +1470,7 @@ fn build_approved_describe_fill_target(response: &CredentialResponseData) -> Wir
         reference: None,
         item: None,
         projects: None,
+        access_token: None,
         message: None,
         fill: None,
         fill_target: Some(fill_target),
@@ -1358,6 +1512,7 @@ fn build_approved_secret(
                 reference: Some(format!("bw://secret/{secret_id}")),
                 item: None,
                 projects: None,
+                access_token: None,
                 message: None,
                 fill: None,
                 fill_target: None,
@@ -1384,6 +1539,7 @@ fn build_approved_secret(
                     username: None,
                 }),
                 projects: None,
+                access_token: None,
                 message: None,
                 fill: None,
                 fill_target: None,
@@ -1408,7 +1564,8 @@ fn build_approved_secret(
 /// `credential_id`-based reference construction in [`build_approved_credential`]).
 fn resource_id(response: &CredentialResponseData, resource: ResourceKind) -> Option<String> {
     match resource {
-        ResourceKind::Secret => response.secret_id.clone(),
+        // An access token is stored in a secret; the reply references that secret.
+        ResourceKind::Secret | ResourceKind::AccessToken => response.secret_id.clone(),
         ResourceKind::Project => response.project_id.clone(),
         ResourceKind::Credential => None,
     }
@@ -1419,7 +1576,7 @@ fn resource_id(response: &CredentialResponseData, resource: ResourceKind) -> Opt
 /// agent-access-architecture.md's "M6" wire section: "New reference scheme `bw://project/<id>`").
 fn reference_for(resource: ResourceKind, id: &str) -> String {
     match resource {
-        ResourceKind::Secret => format!("bw://secret/{id}"),
+        ResourceKind::Secret | ResourceKind::AccessToken => format!("bw://secret/{id}"),
         ResourceKind::Project => format!("bw://project/{id}"),
         // Never reached — see `resource_id`'s docs.
         ResourceKind::Credential => format!("bw://item/{id}"),
@@ -1460,10 +1617,45 @@ fn build_approved_reference_and_name(
             username: None,
         }),
         projects: None,
+        access_token: None,
         message: None,
         fill: None,
         fill_target: None,
     }
+}
+
+/// Builds the `status: "approved"` reply for `accessTokenCreate`: the reference/name of the
+/// secret that now holds the token, plus value-free token metadata. By construction there is no
+/// `secret` object and no value anywhere in this function — the token never reaches this crate
+/// (it is written into the secret renderer-side and discarded there), so it cannot be echoed.
+///
+/// Missing secret id, secret name or token metadata on an approved response is a handler
+/// contract violation — fail closed rather than synthesize any of them.
+fn build_approved_access_token(response: &CredentialResponseData) -> WireResponse {
+    let (Some(info), true) = (
+        response.access_token_info.as_ref(),
+        response.secret_id.is_some() && response.item_name.is_some(),
+    ) else {
+        return WireResponse::status(
+            WireStatus::Error,
+            "Approved response missing secret or access token metadata",
+        );
+    };
+    let mut wire = build_approved_reference_and_name(response, ResourceKind::AccessToken);
+    if wire.status != WireStatus::Approved {
+        return wire;
+    }
+    let AccessTokenInfo {
+        machine_account_id,
+        token_name,
+        expires_at,
+    } = info.clone();
+    wire.access_token = Some(WireAccessTokenInfo {
+        machine_account_id,
+        token_name,
+        expires_at,
+    });
+    wire
 }
 
 /// Cap on the number of entries released in a single `projectList` reply — defensive-in-depth;
@@ -1497,6 +1689,7 @@ fn build_approved_list(response: &CredentialResponseData) -> WireResponse {
         reference: None,
         item: None,
         projects: Some(entries),
+        access_token: None,
         message: None,
         fill: None,
         fill_target: None,
@@ -1550,6 +1743,8 @@ fn fields_shared_list(
         // (which do use `ResourceKind::Project`) report `fields_shared` as `None` directly in
         // `build_response`, never through this function.
         ResourceKind::Project => None,
+        // Unreachable for the same reason: an access token is created, never looked up.
+        ResourceKind::AccessToken => None,
     }
 }
 
@@ -1674,6 +1869,7 @@ mod tests {
             fill: None,
             openshell: None,
             generate: None,
+            access_token: None,
             client: None,
         }
     }
@@ -1820,6 +2016,7 @@ mod tests {
             fill: None,
             openshell: None,
             generate: None,
+            access_token: None,
             client: None,
         }
     }
@@ -2250,6 +2447,7 @@ mod tests {
             fill: None,
             openshell: None,
             generate: None,
+            access_token: None,
             client: None,
         }
     }
@@ -2611,6 +2809,7 @@ mod tests {
             fill: None,
             openshell: None,
             generate: None,
+            access_token: None,
             client: None,
         }
     }
@@ -2745,6 +2944,7 @@ mod tests {
             fill: None,
             openshell: None,
             generate: None,
+            access_token: None,
             client: None,
         }
     }
@@ -2958,6 +3158,7 @@ mod tests {
             fill: None,
             openshell: None,
             generate: None,
+            access_token: None,
             client: Some(WireClientInfo {
                 name: "aac".to_string(),
                 version: "0.1.0".to_string(),
@@ -4132,6 +4333,218 @@ mod tests {
         );
         assert_eq!(outcome.response.status, WireStatus::Error);
         assert_eq!(outcome.response.message.as_deref(), Some("Request failed"));
+    }
+
+    // --- accessTokenCreate ---------------------------------------------------------------------
+
+    const SENTINEL_ACCESS_TOKEN: &str = "0.SENTINEL-TOKEN-ID.SENTINEL-CLIENT-SECRET:SENTINELKEY";
+
+    fn base_access_token_request() -> WireRequest {
+        WireRequest {
+            version: 1,
+            op: "accessTokenCreate".to_string(),
+            query: None,
+            delivery: None,
+            create: None,
+            update: None,
+            target: None,
+            fill: None,
+            openshell: None,
+            generate: None,
+            access_token: Some(WireAccessTokenCreate {
+                machine_account: "ci-bot".to_string(),
+                name: "ci-token".to_string(),
+                expires_in_days: Some(30),
+                secret_name: Some("CI_BOT_TOKEN".to_string()),
+                project: Some("my-app".to_string()),
+            }),
+            client: None,
+        }
+    }
+
+    #[test]
+    fn validate_accepts_a_well_formed_access_token_create() {
+        match validate(base_access_token_request()).unwrap() {
+            ValidatedRequest::AccessTokenCreate {
+                machine_account,
+                token_name,
+                expires_in_days,
+                secret_name,
+                project,
+                ..
+            } => {
+                assert_eq!(machine_account, "ci-bot");
+                assert_eq!(token_name, "ci-token");
+                assert_eq!(expires_in_days, Some(30));
+                assert_eq!(secret_name.as_deref(), Some("CI_BOT_TOKEN"));
+                assert_eq!(project.as_deref(), Some("my-app"));
+            }
+            other => panic!("expected AccessTokenCreate, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_access_token_create_rejects_malformed_proposals() {
+        let mut missing = base_access_token_request();
+        missing.access_token = None;
+        assert_validation_error(missing, "missing accessToken object");
+
+        let mut no_machine = base_access_token_request();
+        no_machine.access_token.as_mut().unwrap().machine_account = " ".to_string();
+        assert_validation_error(no_machine, "accessToken.machineAccount must not be empty");
+
+        let mut no_name = base_access_token_request();
+        no_name.access_token.as_mut().unwrap().name = String::new();
+        assert_validation_error(no_name, "accessToken.name must not be empty");
+
+        for days in [0, MAX_ACCESS_TOKEN_EXPIRY_DAYS + 1] {
+            let mut bad = base_access_token_request();
+            bad.access_token.as_mut().unwrap().expires_in_days = Some(days);
+            assert_validation_error(bad, "accessToken.expiresInDays must be between 1 and 3650");
+        }
+
+        let mut no_secret_name = base_access_token_request();
+        no_secret_name.access_token.as_mut().unwrap().secret_name = Some(String::new());
+        assert_validation_error(no_secret_name, "accessToken.secretName must not be empty");
+    }
+
+    #[test]
+    fn validate_access_token_create_rejects_foreign_objects() {
+        let mut with_create = base_access_token_request();
+        with_create.create = Some(WireCreate {
+            name: "x".to_string(),
+            value: Some(SENTINEL_ACCESS_TOKEN.to_string()),
+            generate: None,
+            note: None,
+            project: None,
+        });
+        assert_validation_error(with_create, "create object is not valid for this operation");
+
+        let mut with_generate = base_access_token_request();
+        with_generate.generate = Some(serde_json::json!({}));
+        assert_validation_error(with_generate, "generate is not valid for this operation");
+    }
+
+    #[test]
+    fn access_token_object_is_rejected_on_every_other_op() {
+        for op in [
+            "credentialRequest",
+            "secretCreate",
+            "projectList",
+            "describeFillTarget",
+        ] {
+            let mut request = base_access_token_request();
+            request.op = op.to_string();
+            assert_validation_error(
+                request,
+                "accessToken object is not valid for this operation",
+            );
+        }
+    }
+
+    #[test]
+    fn access_token_wire_and_validated_debug_redact_names() {
+        let wire = format!("{:?}", base_access_token_request().access_token.unwrap());
+        assert!(!wire.contains("ci-bot") && !wire.contains("ci-token"));
+        let validated = format!("{:?}", validate(base_access_token_request()).unwrap());
+        assert!(!validated.contains("ci-bot") && !validated.contains("ci-token"));
+    }
+
+    fn approving_access_token_response() -> CredentialResponseData {
+        CredentialResponseData {
+            approved: true,
+            item_name: Some("CI_BOT_TOKEN".to_string()),
+            secret_id: Some("secret-9".to_string()),
+            access_token_info: Some(AccessTokenInfo {
+                machine_account_id: "ma-1".to_string(),
+                token_name: "ci-token".to_string(),
+                expires_at: Some("2026-12-09T00:00:00.000Z".to_string()),
+            }),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn approved_access_token_reply_has_reference_name_and_metadata_only() {
+        let outcome = build_response(
+            Ok(Ok(approving_access_token_response())),
+            ResourceKind::AccessToken,
+            RequestOperation::Create,
+            None,
+        );
+        assert_eq!(outcome.response.status, WireStatus::Approved);
+        let value = serde_json::to_value(&outcome.response).unwrap();
+        assert_eq!(value["reference"], "bw://secret/secret-9");
+        assert_eq!(value["item"]["name"], "CI_BOT_TOKEN");
+        assert_eq!(value["accessToken"]["machineAccountId"], "ma-1");
+        assert_eq!(value["accessToken"]["tokenName"], "ci-token");
+        assert_eq!(
+            value["accessToken"]["expiresAt"],
+            "2026-12-09T00:00:00.000Z"
+        );
+        assert!(value.get("secret").is_none());
+        assert!(value.get("credential").is_none());
+        assert!(outcome.fields_shared.is_none());
+    }
+
+    #[test]
+    fn approved_access_token_reply_omits_expiry_for_a_non_expiring_token() {
+        let mut response = approving_access_token_response();
+        response.access_token_info.as_mut().unwrap().expires_at = None;
+        let outcome = build_response(
+            Ok(Ok(response)),
+            ResourceKind::AccessToken,
+            RequestOperation::Create,
+            None,
+        );
+        let value = serde_json::to_value(&outcome.response).unwrap();
+        assert!(value["accessToken"].get("expiresAt").is_none());
+    }
+
+    #[test]
+    fn access_token_sentinel_planted_in_every_response_slot_never_reaches_the_reply() {
+        // A buggy or compromised host that stuffs the token into every value-bearing slot still
+        // cannot get it onto the wire: the access-token reply builder reads none of them.
+        let mut response = approving_access_token_response();
+        response.secret_value = Some(Zeroizing::new(SENTINEL_ACCESS_TOKEN.to_string()));
+        response.password = Some(SENTINEL_ACCESS_TOKEN.to_string());
+        response.username = Some(SENTINEL_ACCESS_TOKEN.to_string());
+        response.totp = Some(SENTINEL_ACCESS_TOKEN.to_string());
+        response.uri = Some(SENTINEL_ACCESS_TOKEN.to_string());
+        response.notes = Some(SENTINEL_ACCESS_TOKEN.to_string());
+        response.fill_result = Some(format!("\"{SENTINEL_ACCESS_TOKEN}\""));
+        let debug_of_response = format!("{response:?}");
+        let outcome = build_response(
+            Ok(Ok(response)),
+            ResourceKind::AccessToken,
+            RequestOperation::Create,
+            None,
+        );
+        let wire = serde_json::to_string(&outcome.response).unwrap();
+        assert!(!wire.contains("SENTINEL"), "wire reply leaked: {wire}");
+        assert!(!format!("{:?}", outcome.response).contains("SENTINEL"));
+        assert!(!debug_of_response.contains("SENTINEL"));
+        assert!(outcome.fields_shared.is_none());
+    }
+
+    #[test]
+    fn approved_access_token_reply_fails_closed_without_secret_or_metadata() {
+        let mut no_secret = approving_access_token_response();
+        no_secret.secret_id = None;
+        let mut no_name = approving_access_token_response();
+        no_name.item_name = None;
+        let mut no_info = approving_access_token_response();
+        no_info.access_token_info = None;
+        for response in [no_secret, no_name, no_info] {
+            let outcome = build_response(
+                Ok(Ok(response)),
+                ResourceKind::AccessToken,
+                RequestOperation::Create,
+                None,
+            );
+            assert_eq!(outcome.response.status, WireStatus::Error);
+            assert!(outcome.response.access_token.is_none());
+        }
     }
 
     #[test]
