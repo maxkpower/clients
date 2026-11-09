@@ -711,6 +711,7 @@ export class MainAgentAccessService {
         cipherId: pointsAtCipher ? outcome.cipherId : undefined,
         secretId: pointsAtSecretOrProject ? outcome.secretId : undefined,
         projectId: pointsAtSecretOrProject ? outcome.projectId : undefined,
+        machineAccountId: pointsAtSecretOrProject ? outcome.machineAccountId : undefined,
         fieldsShared: pointsAtCipher ? outcome.fieldsShared : undefined,
         fillOrigin: fillOutcome ? outcome.fillOrigin : undefined,
         resolvedAtMs: `${Date.now()}`,

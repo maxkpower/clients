@@ -151,6 +151,12 @@ export interface CredentialRequestActivity extends AgentAccessActivityBase {
    * at render time from the renderer-side project name cache, ids-only invariant unchanged.
    */
   projectId?: string;
+  /**
+   * Id of the Secrets Manager machine account a `Created` row targeted, for
+   * {@link AgentAccessResourceType.MachineAccount} requests. An opaque identifier — the name
+   * resolves at render time from the renderer-side name cache, ids-only invariant unchanged.
+   */
+  machineAccountId?: string;
   /** Which fields were released, e.g. `["username", "password"]`. Never their values. */
   fieldsShared?: string[];
   /**
@@ -201,6 +207,9 @@ export interface CredentialRequestOutcome {
   /** Id of the created/updated/deleted Secrets Manager project — see
    *  {@link CredentialRequestActivity.projectId}. */
   projectId?: string;
+  /** Id of the created Secrets Manager machine account — see
+   *  {@link CredentialRequestActivity.machineAccountId}. */
+  machineAccountId?: string;
   fieldsShared?: string[];
   /** Extension-reported page origin of a fill attempt — see
    *  {@link CredentialRequestActivity.fillOrigin}. Only meaningful alongside a `Filled` or

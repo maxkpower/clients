@@ -91,13 +91,15 @@ pub mod agent_access {
     /// Which kind of vault data a [`CredentialRequestData`] is asking for. Always `"credential"`
     /// on the relay path — Secrets Manager secrets are local-transport-only (see
     /// agent-access-architecture.md, "M4", invariant 6).
-    #[napi(string_enum = "camelCase")]
+    #[napi(string_enum = "snake_case")]
     #[derive(Debug, Clone, Copy)]
     pub enum ResourceType {
         Credential,
         Secret,
         /// Secrets Manager project (M6) — list/create/update/delete operations only.
         Project,
+        /// Secrets Manager machine account — create operation only.
+        MachineAccount,
     }
 
     impl From<agent_access_core::ResourceKind> for ResourceType {
@@ -106,6 +108,7 @@ pub mod agent_access {
                 agent_access_core::ResourceKind::Credential => Self::Credential,
                 agent_access_core::ResourceKind::Secret => Self::Secret,
                 agent_access_core::ResourceKind::Project => Self::Project,
+                agent_access_core::ResourceKind::MachineAccount => Self::MachineAccount,
             }
         }
     }
@@ -644,6 +647,9 @@ pub mod agent_access {
         /// Secrets Manager project ID, for approved `resourceType: "project"`
         /// create/update/delete responses (M6). Unset otherwise.
         pub project_id: Option<String>,
+        /// Secrets Manager machine account ID, for approved `resourceType: "machine_account"`
+        /// create responses. Unset otherwise.
+        pub machine_account_id: Option<String>,
         /// The readable project list released by an approved `operation: "list"` request (M6) —
         /// names, ids, and write flags only, no secret material. The names transit main only
         /// inside this in-flight response and are never buffered there (ids-only activity
@@ -754,6 +760,7 @@ pub mod agent_access {
                 secret_value: data.secret_value.map(zeroize::Zeroizing::new),
                 secret_id: data.secret_id,
                 project_id: data.project_id,
+                machine_account_id: data.machine_account_id,
                 projects: data.projects.map(|entries| {
                     entries
                         .into_iter()
@@ -951,6 +958,43 @@ pub mod agent_access {
         }
 
         #[test]
+        fn resource_type_machine_account_round_trips() {
+            assert!(matches!(
+                ResourceType::from(agent_access_core::ResourceKind::MachineAccount),
+                ResourceType::MachineAccount
+            ));
+        }
+
+        #[test]
+        fn response_machine_account_id_converts() {
+            let response = CredentialResponseData {
+                approved: true,
+                username: None,
+                password: None,
+                totp: None,
+                uri: None,
+                notes: None,
+                credential_id: None,
+                reason: None,
+                item_name: None,
+                secret_value: None,
+                secret_id: None,
+                project_id: None,
+                machine_account_id: Some("ma-1".to_string()),
+                projects: None,
+                fill_result: None,
+                fill_target: None,
+                denial_detail: None,
+                fill_fields_shared: None,
+                openshell_values: None,
+                openshell_lifetime: None,
+            };
+            let core_response: agent_access_core::CredentialResponseData = response.into();
+            assert_eq!(core_response.machine_account_id.as_deref(), Some("ma-1"));
+            assert!(core_response.project_id.is_none());
+        }
+
+        #[test]
         fn operation_type_update_delete_list_round_trip() {
             assert!(matches!(
                 OperationType::from(agent_access_core::RequestOperation::Update),
@@ -996,6 +1040,7 @@ pub mod agent_access {
                 secret_value: None,
                 secret_id: None,
                 project_id: Some("project-1".to_string()),
+                machine_account_id: None,
                 projects: Some(vec![AgentAccessProjectEntry {
                     id: "project-1".to_string(),
                     name: "My Project".to_string(),
@@ -1068,6 +1113,7 @@ pub mod agent_access {
                 secret_value: None,
                 secret_id: None,
                 project_id: None,
+                machine_account_id: None,
                 projects: None,
                 fill_result: None,
                 fill_target: None,

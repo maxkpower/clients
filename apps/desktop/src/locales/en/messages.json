@@ -1356,6 +1356,18 @@
   "agentAccessProjectCreateRequestTitle": {
     "message": "New Secrets Manager project requested"
   },
+  "agentAccessMachineAccountCreateRequestTitle": {
+    "message": "New Secrets Manager machine account requested"
+  },
+  "agentAccessMachineAccountCreateNote": {
+    "message": "The new machine account starts with no project access and no access token."
+  },
+  "agentAccessMachineAccountName": {
+    "message": "Machine account name"
+  },
+  "agentAccessCreateMachineAccountFallbackName": {
+    "message": "a new machine account"
+  },
   "agentAccessProjectRenameRequestTitle": {
     "message": "Project rename requested"
   },

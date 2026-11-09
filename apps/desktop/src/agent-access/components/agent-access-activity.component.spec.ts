@@ -66,6 +66,7 @@ describe("AgentAccessActivityComponent", () => {
 
   let mockResolveSecretName: jest.Mock;
   let mockResolveProjectName: jest.Mock;
+  let mockResolveMachineAccountName: jest.Mock;
 
   function createComponent(): AgentAccessActivityComponent {
     const messageListener = {
@@ -93,9 +94,11 @@ describe("AgentAccessActivityComponent", () => {
     mockResolveSecretName = jest.fn().mockReturnValue(undefined);
     // M6 project analogue of `resolveSecretName` — same "not seen this session" default.
     mockResolveProjectName = jest.fn().mockReturnValue(undefined);
+    mockResolveMachineAccountName = jest.fn().mockReturnValue(undefined);
     const agentAccessSecretsService = {
       resolveSecretName: mockResolveSecretName,
       resolveProjectName: mockResolveProjectName,
+      resolveMachineAccountName: mockResolveMachineAccountName,
     };
 
     TestBed.configureTestingModule({
@@ -335,6 +338,49 @@ describe("AgentAccessActivityComponent", () => {
       expect(TestBed.inject(I18nService).t).toHaveBeenCalledWith(
         "agentAccessCreatedItem",
         "agentAccessCreateFallbackName",
+      );
+    });
+  });
+
+  describe("result label for a created machine account", () => {
+    let component: AgentAccessActivityComponent;
+    const resultLabel = (entry: CredentialRequestActivity) =>
+      component["requestResultLabel"](entry);
+    const createdMachineAccount: CredentialRequestActivity = {
+      type: "credential_request",
+      id: "request-ma-1",
+      timestampMs: "1700000000000",
+      agentName: "Cursor",
+      origin: "local",
+      status: "created",
+      resourceType: "machine_account",
+      operation: "create",
+      machineAccountId: "ma-1",
+      resolvedAtMs: "1700000005000",
+    };
+
+    beforeEach(async () => {
+      component = createComponent();
+      await component.ngOnInit();
+    });
+
+    it("resolves the name from the machine-account cache, by machineAccountId", () => {
+      mockResolveMachineAccountName.mockReturnValue("ci-runner");
+
+      expect(resultLabel(createdMachineAccount)).toBe("agentAccessCreatedItem");
+      expect(mockResolveMachineAccountName).toHaveBeenCalledWith("ma-1");
+      expect(mockResolveSecretName).not.toHaveBeenCalled();
+      expect(TestBed.inject(I18nService).t).toHaveBeenCalledWith(
+        "agentAccessCreatedItem",
+        "ci-runner",
+      );
+    });
+
+    it("falls back to a generic machine-account label when the name was never cached", () => {
+      expect(resultLabel(createdMachineAccount)).toBe("agentAccessCreatedItem");
+      expect(TestBed.inject(I18nService).t).toHaveBeenCalledWith(
+        "agentAccessCreatedItem",
+        "agentAccessCreateMachineAccountFallbackName",
       );
     });
   });

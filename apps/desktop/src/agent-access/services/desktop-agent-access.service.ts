@@ -63,6 +63,10 @@ import {
   ConfirmDeleteRequestResult,
 } from "../components/confirm-delete-request.component";
 import {
+  CreateMachineAccountRequestComponent,
+  CreateMachineAccountRequestResult,
+} from "../components/create-machine-account-request.component";
+import {
   CreateProjectRequestComponent,
   CreateProjectRequestResult,
 } from "../components/create-project-request.component";
@@ -1131,6 +1135,10 @@ export class DesktopAgentAccessService implements OnDestroy {
           await this.handleCreateRequest(message, userId);
           return;
         }
+        if (resourceType === AgentAccessResourceType.MachineAccount) {
+          await this.handleMachineAccountCreateRequest(message, userId);
+          return;
+        }
         break;
       case AgentAccessOperation.Update:
         if (resourceType === AgentAccessResourceType.Secret) {
@@ -1376,6 +1384,86 @@ export class DesktopAgentAccessService implements OnDestroy {
       });
     } catch (e) {
       this.logService.error("Agent Access: failed to create a Secrets Manager project", e);
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("agentAccessCreateFailedToast"),
+      });
+      await this.denyCredentialRequest(requestId);
+    }
+  }
+
+  // `machineAccountCreate` branch. Sibling of `handleProjectCreateRequest`: no lookup, straight
+  // to the creation dialog (org picker + editable name prefilled with the agent's proposal), own
+  // full lifecycle. The account is created with no project access and no access token — those
+  // are separate operations.
+  private async handleMachineAccountCreateRequest(
+    message: Record<string, unknown>,
+    userId: UserId,
+  ): Promise<void> {
+    const requestId = message.requestId as number;
+    // `newSecretName` is the generic "proposed name" carrier for every create (see the field-reuse
+    // note in `handleProjectCreateRequest`).
+    const proposedName = message.newSecretName as string | undefined;
+    if (!proposedName) {
+      this.logService.error(
+        "Agent Access: machine account create request is missing a proposed name",
+      );
+      await this.denyCredentialRequest(requestId);
+      return;
+    }
+
+    const organizations = await this.agentAccessSecretsService.smOrganizations(userId);
+    if (organizations.length === 0) {
+      this.toastService.showToast({
+        variant: "error",
+        title: null,
+        message: this.i18nService.t("agentAccessCreateNoSmAccess"),
+      });
+      await this.denyCredentialRequest(requestId);
+      return;
+    }
+
+    ipc.platform.focusWindow();
+
+    const dialogRef = CreateMachineAccountRequestComponent.open(this.dialogService, {
+      requesterName: message.requesterName as string | undefined,
+      requesterFingerprint: message.requesterFingerprint as string | undefined,
+      machineAccountName: proposedName,
+      organizations,
+      userId,
+      lastOrganizationId: this.lastCreateOrganizationId,
+    });
+
+    const result: CreateMachineAccountRequestResult | undefined = await firstValueFrom(
+      dialogRef.closed,
+    );
+    if (result == null || !result.approved || result.organizationId == null || !result.name) {
+      await this.denyCredentialRequest(requestId);
+      return;
+    }
+
+    try {
+      // The user-confirmed name from the dialog, never the agent's raw proposal.
+      const created = await this.agentAccessSecretsService.createMachineAccount(
+        result.organizationId,
+        userId,
+        result.name,
+      );
+      this.lastCreateOrganizationId = result.organizationId;
+
+      const response: agent_access.CredentialResponseData = {
+        approved: true,
+        machineAccountId: created.id,
+        itemName: created.name,
+      };
+      await ipc.agentAccess.credentialRequestResponse(requestId, response, {
+        status: AgentAccessRequestStatus.Created,
+        machineAccountId: created.id,
+        operation: AgentAccessOperation.Create,
+      });
+    } catch (e) {
+      this.logService.error("Agent Access: failed to create a Secrets Manager machine account", e);
       this.toastService.showToast({
         variant: "error",
         title: null,

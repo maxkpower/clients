@@ -435,6 +435,11 @@ export declare namespace agent_access {
      */
     projectId?: string
     /**
+     * Secrets Manager machine account ID, for approved `resourceType: "machine_account"`
+     * create responses. Unset otherwise.
+     */
+    machineAccountId?: string
+    /**
      * The readable project list released by an approved `operation: "list"` request (M6) —
      * names, ids, and write flags only, no secret material. The names transit main only
      * inside this in-flight response and are never buffered there (ids-only activity
@@ -634,7 +639,9 @@ export declare namespace agent_access {
     Credential = 'credential',
     Secret = 'secret',
     /** Secrets Manager project (M6) — list/create/update/delete operations only. */
-    Project = 'project'
+    Project = 'project',
+    /** Secrets Manager machine account — create operation only. */
+    MachineAccount = 'machine_account'
   }
   /**
    * Code-signature facts (W2a) about the attested process — the resolved `parent` if
