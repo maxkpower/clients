@@ -312,6 +312,13 @@ export class AgentAccessActivityComponent implements OnInit {
         // doc on `CredentialRequestActivity`: the main process omits it specifically because it
         // would otherwise carry the secret's name). The generic fallback below is the only
         // option when the name isn't in this session's cache (e.g. the app restarted since).
+        if (entry.resourceType === AgentAccessResourceType.MachineAccount) {
+          const machineAccountName =
+            (entry.machineAccountId
+              ? this.agentAccessSecretsService.resolveMachineAccountName(entry.machineAccountId)
+              : undefined) ?? this.i18nService.t("agentAccessCreateMachineAccountFallbackName");
+          return this.i18nService.t("agentAccessCreatedItem", machineAccountName);
+        }
         const secretName =
           (entry.secretId
             ? this.agentAccessSecretsService.resolveSecretName(entry.secretId)

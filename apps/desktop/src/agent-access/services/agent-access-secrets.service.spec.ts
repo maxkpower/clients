@@ -532,6 +532,67 @@ describe("AgentAccessSecretsService", () => {
     });
   });
 
+  describe("createMachineAccount", () => {
+    it("encrypts the name with the organization key and posts to /organizations/{orgId}/service-accounts", async () => {
+      encryptService.encryptString.mockResolvedValue({
+        encryptedString: "enc-ci-runner",
+      } as EncString);
+      apiService.send.mockResolvedValue({ Id: "ma-1", Name: "enc-ci-runner" });
+
+      const result = await service.createMachineAccount(OrgReadable, UserOne, "ci-runner");
+
+      expect(encryptService.encryptString).toHaveBeenCalledWith("ci-runner", SomeKey);
+      expect(apiService.send).toHaveBeenCalledWith(
+        "POST",
+        `/organizations/${OrgReadable}/service-accounts`,
+        { name: "enc-ci-runner" },
+        true,
+        true,
+        null,
+        expect.any(Function),
+      );
+      expect(result).toEqual({ id: "ma-1", name: "ci-runner" });
+    });
+
+    it("marks the create call as agent-mediated", async () => {
+      encryptService.encryptString.mockResolvedValue({ encryptedString: "enc" } as EncString);
+      apiService.send.mockResolvedValue({ Id: "ma-1" });
+
+      await service.createMachineAccount(OrgReadable, UserOne, "ci-runner");
+
+      const [, , , , , , alterHeaders] = apiService.send.mock.calls[0];
+      const headers = new Headers();
+      (alterHeaders as (headers: Headers) => void)(headers);
+      expect(headers.get("Bitwarden-Agent-Mediated")).toBe("1");
+    });
+
+    it("throws (does not swallow) when the API call fails", async () => {
+      encryptService.encryptString.mockResolvedValue({ encryptedString: "enc" } as EncString);
+      apiService.send.mockRejectedValue(new Error("machine account limit reached"));
+
+      await expect(service.createMachineAccount(OrgReadable, UserOne, "ci-runner")).rejects.toThrow(
+        "machine account limit reached",
+      );
+    });
+
+    it("throws without calling the API when no organization key is available", async () => {
+      await expect(
+        service.createMachineAccount("org-without-key", UserOne, "ci-runner"),
+      ).rejects.toThrow("no organization key");
+      expect(apiService.send).not.toHaveBeenCalled();
+    });
+
+    it("seeds the name cache, resolvable via resolveMachineAccountName", async () => {
+      encryptService.encryptString.mockResolvedValue({ encryptedString: "enc" } as EncString);
+      apiService.send.mockResolvedValue({ Id: "ma-1" });
+
+      await service.createMachineAccount(OrgReadable, UserOne, "ci-runner");
+
+      expect(service.resolveMachineAccountName("ma-1")).toBe("ci-runner");
+      expect(service.resolveMachineAccountName("unknown")).toBeUndefined();
+    });
+  });
+
   describe("createSecret", () => {
     beforeEach(() => {
       encryptService.encryptString.mockImplementation(

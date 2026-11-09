@@ -213,6 +213,16 @@ class SmProjectCreateResponse extends BaseResponse {
   }
 }
 
+/** Wire shape of `POST /organizations/{orgId}/service-accounts` — only the id is consumed. */
+class SmMachineAccountCreateResponse extends BaseResponse {
+  id: string;
+
+  constructor(response: unknown) {
+    super(response);
+    this.id = this.getResponseProperty("Id");
+  }
+}
+
 /** Wire shape of `POST /secrets/delete` / `POST /projects/delete` (M6-D) —
  *  `{Data: [{Id, Error}]}`; `Error` is a non-null string on a per-id authz/validation failure
  *  (an HTTP 200 reply, not a thrown error). See `AgentAccessSecretsService.assertBulkDeleteSucceeded`. */
@@ -292,6 +302,11 @@ export class AgentAccessSecretsService {
    *  resolve a `Created`/`Updated`/`Deleted` project row's display name. */
   private readonly projectNameCache = new Map<string, string>();
 
+  /** machineAccountId -> name — the machine-account analogue of {@link projectNameCache},
+   *  seeded by `createMachineAccount` (which already knows the plaintext it sent). Used by
+   *  `AgentAccessActivityComponent` to resolve a `Created` machine-account row's display name. */
+  private readonly machineAccountNameCache = new Map<string, string>();
+
   /** Organizations the given user can request Secrets Manager secrets from: enabled orgs with
    *  Secrets Manager access. */
   async smOrganizations(userId: UserId): Promise<Organization[]> {
@@ -316,6 +331,12 @@ export class AgentAccessSecretsService {
    *  `undefined` if the project was never looked up (or created/renamed) in this session. */
   resolveProjectName(projectId: string): string | undefined {
     return this.projectNameCache.get(projectId);
+  }
+
+  /** Machine-account analogue of {@link resolveProjectName}. Returns `undefined` if the machine
+   *  account was not created in this session. */
+  resolveMachineAccountName(machineAccountId: string): string | undefined {
+    return this.machineAccountNameCache.get(machineAccountId);
   }
 
   /**
@@ -539,6 +560,41 @@ export class AgentAccessSecretsService {
     // Seeds the session-scoped project name cache the same way `createSecret` seeds
     // `secretNameCache` — the activity log stores `projectId` only, never a name.
     this.projectNameCache.set(created.id, name);
+    return { id: created.id, name };
+  }
+
+  /**
+   * Creates a new Secrets Manager machine account (`machineAccountCreate`). The server calls
+   * these "service accounts": `POST /organizations/{orgId}/service-accounts` with the
+   * org-key-encrypted name only — exactly the web SM client's `ServiceAccountRequest`. The
+   * account starts with no project access and no access token; both are separate operations.
+   *
+   * Does NOT swallow failures (e.g. a plan's machine-account limit): they must reach the caller
+   * so the approval pipeline can deny with a generic error and toast. Marked
+   * `Bitwarden-Agent-Mediated` like every other agent-driven SM mutation (invariant 19).
+   */
+  async createMachineAccount(
+    organizationId: string,
+    userId: UserId,
+    name: string,
+  ): Promise<{ id: string; name: string }> {
+    const orgKey = await this.resolveOrgKey(organizationId, userId);
+    if (orgKey == null) {
+      throw new Error("Agent Access: no organization key available to create a machine account");
+    }
+
+    const encryptedName = await this.encryptService.encryptString(name, orgKey);
+    const response = await this.apiService.send(
+      "POST",
+      `/organizations/${organizationId}/service-accounts`,
+      { name: encryptedName.encryptedString },
+      true,
+      true,
+      null,
+      markAgentMediated,
+    );
+    const created = new SmMachineAccountCreateResponse(response);
+    this.machineAccountNameCache.set(created.id, name);
     return { id: created.id, name };
   }
 

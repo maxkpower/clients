@@ -895,6 +895,20 @@ decides the shape; a stray `value` on a projectCreate is a validation error). Re
 — rename only (mirrors the server). **`projectDelete`:**
 `{"version":1,"op":"projectDelete","target":{"id"}}`. Responses: reference + `item{name}`.
 
+**`machineAccountCreate`:** `{"version":1,"op":"machineAccountCreate","create":{"name":"..."},
+"client":{...}}` — same shape and validation as `projectCreate` (`create.name` required non-empty;
+`value`/`generate`/`note`/`project` ABSENT, a stray one is a validation error). Maps to
+`ResourceKind::MachineAccount` / `RequestOperation::Create` (`resourceType: "machine_account"` in
+napi/TS). Response: `bw://machine-account/<id>` + `item{name}` — never a credential. Desktop: the
+approval dialog (`CreateMachineAccountRequestComponent`) picks the organization and shows the
+agent's name as an **editable hint**; the user-confirmed name is what gets created, via
+`POST /organizations/{orgId}/service-accounts {name: <org-key EncString>}` (the server's name for a
+machine account is "service account"; no SDK call is involved — same plain-API pattern as projects)
+with `Bitwarden-Agent-Mediated: 1`. The account is created with no project access and no access
+token; both are separate operations. There is no `machineAccountList` — the editable name and org
+picker make a pre-listing unnecessary (duplicate-name behavior is whatever the server enforces; unverified). MCP tool:
+`create_machine_account({name})` → `{machineAccountId, reference, name}`.
+
 ### aac (SDK repo) — 7 new MCP tools (M6-A)
 
 `transport/local.rs`: `PROJECT_REFERENCE_PREFIX = "bw://project/"` + `strip_project_reference`;

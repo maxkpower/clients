@@ -1,0 +1,60 @@
+<form [bitSubmit]="submit" [formGroup]="createMachineAccountRequestForm" bit-dialog>
+  <div class="tw-font-medium" bitDialogTitle>
+    {{ "agentAccessMachineAccountCreateRequestTitle" | i18n }}
+  </div>
+  <div bitDialogContent>
+    <div class="tw-flex tw-flex-col tw-gap-4">
+      <bit-callout
+        type="warning"
+        title="{{ 'agentAccessMachineAccountCreateRequestTitle' | i18n }}"
+      >
+        {{ "agentAccessRequestedBy" | i18n: requesterDisplayName }}
+      </bit-callout>
+
+      <bit-form-field disableMargin>
+        <bit-label>{{ "agentAccessMachineAccountName" | i18n }}</bit-label>
+        <input
+          id="create-machine-account-request_input_name"
+          bitInput
+          type="text"
+          formControlName="name"
+        />
+        <bit-hint>{{ "agentAccessMachineAccountCreateNote" | i18n }}</bit-hint>
+      </bit-form-field>
+
+      <bit-form-field disableMargin>
+        <bit-label>{{ "organization" | i18n }}</bit-label>
+        <bit-select
+          id="create-machine-account-request_select_organization"
+          formControlName="organizationId"
+        >
+          @for (org of params.organizations; track org.id) {
+            <bit-option [value]="org.id" [label]="org.name"></bit-option>
+          }
+        </bit-select>
+      </bit-form-field>
+    </div>
+  </div>
+  <ng-container bitDialogFooter>
+    <button
+      id="create-machine-account-request_button_authorize"
+      type="submit"
+      bitButton
+      bitFormButton
+      buttonType="primary"
+      [disabled]="createMachineAccountRequestForm.invalid"
+    >
+      <span>{{ "authorize" | i18n }}</span>
+    </button>
+    <button
+      id="create-machine-account-request_button_deny"
+      type="button"
+      bitButton
+      bitFormButton
+      buttonType="secondary"
+      (click)="deny()"
+    >
+      {{ "deny" | i18n }}
+    </button>
+  </ng-container>
+</form>

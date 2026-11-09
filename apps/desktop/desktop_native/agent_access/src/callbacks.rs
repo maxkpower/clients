@@ -74,6 +74,11 @@ pub enum ResourceKind {
     /// [`RequestOperation::Request`]. Local-transport-only, same restriction as
     /// [`Secret`](Self::Secret).
     Project,
+    /// Secrets Manager machine account (service account on the server). Only ever paired with
+    /// [`RequestOperation::Create`] (`machineAccountCreate`) — it never appears on a
+    /// [`RequestOperation::Request`]. Local-transport-only, same restriction as
+    /// [`Secret`](Self::Secret).
+    MachineAccount,
 }
 
 /// Which ingress a [`CredentialRequestData`] arrived through. The single enforcement point
@@ -381,6 +386,10 @@ pub struct CredentialResponseData {
     /// create/update/delete response (M6) — the project analogue of
     /// [`secret_id`](Self::secret_id). Unset for every other resource/operation.
     pub project_id: Option<String>,
+    /// Secrets Manager machine account ID, for an approved [`ResourceKind::MachineAccount`]
+    /// create response — the machine-account analogue of [`project_id`](Self::project_id).
+    /// Unset for every other resource/operation.
+    pub machine_account_id: Option<String>,
     /// The readable Secrets Manager project list released by an approved
     /// [`RequestOperation::List`] request (M6) — names, ids, and write flags only, no secret
     /// material. Names decrypt renderer-side and transit main only inside this in-flight
@@ -435,6 +444,7 @@ impl std::fmt::Debug for CredentialResponseData {
             .field("has_secret_value", &self.secret_value.is_some())
             .field("secret_id", &self.secret_id)
             .field("project_id", &self.project_id)
+            .field("machine_account_id", &self.machine_account_id)
             // Never `{:?}` the `Vec<ProjectEntry>` itself — names are decrypted org metadata
             // and this crate's blanket "an accidental Debug can't leak it" rule applies here
             // too, even though `ProjectEntry` itself derives a plain `Debug` (see its docs).

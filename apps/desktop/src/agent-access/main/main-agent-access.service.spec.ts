@@ -1063,6 +1063,36 @@ describe("MainAgentAccessService", () => {
         expect(entry.secretId).toBeUndefined();
       });
 
+      it("records machineAccountId (and no secretId/projectId) on a Created machine account resolution", async () => {
+        const machineAccountCreateData: agent_access.CredentialRequestData = {
+          ...mockCredentialData,
+          queryValue: "ci-runner",
+          resourceType: "machine_account",
+          operation: "create",
+          newSecretName: "ci-runner",
+        } as unknown as agent_access.CredentialRequestData;
+        const credentialPromise = capturedCredentialCb(null, machineAccountCreateData);
+        const { requestId } = lastMessage("agentaccess.credentialrequest");
+
+        await respond(requestId, {
+          response: { approved: true, machineAccountId: "ma-1", itemName: "ci-runner" },
+          outcome: { status: "created", machineAccountId: "ma-1", operation: "create" },
+        });
+        await credentialPromise;
+
+        const [entry] = await getActivity();
+        expect(entry).toMatchObject({
+          status: "created",
+          resourceType: "machine_account",
+          machineAccountId: "ma-1",
+        });
+        expect(entry.secretId).toBeUndefined();
+        expect(entry.projectId).toBeUndefined();
+        // The proposed name never enters the activity buffer (ids-only invariant).
+        expect(entry).not.toHaveProperty("queryValue");
+        expect(JSON.stringify(entry)).not.toContain("ci-runner");
+      });
+
       it("resolves a Listed outcome copying neither secretId nor projectId — the list itself was the release", async () => {
         const credentialPromise = capturedCredentialCb(null, listRequestData);
         const { requestId } = lastMessage("agentaccess.credentialrequest");

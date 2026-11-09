@@ -1061,6 +1061,33 @@ mod tests {
         }
     }
 
+    /// Asserts a `machineAccountCreate` request carries `resource: MachineAccount` and only a
+    /// name, with `query_value` force-filled with the proposed name like the other creates.
+    struct MachineAccountCreateApprovingHandler;
+
+    #[async_trait]
+    impl CredentialRequestHandler for MachineAccountCreateApprovingHandler {
+        async fn handle_credential_request(
+            &self,
+            request: CredentialRequestData,
+        ) -> Result<CredentialResponseData, CallbackError> {
+            assert_eq!(request.resource, ResourceKind::MachineAccount);
+            assert_eq!(request.operation, RequestOperation::Create);
+            assert_eq!(request.new_secret_name.as_deref(), Some("ci-runner"));
+            assert_eq!(request.query_value, "ci-runner");
+            assert!(request.new_secret_value.is_none());
+            assert!(request.new_secret_note.is_none());
+            assert!(request.project_hint.is_none());
+            assert!(!request.generate_value);
+            Ok(CredentialResponseData {
+                approved: true,
+                item_name: Some("ci-runner".to_string()),
+                machine_account_id: Some("ma-1".to_string()),
+                ..Default::default()
+            })
+        }
+    }
+
     /// Asserts a `secretUpdate` request threads `target_id`/the `new_secret_*`/`generate_*`
     /// fields correctly, and that `query_value` is force-filled with the target id (M6's
     /// "Invariant guard extension" — the main-process activity buffer must never see names for
@@ -1424,6 +1451,25 @@ mod tests {
         assert!(line.contains("\"reference\":\"bw://project/project-1\""));
         assert!(line.contains("\"item\""));
         assert!(line.contains("my-app"));
+        assert!(!line.contains("\"secret\""));
+        assert!(!line.contains("\"credential\""));
+    }
+
+    #[tokio::test]
+    async fn machine_account_create_wire_round_trip() {
+        let request = "{\"version\":1,\"op\":\"machineAccountCreate\",\
+            \"create\":{\"name\":\"ci-runner\"},\
+            \"client\":{\"name\":\"aac\",\"version\":\"0.1.0\"}}\n";
+        let line = round_trip(
+            request,
+            Arc::new(MachineAccountCreateApprovingHandler),
+            Arc::new(NoopEventSink),
+        )
+        .await;
+
+        assert!(line.contains("\"status\":\"approved\""));
+        assert!(line.contains("\"reference\":\"bw://machine-account/ma-1\""));
+        assert!(line.contains("ci-runner"));
         assert!(!line.contains("\"secret\""));
         assert!(!line.contains("\"credential\""));
     }
@@ -2386,6 +2432,7 @@ mod openshell_serve_tests {
             "secretRequest",
             "secretCreate",
             "projectList",
+            "machineAccountCreate",
             "describeFillTarget",
             "somethingElse",
         ] {

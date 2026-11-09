@@ -135,6 +135,7 @@ describe("DesktopAgentAccessService", () => {
   let mockGetSecretValue: jest.Mock;
   let mockSmOrganizations: jest.Mock;
   let mockCreateProject: jest.Mock;
+  let mockCreateMachineAccount: jest.Mock;
   let mockCreateSecret: jest.Mock;
   let mockCollect: jest.Mock;
   let mockDescribeTarget: jest.Mock;
@@ -202,6 +203,7 @@ describe("DesktopAgentAccessService", () => {
       resolveSecretName: jest.fn().mockReturnValue(undefined),
       resolveProjectName: mockResolveProjectName,
       createProject: mockCreateProject,
+      createMachineAccount: mockCreateMachineAccount,
       createSecret: mockCreateSecret,
       getSecretForUpdate: mockGetSecretForUpdate,
       updateSecret: mockUpdateSecret,
@@ -306,6 +308,7 @@ describe("DesktopAgentAccessService", () => {
     // fabricated organization list.
     mockSmOrganizations = jest.fn().mockResolvedValue([]);
     mockCreateProject = jest.fn().mockResolvedValue({ id: "proj-new", name: "new project" });
+    mockCreateMachineAccount = jest.fn().mockResolvedValue({ id: "ma-new", name: "new account" });
     mockCreateSecret = jest.fn().mockResolvedValue("secret-created-1");
     // M6 write paths: default to rejections/empty-lists so a stray update/delete/list test that
     // doesn't configure these explicitly fails loudly (a generic-error deny) rather than silently
@@ -2077,6 +2080,171 @@ describe("DesktopAgentAccessService", () => {
       await flush();
 
       expect(mockCreateProject).not.toHaveBeenCalled();
+    });
+  });
+
+  // `machineAccountCreate` (resourceType: "machine_account", operation: "create") — sibling of
+  // project creation: no lookup, own dialog/lifecycle, the user-confirmed name wins.
+  describe("credential request — resourceType: 'machine_account', operation: 'create'", () => {
+    const org = { id: "org-1", name: "Acme Inc" } as any;
+
+    beforeEach(async () => {
+      service = buildService(true);
+      await service.init();
+      agentAccessEnabledSubject.next(true);
+      accountSubject.next({ id: "user-1" as UserId });
+      activeAccountStatusSubject.next(AuthenticationStatus.Unlocked);
+      authSubjectFor("user-1").next(AuthenticationStatus.Unlocked);
+    });
+
+    it("denies without opening a dialog when there is no SM access", async () => {
+      mockSmOrganizations.mockResolvedValue([]);
+
+      credentialRequestSubject.next({
+        requestId: 280,
+        operation: "create",
+        resourceType: "machine_account",
+        newSecretName: "ci-runner",
+      });
+      await flush();
+
+      expect(mockDialogOpen).not.toHaveBeenCalled();
+      expect(mockCreateMachineAccount).not.toHaveBeenCalled();
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        280,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+    });
+
+    it("denies when the proposed name is missing", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+
+      credentialRequestSubject.next({
+        requestId: 281,
+        operation: "create",
+        resourceType: "machine_account",
+      });
+      await flush();
+
+      expect(mockDialogOpen).not.toHaveBeenCalled();
+      expect(mockCreateMachineAccount).not.toHaveBeenCalled();
+    });
+
+    it("opens the dialog with the proposed name as a hint, then creates and responds with status: created, machineAccountId", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({
+        closed: of({ approved: true, organizationId: "org-1", name: "ci-runner" }),
+      });
+      mockCreateMachineAccount.mockResolvedValue({ id: "ma-1", name: "ci-runner" });
+
+      credentialRequestSubject.next({
+        requestId: 282,
+        operation: "create",
+        resourceType: "machine_account",
+        newSecretName: "ci-runner",
+      });
+      await flush();
+
+      expect(mockDialogOpen).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          data: expect.objectContaining({ machineAccountName: "ci-runner", organizations: [org] }),
+        }),
+      );
+      expect(mockCreateMachineAccount).toHaveBeenCalledWith("org-1", "user-1", "ci-runner");
+      expect(mockCreateProject).not.toHaveBeenCalled();
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        282,
+        { approved: true, machineAccountId: "ma-1", itemName: "ci-runner" },
+        { status: "created", machineAccountId: "ma-1", operation: "create" },
+      );
+    });
+
+    it("creates with the name the user confirmed in the dialog, not the agent's proposal", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({
+        closed: of({ approved: true, organizationId: "org-1", name: "user-chosen" }),
+      });
+      mockCreateMachineAccount.mockResolvedValue({ id: "ma-2", name: "user-chosen" });
+
+      credentialRequestSubject.next({
+        requestId: 283,
+        operation: "create",
+        resourceType: "machine_account",
+        newSecretName: "agent-proposed",
+      });
+      await flush();
+
+      expect(mockCreateMachineAccount).toHaveBeenCalledWith("org-1", "user-1", "user-chosen");
+    });
+
+    it("denies without creating when the user rejects the dialog", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of({ approved: false }) });
+
+      credentialRequestSubject.next({
+        requestId: 284,
+        operation: "create",
+        resourceType: "machine_account",
+        newSecretName: "ci-runner",
+      });
+      await flush();
+
+      expect(mockCreateMachineAccount).not.toHaveBeenCalled();
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        284,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+    });
+
+    it("denies (and does not report a created account) when the API call fails", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({
+        closed: of({ approved: true, organizationId: "org-1", name: "ci-runner" }),
+      });
+      mockCreateMachineAccount.mockRejectedValue(new Error("machine account limit reached"));
+
+      credentialRequestSubject.next({
+        requestId: 285,
+        operation: "create",
+        resourceType: "machine_account",
+        newSecretName: "ci-runner",
+      });
+      await flush();
+
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        285,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+    });
+
+    it("fails closed for any machine_account operation other than create", async () => {
+      for (const [requestId, operation] of [
+        [286, "update"],
+        [287, "delete"],
+        [288, "list"],
+      ] as const) {
+        credentialRequestSubject.next({
+          requestId,
+          operation,
+          resourceType: "machine_account",
+          targetId: "ma-1",
+        });
+      }
+      await flush();
+
+      expect(mockDialogOpen).not.toHaveBeenCalled();
+      expect(mockCreateMachineAccount).not.toHaveBeenCalled();
+      for (const requestId of [286, 287, 288]) {
+        expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+          requestId,
+          { approved: false, reason: "denied" },
+          { status: "denied" },
+        );
+      }
     });
   });
 

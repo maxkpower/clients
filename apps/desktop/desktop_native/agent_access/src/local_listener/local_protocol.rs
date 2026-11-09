@@ -442,6 +442,7 @@ pub(super) fn validate(request: WireRequest) -> Result<ValidatedRequest, &'stati
         "secretDelete" => validate_delete(ResourceKind::Secret, request),
         "projectDelete" => validate_delete(ResourceKind::Project, request),
         "projectList" => validate_list(request),
+        "machineAccountCreate" => validate_create(ResourceKind::MachineAccount, request),
         "describeFillTarget" => validate_describe_fill_target(request),
         _ => Err("unknown operation"),
     }
@@ -559,21 +560,39 @@ fn validate_create(
         return Err("create.name must not be empty");
     }
 
-    if resource == ResourceKind::Project {
-        // The op decides the shape — a stray value/generate/note/project on a projectCreate is
-        // a validation error, not a silently-ignored field (agent-access-architecture.md's "M6"
-        // wire section: "a stray `value` on a projectCreate is a validation error").
+    if resource != ResourceKind::Secret {
+        // The op decides the shape — a stray value/generate/note/project on a projectCreate or
+        // machineAccountCreate is a validation error, not a silently-ignored field
+        // (agent-access-architecture.md's "M6" wire section: "a stray `value` on a projectCreate
+        // is a validation error"). A machine account carries a name only; project access is a
+        // separate concern (access policies), never part of the create.
+        let (value_err, generate_err, note_err, project_err) =
+            if resource == ResourceKind::MachineAccount {
+                (
+                    "value is not valid for machineAccountCreate",
+                    "generate is not valid for machineAccountCreate",
+                    "note is not valid for machineAccountCreate",
+                    "project is not valid for machineAccountCreate",
+                )
+            } else {
+                (
+                    "value is not valid for projectCreate",
+                    "generate is not valid for projectCreate",
+                    "note is not valid for projectCreate",
+                    "project is not valid for projectCreate",
+                )
+            };
         if create.value.is_some() {
-            return Err("value is not valid for projectCreate");
+            return Err(value_err);
         }
         if create.generate.is_some() {
-            return Err("generate is not valid for projectCreate");
+            return Err(generate_err);
         }
         if create.note.is_some() {
-            return Err("note is not valid for projectCreate");
+            return Err(note_err);
         }
         if create.project.is_some() {
-            return Err("project is not valid for projectCreate");
+            return Err(project_err);
         }
         return Ok(ValidatedRequest::Create {
             resource,
@@ -1158,6 +1177,11 @@ fn build_approved(
         ResourceKind::Project => {
             WireResponse::status(WireStatus::Error, "Lookup is not supported for projects")
         }
+        // Same reasoning as `Project`: no machine-account lookup op exists on the wire.
+        ResourceKind::MachineAccount => WireResponse::status(
+            WireStatus::Error,
+            "Lookup is not supported for machine accounts",
+        ),
     }
 }
 
@@ -1410,6 +1434,7 @@ fn resource_id(response: &CredentialResponseData, resource: ResourceKind) -> Opt
     match resource {
         ResourceKind::Secret => response.secret_id.clone(),
         ResourceKind::Project => response.project_id.clone(),
+        ResourceKind::MachineAccount => response.machine_account_id.clone(),
         ResourceKind::Credential => None,
     }
 }
@@ -1421,6 +1446,7 @@ fn reference_for(resource: ResourceKind, id: &str) -> String {
     match resource {
         ResourceKind::Secret => format!("bw://secret/{id}"),
         ResourceKind::Project => format!("bw://project/{id}"),
+        ResourceKind::MachineAccount => format!("bw://machine-account/{id}"),
         // Never reached — see `resource_id`'s docs.
         ResourceKind::Credential => format!("bw://item/{id}"),
     }
@@ -1549,7 +1575,7 @@ fn fields_shared_list(
         // op that could produce `ResourceKind::Project` there. `Create`/`Update`/`Delete`/`List`
         // (which do use `ResourceKind::Project`) report `fields_shared` as `None` directly in
         // `build_response`, never through this function.
-        ResourceKind::Project => None,
+        ResourceKind::Project | ResourceKind::MachineAccount => None,
     }
 }
 
@@ -4162,5 +4188,137 @@ mod tests {
             .await
             .unwrap_err()
         })
+    }
+
+    // --- machineAccountCreate -----------------------------------------------------------------
+
+    fn base_machine_account_create_request() -> WireRequest {
+        WireRequest {
+            op: "machineAccountCreate".to_string(),
+            ..base_project_create_request()
+        }
+    }
+
+    #[test]
+    fn validate_accepts_a_well_formed_machine_account_create_request() {
+        match validate(base_machine_account_create_request()).unwrap() {
+            ValidatedRequest::Create {
+                resource,
+                name,
+                value,
+                generate,
+                note,
+                project,
+                ..
+            } => {
+                assert_eq!(resource, ResourceKind::MachineAccount);
+                assert_eq!(name, "my-app");
+                assert!(value.is_none());
+                assert!(generate.is_none());
+                assert!(note.is_none());
+                assert!(project.is_none());
+            }
+            other => panic!("expected a Create, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_rejects_machine_account_create_with_empty_name() {
+        let mut request = base_machine_account_create_request();
+        request.create.as_mut().unwrap().name = String::new();
+        assert_validation_error(request, "create.name must not be empty");
+    }
+
+    #[test]
+    fn validate_rejects_machine_account_create_without_create_object() {
+        let request = WireRequest {
+            create: None,
+            ..base_machine_account_create_request()
+        };
+        assert_validation_error(request, "missing create object");
+    }
+
+    #[test]
+    fn validate_rejects_machine_account_create_with_stray_fields() {
+        let mut request = base_machine_account_create_request();
+        request.create.as_mut().unwrap().value = Some("x".to_string());
+        assert_validation_error(request, "value is not valid for machineAccountCreate");
+
+        let mut request = base_machine_account_create_request();
+        request.create.as_mut().unwrap().generate = Some(WireGenerate {
+            length: None,
+            symbols: None,
+        });
+        assert_validation_error(request, "generate is not valid for machineAccountCreate");
+
+        let mut request = base_machine_account_create_request();
+        request.create.as_mut().unwrap().note = Some("n".to_string());
+        assert_validation_error(request, "note is not valid for machineAccountCreate");
+
+        let mut request = base_machine_account_create_request();
+        request.create.as_mut().unwrap().project = Some("p".to_string());
+        assert_validation_error(request, "project is not valid for machineAccountCreate");
+    }
+
+    #[test]
+    fn validate_rejects_foreign_objects_on_machine_account_create() {
+        let request = WireRequest {
+            delivery: Some(WireDelivery::Inject),
+            ..base_machine_account_create_request()
+        };
+        assert_validation_error(request, "delivery is not valid for this operation");
+
+        let request = WireRequest {
+            target: Some(WireTarget {
+                id: "ma-1".to_string(),
+            }),
+            ..base_machine_account_create_request()
+        };
+        assert_validation_error(request, "target object is not valid for this operation");
+    }
+
+    #[test]
+    fn approved_machine_account_create_carries_machine_account_reference() {
+        let outcome = build_response(
+            Ok(Ok(CredentialResponseData {
+                approved: true,
+                machine_account_id: Some("ma-1".to_string()),
+                item_name: Some("ci-runner".to_string()),
+                // A project id must never be mistaken for the machine account id.
+                project_id: Some("project-1".to_string()),
+                ..Default::default()
+            })),
+            ResourceKind::MachineAccount,
+            RequestOperation::Create,
+            None,
+        );
+        assert_eq!(outcome.response.status, WireStatus::Approved);
+        assert_eq!(
+            outcome.response.reference.as_deref(),
+            Some("bw://machine-account/ma-1")
+        );
+        assert_eq!(
+            outcome.response.item.as_ref().unwrap().name.as_deref(),
+            Some("ci-runner")
+        );
+        assert!(outcome.response.secret.is_none());
+        assert!(outcome.fields_shared.is_none());
+    }
+
+    #[test]
+    fn approved_machine_account_create_missing_id_denies_safely() {
+        let outcome = build_response(
+            Ok(Ok(CredentialResponseData {
+                approved: true,
+                item_name: Some("ci-runner".to_string()),
+                project_id: Some("project-1".to_string()),
+                ..Default::default()
+            })),
+            ResourceKind::MachineAccount,
+            RequestOperation::Create,
+            None,
+        );
+        assert_eq!(outcome.response.status, WireStatus::Error);
+        assert!(outcome.response.reference.is_none());
     }
 }
