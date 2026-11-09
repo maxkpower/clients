@@ -100,6 +100,12 @@ pub mod agent_access {
         Project,
         /// Secrets Manager machine account — create operation only.
         MachineAccount,
+        /// Secrets Manager machine-account access token (`accessTokenCreate`) — create only. The
+        /// token never crosses this boundary in either direction; see
+        /// `agent_access_core::AccessTokenRequestData`. Explicit value because the enum's
+        /// camelCase rule would otherwise yield `"accessToken"`.
+        #[napi(value = "access_token")]
+        AccessToken,
     }
 
     impl From<agent_access_core::ResourceKind> for ResourceType {
@@ -109,6 +115,7 @@ pub mod agent_access {
                 agent_access_core::ResourceKind::Secret => Self::Secret,
                 agent_access_core::ResourceKind::Project => Self::Project,
                 agent_access_core::ResourceKind::MachineAccount => Self::MachineAccount,
+                agent_access_core::ResourceKind::AccessToken => Self::AccessToken,
             }
         }
     }
@@ -516,6 +523,35 @@ pub mod agent_access {
         /// The `bw://` targets of `operation: "providerResolve"`, in wire order. Only set for
         /// `origin: "openshell"`.
         pub provider_targets: Option<Vec<ProviderTargetData>>,
+        /// The agent's hints for `resourceType: "access_token"` + `operation: "create"`: which
+        /// machine account to mint a token for, the token name and an optional lifetime. The
+        /// destination secret name / project hint ride in `newSecretName` / `projectHint`.
+        /// Contains no token material (none exists yet at this point).
+        pub access_token_request: Option<AccessTokenRequestData>,
+    }
+
+    /// Mirror of `agent_access_core::AccessTokenRequestData`.
+    #[napi(object)]
+    #[derive(Clone)]
+    pub struct AccessTokenRequestData {
+        /// Machine-account id or name hint — never trusted silently.
+        pub machine_account: String,
+        /// Proposed access-token name.
+        pub token_name: String,
+        /// Proposed lifetime in days; absent means no preference (the dialog defaults to 30 days).
+        pub expires_in_days: Option<u32>,
+    }
+
+    /// Value-free metadata about a created access token, sent back with the approval. Mirror of
+    /// `agent_access_core::AccessTokenInfo`. There is deliberately no field that could hold the
+    /// token itself.
+    #[napi(object)]
+    #[derive(Clone)]
+    pub struct AccessTokenInfoData {
+        pub machine_account_id: String,
+        pub token_name: String,
+        /// RFC 3339 expiry; absent for a token that never expires.
+        pub expires_at: Option<String>,
     }
 
     impl From<agent_access_core::CredentialRequestData> for CredentialRequestData {
@@ -552,6 +588,13 @@ pub mod agent_access {
                         .map(ProviderTargetData::from)
                         .collect()
                 }),
+                access_token_request: data.access_token_request.map(|request| {
+                    AccessTokenRequestData {
+                        machine_account: request.machine_account,
+                        token_name: request.token_name,
+                        expires_in_days: request.expires_in_days,
+                    }
+                }),
             }
         }
     }
@@ -587,6 +630,10 @@ pub mod agent_access {
                     &self.openshell.as_ref().map(|c| c.sandbox_id.as_str()),
                 )
                 .field("provider_targets", &self.provider_targets)
+                .field(
+                    "has_access_token_request",
+                    &self.access_token_request.is_some(),
+                )
                 .finish()
         }
     }
@@ -685,6 +732,9 @@ pub mod agent_access {
         pub openshell_values: Option<Vec<ProviderValueData>>,
         /// The approval lifetime for an approved `operation: "providerResolve"` request (§M8).
         pub openshell_lifetime: Option<OpenShellLifetimeData>,
+        /// Value-free metadata for an approved `resourceType: "access_token"` create. The new
+        /// secret's id/name ride in `secretId` / `itemName`. Never carries the token itself.
+        pub access_token_info: Option<AccessTokenInfoData>,
     }
 
     /// Redacts every value: secret-bearing fields print as presence flags, and
@@ -710,6 +760,7 @@ pub mod agent_access {
                     }),
                 )
                 .field("openshell_lifetime", &self.openshell_lifetime)
+                .field("has_access_token_info", &self.access_token_info.is_some())
                 .finish()
         }
     }
@@ -772,6 +823,13 @@ pub mod agent_access {
                 denial_detail: data.denial_detail,
                 fill_fields_shared: data.fill_fields_shared,
                 openshell: openshell_resolution(data.openshell_values, data.openshell_lifetime),
+                access_token_info: data.access_token_info.map(|info| {
+                    agent_access_core::AccessTokenInfo {
+                        machine_account_id: info.machine_account_id,
+                        token_name: info.token_name,
+                        expires_at: info.expires_at,
+                    }
+                }),
             }
         }
     }
@@ -902,6 +960,7 @@ pub mod agent_access {
                 fill_target_token: None,
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             }
         }
 
@@ -936,6 +995,68 @@ pub mod agent_access {
             assert_eq!(napi_request.generate_value, Some(true));
             assert_eq!(napi_request.generate_length, Some(64));
             assert_eq!(napi_request.generate_symbols, Some(false));
+        }
+
+        #[test]
+        fn access_token_resource_type_and_request_convert() {
+            assert!(matches!(
+                ResourceType::from(agent_access_core::ResourceKind::AccessToken),
+                ResourceType::AccessToken
+            ));
+            let mut core_request = base_core_request();
+            core_request.resource = agent_access_core::ResourceKind::AccessToken;
+            core_request.operation = agent_access_core::RequestOperation::Create;
+            core_request.access_token_request = Some(agent_access_core::AccessTokenRequestData {
+                machine_account: "ci-bot".to_string(),
+                token_name: "ci-token".to_string(),
+                expires_in_days: Some(30),
+            });
+            let napi_request = CredentialRequestData::from(core_request);
+            let proposal = napi_request.access_token_request.clone().expect("proposal");
+            assert_eq!(proposal.machine_account, "ci-bot");
+            assert_eq!(proposal.token_name, "ci-token");
+            assert_eq!(proposal.expires_in_days, Some(30));
+            assert!(!format!("{napi_request:?}").contains("ci-bot"));
+        }
+
+        #[test]
+        fn access_token_response_metadata_converts_and_debug_has_no_token_material() {
+            const SENTINEL: &str = "0.SENTINEL-TOKEN-ID.SENTINEL-CLIENT-SECRET:SENTINELKEY";
+            let response = CredentialResponseData {
+                approved: true,
+                username: None,
+                password: None,
+                totp: None,
+                uri: None,
+                notes: None,
+                credential_id: None,
+                reason: None,
+                item_name: Some("CI_BOT_TOKEN".to_string()),
+                secret_value: None,
+                secret_id: Some("secret-9".to_string()),
+                project_id: None,
+                machine_account_id: None,
+                projects: None,
+                fill_result: None,
+                fill_target: None,
+                denial_detail: None,
+                fill_fields_shared: None,
+                openshell_values: None,
+                openshell_lifetime: None,
+                access_token_info: Some(AccessTokenInfoData {
+                    machine_account_id: "ma-1".to_string(),
+                    token_name: "ci-token".to_string(),
+                    expires_at: Some("2026-12-09T00:00:00.000Z".to_string()),
+                }),
+            };
+            assert!(!format!("{response:?}").contains(SENTINEL));
+            let core_response: agent_access_core::CredentialResponseData = response.into();
+            let info = core_response.access_token_info.expect("info");
+            assert_eq!(info.machine_account_id, "ma-1");
+            assert_eq!(info.token_name, "ci-token");
+            assert_eq!(info.expires_at.as_deref(), Some("2026-12-09T00:00:00.000Z"));
+            assert_eq!(core_response.secret_id.as_deref(), Some("secret-9"));
+            assert!(core_response.secret_value.is_none());
         }
 
         #[test]
@@ -988,6 +1109,7 @@ pub mod agent_access {
                 fill_fields_shared: None,
                 openshell_values: None,
                 openshell_lifetime: None,
+                access_token_info: None,
             };
             let core_response: agent_access_core::CredentialResponseData = response.into();
             assert_eq!(core_response.machine_account_id.as_deref(), Some("ma-1"));
@@ -1053,6 +1175,7 @@ pub mod agent_access {
                 fill_fields_shared: None,
                 openshell_values: None,
                 openshell_lifetime: None,
+                access_token_info: None,
             };
             let core_response: agent_access_core::CredentialResponseData = response.into();
             assert_eq!(core_response.project_id.as_deref(), Some("project-1"));
@@ -1121,6 +1244,7 @@ pub mod agent_access {
                 fill_fields_shared: None,
                 openshell_values: values,
                 openshell_lifetime: lifetime,
+                access_token_info: None,
             }
         }
 
@@ -1256,6 +1380,7 @@ pub mod agent_access {
                 fill_target_token: None,
                 openshell: Some(core_context()),
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             let napi_request = CredentialRequestData::from(request.clone());
             assert!(napi_request.provider_targets.is_none());

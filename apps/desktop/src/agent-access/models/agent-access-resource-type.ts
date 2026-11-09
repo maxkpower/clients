@@ -12,6 +12,12 @@ export const AgentAccessResourceType = Object.freeze({
   Project: "project",
   /** Secrets Manager machine account (service account) — create operation only, never a credential. */
   MachineAccount: "machine_account",
+  /**
+   * Secrets Manager machine-account access token (`accessTokenCreate`) — create only. The token is
+   * minted renderer-side after approval and written straight into a new secret; it never appears
+   * in any message, activity row or reply.
+   */
+  AccessToken: "access_token",
 } as const);
 export type AgentAccessResourceType =
   (typeof AgentAccessResourceType)[keyof typeof AgentAccessResourceType];

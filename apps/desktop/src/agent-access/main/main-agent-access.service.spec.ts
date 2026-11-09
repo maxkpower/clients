@@ -757,6 +757,78 @@ describe("MainAgentAccessService", () => {
       });
     });
 
+    // Access-token creation (`resourceType: "access_token"`). The token is minted renderer-side
+    // and never reaches main; main's job is to keep the activity row ids-only and pass the
+    // agent's hints through to the renderer.
+    describe("access token creation (resourceType: 'access_token')", () => {
+      const getActivity = () => ipcHandlers.get("agentaccess.getactivity")!({});
+      const respond = (requestId: number, body: Record<string, unknown>) =>
+        ipcHandlers.get("agentaccess.credentialrequestresponse")!({}, { requestId, ...body });
+
+      const tokenRequestData = {
+        ...mockCredentialData,
+        queryValue: "CI_SECRET_NAME_LEAK_IF_STORED",
+        resourceType: "access_token",
+        operation: "create",
+        newSecretName: "CI_SECRET_NAME_LEAK_IF_STORED",
+        projectHint: "my-app",
+        accessTokenRequest: {
+          machineAccount: "MACHINE_LEAK_IF_STORED",
+          tokenName: "TOKEN_NAME_LEAK_IF_STORED",
+          expiresInDays: 30,
+        },
+      } as unknown as agent_access.CredentialRequestData;
+
+      it("opens an ids-only row tagged access_token/create, with no names or hints", async () => {
+        void capturedCredentialCb(null, tokenRequestData);
+
+        const [entry] = await getActivity();
+        expect(entry).toMatchObject({ resourceType: "access_token", operation: "create" });
+        expect(entry).not.toHaveProperty("queryType");
+        expect(entry).not.toHaveProperty("queryValue");
+        expect(JSON.stringify(entry)).not.toContain("LEAK_IF_STORED");
+      });
+
+      it("forwards the agent's hints to the renderer's live request message", () => {
+        void capturedCredentialCb(null, tokenRequestData);
+
+        expect(mockMessagingService.send).toHaveBeenCalledWith(
+          "agentaccess.credentialrequest",
+          expect.objectContaining({
+            resourceType: "access_token",
+            operation: "create",
+            newSecretName: "CI_SECRET_NAME_LEAK_IF_STORED",
+            accessTokenRequest: expect.objectContaining({
+              machineAccount: "MACHINE_LEAK_IF_STORED",
+            }),
+          }),
+        );
+      });
+
+      it("records only the secret id on a Created resolution, never the metadata or any token", async () => {
+        const credentialPromise = capturedCredentialCb(null, tokenRequestData);
+        const { requestId } = lastMessage("agentaccess.credentialrequest");
+
+        await respond(requestId, {
+          response: {
+            approved: true,
+            secretId: "secret-9",
+            itemName: "CI_SECRET_NAME_LEAK_IF_STORED",
+            accessTokenInfo: {
+              machineAccountId: "MACHINE_ID_LEAK_IF_STORED",
+              tokenName: "TOKEN_NAME_LEAK_IF_STORED",
+            },
+          },
+          outcome: { status: "created", secretId: "secret-9" },
+        });
+        await credentialPromise;
+
+        const activity = await getActivity();
+        expect(activity[0]).toMatchObject({ status: "created", secretId: "secret-9" });
+        expect(JSON.stringify(activity)).not.toContain("LEAK_IF_STORED");
+      });
+    });
+
     // M4b (agent-access-architecture.md, "M4b — secret creation"). HARD INVARIANT: the
     // main-process activity buffer stores ids only — a create request's native `queryValue`
     // field carries the *proposed secret name* (its struct field isn't optional), so it must

@@ -340,6 +340,18 @@ describe("AgentAccessActivityComponent", () => {
         "agentAccessCreateFallbackName",
       );
     });
+
+    it("labels an access-token create row as such, still resolving only the secret's name", () => {
+      mockResolveSecretName.mockReturnValue("CI_BOT_TOKEN");
+
+      expect(resultLabel({ ...createdRequest, resourceType: "access_token" })).toBe(
+        "agentAccessCreatedAccessTokenItem",
+      );
+      expect(TestBed.inject(I18nService).t).toHaveBeenCalledWith(
+        "agentAccessCreatedAccessTokenItem",
+        "CI_BOT_TOKEN",
+      );
+    });
   });
 
   describe("result label for a created machine account", () => {

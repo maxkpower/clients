@@ -492,6 +492,7 @@ fn spawn_dispatch(
                         // OpenShell (§M8) is local-transport-only too.
                         openshell: None,
                         provider_targets: Vec::new(),
+                        access_token_request: None,
                     };
 
                     let handler = Arc::clone(&credential_handler);

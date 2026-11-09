@@ -33,8 +33,9 @@ use tracing::{debug, warn};
 
 use crate::{
     callbacks::{
-        AgentAccessEvent, CredentialQueryKind, CredentialRequestData, CredentialRequestHandler,
-        CredentialRequestOrigin, EventSink, RequestOperation, ResourceKind,
+        AccessTokenRequestData, AgentAccessEvent, CredentialQueryKind, CredentialRequestData,
+        CredentialRequestHandler, CredentialRequestOrigin, EventSink, RequestOperation,
+        ResourceKind,
     },
     client::CALLBACK_TIMEOUT,
     error::AgentAccessError,
@@ -300,6 +301,7 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
         ValidatedRequest::Delete { client, .. } => client,
         ValidatedRequest::List { client, .. } => client,
         ValidatedRequest::DescribeFillTarget { client } => client,
+        ValidatedRequest::AccessTokenCreate { client, .. } => client,
     };
     if let Some(client) = client {
         debug!(
@@ -353,6 +355,7 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
                 fill_target_token: fill.as_ref().and_then(|f| f.target_token.clone()),
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             (
                 resource,
@@ -411,6 +414,7 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
                 fill_target_token: None,
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             (resource, RequestOperation::Create, None, request_data)
         }
@@ -462,6 +466,7 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
                 fill_target_token: None,
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             (resource, RequestOperation::Update, None, request_data)
         }
@@ -500,6 +505,7 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
                 fill_target_token: None,
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             (resource, RequestOperation::Delete, None, request_data)
         }
@@ -536,8 +542,64 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
                 fill_target_token: None,
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             (resource, RequestOperation::List, None, request_data)
+        }
+        ValidatedRequest::AccessTokenCreate {
+            machine_account,
+            token_name,
+            expires_in_days,
+            secret_name,
+            project,
+            ..
+        } => {
+            emit_event(
+                &event_sink,
+                "credential_requested",
+                &peer,
+                Some("access_token_create".to_string()),
+                None,
+            );
+            // The destination secret's proposed name (defaulting to the token name), as for any
+            // create — consumed only by handler dispatch, never persisted in the activity row.
+            let destination_name = secret_name.unwrap_or_else(|| token_name.clone());
+            let request_data = CredentialRequestData {
+                query_type: CredentialQueryKind::Name,
+                query_value: destination_name.clone(),
+                requester_fingerprint: None,
+                requester_name: None,
+                origin: CredentialRequestOrigin::Local,
+                local_peer: peer.clone(),
+                delivery_mode: None,
+                resource: ResourceKind::AccessToken,
+                operation: RequestOperation::Create,
+                new_secret_name: Some(destination_name),
+                // No value, ever: the token does not exist until the user approves, and then
+                // only renderer-side.
+                new_secret_value: None,
+                new_secret_note: None,
+                project_hint: project,
+                target_id: None,
+                generate_value: false,
+                generate_length: None,
+                generate_symbols: None,
+                fill_fields: None,
+                fill_target_token: None,
+                openshell: None,
+                provider_targets: Vec::new(),
+                access_token_request: Some(AccessTokenRequestData {
+                    machine_account,
+                    token_name,
+                    expires_in_days,
+                }),
+            };
+            (
+                ResourceKind::AccessToken,
+                RequestOperation::Create,
+                None,
+                request_data,
+            )
         }
         ValidatedRequest::DescribeFillTarget { .. } => {
             emit_event(
@@ -573,6 +635,7 @@ async fn handle_connection<S: AsyncRead + AsyncWrite + Unpin>(
                 fill_target_token: None,
                 openshell: None,
                 provider_targets: Vec::new(),
+                access_token_request: None,
             };
             (
                 ResourceKind::Credential,
@@ -806,6 +869,7 @@ async fn serve_openshell(
         fill_target_token: None,
         openshell: Some(context),
         provider_targets: targets.clone(),
+        access_token_request: None,
     };
 
     let dispatch = tokio::time::timeout(
@@ -1032,6 +1096,54 @@ mod tests {
                 approved: true,
                 item_name: Some("DB_PASSWORD".to_string()),
                 secret_id: Some("secret-1".to_string()),
+                ..Default::default()
+            })
+        }
+    }
+
+    /// Sentinel standing in for a minted machine-account access token. The host never has one to
+    /// hand over; tests plant it in every value-bearing response slot of a misbehaving handler
+    /// and assert it still cannot reach the wire or a `Debug` string.
+    const SENTINEL_ACCESS_TOKEN: &str = "0.SENTINEL-TOKEN-ID.SENTINEL-CLIENT-SECRET:SENTINELKEY";
+
+    /// Asserts an `accessTokenCreate` request carries `resource: AccessToken`, the agent's hints,
+    /// and no value; replies approved with metadata. Deliberately also fills every value-bearing
+    /// response slot with the sentinel token, to prove the reply builder cannot echo it.
+    struct AccessTokenCreateApprovingHandler;
+
+    #[async_trait]
+    impl CredentialRequestHandler for AccessTokenCreateApprovingHandler {
+        async fn handle_credential_request(
+            &self,
+            request: CredentialRequestData,
+        ) -> Result<CredentialResponseData, CallbackError> {
+            assert_eq!(request.resource, ResourceKind::AccessToken);
+            assert_eq!(request.operation, RequestOperation::Create);
+            assert!(request.delivery_mode.is_none());
+            assert!(request.new_secret_value.is_none());
+            assert!(!request.generate_value);
+            assert_eq!(request.new_secret_name.as_deref(), Some("CI_BOT_TOKEN"));
+            assert_eq!(request.project_hint.as_deref(), Some("my-app"));
+            let token = request
+                .access_token_request
+                .clone()
+                .expect("token proposal");
+            assert_eq!(token.machine_account, "ci-bot");
+            assert_eq!(token.token_name, "ci-token");
+            assert_eq!(token.expires_in_days, Some(30));
+            assert!(!format!("{request:?}").contains("ci-bot"));
+            Ok(CredentialResponseData {
+                approved: true,
+                item_name: Some("CI_BOT_TOKEN".to_string()),
+                secret_id: Some("secret-9".to_string()),
+                access_token_info: Some(crate::callbacks::AccessTokenInfo {
+                    machine_account_id: "ma-1".to_string(),
+                    token_name: "ci-token".to_string(),
+                    expires_at: Some("2026-12-09T00:00:00.000Z".to_string()),
+                }),
+                secret_value: Some(zeroize::Zeroizing::new(SENTINEL_ACCESS_TOKEN.to_string())),
+                password: Some(SENTINEL_ACCESS_TOKEN.to_string()),
+                notes: Some(SENTINEL_ACCESS_TOKEN.to_string()),
                 ..Default::default()
             })
         }
@@ -1472,6 +1584,34 @@ mod tests {
         assert!(line.contains("ci-runner"));
         assert!(!line.contains("\"secret\""));
         assert!(!line.contains("\"credential\""));
+    }
+
+    #[tokio::test]
+    async fn access_token_create_wire_round_trip_carries_metadata_but_never_the_token() {
+        let request = "{\"version\":1,\"op\":\"accessTokenCreate\",\
+            \"accessToken\":{\"machineAccount\":\"ci-bot\",\"name\":\"ci-token\",\
+            \"expiresInDays\":30,\"secretName\":\"CI_BOT_TOKEN\",\"project\":\"my-app\"},\
+            \"client\":{\"name\":\"aac\",\"version\":\"0.1.0\"}}\n";
+        let line = round_trip(
+            request,
+            Arc::new(AccessTokenCreateApprovingHandler),
+            Arc::new(NoopEventSink),
+        )
+        .await;
+
+        assert!(line.contains("\"status\":\"approved\""));
+        assert!(line.contains("\"reference\":\"bw://secret/secret-9\""));
+        assert!(line.contains("CI_BOT_TOKEN"));
+        assert!(line.contains("\"machineAccountId\":\"ma-1\""));
+        assert!(line.contains("\"tokenName\":\"ci-token\""));
+        assert!(line.contains("\"expiresAt\":\"2026-12-09T00:00:00.000Z\""));
+        assert!(!line.contains("\"secret\""));
+        assert!(!line.contains("\"credential\""));
+        assert!(!line.contains("\"value\""));
+        assert!(
+            !line.contains("SENTINEL"),
+            "the access token must never reach the wire: {line}"
+        );
     }
 
     #[tokio::test]

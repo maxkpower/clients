@@ -1185,6 +1185,57 @@
   "agentAccessCreateFallbackName": {
     "message": "a new secret"
   },
+  "agentAccessAccessTokenRequestTitle": {
+    "message": "Machine account access token requested"
+  },
+  "agentAccessAccessTokenRequestIntro": {
+    "message": "An application wants Bitwarden to create an access token for a machine account and save it in a new secret. Everything below is a suggestion you can change."
+  },
+  "agentAccessAccessTokenNeverSeenTitle": {
+    "message": "The application never sees the token"
+  },
+  "agentAccessAccessTokenNeverSeenNotice": {
+    "message": "Bitwarden creates the token after you authorize and saves it directly in the secret below. It is not displayed here and is not returned to the application."
+  },
+  "agentAccessAccessTokenMachineAccount": {
+    "message": "Machine account"
+  },
+  "agentAccessAccessTokenNoMachineAccounts": {
+    "message": "No machine accounts found in this organization."
+  },
+  "agentAccessAccessTokenName": {
+    "message": "Access token name"
+  },
+  "agentAccessAccessTokenExpiry": {
+    "message": "Expires"
+  },
+  "agentAccessAccessTokenExpiryDays": {
+    "message": "In $DAYS$ days",
+    "placeholders": {
+      "days": {
+        "content": "$1",
+        "example": "30"
+      }
+    }
+  },
+  "agentAccessAccessTokenNeverExpires": {
+    "message": "Never"
+  },
+  "agentAccessAccessTokenSecretName": {
+    "message": "Secret name"
+  },
+  "agentAccessAccessTokenFailedToast": {
+    "message": "Couldn't create the access token. Try again."
+  },
+  "agentAccessCreatedAccessTokenItem": {
+    "message": "Created access token in $ITEM$",
+    "placeholders": {
+      "item": {
+        "content": "$1",
+        "example": "CI_TOKEN"
+      }
+    }
+  },
   "agentAccessFillTitle": {
     "message": "Fill login in your browser?"
   },

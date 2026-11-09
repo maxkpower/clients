@@ -3037,3 +3037,56 @@ File ownership (disjoint; see the build prompt for each owner):
   `components/agent-access-openshell-add-credential-dialog.component.*`.
 - **i18n:** each renderer owner writes its keys to its own fragment file (never to
   `messages.json` directly); the lead merges them.
+
+## M9 — Access-token creation (`accessTokenCreate`)
+
+An agent can ask the desktop app to create a Secrets Manager machine-account access token and store
+it in a new secret. **The agent never sees the token.** It sends hints and gets back the new
+secret's id/reference plus non-sensitive metadata. Closest precedent: `generate_secret` (M6,
+invariant 14), where the value is born in the renderer, encrypted, POSTed and discarded.
+
+**Wire (local socket only):** `{"version":1,"op":"accessTokenCreate","accessToken":{"machineAccount":
+"<id or name>","name":"<token name>","expiresInDays"?:1..3650,"secretName"?:"…","project"?:"…"},
+"client":{…}}`. Every field is a hint. There is no `value`/`generate`/`create` field, and `validate()`
+rejects an `accessToken` object on every other op (and the OpenShell socket rejects it too). Reply
+(approved): `{"status":"approved","reference":"bw://secret/<id>","item":{"name":"<secret name>"},
+"accessToken":{"machineAccountId":"…","tokenName":"…","expiresAt"?:"…"}}`. The `accessToken` object
+has no field that could hold a token. The Rust reply builder reads only `secret_id`, `item_name`
+and `access_token_info`, so a host that put a token in `secret_value`/`password`/`notes` still could
+not get it onto the wire (tested with a sentinel). aac additionally treats a `secret` or `credential`
+object in this reply as a protocol error.
+
+**Native/napi:** `ResourceKind::AccessToken` (napi/TS string `"access_token"`, via an explicit
+`#[napi(value = …)]`) with `RequestOperation::Create`. `CredentialRequestData.access_token_request`
+carries `{machine_account, token_name, expires_in_days}`; the destination secret-name/project hints
+ride in `new_secret_name`/`project_hint` as for `secretCreate`. `CredentialResponseData
+.access_token_info` carries `{machine_account_id, token_name, expires_at}`. `Debug` prints presence
+only. `query_value` is force-filled with the destination secret name; main keeps it out of the row
+(`operation !== request`).
+
+**Renderer:** `CreateAccessTokenRequestComponent` shows organization, machine account, token name,
+expiry (7/30/60/90/365 days, the agent's value, or never; defaults to 30 days when the agent gave
+none), secret name and destination project (same project logic as the create-secret dialog). Every
+agent value is a preselected hint; the machine account preselects on an id match or an exact decrypted
+name match. `AgentAccessAccessTokensService.createAccessTokenSecret` runs only after approval: it
+generates the token key, `POST /service-accounts/{id}/access-tokens` (same body as the web client),
+assembles `0.<id>.<clientSecret>:<key>` in one function-local variable, calls
+`AgentAccessSecretsService.createSecret` with it as the value, and returns `{secretId, accessTokenId,
+expiresAt}` only. If the secret write fails, the just-issued token is revoked best-effort. Every
+error thrown is a fresh generic `Error` without `cause`. The pipeline responds
+`{approved, secretId, itemName, accessTokenInfo}` with outcome `created`.
+
+**SDK:** `@bitwarden/sdk-internal` exposes no machine-account access-token creation (only Send
+access tokens), so the token is built client-side from `KeyGenerationService`/`EncryptService`/
+`ApiService`, as the web SM client does. `apps/**` may not import `bitwarden_license/**`, hence the
+fresh code.
+
+**Where the token exists:** only inside `createAccessTokenSecret`: the server response's
+`ClientSecret`, the assembled string, and the encrypted POST body to the secret endpoint. Never in
+main, napi, Rust, IPC, the activity row, toasts, logs, the clipboard, i18n strings or the reply.
+JavaScript cannot zeroize strings; the 16-byte key material buffer is `fill(0)`ed and the local is
+overwritten.
+
+**Invariants (additive):** 20. The `accessTokenCreate` reply, every error and every log line is
+token-free by construction. 21. All token-bearing steps live in one file. 22. The user can change
+every agent-supplied value before anything is minted.

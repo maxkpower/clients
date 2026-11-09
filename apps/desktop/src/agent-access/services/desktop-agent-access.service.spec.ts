@@ -21,6 +21,7 @@ import { DialogService, ToastService } from "@bitwarden/components";
 import { DesktopSettingsService } from "../../platform/services/desktop-settings.service";
 import { AGENT_ACCESS_IPC_CHANNELS } from "../models/ipc-channels";
 
+import { AgentAccessAccessTokensService } from "./agent-access-access-tokens.service";
 import { AgentAccessOpenShellService } from "./agent-access-openshell.service";
 import {
   AgentAccessSecretsService,
@@ -136,6 +137,7 @@ describe("DesktopAgentAccessService", () => {
   let mockSmOrganizations: jest.Mock;
   let mockCreateProject: jest.Mock;
   let mockCreateMachineAccount: jest.Mock;
+  let mockCreateAccessTokenSecret: jest.Mock;
   let mockCreateSecret: jest.Mock;
   let mockCollect: jest.Mock;
   let mockDescribeTarget: jest.Mock;
@@ -214,6 +216,9 @@ describe("DesktopAgentAccessService", () => {
       countSecretsInProject: mockCountSecretsInProject,
       generateSecretValue: mockGenerateSecretValue,
     };
+    const mockAgentAccessAccessTokensService = {
+      createAccessTokenSecret: mockCreateAccessTokenSecret,
+    };
     const mockEventCollectionService = { collect: mockCollect };
     const mockDomainSettingsService = {
       getUrlEquivalentDomains: jest.fn().mockReturnValue(of(new Set<string>())),
@@ -241,6 +246,7 @@ describe("DesktopAgentAccessService", () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: TotpService, useValue: mockTotpService },
         { provide: AgentAccessSecretsService, useValue: mockAgentAccessSecretsService },
+        { provide: AgentAccessAccessTokensService, useValue: mockAgentAccessAccessTokensService },
         { provide: EventCollectionService, useValue: mockEventCollectionService },
         { provide: DomainSettingsService, useValue: mockDomainSettingsService },
         { provide: AgentFillBrowserService, useValue: mockAgentFillBrowserService },
@@ -309,6 +315,7 @@ describe("DesktopAgentAccessService", () => {
     mockSmOrganizations = jest.fn().mockResolvedValue([]);
     mockCreateProject = jest.fn().mockResolvedValue({ id: "proj-new", name: "new project" });
     mockCreateMachineAccount = jest.fn().mockResolvedValue({ id: "ma-new", name: "new account" });
+    mockCreateAccessTokenSecret = jest.fn();
     mockCreateSecret = jest.fn().mockResolvedValue("secret-created-1");
     // M6 write paths: default to rejections/empty-lists so a stray update/delete/list test that
     // doesn't configure these explicitly fails loudly (a generic-error deny) rather than silently
@@ -2013,6 +2020,239 @@ describe("DesktopAgentAccessService", () => {
 
   // M6: `projectCreate` (resourceType: "project", operation: "create") — sibling of secret
   // creation, no lookup, own dialog/lifecycle.
+  // `accessTokenCreate`: the agent proposes a machine-account access token; the desktop mints it
+  // after approval and stores it in a new secret. The token never reaches this layer at all, so
+  // nothing in the response, the outcome, the toast or the log can contain it.
+  describe("credential request — resourceType: 'access_token', operation: 'create'", () => {
+    const org = { id: "org-1", name: "Acme Inc", isAdmin: false } as any;
+    const SENTINEL_TOKEN = "0.SENTINEL-TOKEN-ID.SENTINEL-CLIENT-SECRET:SENTINELKEY";
+    const request = {
+      requestId: 310,
+      operation: "create",
+      resourceType: "access_token",
+      requesterName: "Cursor",
+      newSecretName: "CI_BOT_TOKEN",
+      projectHint: "my-app",
+      accessTokenRequest: { machineAccount: "ci-bot", tokenName: "ci-token", expiresInDays: 30 },
+    };
+    const approval = {
+      approved: true,
+      organizationId: "org-1",
+      machineAccountId: "ma-1",
+      tokenName: "ci-token (edited)",
+      expiresInDays: 7,
+      secretName: "CI_TOKEN_EDITED",
+      projectId: "proj-1",
+    };
+
+    beforeEach(async () => {
+      service = buildService(true);
+      await service.init();
+      agentAccessEnabledSubject.next(true);
+      accountSubject.next({ id: "user-1" as UserId });
+      activeAccountStatusSubject.next(AuthenticationStatus.Unlocked);
+      authSubjectFor("user-1").next(AuthenticationStatus.Unlocked);
+    });
+
+    it("never touches vault or Secrets Manager lookups", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of({ approved: false }) });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockGetAllDecrypted).not.toHaveBeenCalled();
+      expect(mockFindSecrets).not.toHaveBeenCalled();
+      expect(mockCreateAccessTokenSecret).not.toHaveBeenCalled();
+    });
+
+    it("denies without a dialog when the account has no Secrets Manager access", async () => {
+      mockSmOrganizations.mockResolvedValue([]);
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockDialogOpen).not.toHaveBeenCalled();
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        310,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+    });
+
+    it("passes the agent's values to the dialog as hints", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of({ approved: false }) });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockDialogOpen).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          data: expect.objectContaining({
+            requesterName: "Cursor",
+            machineAccountHint: "ci-bot",
+            tokenName: "ci-token",
+            expiresInDays: 30,
+            secretName: "CI_BOT_TOKEN",
+            projectHint: "my-app",
+            organizations: [org],
+          }),
+        }),
+      );
+    });
+
+    it("mints with the USER's edited values, and replies with metadata only", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of(approval) });
+      mockCreateAccessTokenSecret.mockResolvedValue({
+        secretId: "secret-9",
+        accessTokenId: "tok-1",
+        expiresAt: "2026-11-16T00:00:00.000Z",
+      });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockCreateAccessTokenSecret).toHaveBeenCalledWith(
+        "org-1",
+        "user-1",
+        "ma-1",
+        "proj-1",
+        { name: "ci-token (edited)", expiresAt: expect.any(Date) },
+        "CI_TOKEN_EDITED",
+      );
+      const expiresAt: Date = mockCreateAccessTokenSecret.mock.calls[0][4].expiresAt;
+      const days = (expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
+      expect(days).toBeGreaterThan(6.99);
+      expect(days).toBeLessThanOrEqual(7);
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        310,
+        {
+          approved: true,
+          secretId: "secret-9",
+          itemName: "CI_TOKEN_EDITED",
+          accessTokenInfo: {
+            machineAccountId: "ma-1",
+            tokenName: "ci-token (edited)",
+            expiresAt: "2026-11-16T00:00:00.000Z",
+          },
+        },
+        { status: "created", secretId: "secret-9", operation: "create" },
+      );
+    });
+
+    it("creates a new project first when the user asked for one", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockCreateProject.mockResolvedValue({ id: "proj-new-1", name: "tokens" });
+      mockDialogOpen.mockReturnValue({
+        closed: of({ ...approval, projectId: undefined, newProjectName: "tokens" }),
+      });
+      mockCreateAccessTokenSecret.mockResolvedValue({ secretId: "s", accessTokenId: "t" });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockCreateProject).toHaveBeenCalledWith("org-1", "user-1", "tokens");
+      expect(mockCreateAccessTokenSecret.mock.calls[0][3]).toBe("proj-new-1");
+    });
+
+    it("passes no expiry when the user chose 'never'", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of({ ...approval, expiresInDays: null }) });
+      mockCreateAccessTokenSecret.mockResolvedValue({ secretId: "s", accessTokenId: "t" });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockCreateAccessTokenSecret.mock.calls[0][4]).toEqual({
+        name: "ci-token (edited)",
+        expiresAt: undefined,
+      });
+    });
+
+    it("denies without minting when the user rejects the dialog", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of({ approved: false }) });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockCreateAccessTokenSecret).not.toHaveBeenCalled();
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        310,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+    });
+
+    it("denies with a toast, and no token material anywhere, when minting fails", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of(approval) });
+      mockCreateAccessTokenSecret.mockRejectedValue(
+        new Error("Agent Access: failed to store a Secrets Manager access token"),
+      );
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        310,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+      expect(mockShowToast).toHaveBeenCalledWith(expect.objectContaining({ variant: "error" }));
+    });
+
+    it("no reply, outcome, toast or log contains a token, even if one were in play", async () => {
+      // The service under test never receives a token; this pins that by making the (mocked)
+      // minting service return a poisoned result and checking that only the whitelisted fields
+      // are forwarded.
+      mockSmOrganizations.mockResolvedValue([org]);
+      mockDialogOpen.mockReturnValue({ closed: of(approval) });
+      mockCreateAccessTokenSecret.mockResolvedValue({
+        secretId: "secret-9",
+        accessTokenId: "tok-1",
+        accessToken: SENTINEL_TOKEN,
+        value: SENTINEL_TOKEN,
+      });
+
+      credentialRequestSubject.next(request);
+      await flush();
+
+      const logService = TestBed.inject(LogService) as unknown as {
+        info: jest.Mock;
+        error: jest.Mock;
+        debug: jest.Mock;
+      };
+      const everything = JSON.stringify([
+        mockCredentialRequestResponse.mock.calls,
+        mockShowToast.mock.calls,
+        mockSendMessage.mock.calls,
+        logService.info.mock.calls,
+        logService.error.mock.calls,
+        logService.debug.mock.calls,
+      ]);
+      expect(everything).not.toContain("SENTINEL");
+      expect(mockCredentialRequestResponse).toHaveBeenCalled();
+    });
+
+    it("denies when the proposal is missing", async () => {
+      mockSmOrganizations.mockResolvedValue([org]);
+
+      credentialRequestSubject.next({ ...request, accessTokenRequest: undefined });
+      await flush();
+
+      expect(mockDialogOpen).not.toHaveBeenCalled();
+      expect(mockCredentialRequestResponse).toHaveBeenCalledWith(
+        310,
+        { approved: false, reason: "denied" },
+        { status: "denied" },
+      );
+    });
+  });
+
   describe("credential request — resourceType: 'project', operation: 'create'", () => {
     const org = { id: "org-1", name: "Acme Inc" } as any;
 

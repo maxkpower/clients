@@ -79,6 +79,12 @@ pub enum ResourceKind {
     /// [`RequestOperation::Request`]. Local-transport-only, same restriction as
     /// [`Secret`](Self::Secret).
     MachineAccount,
+    /// Secrets Manager machine-account access token (`accessTokenCreate`). Only ever paired with
+    /// [`RequestOperation::Create`]. The token itself is minted renderer-side after approval and
+    /// written straight into a new Secrets Manager secret; nothing in this crate (request,
+    /// response, log, audit) ever carries token material — see [`AccessTokenRequestData`] and
+    /// [`AccessTokenInfo`]. Local-transport-only.
+    AccessToken,
 }
 
 /// Which ingress a [`CredentialRequestData`] arrived through. The single enforcement point
@@ -162,6 +168,36 @@ pub enum DeliveryMode {
     /// outcome (`CredentialResponseData::fill_result`). Credential resource only —
     /// `local_listener::local_protocol::validate` rejects `Fill` for [`ResourceKind::Secret`].
     Fill,
+}
+
+/// The agent's proposal on an `accessTokenCreate` request: which machine account to mint a token
+/// for, what to call it, and optionally when it expires. All three are HINTS the user can change
+/// in the approval dialog. Names can reveal what an agent is up to, so `Debug` on the owning
+/// [`CredentialRequestData`] prints presence only. There is deliberately no field here that could
+/// hold token material — the token does not exist until after approval, and then only in the
+/// renderer.
+#[derive(Clone, PartialEq, Eq)]
+pub struct AccessTokenRequestData {
+    /// Machine-account id or name hint; the dialog preselects an id match or an exact name match
+    /// and never trusts it silently.
+    pub machine_account: String,
+    /// Proposed name for the access token (shown in the Secrets Manager UI).
+    pub token_name: String,
+    /// Proposed lifetime in days, already bounded by `local_listener::local_protocol::validate`.
+    /// `None` means the agent stated no preference (the dialog defaults to 30 days).
+    pub expires_in_days: Option<u32>,
+}
+
+/// Value-free metadata about a created machine-account access token, reported back to the
+/// requester. Contains ids, the (user-approved) token name and the expiry — never token
+/// material. Plain `Debug` is fine for the same reason as [`ProjectEntry`], but the owning
+/// [`CredentialResponseData`] still prints presence only.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AccessTokenInfo {
+    pub machine_account_id: String,
+    pub token_name: String,
+    /// RFC 3339 expiry, or `None` for a token that never expires.
+    pub expires_at: Option<String>,
 }
 
 /// A credential lookup — or, for `secretCreate`, a proposed secret creation — requested by a
@@ -266,6 +302,11 @@ pub struct CredentialRequestData {
     /// The `bw://` targets a [`RequestOperation::ProviderResolve`] request asks for, in wire
     /// order. Empty for every other operation. Ids and env-var names only, never values.
     pub provider_targets: Vec<ProviderTarget>,
+    /// The agent's proposal for an `accessTokenCreate` request ([`ResourceKind::AccessToken`] +
+    /// [`RequestOperation::Create`]); `None` for every other request. The destination secret
+    /// name and project hint ride in [`new_secret_name`](Self::new_secret_name) /
+    /// [`project_hint`](Self::project_hint) like a `secretCreate`.
+    pub access_token_request: Option<AccessTokenRequestData>,
 }
 
 impl std::fmt::Debug for CredentialRequestData {
@@ -292,6 +333,10 @@ impl std::fmt::Debug for CredentialRequestData {
             .field("fill_target_token", &self.fill_target_token)
             .field("openshell", &self.openshell)
             .field("provider_targets", &self.provider_targets)
+            .field(
+                "has_access_token_request",
+                &self.access_token_request.is_some(),
+            )
             .finish()
     }
 }
@@ -427,6 +472,12 @@ pub struct CredentialResponseData {
     /// [`RequestOperation::ProviderResolve`] request (§M8.4). Validated again by the OpenShell
     /// reply builder before anything is written to the socket. Unset for every other operation.
     pub openshell: Option<OpenShellResolution>,
+    /// Value-free metadata for an approved `accessTokenCreate` ([`ResourceKind::AccessToken`]).
+    /// The new secret's id/name ride in [`secret_id`](Self::secret_id) /
+    /// [`item_name`](Self::item_name); this adds the machine account id, token name and expiry.
+    /// Never carries token material — the token is stored in that secret and discarded
+    /// renderer-side. Unset for every other operation.
+    pub access_token_info: Option<AccessTokenInfo>,
 }
 
 impl std::fmt::Debug for CredentialResponseData {
@@ -454,6 +505,7 @@ impl std::fmt::Debug for CredentialResponseData {
             .field("has_denial_detail", &self.denial_detail.is_some())
             .field("has_fill_fields_shared", &self.fill_fields_shared.is_some())
             .field("openshell", &self.openshell)
+            .field("has_access_token_info", &self.access_token_info.is_some())
             .finish()
     }
 }
