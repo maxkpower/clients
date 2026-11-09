@@ -205,7 +205,7 @@ describe("CreateSecretRequestComponent", () => {
       expect(component["createSecretRequestForm"].value.projectId).toBeNull();
     });
 
-    it("prefers the session-remembered last project over the hint", async () => {
+    it("prefers the agent's hint over the session-remembered last project", async () => {
       mockListProjects.mockResolvedValue([
         { id: "proj-1", name: "my-app", write: true } as SmProjectMatch,
         { id: "proj-2", name: "other-app", write: true } as SmProjectMatch,
@@ -214,6 +214,23 @@ describe("CreateSecretRequestComponent", () => {
         makeParams({
           organizations: [makeOrg({ id: "org-1" })],
           projectHint: "my-app",
+          lastProjectId: "proj-2",
+        }),
+      );
+      await flush();
+
+      expect(component["createSecretRequestForm"].value.projectId).toBe("proj-1");
+    });
+
+    it("falls back to the session-remembered last project when there is no hint match", async () => {
+      mockListProjects.mockResolvedValue([
+        { id: "proj-1", name: "my-app", write: true } as SmProjectMatch,
+        { id: "proj-2", name: "other-app", write: true } as SmProjectMatch,
+      ]);
+      const component = createComponent(
+        makeParams({
+          organizations: [makeOrg({ id: "org-1" })],
+          projectHint: "no-such-project",
           lastProjectId: "proj-2",
         }),
       );

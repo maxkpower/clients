@@ -189,8 +189,9 @@ export class CreateSecretRequestComponent {
 
   constructor() {
     // Preselects a project once, the first time this organization's project list resolves:
-    // the session-remembered last project if it's still a legal (write === true) target for
-    // this org, else the `projectHint` on an exact decrypted-name match. Never re-applied after
+    // the `projectHint` on an exact decrypted-name match (the agent's explicit intent for THIS
+    // request), else the session-remembered last project if it's still a legal (write === true)
+    // target for this org. Never re-applied after
     // the user has made their own choice or switched organizations — `hintApplied` latches after
     // the first non-empty project list, regardless of whether either preselect actually matched.
     let hintApplied = false;
@@ -207,7 +208,7 @@ export class CreateSecretRequestComponent {
       const hinted = this.params.projectHint
         ? projects.find((project) => project.name === this.params.projectHint)
         : undefined;
-      const preselected = remembered ?? hinted;
+      const preselected = hinted ?? remembered;
       if (preselected != null) {
         this.createSecretRequestForm.controls.projectId.setValue(preselected.id);
       }
